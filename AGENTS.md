@@ -1,103 +1,118 @@
 # AGENTS.md
 
-Instructions for coding agents (Claude Code, Codex, or any other) working
-in this repository. `CLAUDE.md` is a pointer to this file — keep this one
-canonical and don't fork the content between the two.
+Guidance for AI coding agents (Claude Code, Codex, Copilot, Cursor, Aider,
+etc.) working in this repository.
 
-## What this is
+This file is the **entry point**. It is intentionally short. Drill into the
+topical guides under [`AGENTS/`](AGENTS/) for the full picture, and read
+[`spec/index.md`](spec/index.md) for the canonical specification that drives
+changes.
 
-A zero-dependency Rust crate and CLI for the **ER7** encoding of HL7 v2
-messages: parse, query, edit, write. See `README.md` for the user-facing
-pitch, `spec/er7-format.md` for the format itself, and `spec/index.md` for
-the exact, normative rules — **`spec/index.md` is the single source of
-truth for behavior.** If you change what the crate does, update that file
-in the same change; if you're unsure whether a change is a bug fix or a
-behavior change, check it against the spec first.
+## Project snapshot
 
-## Layout
+| Field        | Value                                                                        |
+| ------------ | ---------------------------------------------------------------------------- |
+| Crate        | `er7`                                                                        |
+| Purpose      | Parse, query, edit, and write HL7 v2 messages in the ER7 pipe-hat encoding.  |
+| Layer        | Encoding only — no dictionary, no validation, no transport.                  |
+| Language     | Rust (edition 2024, MSRV 1.85)                                               |
+| License      | MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only            |
+| Runtime deps | **none**, and that is a guarantee (R25)                                      |
+| Repository   | https://github.com/joelparkerhenderson/er7-rust                              |
+| Crate        | https://crates.io/crates/er7                                                 |
+| Docs         | https://docs.rs/er7/                                                         |
+| Maintainer   | Joel Parker Henderson — joel@joelparkerhenderson.com                         |
+
+## How this repo is documented
+
+The documentation is layered so each reader can stop at the depth they need:
 
 ```
-src/lib.rs          Crate docs, Error, re-exports.
-src/separators.rs   Separators (the delimiter set) and Terminator; reading
-                     delimiters from a header, and validating them.
-src/escape.rs       Escape sequences: the Escape token vocabulary, the
-                     escapes() tokenizer, unescape(), escape(), decode_hex().
-src/message.rs      The value tree — Message, Segment, Field, Repetition,
-                     Component, Subcomponent — plus accessors, the
-                     absent/empty/null predicates, queries, and the five
-                     MSH conveniences.
-src/parse.rs        Text to tree: parse(), parse_with(), split_messages().
-src/render.rs       Tree to text: to_er7()/to_text() at every level, and
-                     RenderOptions.
-src/path.rs         HL7 paths such as PID-5.1 and OBX[2]-5.
-src/main.rs         The CLI: outline, --query, --normalize.
-tests/integration.rs Black-box tests through the public API and the CLI.
-spec/index.md       Normative specification (source of truth).
-spec/er7-format.md  Background on ER7 itself, independent of this crate.
-samples/*.er7       Example messages used by the README and by tests.
+index.md                   ← README (user-facing introduction; README.md links here)
+spec/                      ← living spec-driven-development specification,
+                             one file per section (start at spec/index.md),
+                             including the rule index (§1.4), roadmap (§16),
+                             and open tasks (§17)
+AGENTS.md                  ← this file (agent entry point)
+AGENTS/
+├── architecture.md        ← repo layout, modules, data model, public API
+├── conventions.md         ← coding style and doc-comment shape
+├── testing.md             ← unit tests, doctests, the four checks
+├── safety.md              ← patient-safety constraints and scope discipline
+├── workflows.md           ← common cargo commands, daily flow
+├── release.md             ← versioning and publish steps
+└── spec-driven-development.md  ← how the spec/ files drive changes
+docs/
+├── api/index.md           ← full public API reference
+├── usage/index.md         ← tutorial-style walk-through
+├── escapes/index.md       ← escape sequences, with worked examples
+├── paths/index.md         ← HL7 path notation reference
+└── faq/index.md           ← frequently asked questions
+examples/                  ← runnable `cargo run --example <name>` programs
+help/releasing/            ← release checklist (mirrors AGENTS/release.md)
+samples/                   ← example ER7 messages used by docs and tests
 ```
 
-Each module has unit tests in a trailing `#[cfg(test)] mod tests` block;
-anything crossing module boundaries or touching the CLI contract goes in
-`tests/integration.rs` instead.
+There is **no separate** `plan.md` or `tasks.md` — both live as spec
+sections ([`spec/16-roadmap.md`](spec/16-roadmap.md),
+[`spec/17-open-tasks.md`](spec/17-open-tasks.md)). If a planning artefact
+needs a home, add a section there.
 
-## Working conventions
+## Five rules that bind every change
 
-- **Rust edition 2024**, zero runtime dependencies — keep it that way
-  unless the user asks otherwise; being dependency-free is part of this
-  crate's value.
-- Every public item needs a doc comment; `src/lib.rs` carries
-  `#![warn(missing_docs)]`. Match the existing register: say what the item
-  is, and where the *why* isn't obvious from the code, say that too in a
-  sentence.
-- Before finishing a change, run all four:
-  ```sh
-  cargo test                                # unit, integration, doc tests
-  cargo clippy --all-targets -- -D warnings
-  cargo fmt --check
-  cargo rustdoc --lib -- -W missing-docs
-  ```
-  All four are clean on `main`; keep them that way.
-- New behavior needs a test. Prefer a unit test next to the code for
-  parsing, escaping, and naming rules; an integration test for anything a
-  caller or the CLI can observe.
+These are the load-bearing constraints. Each is expanded in the matching
+topical guide, and each maps to a numbered rule in
+[`spec/01-purpose-and-scope.md`](spec/01-purpose-and-scope.md) §1.4.
 
-## The three properties to protect
+1. **Do not break the round trip.** `parse(text).to_er7()` reproduces
+   canonical input byte for byte (R16). This is why leaf text is stored raw
+   and decoded on demand, and why nothing but blank lines is trimmed. Never
+   normalize a value at parse time. See
+   [`AGENTS/conventions.md`](AGENTS/conventions.md).
+2. **Keep absent, empty, and null distinct** (R10, R11). The explicit `""`
+   means *clear this value*; collapsing it into "empty" corrupts patient
+   records. See [`AGENTS/safety.md`](AGENTS/safety.md).
+3. **Nothing below the header may fail** (R6). Unknown segments, ragged
+   fields, odd delimiters, undecodable escapes — all data, never errors.
+   Do not turn a fallback into a failure.
+4. **Do not add a dictionary, a validator, or a transport** (R24), and do
+   not add a dependency (R25). Both are the crate's reason to exist. See
+   [`AGENTS/safety.md`](AGENTS/safety.md).
+5. **Update the spec first.** Behavioural changes — even small ones — start
+   by editing the matching file under `spec/`, then the code, then the
+   tests. See
+   [`AGENTS/spec-driven-development.md`](AGENTS/spec-driven-development.md).
 
-These are what the crate is for. A change that breaks one of them is wrong
-even if every test still passes.
+## Quick orientation for a brand-new agent
 
-1. **Round trip.** `parse(text).to_er7()` reproduces canonical input byte
-   for byte (`spec/index.md` §6.2). This is why leaf text is stored raw and
-   decoded on demand, and why nothing but blank lines is trimmed. Don't
-   "normalize" values at parse time.
-2. **Nothing fails below the header.** Unknown segments, ragged fields,
-   odd delimiters, undecodable escapes — all data, never errors
-   (`spec/index.md` §10). Don't turn a fallback into a failure.
-3. **Absent, empty, and null stay distinct** (`spec/index.md` §4.2).
-   Collapsing them is a patient-safety bug, not a simplification: the
-   explicit `""` means *clear this value*.
+If you have just been spawned with no prior context, do this in order:
 
-## Making a spec-affecting change
+1. Read this file (you are here).
+2. Read [`spec/01-purpose-and-scope.md`](spec/01-purpose-and-scope.md) — the
+   rule index in §1.4 is the whole contract in one table, and §1.5 tells you
+   which goal wins when two conflict.
+3. Skim [`spec/index.md`](spec/index.md) for the section map, and §16/§17 for
+   what work is currently in flight.
+4. Skim [`AGENTS/architecture.md`](AGENTS/architecture.md) for the layout.
+5. For any task touching behaviour, open
+   [`AGENTS/safety.md`](AGENTS/safety.md) **before** writing code.
+6. Run `cargo test` to confirm a green baseline before changing anything.
 
-1. Update `spec/index.md` first, or alongside the code, so it states the
-   new intended behavior precisely.
-2. Implement it, respecting the module boundaries above.
-3. Add or update tests that pin the new behavior.
-4. Update `README.md` only if the change affects its summary or examples —
-   the README intentionally doesn't restate everything the spec covers.
-5. Run the four checks.
+## Common commands
 
-## Non-goals (don't "fix" these without discussion)
+```sh
+cargo build                              # Build
+cargo test                               # Unit + integration + doc tests
+cargo test -- --nocapture                # Show println!() output
+cargo doc --no-deps --open               # Build and open rustdoc
+cargo run -- samples/oru_r01.er7         # Run the CLI on a sample
+cargo run --example parse_a_message      # Run an example
+cargo clippy --all-targets -- -D warnings  # Lint
+cargo fmt                                # Format
+cargo rustdoc --lib -- -W missing-docs   # Confirm every public item is documented
+```
 
-- **Adding a dictionary.** Segment field tables, data types, message
-  structures, code tables: all deliberately out of scope
-  (`spec/index.md` §1, §11). The sibling crate
-  `hl7-2-5-to-xml-using-rust` is where that layer lives.
-- **Validation.** Cardinality, required fields, lengths, table membership.
-- **Transport.** MLLP framing, TCP, acknowledgement workflows.
-- **Interpreting formatting escapes.** `\.br\`, `\H\`, `\Cxxyy\` are
-  preserved as written, not rendered (`spec/index.md` §5.2).
-- **Deriving a message structure** from MSH-9.1 and MSH-9.2 when MSH-9.3 is
-  absent — that mapping is version-specific and belongs above this layer
-  (`spec/index.md` §9).
+The last four are the **four checks**; all four are clean on `main` and must
+stay that way. A fuller walk-through lives in
+[`AGENTS/workflows.md`](AGENTS/workflows.md) and
+[`AGENTS/release.md`](AGENTS/release.md).

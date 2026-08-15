@@ -3,7 +3,17 @@
 //!
 //! The default output is an outline — one line per value, labelled with the
 //! HL7 path that names it — because the hardest thing about a pipe-hat
-//! message is working out which position a value is actually in.
+//! message is working out which position a value is actually in. Every
+//! label is a valid `--query` argument, so a path read off the outline can
+//! be pasted straight back in.
+//!
+//! This binary adds no behaviour of its own: everything it prints is the
+//! library's output, formatted. It uses the published public API only, so
+//! anything it needs, a downstream crate can have too.
+//!
+//! The input/output contract — options, outline format, exit codes — is
+//! specified by spec §12, and pinned by the `cli_*` tests in
+//! `tests/integration.rs`.
 
 use std::io::{Read, Write};
 use std::process::ExitCode;

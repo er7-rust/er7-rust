@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+title: ER7 Rust: Parse, query, edit, and write HL7 v2 messages in the ER7 pipe-hat encoding, with zero dependencies.
+message: >-
+  If you use this work and you want to cite it,
+  then you can use the metadata from this file.
+type: software
+authors:
+  - given-names: Joel Parker
+    family-names: Henderson
+    email: joel@joelparkerhenderson.com
+    affiliation: joelparkerhenderson.com
+    orcid: 'https://orcid.org/0009-0000-4681-282X'
+identifiers:
+  - type: url
+    value: 'https://github.com/joelparkerhenderson/er7-rust/'
+    description: ER7 Rust: Parse, query, edit, and write HL7 v2 messages in the ER7 pipe-hat encoding, with zero dependencies.
+repository-code: 'https://github.com/joelparkerhenderson/er7-rust/'
+abstract: >-
+  ER7 Rust: Parse, query, edit, and write HL7 v2 messages in the ER7 pipe-hat encoding, with zero dependencies.
+license: See license file

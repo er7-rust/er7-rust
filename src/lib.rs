@@ -1,3 +1,13 @@
+//! # ER7
+//!
+//! **[documentation](https://docs.rs/er7/)**
+//! •
+//! **[source](https://github.com/joelparkerhenderson/er7-rust)**
+//! •
+//! **[crate](https://crates.io/crates/er7)**
+//! •
+//! **[email](mailto:joel@joelparkerhenderson.com)**
+//!
 //! ER7 — the pipe-hat encoding that carries HL7 v2 messages between
 //! healthcare systems — parsed, queried, edited, and written back, with no
 //! dependencies.
@@ -7,6 +17,8 @@
 //! shifts everything after it. This crate exists to make that structure
 //! explicit and to keep it intact — text is stored exactly as it arrived,
 //! and decoded only when you ask for a value.
+//!
+//! Example:
 //!
 //! ```
 //! # fn main() -> Result<(), er7::Error> {
@@ -27,34 +39,42 @@
 //!
 //! # What is here
 //!
-//! - [`parse()`] and [`parse_with`] read text into a [`Message`]; the tree
-//!   below it is [`Segment`], [`Field`], [`Repetition`], [`Component`],
-//!   [`Subcomponent`].
-//! - [`split_messages`] cuts a batch file or a run of concatenated messages
-//!   into individual ones.
-//! - [`Message::query`] and [`Message::query_all`] read values by HL7
-//!   [`Path`], e.g. `PID-5.1` or `OBX[2]-5`.
-//! - [`Message::to_er7`] writes the tree back out; [`Segment::to_text`] and
-//!   its siblings write it with escape sequences resolved.
-//! - [`escape::unescape`] and [`escape::escape`] convert between a value
-//!   and its encoded form; [`escape::escapes`] exposes the whole
-//!   escape-sequence vocabulary for callers that need more.
-//! - [`Separators`] is the delimiter set, read from each message's own
-//!   header rather than assumed.
+//! | Item | Purpose |
+//! |------|---------|
+//! | [`parse()`], [`parse_with`] | read text into a [`Message`] |
+//! | [`Message`], [`Segment`], [`Field`], [`Repetition`], [`Component`], [`Subcomponent`] | the six-level value tree |
+//! | [`Message::query`], [`Message::query_all`] | read values by HL7 [`Path`], e.g. `PID-5.1` or `OBX[2]-5` |
+//! | [`Message::to_er7`], [`Segment::to_text`] and siblings | write the tree back out, as sent or decoded |
+//! | [`split_messages`] | cut a batch file or concatenated messages into individual ones |
+//! | [`escape::unescape`], [`escape::escape`], [`escape::escapes`] | the escape-sequence vocabulary |
+//! | [`Separators`] | the delimiter set, read from each message's own header rather than assumed |
 //!
 //! # What is deliberately not here
 //!
 //! This crate is an encoding, not a dictionary. It does not know which
 //! fields a segment should have, what data type each one carries, which
 //! message structures exist, or what any code table means — all of that is
-//! version-specific and belongs in a layer above. The one exception is a
-//! handful of `MSH` accessors such as [`Message::control_id`], because
-//! routing a message requires reading them and their positions have never
-//! moved.
+//! version-specific and belongs in a layer above. It performs no
+//! validation and no transport.
+//!
+//! The one exception is a handful of `MSH` accessors such as
+//! [`Message::control_id`], because routing a message requires reading
+//! them and their positions have never moved in any HL7 v2 release.
+//!
+//! For the HL7 v2.5 dictionary layer, see the sibling crate
+//! [`hl7-2-5-to-xml-using-rust`](https://github.com/joelparkerhenderson/hl7-2-5-to-xml-using-rust).
+//!
+//! # Documentation
 //!
 //! `spec/index.md` in the repository is the normative specification of
 //! everything above; where this documentation and that document disagree,
-//! that document is right.
+//! that document is right. Section references such as "spec §6.2" and rule
+//! IDs such as "R16" throughout these docs point into it.
+//!
+//! The repository also holds a tutorial (`docs/usage/`), references for
+//! [paths](Path) (`docs/paths/`) and [escape sequences](escape)
+//! (`docs/escapes/`), an FAQ (`docs/faq/`), and runnable programs
+//! (`examples/`).
 
 #![warn(missing_docs)]
 
@@ -75,25 +95,47 @@ use std::fmt;
 
 /// What can go wrong.
 ///
-/// Only two things can: a message with no usable header, and a path that is
-/// not a path. Everything else about ER7 is recoverable, and this crate
-/// recovers rather than refusing, because a receiver that rejects a message
-/// it could have read is worse than one that reads it as written.
+/// Four variants, arising from exactly two situations: a message with no
+/// usable header, and a path that is not a path. Everything else about ER7
+/// is recoverable, and this crate recovers rather than refusing, because a
+/// receiver that rejects a message it could have read is worse than one
+/// that reads it as written (spec §11, rules R6 and R23).
+///
+/// Example:
+///
+/// ```
+/// use er7::Error;
+///
+/// assert!(matches!(er7::parse(""), Err(Error::Empty)));
+/// assert!(matches!(er7::parse("PID|1"), Err(Error::MissingHeader(_))));
+/// assert!(matches!(er7::parse("MSH"), Err(Error::BadHeader(_))));
+/// assert!(matches!("PID-0".parse::<er7::Path>(), Err(Error::BadPath(_))));
+///
+/// // Everything below the header parses, however odd it is.
+/// assert!(er7::parse("MSH|^~\\&|LAB\rZZZ\rPID||||||||||").is_ok());
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Error {
-    /// The input held no segments at all.
+    /// The input held no segments at all — it was empty, or held only
+    /// blank lines.
     Empty,
     /// The first segment is not `MSH`, `FHS`, or `BHS`, so the message
-    /// never declared its delimiters. Carries the name that was found.
+    /// never declared its delimiters. Carries the segment name that was
+    /// found instead.
     MissingHeader(String),
-    /// The header segment declared a delimiter set that cannot be used —
-    /// missing, alphanumeric, or reusing one character for two roles.
+    /// The header segment declared a delimiter set that cannot be used:
+    /// missing, alphanumeric, a line ending, or reusing one character for
+    /// two roles (spec §3.3). Carries a sentence naming the problem.
     BadHeader(String),
-    /// A path such as `PID-5.1` could not be read; carries the reason.
+    /// A path such as `PID-5.1` could not be read (spec §8.1). Carries the
+    /// path and the reason.
     BadPath(String),
 }
 
 impl fmt::Display for Error {
+    /// One complete sentence, with no trailing period and no error prefix,
+    /// so it reads correctly whether a caller writes `{e}`, wraps it, or
+    /// prefixes it as the CLI does.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Error::Empty => write!(f, "input contains no HL7 segments"),

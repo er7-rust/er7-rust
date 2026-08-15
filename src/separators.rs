@@ -3,15 +3,31 @@
 //! ER7 hardcodes nothing: a message declares its delimiters in MSH-1 (the
 //! field separator, which is literally the fourth character of the message)
 //! and MSH-2 (the remaining encoding characters). Everything in this crate
-//! therefore takes a [`Separators`] rather than assuming `|^~\&`.
+//! therefore takes a [`Separators`] rather than assuming `|^~\&` (R1).
+//!
+//! Specified by spec §3.
 
 use crate::Error;
 use std::fmt;
 
 /// The characters that end a segment when a message is written back out.
 ///
-/// Parsing always accepts any of these; this only chooses what
-/// [`Message::to_er7_with`](crate::Message::to_er7_with) emits.
+/// Parsing always accepts any of these (R4); this only chooses what
+/// [`Message::to_er7_with`](crate::Message::to_er7_with) emits (spec §3.5).
+///
+/// Example:
+///
+/// ```
+/// # fn main() -> Result<(), er7::Error> {
+/// use er7::{RenderOptions, Terminator};
+///
+/// let message = er7::parse("MSH|^~\\&|LAB\rPID|1")?;
+/// let options = RenderOptions { terminator: Terminator::Lf, ..Default::default() };
+/// assert_eq!(message.to_er7_with(options), "MSH|^~\\&|LAB\nPID|1");
+/// assert_eq!(Terminator::CrLf.as_str(), "\r\n");
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Terminator {
     /// A single carriage return, `\r` — the only terminator HL7 permits, and
@@ -41,7 +57,20 @@ impl Terminator {
 /// The HL7-recommended values are the [`Default`] (`|`, `^`, `~`, `\`, `&`,
 /// and no truncation character). A real message may choose others, so parse
 /// them from the message with [`Separators::from_header`] instead of
-/// assuming.
+/// assuming (R1, spec §3.1).
+///
+/// Example:
+///
+/// ```
+/// # fn main() -> Result<(), er7::Error> {
+/// // A message that uses none of the usual characters parses just as well.
+/// let message = er7::parse("MSH#*!?@#LAB#*ACME#SMITH*JOHN@JR")?;
+/// assert_eq!(message.separators.field, '#');
+/// assert_eq!(message.separators.subcomponent, '@');
+/// assert_eq!(message.query("MSH-5.2.2")?.as_deref(), Some("JR"));
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Separators {
     /// Separates fields within a segment, and the segment name from the
@@ -87,13 +116,33 @@ impl Separators {
     ///
     /// The character after the three-character segment name is the field
     /// separator; the characters from there to the next field separator are
-    /// the encoding characters, taken positionally. Encoding characters the
-    /// message omits fall back to their [`Default`].
+    /// the encoding characters, taken positionally, at most five. Encoding
+    /// characters the message omits fall back to their [`Default`] (R3).
+    ///
+    /// The result is checked with [`Separators::validate`], so a set that
+    /// could not be parsed back unambiguously is an error rather than a
+    /// source of confidently wrong values (spec §3.2).
+    ///
+    /// Example:
     ///
     /// ```
-    /// # use er7::Separators;
-    /// let seps = Separators::from_header(r"MSH|^~\&|LAB").unwrap();
-    /// assert_eq!(seps, Separators::default());
+    /// # fn main() -> Result<(), er7::Error> {
+    /// use er7::Separators;
+    ///
+    /// assert_eq!(Separators::from_header(r"MSH|^~\&|LAB")?, Separators::default());
+    ///
+    /// // A fifth encoding character is the HL7 v2.7 truncation character.
+    /// assert_eq!(Separators::from_header(r"MSH|^~\&#|LAB")?.truncation, Some('#'));
+    ///
+    /// // Only three encoding characters were supplied, so the subcomponent
+    /// // separator falls back: reading stops at the field separator.
+    /// let partial = Separators::from_header(r"MSH|^~\|LAB")?;
+    /// assert_eq!(partial.subcomponent, '&');
+    ///
+    /// // The same character cannot mean two things.
+    /// assert!(Separators::from_header(r"MSH|^^\&|LAB").is_err());
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn from_header(line: &str) -> Result<Separators, Error> {
         let mut chars = line.chars().skip(3);
@@ -120,7 +169,33 @@ impl Separators {
     ///
     /// [`Separators::from_header`] applies this to every message it reads,
     /// because a message that reuses one character for two roles cannot be
-    /// parsed back into the values the sender meant.
+    /// parsed back into the values the sender meant (R2, spec §3.3).
+    ///
+    /// This is the crate's only strictness. Everywhere else, odd input is
+    /// data rather than an error (R6) — but an ambiguous delimiter set would
+    /// produce confidently wrong values rather than merely ugly ones.
+    ///
+    /// Example:
+    ///
+    /// ```
+    /// use er7::Separators;
+    ///
+    /// assert!(Separators::default().validate().is_ok());
+    ///
+    /// // Unusual is fine; ambiguous is not.
+    /// let unusual = Separators { field: '#', component: '*', repetition: '!',
+    ///                            escape: '?', subcomponent: '@', truncation: None };
+    /// assert!(unusual.validate().is_ok());
+    ///
+    /// let repeated = Separators { component: '&', ..Separators::default() };
+    /// assert!(repeated.validate().is_err());
+    ///
+    /// let alphanumeric = Separators { field: 'X', ..Separators::default() };
+    /// assert!(alphanumeric.validate().is_err());
+    ///
+    /// let terminator = Separators { repetition: '\r', ..Separators::default() };
+    /// assert!(terminator.validate().is_err());
+    /// ```
     pub fn validate(&self) -> Result<(), Error> {
         for (role, c) in self.roles() {
             if c.is_alphanumeric() {
@@ -145,14 +220,40 @@ impl Separators {
         Ok(())
     }
 
-    /// True when `c` plays any structural role in this delimiter set, and so
-    /// must be escaped to appear in a value.
+    /// True when `c` plays any structural role in this delimiter set.
+    ///
+    /// The truncation character counts, because a message may not reuse it
+    /// for another role — but note it is *not* escaped when it appears in a
+    /// value, since it is structural only inside MSH-2 (spec §6.3).
+    ///
+    /// Example:
+    ///
+    /// ```
+    /// use er7::Separators;
+    ///
+    /// let separators = Separators::default();
+    /// assert!(separators.is_delimiter('|'));
+    /// assert!(separators.is_delimiter('&'));
+    /// assert!(!separators.is_delimiter('#'));
+    /// assert!(!separators.is_delimiter('A'));
+    /// ```
     pub fn is_delimiter(&self, c: char) -> bool {
         self.roles().iter().any(|&(_, d)| d == c)
     }
 
     /// The encoding-characters string this set writes as MSH-2, e.g.
     /// `^~\&`. Note this excludes the field separator, which is MSH-1.
+    ///
+    /// Example:
+    ///
+    /// ```
+    /// use er7::Separators;
+    ///
+    /// assert_eq!(Separators::default().encoding_characters(), r"^~\&");
+    ///
+    /// let v27 = Separators { truncation: Some('#'), ..Separators::default() };
+    /// assert_eq!(v27.encoding_characters(), r"^~\&#");
+    /// ```
     pub fn encoding_characters(&self) -> String {
         let mut s = String::with_capacity(5);
         s.push(self.component);
@@ -185,6 +286,12 @@ impl Separators {
 impl fmt::Display for Separators {
     /// The delimiters as they appear at the start of a message: the field
     /// separator followed by the encoding characters, e.g. `|^~\&`.
+    ///
+    /// Example:
+    ///
+    /// ```
+    /// assert_eq!(er7::Separators::default().to_string(), r"|^~\&");
+    /// ```
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}{}", self.field, self.encoding_characters())
     }

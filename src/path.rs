@@ -4,6 +4,9 @@
 //! The notation is a de-facto standard rather than part of HL7 itself, so
 //! this module accepts the two spellings that are common in the field —
 //! `PID-5.1` and `PID.5.1` — and writes the first.
+//!
+//! Specified by spec §8.1. A full reference, including the two behaviours
+//! that surprise people, is in `docs/paths/index.md`.
 
 use crate::Error;
 use std::fmt;
@@ -14,18 +17,34 @@ use std::str::FromStr;
 /// indices for the segment and for the field's repetitions.
 ///
 /// Every index is 1-based, matching the standard's own numbering: `PID-5.1`
-/// is the first component of the fifth field, not the sixth.
+/// is the first component of the fifth field, not the sixth (R18).
+///
+/// The two occurrence indices mean different things: the one after the
+/// **segment name** picks which segment of that name, and the one after the
+/// **field number** picks which repetition. Leaving either out means "every
+/// one" (R19).
+///
+/// Example:
 ///
 /// ```
-/// # use er7::Path;
-/// let path: er7::Path = "OBX[2]-5[1].1".parse().unwrap();
+/// # fn main() -> Result<(), er7::Error> {
+/// let path: er7::Path = "OBX[2]-5[1].1".parse()?;
 /// assert_eq!(path.segment, "OBX");
-/// assert_eq!(path.segment_occurrence, Some(2));
+/// assert_eq!(path.segment_occurrence, Some(2));  // the second OBX
 /// assert_eq!(path.field, Some(5));
-/// assert_eq!(path.repetition, Some(1));
+/// assert_eq!(path.repetition, Some(1));          // its first repetition
 /// assert_eq!(path.component, Some(1));
 /// assert_eq!(path.subcomponent, None);
+///
+/// // Leaving an occurrence out means every one.
+/// let all: er7::Path = "OBX-5".parse()?;
+/// assert_eq!(all.segment_occurrence, None);
+/// assert_eq!(all.repetition, None);
+/// # Ok(())
+/// # }
 /// ```
+///
+/// `Path` is `Hash`, so a set of paths can be map keys or deduplicated.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Path {
     /// The segment name, e.g. `PID`. Matched case-sensitively against the
@@ -46,13 +65,32 @@ pub struct Path {
 
 impl Path {
     /// Parse a path, accepting either `PID-5.1` or `PID.5.1` for the step
-    /// from segment to field.
+    /// from segment to field, because both are in common use. Surrounding
+    /// whitespace is ignored.
+    ///
+    /// An index of `0` is rejected rather than clamped: HL7 numbering starts
+    /// at 1, so a `0` is almost always a caller's off-by-one, and silently
+    /// reading it as `1` would return a plausible wrong answer (R18).
+    ///
+    /// Example:
     ///
     /// ```
-    /// # use er7::Path;
-    /// assert_eq!(Path::parse("PID.5.1").unwrap(), Path::parse("PID-5.1").unwrap());
-    /// assert!(Path::parse("PID-0").is_err());
+    /// # fn main() -> Result<(), er7::Error> {
+    /// use er7::Path;
+    ///
+    /// // Both spellings, and surrounding whitespace, are accepted.
+    /// assert_eq!(Path::parse("PID.5.1")?, Path::parse("PID-5.1")?);
+    /// assert_eq!(Path::parse(" PID-5 ")?, Path::parse("PID-5")?);
+    ///
+    /// // Rejected: a zero index, and anything malformed.
+    /// for text in ["", "-5", "PID-", "PID-5.", "PID-0", "PID[0]-5", "PID[2-5", "PID-5x"] {
+    ///     assert!(Path::parse(text).is_err(), "expected {text:?} to be rejected");
+    /// }
+    /// # Ok(())
+    /// # }
     /// ```
+    ///
+    /// See also [`FromStr`], which is the same thing via `.parse()`.
     pub fn parse(text: &str) -> Result<Path, Error> {
         let text = text.trim();
         let mut rest = text;
@@ -154,6 +192,17 @@ fn take_index(rest: &mut &str, text: &str) -> Result<usize, Error> {
 impl FromStr for Path {
     type Err = Error;
 
+    /// Parse a path with `.parse()`; see [`Path::parse`].
+    ///
+    /// Example:
+    ///
+    /// ```
+    /// # fn main() -> Result<(), er7::Error> {
+    /// let path: er7::Path = "PID-5.1".parse()?;
+    /// assert_eq!(path.field, Some(5));
+    /// # Ok(())
+    /// # }
+    /// ```
     fn from_str(text: &str) -> Result<Path, Error> {
         Path::parse(text)
     }
@@ -163,6 +212,19 @@ impl fmt::Display for Path {
     /// Write the canonical spelling, e.g. `OBX[2]-5.1`. Occurrence indices
     /// the path left open are left out rather than defaulted to 1, so a
     /// round trip through `Display` and `parse` preserves meaning.
+    ///
+    /// Example:
+    ///
+    /// ```
+    /// # fn main() -> Result<(), er7::Error> {
+    /// for text in ["MSH", "PID-5", "PID-5.1", "PID-5.1.2", "OBX[2]-5[1].1.2"] {
+    ///     assert_eq!(text.parse::<er7::Path>()?.to_string(), text);
+    /// }
+    /// // The `.` spelling is normalized to `-`.
+    /// assert_eq!("PID.5.1".parse::<er7::Path>()?.to_string(), "PID-5.1");
+    /// # Ok(())
+    /// # }
+    /// ```
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.segment)?;
         if let Some(occurrence) = self.segment_occurrence {

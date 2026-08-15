@@ -9,6 +9,9 @@
 //! [`escapes`] tokenizes a string into [`Escape`] values, which is the whole
 //! vocabulary; [`unescape`] and [`escape`] are the two convenience passes
 //! built on top of it.
+//!
+//! Specified by spec §6. A worked tutorial, including how to render
+//! formatted text from the token stream, is in `docs/escapes/index.md`.
 
 use crate::Separators;
 use std::borrow::Cow;
@@ -19,6 +22,28 @@ use std::borrow::Cow;
 /// Bodies are returned without the surrounding escape characters and
 /// without the letter that selects the sequence, so `\X0D\` yields
 /// `Escape::Hex("0D")`.
+///
+/// Classification is structural, not semantic: `\XZZ\` is `Hex("ZZ")` even
+/// though `ZZ` is not hexadecimal. Deciding whether a body is *decodable*
+/// is [`decode_hex`]'s job, which is what keeps the tokenizer total
+/// (spec §6.1).
+///
+/// Example:
+///
+/// ```
+/// use er7::{Separators, escape::{escapes, Escape}};
+///
+/// let separators = Separators::default();
+/// let tokens: Vec<_> = escapes(r"a\F\b\X0D\c\.br\", &separators).collect();
+/// assert_eq!(tokens, vec![
+///     Escape::Text("a"),
+///     Escape::Field,
+///     Escape::Text("b"),
+///     Escape::Hex("0D"),
+///     Escape::Text("c"),
+///     Escape::Formatting("br"),
+/// ]);
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Escape<'a> {
     /// A run of text containing no escape character.
@@ -65,7 +90,21 @@ impl Escape<'_> {
     ///
     /// This is what [`unescape`] uses to leave sequences it does not decode
     /// untouched, and it makes `escapes(s, seps)` a lossless tokenizer:
-    /// concatenating every token's `write_er7` reproduces `s`.
+    /// concatenating every token's `write_er7` reproduces `s` (R12).
+    ///
+    /// Example:
+    ///
+    /// ```
+    /// use er7::{Separators, escape::escapes};
+    ///
+    /// let separators = Separators::default();
+    /// let source = r"a\F\b\.sp 2\c\Q\d";
+    /// let mut rebuilt = String::new();
+    /// for token in escapes(source, &separators) {
+    ///     token.write_er7(&mut rebuilt, &separators);
+    /// }
+    /// assert_eq!(rebuilt, source);
+    /// ```
     pub fn write_er7(&self, out: &mut String, separators: &Separators) {
         let escape = separators.escape;
         let mut sequence = |selector: &str, body: &str| {
@@ -98,12 +137,18 @@ impl Escape<'_> {
 /// The iterator never fails: text that does not form a valid sequence comes
 /// back as [`Escape::Unknown`] or [`Escape::Unterminated`] rather than an
 /// error, because a receiver's job is to make sense of what arrived, not to
-/// reject it.
+/// reject it (R12, spec §6.1).
+///
+/// Reach for this when you need more than "decode or don't" — for instance
+/// to render `\.br\` yourself, which [`unescape`] deliberately will not do.
+///
+/// Example:
 ///
 /// ```
-/// # use er7::{Separators, escape::{escapes, Escape}};
-/// let seps = Separators::default();
-/// let tokens: Vec<_> = escapes(r"Dr\S\Who\.br\", &seps).collect();
+/// use er7::{Separators, escape::{escapes, Escape}};
+///
+/// let separators = Separators::default();
+/// let tokens: Vec<_> = escapes(r"Dr\S\Who\.br\", &separators).collect();
 /// assert_eq!(tokens, vec![
 ///     Escape::Text("Dr"),
 ///     Escape::Component,
@@ -111,6 +156,8 @@ impl Escape<'_> {
 ///     Escape::Formatting("br"),
 /// ]);
 /// ```
+///
+/// See also [`unescape`] and [`escape`], the two passes built on this.
 pub fn escapes<'a>(text: &'a str, separators: &Separators) -> Escapes<'a> {
     Escapes {
         rest: text,
@@ -193,12 +240,19 @@ fn classify(body: &str) -> Escape<'_> {
 /// byte, and the bytes are read as UTF-8 with the usual lossy replacement,
 /// which is the best a receiver can do for a sender that meant some other
 /// character set. Returns `None` for a body that is empty, has an odd
-/// length, or holds a non-hexadecimal character.
+/// length, or holds a non-hexadecimal character. [`unescape`] uses that
+/// `None` to keep an undecodable `\X..\` literal rather than guessing.
+///
+/// Example:
 ///
 /// ```
-/// assert_eq!(er7::escape::decode_hex("0D"), Some("\r".to_string()));
-/// assert_eq!(er7::escape::decode_hex("4142"), Some("AB".to_string()));
-/// assert_eq!(er7::escape::decode_hex("XYZ"), None);
+/// use er7::escape::decode_hex;
+///
+/// assert_eq!(decode_hex("0D"), Some("\r".to_string()));
+/// assert_eq!(decode_hex("4142"), Some("AB".to_string()));
+/// assert_eq!(decode_hex(""), None);     // empty
+/// assert_eq!(decode_hex("A"), None);    // odd length
+/// assert_eq!(decode_hex("XYZ"), None);  // not hexadecimal
 /// ```
 pub fn decode_hex(body: &str) -> Option<String> {
     if body.is_empty() || !body.len().is_multiple_of(2) || !body.is_ascii() {
@@ -220,14 +274,32 @@ pub fn decode_hex(body: &str) -> Option<String> {
 /// (`\Cxxyy\`), local extensions (`\Zdd..\`), unrecognized bodies, and an
 /// unterminated escape character are all kept literally: they say something
 /// about presentation or encoding that a plain string cannot carry, so
-/// dropping them would lose more than keeping them.
+/// dropping them would lose information and guessing at them would invent
+/// it (R13, spec §6.2).
+///
+/// Returns `Cow::Borrowed` when the text holds no escape character at all,
+/// which is the overwhelmingly common case.
+///
+/// Example:
 ///
 /// ```
-/// # use er7::{Separators, escape::unescape};
-/// let seps = Separators::default();
-/// assert_eq!(unescape(r"Smith \T\ Jones", &seps), "Smith & Jones");
-/// assert_eq!(unescape(r"line\.br\next", &seps), r"line\.br\next");
+/// use er7::{Separators, escape::unescape};
+///
+/// let separators = Separators::default();
+///
+/// // Sequences that stand for characters decode.
+/// assert_eq!(unescape(r"Smith \T\ Jones", &separators), "Smith & Jones");
+/// assert_eq!(unescape(r"\X4142\", &separators), "AB");
+///
+/// // Everything else is kept exactly as written.
+/// assert_eq!(unescape(r"line\.br\next", &separators), r"line\.br\next");
+/// assert_eq!(unescape(r"\H\loud\N\", &separators), r"\H\loud\N\");
+/// assert_eq!(unescape(r"\XZZ\", &separators), r"\XZZ\");
+/// assert_eq!(unescape(r"a\Fb", &separators), r"a\Fb");
 /// ```
+///
+/// See also [`escape`] for the inverse, and [`escapes`] for the token
+/// stream both are built on.
 pub fn unescape<'a>(text: &'a str, separators: &Separators) -> Cow<'a, str> {
     if !text.contains(separators.escape) {
         return Cow::Borrowed(text);
@@ -257,13 +329,30 @@ pub fn unescape<'a>(text: &'a str, separators: &Separators) -> Cow<'a, str> {
 /// Every delimiter becomes its sequence, and a carriage return or line feed
 /// becomes `\X0D\` or `\X0A\` — those would otherwise end the segment, which
 /// is the one corruption an ER7 writer must never commit. This is the
-/// inverse of [`unescape`] for text that contains no sequences of its own.
+/// inverse of [`unescape`] for text that contains no sequences of its own
+/// (R14, R15, spec §6.3).
+///
+/// Most callers want [`Subcomponent::set`](crate::Subcomponent::set)
+/// instead, which does this and stores the result.
+///
+/// Example:
 ///
 /// ```
-/// # use er7::{Separators, escape::escape};
-/// let seps = Separators::default();
-/// assert_eq!(escape("Smith & Jones", &seps), r"Smith \T\ Jones");
-/// assert_eq!(escape("a|b", &seps), r"a\F\b");
+/// use er7::{Separators, escape::{escape, unescape}};
+///
+/// let separators = Separators::default();
+///
+/// assert_eq!(escape("Smith & Jones", &separators), r"Smith \T\ Jones");
+/// assert_eq!(escape("a|b^c~d&e", &separators), r"a\F\b\S\c\R\d\T\e");
+/// // The escape character is encoded first, so it is encoded once.
+/// assert_eq!(escape(r"a\b", &separators), r"a\E\b");
+/// // A literal carriage return would end the segment and truncate the message.
+/// assert_eq!(escape("line\rnext", &separators), r"line\X0D\next");
+///
+/// // Encoding then decoding is the identity, for every value.
+/// for value in ["plain", r"a|b^c~d&e\f", "with\rcr"] {
+///     assert_eq!(unescape(&escape(value, &separators), &separators), value);
+/// }
 /// ```
 pub fn escape<'a>(text: &'a str, separators: &Separators) -> Cow<'a, str> {
     // The truncation character is deliberately absent here: it is only

@@ -1,9 +1,11 @@
 //! Reading ER7 text into the value tree.
 //!
 //! Parsing is deliberately forgiving below the header: unknown segments,
-//! ragged field counts, and stray empty positions are all data, not errors.
-//! The only thing that can fail is the header itself, because without its
-//! delimiters there is no way to read anything that follows.
+//! ragged field counts, and stray empty positions are all data, not errors
+//! (R6). The only thing that can fail is the header itself, because without
+//! its delimiters there is no way to read anything that follows.
+//!
+//! Specified by spec §4 (parsing) and §9 (batch input).
 
 use crate::message::is_header_name;
 use crate::{Component, Error, Field, Message, Repetition, Segment, Separators, Subcomponent};
@@ -14,17 +16,35 @@ const BATCH_ENVELOPE: [&str; 4] = ["FHS", "BHS", "BTS", "FTS"];
 
 /// Parse one ER7 message, taking its delimiters from its own header.
 ///
-/// The first segment must be `MSH`, or the `FHS`/`BHS` header of a batch;
-/// everything after it parses without ever failing.
+/// The first segment must be `MSH`, or the `FHS`/`BHS` header of a batch
+/// (R5); everything after it parses without ever failing (R6).
+///
+/// Segments are divided at `\r`, `\n`, or `\r\n`, and blank lines are
+/// dropped. Nothing else is trimmed, because a value that really ended in a
+/// space might be data and the crate cannot tell (R4, spec §4.1).
+///
+/// Example:
 ///
 /// ```
 /// # fn main() -> Result<(), er7::Error> {
 /// let message = er7::parse("MSH|^~\\&|LAB|ACME\rPID|1||9^^^ACME^MR")?;
 /// assert_eq!(message.segments.len(), 2);
 /// assert_eq!(message.query("PID-3.5")?.as_deref(), Some("MR"));
+///
+/// // Any terminator, and blank lines are dropped.
+/// assert_eq!(er7::parse("MSH|^~\\&|LAB\r\n\r\nPID|1\n")?.segments.len(), 2);
+///
+/// // Unknown segments and ragged fields are data, not errors.
+/// assert!(er7::parse("MSH|^~\\&|LAB\rZPD|1|LOCAL\rXYZ").is_ok());
+///
+/// // Only a missing or unusable header fails.
+/// assert!(er7::parse("PID|1").is_err());
 /// # Ok(())
 /// # }
 /// ```
+///
+/// See also [`parse_with`] for a fragment with no header of its own, and
+/// [`split_messages`] for input holding more than one message.
 pub fn parse(text: &str) -> Result<Message, Error> {
     let text = strip_bom(text);
     let lines = segment_lines(text);
@@ -47,14 +67,27 @@ pub fn parse(text: &str) -> Result<Message, Error> {
 /// that has no header of its own — a single segment pulled from a log, or
 /// the body of a message whose `MSH` was read separately.
 ///
-/// This cannot fail: whatever the text is, it becomes some tree.
+/// This cannot fail — whatever the text is, it becomes some tree — which is
+/// why it returns [`Message`] rather than `Result` (spec §4.3).
+///
+/// Example:
 ///
 /// ```
-/// # use er7::Separators;
-/// let separators = Separators::default();
-/// let fragment = er7::parse_with("PID|1||9|4|SMITH^JOHN", separators);
-/// assert_eq!(fragment.query("PID-5.1").unwrap().as_deref(), Some("SMITH"));
+/// # fn main() -> Result<(), er7::Error> {
+/// use er7::Separators;
+///
+/// let fragment = er7::parse_with("PID|1||9|4|SMITH^JOHN", Separators::default());
+/// assert_eq!(fragment.query("PID-5.1")?.as_deref(), Some("SMITH"));
+///
+/// // Several segments work too, and so does text that is not really ER7.
+/// let lines = er7::parse_with("NTE|1||note\rNTE|2||more", Separators::default());
+/// assert_eq!(lines.query_all("NTE-3")?, ["note", "more"]);
+/// assert_eq!(er7::parse_with("anything at all", Separators::default()).segments.len(), 1);
+/// # Ok(())
+/// # }
 /// ```
+///
+/// See also [`parse()`] when the text carries its own header.
 pub fn parse_with(text: &str, separators: Separators) -> Message {
     Message {
         separators,
@@ -69,15 +102,36 @@ pub fn parse_with(text: &str, separators: Separators) -> Message {
 /// individual messages — one per `MSH` segment.
 ///
 /// The returned slices borrow from `text` and keep its original segment
-/// terminators, so each one can be handed straight to [`parse`]. Batch
-/// envelope segments (`FHS`, `BHS`, `BTS`, `FTS`) are left out: they
-/// describe the file, not a message.
+/// terminators, so each one can be handed straight to [`parse()`] with no
+/// copy. Batch envelope segments (`FHS`, `BHS`, `BTS`, `FTS`) are left out:
+/// they describe the file, not a message (R21, spec §9).
+///
+/// A first line that is not an `MSH` still starts a message, which `parse`
+/// then rejects — better than silently dropping it, since a caller
+/// reconciling against a `BTS` count needs to know it was there
+/// (spec §9.3).
+///
+/// Example:
 ///
 /// ```
 /// let batch = "FHS|^~\\&|SENDER\rMSH|^~\\&|A\rMSA|AA|1\rMSH|^~\\&|B\rMSA|AA|2\rFTS|2";
 /// let messages = er7::split_messages(batch);
-/// assert_eq!(messages, vec!["MSH|^~\\&|A\rMSA|AA|1", "MSH|^~\\&|B\rMSA|AA|2"]);
+/// assert_eq!(messages, ["MSH|^~\\&|A\rMSA|AA|1", "MSH|^~\\&|B\rMSA|AA|2"]);
+///
+/// // Handle each independently, so one bad message does not lose the rest.
+/// for source in er7::split_messages(batch) {
+///     match er7::parse(source) {
+///         Ok(message) => assert!(message.header().is_some()),
+///         Err(e) => eprintln!("skipping malformed message: {e}"),
+///     }
+/// }
+///
+/// // Envelope names are matched exactly, so a local `BTSX` is not a trailer.
+/// assert_eq!(er7::split_messages("MSH|^~\\&|A\rBTSX|1"), ["MSH|^~\\&|A\rBTSX|1"]);
 /// ```
+///
+/// This does not unframe MLLP: transport is out of scope, so strip the
+/// 0x0B / 0x1C 0x0D bytes before calling this.
 pub fn split_messages(text: &str) -> Vec<&str> {
     let text = strip_bom(text);
     let mut spans: Vec<(usize, usize)> = Vec::new();
@@ -304,6 +358,45 @@ mod tests {
             split_messages(batch),
             vec!["MSH|^~\\&|A\rMSA|AA|1", "MSH|^~\\&|B\rMSA|AA|2"]
         );
+    }
+
+    #[test]
+    fn an_empty_field_has_no_repetitions() {
+        // R7: a field the sender left empty has zero repetitions, which is
+        // what separates "not sent" from a repetition that is present and
+        // blank. Empty positions below the field level are always kept,
+        // because position is what gives a value meaning.
+        let message = parse("MSH|^~\\&|LAB\rPID||A|A~~B|~|^^C|A&&B").unwrap();
+        let pid = message.segment("PID").unwrap();
+
+        assert_eq!(pid.field(1).unwrap().repetitions.len(), 0); // `||`
+        assert_eq!(pid.field(2).unwrap().repetitions.len(), 1); // `A`
+        assert_eq!(pid.field(3).unwrap().repetitions.len(), 3); // `A~~B`
+        assert_eq!(pid.field(4).unwrap().repetitions.len(), 2); // `~`
+        assert_eq!(
+            pid.field(5)
+                .unwrap()
+                .repetition(1)
+                .unwrap()
+                .components
+                .len(),
+            3 // `^^C`
+        );
+        assert_eq!(
+            pid.field(6)
+                .unwrap()
+                .component(1)
+                .unwrap()
+                .subcomponents
+                .len(),
+            3 // `A&&B`
+        );
+
+        // An empty field is empty but not null, and it still writes back as
+        // the empty position it was.
+        assert!(pid.field(1).unwrap().is_empty());
+        assert!(!pid.field(1).unwrap().is_null());
+        assert_eq!(message.to_er7(), "MSH|^~\\&|LAB\rPID||A|A~~B|~|^^C|A&&B");
     }
 
     #[test]

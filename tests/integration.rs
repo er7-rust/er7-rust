@@ -151,6 +151,38 @@ fn parses_a_fragment_that_has_no_header() {
     assert_eq!(fragment.query("OBX-5").unwrap().as_deref(), Some("187"));
 }
 
+#[test]
+fn the_crate_has_no_runtime_dependencies() {
+    // R25: the `[dependencies]` table is empty, and stays empty. Healthcare
+    // integration code gets audited, this crate is meant to sit at the
+    // bottom of a stack of HL7 crates, and nothing in ER7 needs a
+    // dependency. Asserting it here makes the rule fail loudly rather than
+    // drift (spec §15.1).
+    let manifest = include_str!("../Cargo.toml");
+
+    // Collect the body of every dependency table: runtime, dev, and build.
+    let mut in_dependencies = false;
+    for line in manifest.lines() {
+        let line = line.trim();
+        if line.starts_with('[') {
+            in_dependencies = line.contains("dependencies");
+            continue;
+        }
+        if !in_dependencies || line.is_empty() || line.starts_with('#') {
+            continue;
+        }
+        panic!("expected no dependencies, found {line:?} in Cargo.toml");
+    }
+
+    // The lock file is the second witness: this crate and nothing else.
+    let lock = include_str!("../Cargo.lock");
+    assert_eq!(
+        lock.matches("name = ").count(),
+        1,
+        "expected Cargo.lock to hold exactly one package, this crate"
+    );
+}
+
 /// A message exercising the corners: a v2.7 truncation character, an
 /// explicit null, a formatting escape, a decoded delimiter, and hex data.
 const EDGES: &str = "MSH|^~\\&#|LAB|ACME|EHR|CLINIC|20260815120000||ADT^A08^ADT_A01|N1|P|2.7\r\
