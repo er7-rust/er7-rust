@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+title: ER7 Rust site — the public documentation site for the er7 Rust crate.
+message: >-
+  If you use this work and you want to cite it,
+  then you can use the metadata from this file.
+type: software
+authors:
+  - given-names: Joel Parker
+    family-names: Henderson
+    email: joel@joelparkerhenderson.com
+    affiliation: joelparkerhenderson.com
+    orcid: 'https://orcid.org/0009-0000-4681-282X'
+identifiers:
+  - type: url
+    value: 'https://er7-rust.github.io/'
+    description: The published site.
+repository-code: 'https://github.com/er7-rust/er7-rust.github.io/'
+url: 'https://er7-rust.github.io/'
+abstract: >-
+  The public documentation site for the er7 Rust crate, which parses,
+  queries, edits, and writes HL7 v2 messages in the ER7 pipe-hat encoding.
+license: See license file
