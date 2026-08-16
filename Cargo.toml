@@ -1,0 +1,32 @@
+[package]
+name = "serde-er7"
+version = "0.1.0"
+edition = "2024"
+authors = ["Joel Parker Henderson <joel@joelparkerhenderson.com>"]
+description = "Serialize and deserialize ER7 (HL7 v2 pipe-hat encoding) message trees with Serde, so they can flow through JSON, YAML, or any other Serde data format"
+license = "MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only"
+readme = "README.md"
+keywords = ["hl7", "er7", "serde", "healthcare", "serialization"]
+categories = ["encoding", "parser-implementations"]
+include = [
+    "src/**/*",
+    "spec/**/*",
+    "docs/**/*",
+    "examples/**/*",
+    "/LICENSE.md",
+    "/README.md",
+    "/index.md",
+]
+
+# Exactly two dependencies, and both are the point of this crate: `serde` is
+# the trait vocabulary this crate implements against, and `er7` is the value
+# tree it wraps. See spec/03-dependencies-and-format-agnosticism.md.
+[dependencies]
+serde = "1"
+er7 = "0"
+
+# serde_json is not a runtime dependency of this crate — it is deliberately
+# format-agnostic — but it is the natural format to exercise in tests,
+# doctests, and examples, so it appears only here.
+[dev-dependencies]
+serde_json = "1"
