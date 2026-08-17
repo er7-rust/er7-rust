@@ -1,0 +1,33 @@
+[package]
+name = "er7-redact"
+version = "0.1.0"
+edition = "2024"
+authors = ["Joel Parker Henderson <joel@joelparkerhenderson.com>"]
+description = "Redact patient detail from HL7 v2 messages in the ER7 pipe-hat encoding, without changing the shape of the message"
+license = "MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only"
+repository = "https://github.com/er7-rust/er7-redact"
+readme = "README.md"
+keywords = ["hl7", "er7", "healthcare", "redaction", "phi"]
+categories = ["encoding", "command-line-utilities"]
+# Leading slashes anchor to the package root; without them these patterns
+# would also match the per-directory README.md and index.md files.
+include = [
+    "src/**/*",
+    "spec/**/*",
+    "docs/**/*",
+    "examples/**/*",
+    "samples/**/*",
+    "/LICENSE.md",
+    "/README.md",
+    "/index.md",
+]
+
+# Exactly one dependency, and it is the point of this crate: `er7` is the
+# value tree being edited and the path notation policies are written in.
+# See spec/12-dependencies-and-build.md §12.1, rule D16.
+[dependencies]
+er7 = "0"
+
+[[bin]]
+name = "er7-redact"
+path = "src/main.rs"

@@ -1,0 +1,12 @@
+# de-identify.policy — exercises every action of spec section 3
+#
+# Synthetic sample used by the tests; see spec section 11.4.
+
+MSH-7      keep          # the timestamp a test asserts on
+PID-3.1    pseudonym     # keep linkage, lose the record number
+PID-5      replace REDACTED
+PID-7      first 4       # the birth year is enough
+PID-11     clear
+PID-13     mask *        # keep the shape of a phone number
+PID-19     null          # tell the receiver to clear its copy
+NTE-3      last 0        # free text: keep nothing
