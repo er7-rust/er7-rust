@@ -6,7 +6,7 @@
   <title>Ecosystem — er7</title>
   <meta
     name="description"
-    content="The crate family: er7 for the ER7 encoding, hl7-2-5-to-xml and hl7-2-5-to-json for the HL7 v2.5 dictionary layer on top of it."
+    content="The crate family: er7 for the ER7 encoding, er7-redact for removing patient detail, and hl7-2-5-to-xml and hl7-2-5-to-json for the HL7 v2.5 dictionary layer on top of it."
   />
 </svelte:head>
 
@@ -14,12 +14,13 @@
   <p class="hero-eyebrow">The crate family</p>
   <h1>Ecosystem</h1>
   <p class="hero-tagline">
-    One small crate for the encoding, and dictionary crates on top of it. The split is the point.
+    One small crate for the encoding, and crates on top of it that each do one job. The split is the
+    point.
   </p>
 </section>
 
 <section class="section">
-  <h2 class="section-heading">Why two layers</h2>
+  <h2 class="section-heading">Why the encoding is its own layer</h2>
   <div class="prose">
     <p>
       ER7 is <strong>one small encoding, stable across every HL7 v2 release</strong> from v2.1 in
@@ -32,21 +33,31 @@
       a dictionary crate chooses its own version, and a user who only needs to route or audit
       messages pays for nothing.
     </p>
+    <p>
+      What sits on top comes in two kinds. A <strong>dictionary</strong> knows what a position
+      <em>means</em> in one HL7 version. A <strong>tool</strong> does one job to any message and
+      needs no dictionary at all — <code>er7-redact</code> is one: to remove a patient name it has
+      to know which position holds it, not what a name is.
+    </p>
   </div>
 
-  <pre><code>{`  ┌──────────────────────────────────────────────────┐
-  │  hl7-2-5-to-xml        hl7-2-5-to-json           │   HL7 v2.5 dictionary
-  │  v2.5 data types, message structures, renderer   │
-  └──────────────────────────────────────────────────┘
-                          │  depends on
-                          ▼
-  ┌──────────────────────────────────────────────────┐
-  │  er7                                             │   Encoding
-  │  delimiters, value tree, escapes, batch input    │
-  └──────────────────────────────────────────────────┘
-                          │
-                          ▼
-                    (no dependencies)`}</code></pre>
+  <pre><code>{`  ┌──────────────────────────────────┐  ┌──────────────────────────────────┐
+  │  er7-redact                      │  │  hl7-2-5-to-xml                  │
+  │  policies, actions,              │  │  hl7-2-5-to-json                 │
+  │  pseudonyms, reports             │  │  v2.5 types, structures, render  │
+  └──────────────────────────────────┘  └──────────────────────────────────┘
+     Tool — any HL7 version               HL7 v2.5 dictionary
+                   │                                     │
+                   └─────────────────┬───────────────────┘
+                          depends on │
+                                     ▼
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │  er7                                                                 │
+  │  delimiters, value tree, escapes, batch input                        │
+  └──────────────────────────────────────────────────────────────────────┘   Encoding
+                                     │
+                                     ▼
+                             (no dependencies)`}</code></pre>
 </section>
 
 <section class="section">
@@ -84,12 +95,16 @@
         <tr><td>Batch splitting</td><td><code>er7</code></td></tr>
         <tr><td>Absent / empty / null</td><td><code>er7</code></td></tr>
         <tr><td>Byte-for-byte round trip</td><td><code>er7</code></td></tr>
+        <tr><td>Which positions carry patient detail</td><td><code>er7-redact</code></td></tr>
+        <tr><td>Masking a value without moving the shape</td><td><code>er7-redact</code></td></tr>
+        <tr><td>Stable pseudonyms across messages</td><td><code>er7-redact</code></td></tr>
         <tr><td>Which data type each field carries</td><td>dictionary crate</td></tr>
         <tr><td>Composite component names (XPN.1, CX.4, …)</td><td>dictionary crate</td></tr>
         <tr><td>Message-structure grammars and grouping</td><td>dictionary crate</td></tr>
         <tr><td>XML or JSON rendering</td><td>dictionary crate</td></tr>
         <tr><td>MLLP framing, acknowledgements</td><td>neither — out of scope</td></tr>
         <tr><td>Validation of any kind</td><td>neither — out of scope</td></tr>
+        <tr><td>Whether a redacted message is safe to share</td><td>none — a judgement</td></tr>
       </tbody>
     </table>
   </div>
@@ -98,7 +113,7 @@
 <section class="section">
   <h2 class="section-heading">
     <span class="section-heading-eyebrow">Worked example</span>
-    The same message, three ways
+    The same message, four ways
   </h2>
   <div class="prose">
     <p>
@@ -110,6 +125,19 @@
   <h3><code>er7</code> — what is at this position?</h3>
   <pre><code>{`assert_eq!(message.query("PID-5.1")?.as_deref(), Some("TEST"));
 assert_eq!(message.to_er7(), text);  // unchanged`}</code></pre>
+
+  <h3><code>er7-redact</code> — what of it can be shared?</h3>
+  <pre><code>{`PID|1||33f9458d5c426675||REDACTED^REDACTED`}</code></pre>
+  <div class="prose">
+    <p>
+      Same fields, same components, same delimiters — the record number is a stable pseudonym, so
+      two messages about this patient still agree they are about the same one. The crate also
+      reports what it changed, as paths and actions with no values in them:
+    </p>
+  </div>
+  <pre><code>{`PID[1]-3[1].1.1  pseudonym
+PID[1]-5[1].1.1  replace REDACTED
+PID[1]-5[1].2.1  replace REDACTED`}</code></pre>
 
   <h3><code>hl7-2-5-to-xml</code> — what does it mean, as v2.xml?</h3>
   <pre><code>{`<PID>
@@ -146,10 +174,11 @@ assert_eq!(message.to_er7(), text);  // unchanged`}</code></pre>
   <h2 class="section-heading">Building your own layer</h2>
   <div class="prose">
     <p>
-      If you need a dictionary for a version other than v2.5, or a different output format,
-      <code>er7</code> is the foundation to build on. The two dictionary crates above are worked
-      examples of the shape: each holds its version&rsquo;s tables, its structure grammars, and its
-      renderer, and delegates everything about the encoding.
+      If you need a dictionary for a version other than v2.5, a different output format, or a tool
+      that does one job to any message, <code>er7</code> is the foundation to build on. The crates
+      above are worked examples of both shapes: a dictionary holds its version&rsquo;s tables,
+      structure grammars, and renderer, while a tool such as <code>er7-redact</code> holds only the
+      positions it acts on — and both delegate everything about the encoding.
     </p>
     <p>Three things they do that yours probably should:</p>
     <ul>

@@ -41,7 +41,7 @@ export type Crate = {
   layer: string;
 };
 
-/** The three crates in the family, from the bottom of the stack up. */
+/** The four crates in the family, from the bottom of the stack up. */
 export const crates: Crate[] = [
   {
     name: 'er7',
@@ -51,6 +51,15 @@ export const crates: Crate[] = [
     crate: 'https://crates.io/crates/er7',
     docs: 'https://docs.rs/er7/',
     layer: 'Encoding'
+  },
+  {
+    name: 'er7-redact',
+    description:
+      'Removes patient detail from a message without moving its shape: a policy of HL7 paths and actions, stable pseudonyms, and a report of every position it changed.',
+    repository: 'https://github.com/er7-rust/er7-redact',
+    crate: 'https://crates.io/crates/er7-redact',
+    docs: 'https://docs.rs/er7-redact/',
+    layer: 'Tool'
   },
   {
     name: 'hl7-2-5-to-xml',

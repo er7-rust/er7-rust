@@ -55,7 +55,7 @@ Consequences:
 | `/escapes/` | The full sequence table, why half stay literal, decoding, encoding, the tokenizer, the scoping divergence | crate §6, §18.2 |
 | `/cli/` | Synopsis, options, the outline format, recipes, exit codes | crate §12 |
 | `/api/` | Entry points, the value tree, accessors, configuration, errors | crate §5, §11, `docs/api/` |
-| `/ecosystem/` | The encoding/dictionary split, the three crates, building your own layer | crate §1.3, §18.1 |
+| `/ecosystem/` | The encoding/dictionary split, the four crates and the two kinds of layer, building your own | crate §1.3, §18.1 |
 | `/about/` | Metadata, spec-driven development, patient safety, contributing, license, citation | crate §14, §15 |
 
 ### 3.2 Out of scope
@@ -65,9 +65,10 @@ Consequences:
 - **Duplicating the rustdoc.** `/api/` is a map that links to
   <https://docs.rs/er7>, not a replacement for it. If a reader needs a full
   signature, send them there.
-- **HL7 v2.5 dictionary documentation.** The sibling crates have their own
-  repositories and docs; `/ecosystem/` links to them and explains the
-  boundary, and stops there.
+- **Sibling-crate documentation.** The HL7 v2.5 dictionary crates and
+  `er7-redact` have their own repositories and docs; `/ecosystem/` links to
+  them and explains the boundary, and stops there. A sibling gets a card
+  and a row, never a route.
 - **A blog, changelog, or news feed.** The crate's commit history is its
   changelog.
 - **Anything interactive that needs a server**, since there is none.

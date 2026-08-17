@@ -45,7 +45,7 @@ clean.
 | `/escapes/` | Escape sequences: the full table, what decodes, what stays literal |
 | `/cli/` | The `er7` command-line tool, with recipes |
 | `/api/` | The complete public API surface |
-| `/ecosystem/` | The crate family and the encoding/dictionary layer split |
+| `/ecosystem/` | The crate family, and the two kinds of layer built on the encoding |
 | `/about/` | Licensing, citation, contributing, patient-safety constraints |
 
 Every route is prerendered. `trailingSlash: 'always'` means a path
