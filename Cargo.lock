@@ -4,9 +4,9 @@ version = 4
 
 [[package]]
 name = "er7"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "da6b31d50aba8079be3df6577e584abf98fd291e160e3c7370c50802b1c64240"
+checksum = "e8b4e66862ad5116b35bcbaeea7f087a7a014170cc1c91224b1d0105ce54774c"
 
 [[package]]
 name = "er7-redact"
