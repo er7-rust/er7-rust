@@ -1,7 +1,7 @@
 # `er7-redact` crate specification
 
 **Status:** living document. Updated alongside every behavioural change.
-**Applies to:** `er7-redact` 0.1.0.
+**Applies to:** `er7-redact` 0.1.1.
 **Audience:** maintainers, AI agents, and downstream integrators reading
 the crate's contract.
 **Companion docs:** [`AGENTS.md`](../AGENTS.md) for agent guidance,
