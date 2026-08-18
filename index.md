@@ -1,8 +1,10 @@
 # er7-rust.github.io
 
 The public site for the [`er7`](https://github.com/er7-rust/er7-rust) Rust
-crate — parse, query, edit, and write HL7 v2 messages in the ER7 pipe-hat
-encoding.
+crate family — parse, query, edit, and write HL7 v2 messages in the ER7
+pipe-hat encoding, and the subprojects built on it: `er7-redact` and
+`serde-er7`. Every subproject is documented here in full — tutorial, help,
+and examples — not merely linked to.
 
 Live at **<https://er7-rust.github.io/>**.
 
@@ -45,6 +47,8 @@ clean.
 | `/escapes/` | Escape sequences: the full table, what decodes, what stays literal |
 | `/cli/` | The `er7` command-line tool, with recipes |
 | `/api/` | The complete public API surface |
+| `/er7-redact/` | The `er7-redact` subproject: tutorial, help, examples |
+| `/serde-er7/` | The `serde-er7` subproject: tutorial, help, examples |
 | `/ecosystem/` | The crate family, and the two kinds of layer built on the encoding |
 | `/about/` | Licensing, citation, contributing, patient-safety constraints |
 

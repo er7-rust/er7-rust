@@ -28,6 +28,8 @@ export const navLinks: NavLink[] = [
   { href: '/escapes/', label: 'Escapes' },
   { href: '/cli/', label: 'Command line' },
   { href: '/api/', label: 'API' },
+  { href: '/er7-redact/', label: 'er7-redact' },
+  { href: '/serde-er7/', label: 'serde-er7' },
   { href: '/ecosystem/', label: 'Ecosystem' },
   { href: '/about/', label: 'About' }
 ];

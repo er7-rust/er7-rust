@@ -25,6 +25,14 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://er7-rust.github.io/er7-redact/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://er7-rust.github.io/serde-er7/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://er7-rust.github.io/ecosystem/</loc>
     <priority>0.8</priority>
   </url>

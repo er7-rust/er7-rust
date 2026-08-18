@@ -11,39 +11,46 @@ See [`index.md`](index.md) for the human-oriented overview, and
 | Field | Value |
 | ----- | ----- |
 | Package | `er7-rust.github.io` |
-| Purpose | The public site for the `er7` Rust crate |
+| Purpose | The public site for the `er7` Rust crate family, documenting every subproject in full |
 | Live at | https://er7-rust.github.io/ |
 | Stack | SvelteKit 2 + Svelte 5 (runes), `@sveltejs/adapter-static`, TypeScript |
 | Design system | Lily Design System™ |
 | Package manager | pnpm |
 | Deploy | GitHub Actions → GitHub Pages, on push to `main` |
-| Crate repository | https://github.com/er7-rust/er7-rust |
+| Crate repositories | https://github.com/er7-rust — `er7`, `er7-redact`, `serde-er7` |
 | Maintainer | Joel Parker Henderson — joel@joelparkerhenderson.com |
 
 ## The one rule that matters most
 
-**This site is derived, not normative.** The `er7` crate repository holds
-the source of truth for behaviour in its `spec/` directory, with numbered
-rules `R1`–`R25` and a test for each. These pages explain and illustrate
-that spec; they do not define it.
+**This site is derived, not normative.** Every crate repository holds the
+source of truth for its own behaviour, in its `spec/` directory, with
+numbered rules and a test for each — `R1`–`R25` for `er7`, `D1`–`D18` for
+`er7-redact`, `S1`–`S12` for `serde-er7`. These pages explain and
+illustrate those specs; they do not define anything.
 
-So: **never state a behaviour here that the crate's spec does not state.**
-If you find a discrepancy, the crate is right and this site is the bug —
-unless the crate's spec is itself wrong, in which case fix it there first
-and then update these pages. Do not "improve" a rule in prose.
+So: **never state a behaviour here that the owning crate's spec does not
+state.** If you find a discrepancy, the crate is right and this site is the
+bug — unless the crate's spec is itself wrong, in which case fix it there
+first and then update these pages. Do not "improve" a rule in prose.
+
+And **never hand-write a tool's output.** Anything shown as what a command
+prints or a serializer produces is captured from a real run of the released
+crate (site spec §4.3).
 
 Concretely, before changing any factual claim on a page, check it against
-the matching section of the crate's spec:
+the matching section of the owning crate's spec:
 
-| Page | Crate spec section |
-| ---- | ------------------ |
-| `/format/` | §2 The ER7 encoding |
-| `/paths/` | §8 Paths and queries |
-| `/escapes/` | §6 Escape sequences |
-| `/cli/` | §12 Command-line interface |
-| `/api/` | §5 value tree, §11 errors, and `docs/api/index.md` |
-| `/ecosystem/` | §1.3 scope, §18.1 the layer boundary |
-| `/about/` | §14 versioning, §15 metadata |
+| Page | Crate | Spec section |
+| ---- | ----- | ------------ |
+| `/format/` | `er7` | §2 The ER7 encoding |
+| `/paths/` | `er7` | §8 Paths and queries |
+| `/escapes/` | `er7` | §6 Escape sequences |
+| `/cli/` | `er7` | §12 Command-line interface |
+| `/api/` | `er7` | §5 value tree, §11 errors, and `docs/api/index.md` |
+| `/er7-redact/` | `er7-redact` | §2 model, §3 actions, §4 preservation, §5 policies, §6 file format, §7 pseudonyms, §8 report, §10 CLI |
+| `/serde-er7/` | `serde-er7` | §1 purpose, §2 wire shapes, §4 round trip, §5 errors, §6 ergonomics |
+| `/ecosystem/` | `er7` | §1.3 scope, §18.1 the layer boundary |
+| `/about/` | `er7` | §14 versioning, §15 metadata |
 
 ## Layout
 
@@ -119,6 +126,25 @@ Four edits, all required:
 2. `src/lib/site.ts` — a `navLinks` entry.
 3. `static/sitemap.xml` — a `<url>` entry.
 4. `index.md` and `spec/index.md` — a row in the routes table.
+
+## Adding a subproject
+
+A new crate in the `er7-rust` organisation is documented **in full**, on
+one route, following the section order in
+[`spec/index.md`](spec/index.md) §3.3: what it is, install, tutorial, help,
+examples, what it does not do, where to go next.
+
+That means the four edits above, plus:
+
+5. `src/lib/site.ts` — a `crates` entry, so it appears on `/ecosystem/`.
+6. `/ecosystem/` — a row in "what each layer owns", and a step in the
+   worked example if the crate has something to say about the shared
+   message.
+
+Write the page from the crate's own `index.md`, `docs/`, and `spec/`, and
+run its commands to capture their real output. A crate outside the
+organisation is a *neighbour*, not a subproject: it gets a card on
+`/ecosystem/` and nothing more (site spec §1.1).
 
 ## Patient safety
 
