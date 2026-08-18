@@ -1,6 +1,6 @@
 [package]
 name = "er7"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 authors = ["Joel Parker Henderson <joel@joelparkerhenderson.com>"]
 description = "Parse, query, edit, and write HL7 v2 messages in the ER7 pipe-hat encoding, with zero dependencies"
