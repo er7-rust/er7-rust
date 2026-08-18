@@ -1,8 +1,10 @@
 # er7
 
+**[website](https://er7-rust.github.io/)**
+•
 **[documentation](https://docs.rs/er7/)**
 •
-**[source](https://github.com/joelparkerhenderson/er7-rust)**
+**[source](https://github.com/er7-rust/er7-rust)**
 •
 **[crate](https://crates.io/crates/er7)**
 •
@@ -175,9 +177,20 @@ routing a message requires reading them and those positions have never moved
 in any HL7 v2 release. The reasoning, and what was declined, is in
 [spec §10](spec/10-msh-conveniences.md).
 
-For the HL7 v2.5 dictionary layer, see the sibling crate
-[hl7-2-5-to-xml-using-rust](https://github.com/joelparkerhenderson/hl7-2-5-to-xml-using-rust),
-which converts ER7 to the official v2.xml representation.
+### The crate family
+
+`er7` is the bottom of a stack; each layer above it is a separate crate, so
+a caller pays only for what they use.
+
+| Crate | Adds |
+| ----- | ---- |
+| [`er7-redact`](https://crates.io/crates/er7-redact) | redaction: remove patient detail without changing the shape of the message |
+| [`serde-er7`](https://crates.io/crates/serde-er7) | Serde support, so a message tree can travel as JSON, YAML, or any other format |
+| [`hl7-2-5-to-xml`](https://crates.io/crates/hl7-2-5-to-xml) / [`hl7-2-5-to-json`](https://crates.io/crates/hl7-2-5-to-json) | the HL7 v2.5 dictionary: data types, message structures, and a renderer |
+
+All four are presented together at
+<https://er7-rust.github.io/ecosystem/>, and the boundary between them is
+[spec §1.3.1](spec/01-purpose-and-scope.md).
 
 ## Documentation
 
@@ -195,7 +208,8 @@ which converts ER7 to the official v2.xml representation.
 | [`samples/`](samples/) | example messages: a lab result, an admission update with a `Z` segment, a batch file |
 
 Rendered API docs are at <https://docs.rs/er7/>, or locally with
-`cargo doc --no-deps --open`.
+`cargo doc --no-deps --open`. The same material, presented for the web, is
+at <https://er7-rust.github.io/>.
 
 ## Development
 

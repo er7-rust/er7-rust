@@ -40,9 +40,29 @@ All of that is version-specific and belongs in a layer above. §10 is the
 one narrow, justified exception. The rationale, and the alternatives
 considered, are in [§18.1](18-open-questions-and-divergences.md).
 
-For the HL7 v2.5 dictionary layer, see the sibling crate
-[`hl7-2-5-to-xml-using-rust`](https://github.com/joelparkerhenderson/hl7-2-5-to-xml-using-rust),
-which builds on exactly this kind of encoding-level model.
+### 1.3.1 Where the rest lives — the crate family
+
+This crate is the bottom of a stack, and the layers above it are separate
+crates by design (R24, R25). **This subsection is the single source of
+truth for the family**; other documents in this repository link here rather
+than repeat it.
+
+| Crate | Adds | Depends on |
+| ----- | ---- | ---------- |
+| [`er7-redact`](https://crates.io/crates/er7-redact) | removing patient detail from a message without changing its shape: a policy of HL7 paths and actions, stable pseudonyms, an audit report | `er7` |
+| [`serde-er7`](https://crates.io/crates/serde-er7) | `Serialize`/`Deserialize` for every type in the tree, so a message can flow through any Serde format | `er7`, `serde` |
+| [`hl7-2-5-to-xml`](https://crates.io/crates/hl7-2-5-to-xml), [`hl7-2-5-to-json`](https://crates.io/crates/hl7-2-5-to-json) | the HL7 v2.5 dictionary — data types, message structures, and a renderer | `er7` |
+
+The first two are maintained alongside this crate in the
+[`er7-rust`](https://github.com/er7-rust) organisation; the dictionary
+crates are separate, and their port onto `er7` is what
+[§16.3](16-roadmap.md) records.
+
+Each of these is a crate rather than a feature of this one for the same
+reason: a caller who only routes messages should pay for nothing they do
+not use, and every optional dependency here would be an audit surface for
+everyone ([§15.3](15-dependencies-and-build.md)). The family is presented
+together at <https://er7-rust.github.io/ecosystem/>.
 
 ## 1.4 Rule index (R1–R25)
 

@@ -12,9 +12,9 @@ authors:
     orcid: 'https://orcid.org/0009-0000-4681-282X'
 identifiers:
   - type: url
-    value: 'https://github.com/joelparkerhenderson/er7-rust/'
+    value: 'https://github.com/er7-rust/er7-rust/'
     description: ER7 Rust: Parse, query, edit, and write HL7 v2 messages in the ER7 pipe-hat encoding, with zero dependencies.
-repository-code: 'https://github.com/joelparkerhenderson/er7-rust/'
+repository-code: 'https://github.com/er7-rust/er7-rust/'
 abstract: >-
   ER7 Rust: Parse, query, edit, and write HL7 v2 messages in the ER7 pipe-hat encoding, with zero dependencies.
 license: See license file

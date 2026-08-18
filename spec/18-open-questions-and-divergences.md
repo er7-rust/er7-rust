@@ -26,9 +26,12 @@ everyone or shipping all of them to everyone. Keeping the encoding separate
 lets a dictionary crate choose its own version, and lets a user who only
 needs to route or audit messages pay for nothing.
 
-**What would reopen it:** [T5](17-open-tasks.md) porting a dictionary crate
-onto `er7`. If that port needs hooks this crate refuses to provide, the
-boundary is in the wrong place.
+**Settled by the T5 port.** `hl7-2-5-to-xml-using-rust` and
+`hl7-2-5-to-json-using-rust` now both depend on `er7` and keep only their
+v2.5 dictionary — data-type tables, message-structure grammars, renderer.
+Each dropped an identical 350-line copy of the encoding layer, and their
+converted output did not change by a byte. The boundary is in the right
+place; see [§16.3](16-roadmap.md) for the detail.
 
 ## 18.2 Escape sequences are decoded in every field
 
@@ -62,9 +65,10 @@ can call `unescape` selectively.
 ([§2.2](02-er7-encoding.md)), and this crate is meant to define the
 vocabulary its callers use.
 
-**Cost:** the two crates read differently, and the [T5](17-open-tasks.md)
-port will have to rename. That rename is mechanical and one-directional, so
-the cost is bounded and worth paying once.
+**Cost, now measured:** the T5 port renamed `Repeat` to `Repetition` and
+`repeats` to `repetitions` in both sibling crates. It was a mechanical
+find-and-replace in one file each, caught entirely by the compiler. The
+cost was as bounded as predicted.
 
 ## 18.4 MSH accessors that were declined
 
@@ -94,9 +98,19 @@ keeps what it was given.
 **Consequence to be aware of:** a message that has been pretty-printed with
 indentation will parse with that indentation inside the segment name. The
 name of the first segment would then not be `MSH`, and `parse` would
-return `MissingHeader` — arguably a surprising error for what looks like a
-readable message. Handling that would mean guessing which whitespace is
-data, so it is left to the caller to trim before parsing.
+return `MissingHeader` — a surprising error for what looks like a readable
+message. Handling that would mean guessing which whitespace is data, so it
+is left to the caller to trim before parsing.
+
+**Confirmed by the T5 port, and left as is.** Both sibling crates hit
+exactly this and both added the same six-line `normalize` — split, trim,
+drop blanks, rejoin with `\r` — before calling `parse`. That is the
+intended division: they convert to XML and JSON, where leading whitespace
+is noise, so they can afford to trim; this crate guarantees a byte-for-byte
+round trip (R16), so it cannot. Two callers writing the same six lines is
+acceptable where two callers writing the same eight-line *value lookup*
+([T8](17-open-tasks.md)) is not, because the trimming encodes a policy the
+callers own and the lookup encodes one this crate owns.
 
 ## 18.6 Open question: should `to_text` exist at every level?
 

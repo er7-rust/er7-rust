@@ -18,9 +18,10 @@ changes.
 | Language     | Rust (edition 2024, MSRV 1.85)                                               |
 | License      | MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only            |
 | Runtime deps | **none**, and that is a guarantee (R25)                                      |
-| Repository   | https://github.com/joelparkerhenderson/er7-rust                              |
+| Repository   | https://github.com/er7-rust/er7-rust                                         |
 | Crate        | https://crates.io/crates/er7                                                 |
 | Docs         | https://docs.rs/er7/                                                         |
+| Website      | https://er7-rust.github.io/ — source in the sibling repo `er7-rust.github.io` |
 | Maintainer   | Joel Parker Henderson — joel@joelparkerhenderson.com                         |
 
 ## How this repo is documented

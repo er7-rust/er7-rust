@@ -42,9 +42,15 @@ for anyone who turns it on, and needs the same justification.
 None. The crate has no `[features]` table and no optional dependencies, so
 there is exactly one build configuration and exactly one thing to test.
 
-Plausible future features — `serde` derives on the tree types, a
-`no_std`+`alloc` mode — are recorded in [§16](16-roadmap.md) rather than
+A `no_std`+`alloc` mode is recorded in [§16](16-roadmap.md) rather than
 speculatively added.
+
+**Serde support is settled, and it is not a feature here.** It ships as the
+separate crate [`serde-er7`](https://crates.io/crates/serde-er7), which
+depends on this one and adds hand-written `Serialize`/`Deserialize` impls
+for every type in the tree. A `serde` feature in this crate would put an
+optional dependency in front of every caller who never serialises anything,
+and R25 exists to stop exactly that. Task T6 closed on this basis.
 
 ## 15.4 Package metadata
 
@@ -54,9 +60,10 @@ speculatively added.
 | version | `0.1.0` |
 | edition | `2024` |
 | license | `MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only` |
-| repository | <https://github.com/joelparkerhenderson/er7-rust> |
+| repository | <https://github.com/er7-rust/er7-rust> |
 | crate | <https://crates.io/crates/er7> |
 | docs | <https://docs.rs/er7> |
+| website | <https://er7-rust.github.io> |
 | keywords | `hl7`, `er7`, `healthcare`, `parser`, `pipe-delimited` |
 | categories | `parser-implementations`, `encoding`, `command-line-utilities` |
 

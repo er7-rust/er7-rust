@@ -30,8 +30,13 @@ version, and lets a user who only needs to route or audit messages pay for
 nothing. The reasoning in full is
 [spec §18.1](../../spec/18-open-questions-and-divergences.md).
 
-For the HL7 v2.5 dictionary layer, see
-[hl7-2-5-to-xml-using-rust](https://github.com/joelparkerhenderson/hl7-2-5-to-xml-using-rust).
+The layers above this one ship as their own crates —
+[`er7-redact`](https://crates.io/crates/er7-redact) for redaction,
+[`serde-er7`](https://crates.io/crates/serde-er7) for Serde support,
+[`hl7-2-5-to-xml`](https://crates.io/crates/hl7-2-5-to-xml) and
+[`hl7-2-5-to-json`](https://crates.io/crates/hl7-2-5-to-json) for the HL7
+v2.5 dictionary. The full list is
+[spec §1.3.1](../../spec/01-purpose-and-scope.md).
 
 ## Then why does it read MSH-9 and MSH-10?
 
@@ -170,7 +175,7 @@ please open an issue with the numbers.
 ## How do I report a bug or ask for a feature?
 
 Open a GitHub issue at
-<https://github.com/joelparkerhenderson/er7-rust>. Please include a
+<https://github.com/er7-rust/er7-rust>. Please include a
 **synthetic** message that reproduces the problem — never a real one, even
 redacted.
 

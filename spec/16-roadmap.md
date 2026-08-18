@@ -21,19 +21,46 @@ it ships. There is no separate `plan.md`.
 
 1.0.0 is reached when three conditions hold:
 
-1. **The API has been exercised by a second crate.** The sibling
-   `hl7-2-5-to-xml-using-rust` has its own encoding layer today; porting it
-   to build on `er7` would test whether this crate's model is actually the
-   right foundation, and would surface anything missing before the API is
-   frozen ([T5](17-open-tasks.md)).
+1. ~~**The API has been exercised by a second crate.**~~ **Met.**
+   `hl7-2-5-to-xml-using-rust` and `hl7-2-5-to-json-using-rust` both had
+   their own copy of an encoding layer; both now depend on `er7` instead
+   (task T5, shipped). Their converted output is byte-for-byte identical to
+   what it was before the port, and their own test suites pass unchanged.
+   See §16.3 below for what the port taught.
 2. **R6 is demonstrated, not argued** — §16.1 priority 1.
 3. **Every rule in [§1.4](01-purpose-and-scope.md) has a test**, with the
    sole documented exception of R24 ([§13.1](13-testing-strategy.md)).
 
-No breaking changes are planned for 1.0.0 beyond whatever condition 1
-surfaces. If it surfaces nothing, 0.2.0 becomes 1.0.0 unchanged.
+No breaking changes are planned for 1.0.0. Condition 1 surfaced one
+additive candidate ([T8](17-open-tasks.md)) and no removals or renames, so
+if conditions 2 and 3 are met the API can be frozen as it stands.
 
-## 16.3 Explicitly not on the roadmap
+## 16.3 What the T5 port established
+
+Recorded here because it is the evidence behind the 1.0.0 decision.
+
+**Confirmed as designed:**
+
+| Design | How the port exercised it |
+|--------|---------------------------|
+| The five MSH accessors ([§10](10-msh-conveniences.md)) | Both crates' `root_name` — deriving a message-structure ID from MSH-9 — collapsed to `message_structure()`, `message_code()`, `trigger_event()`. This is exactly the universality argument §10.2 makes. |
+| `is_null` at every level ([§5.3](05-value-tree.md)) | Both crates replaced a hand-written comparison against `""` with `Repetition::is_null()`. |
+| Decode-on-demand ([§5.2](05-value-tree.md)) | Both now decode with `Subcomponent::value` at the point text becomes XML or JSON, which is where the delimiter set is known. It cost each crate one extra `&Separators` parameter through its node builders — the expected price, and both accepted it. |
+| Tolerance below the header (R6) | Neither crate needed a single new fallback; their Z-segment and ragged-field tests passed unchanged. |
+
+**Friction, recorded rather than patched:**
+
+- A per-segment value lookup was written twice, identically —
+  [T8](17-open-tasks.md).
+- Both crates had to add a `normalize` step to keep their own documented
+  trimming, because this crate deliberately trims nothing —
+  [§18.5](18-open-questions-and-divergences.md), now with two real callers
+  behind it.
+- The `Repeat` → `Repetition` rename cost each crate a mechanical
+  find-and-replace, as [§18.3](18-open-questions-and-divergences.md)
+  predicted.
+
+## 16.4 Explicitly not on the roadmap
 
 These are settled, not pending. Reopening one needs an argument, not a
 patch.

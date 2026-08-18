@@ -39,6 +39,16 @@ it. A rule with no test is a bug in this table.
 | R24 | *by review* — enforced by [`AGENTS/safety.md`](../AGENTS/safety.md), not by a test; there is no way to assert the absence of a feature | — |
 | R25 | `the_crate_has_no_runtime_dependencies` | `tests/integration.rs` |
 
+The table is **checked by `cargo test`**, not only by review:
+`every_rule_has_a_coverage_row` in `tests/integration.rs` reads this file
+and [§1.4](01-purpose-and-scope.md) and fails if a rule is declared with no
+row here, or covered here without being declared. Its companion
+`every_spec_section_is_indexed_and_present` does the same for the section
+files and [`index.md`](index.md).
+
+These two are the mechanism behind "the spec is the single source of
+truth": the claim now costs a test run rather than a careful reader.
+
 ## 13.2 Where a test belongs
 
 | Kind of test | Home |
@@ -47,6 +57,7 @@ it. A rule with no test is a bug in this table.
 | anything crossing module boundaries | `tests/integration.rs` |
 | anything a caller can observe through the public API only | `tests/integration.rs` |
 | the CLI contract ([§12](12-command-line-interface.md)) | `tests/integration.rs`, `cli_*` prefix |
+| an invariant of the spec itself — the rule index, the section files | `tests/integration.rs` (§13.1) |
 | an illustration a reader should see in the docs | a rustdoc `Example:` block, which runs as a doc-test |
 
 ## 13.3 The four checks
