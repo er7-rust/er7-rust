@@ -16,8 +16,12 @@ Start here if you have no prior context:
 | [AGENTS/spec-driven-development.md](AGENTS/spec-driven-development.md) | how a change flows: spec first, then tests, then code |
 
 The rules themselves are specified in [`spec/`](spec/) (single source of
-truth). [`index.md`](index.md) is the user-facing README, and
-[`docs/`](docs/) holds the tutorials and reference pages.
+truth), and `cargo test` enforces that the rule index, the
+[§11.1](spec/11-testing-strategy.md) coverage table, and the
+[§5.1](spec/05-built-in-policies.md) policy table agree with the code.
+
+[`index.md`](index.md) is the user-facing README, and [`docs/`](docs/)
+holds the tutorials and reference pages.
 
 Before finishing any change, run the four checks:
 
