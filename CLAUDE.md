@@ -9,13 +9,15 @@ Start here:
 | Read | For |
 | ---- | --- |
 | [AGENTS.md](AGENTS.md) | the snapshot, the layout, the conventions, and the one rule that matters most |
-| [spec/index.md](spec/index.md) | this site's scope and content model |
+| [spec/index.md](spec/index.md) | this site's scope and content model — §1.1 subproject vs neighbour, §3.3 what a subproject page must cover |
 | [index.md](index.md) | the human-oriented overview |
 
 **The one rule that matters most:** this site is *derived, not normative*.
-The `er7` crate repository holds the source of truth for behaviour in its
-`spec/` directory. Never state a behaviour here that the crate's spec does
-not state.
+Every crate repository holds the source of truth for its own behaviour in
+its `spec/` directory — `R` rules for `er7`, `D` for `er7-redact`, `S` for
+`serde-er7`. Never state a behaviour here that the owning crate's spec does
+not state, and never hand-write a tool's output: capture it from a real
+run.
 
 Before finishing any change:
 

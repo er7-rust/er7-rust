@@ -57,7 +57,10 @@
     </p>
     <p>
       Every guarantee carries a stable rule ID (<code>R1</code>&ndash;<code>R25</code>), and a
-      coverage table maps each rule to the test that enforces it. Plans and tasks live as spec
+      coverage table maps each rule to the test that enforces it &mdash; and the table itself is
+      checked by <code>cargo test</code>, so a rule added without a test, or a section file added
+      without an index entry, fails the build rather than waiting for a careful reader. Every crate
+      in the family does the same, with its own rule prefix. Plans and tasks live as spec
       sections rather than as separate files, so a roadmap item and the rule it changes sit next to
       each other.
     </p>
@@ -72,7 +75,7 @@
       <span class="stat-label">numbered behavioural rules</span>
     </div>
     <div class="stat">
-      <span class="stat-value">124</span>
+      <span class="stat-value">126</span>
       <span class="stat-label">unit, integration, and doc tests</span>
     </div>
     <div class="stat">
