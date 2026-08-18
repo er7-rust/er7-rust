@@ -53,3 +53,30 @@ extend for the crates they build on. This lets a caller depend on
 without a second, separately-versioned dependency on `er7` in their own
 `Cargo.toml`. The re-export is exempt from S1/S2: it does not add a
 dependency, it exposes one that already exists.
+
+## 3.5 Lints
+
+`Cargo.toml` carries a `[lints.clippy]` table setting the **pedantic**
+group to `warn`:
+
+```toml
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+```
+
+It sits beside the dependency table because it is the same kind of
+statement: what this manifest promises a reviewer. The four checks run
+`cargo clippy --all-targets -- -D warnings`
+([§7.4](07-testing-strategy.md)), so a pedantic finding fails the build,
+and `priority = -1` lets a single lint be re-set without turning the group
+off.
+
+The lint that matters most here is `missing_errors_doc`: this crate's only
+fallible entry point is [`Message::parse`], and a caller needs to know that
+its `Err` is `er7`'s, unchanged, with nothing added
+([§5](05-error-handling.md)).
+
+Where a pedantic lint is wrong for a line, the fix is an `#[allow]`
+carrying a `reason`, next to that line — not a hole in the group.
+
+[`Message::parse`]: https://docs.rs/serde-er7/latest/serde_er7/struct.Message.html#method.parse

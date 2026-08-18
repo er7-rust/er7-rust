@@ -5,7 +5,7 @@
 //!
 //! This is the crate's flagship path: [`serde_er7::Message`] never mentions
 //! JSON itself, so `serde_json` here is interchangeable with any other
-//! Serde format — YAML, CBOR, MessagePack, whatever your pipeline already
+//! Serde format — YAML, CBOR, `MessagePack`, whatever your pipeline already
 //! uses. See `docs/usage/index.md` §1.
 
 use serde_er7::Message;

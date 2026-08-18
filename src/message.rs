@@ -77,6 +77,12 @@ impl Message {
     /// # Ok(())
     /// # }
     /// ```
+    ///
+    /// # Errors
+    ///
+    /// Returns `er7::Error` exactly as [`er7::parse()`] does: the input held
+    /// no segments, the first segment is not a header, or the header
+    /// declared an unusable delimiter set. Nothing is added here.
     pub fn parse(text: &str) -> Result<Message, er7::Error> {
         er7::parse(text).map(Message)
     }

@@ -27,6 +27,12 @@ include = [
 serde = "1"
 er7 = "0"
 
+# Pedantic lints are on, and the four checks run clippy with `-D warnings`,
+# so a pedantic finding fails the build like any other. See
+# spec/03-dependencies-and-format-agnosticism.md §3.5.
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+
 # serde_json is not a runtime dependency of this crate — it is deliberately
 # format-agnostic — but it is the natural format to exercise in tests,
 # doctests, and examples, so it appears only here.

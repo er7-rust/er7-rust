@@ -48,6 +48,21 @@ to it.
   [`spec/06-ergonomics.md`](../spec/06-ergonomics.md) §6.4 — do not "fix"
   it by adding `Cow`-based borrowing without updating that section first.
 
+## Lints
+
+`cargo clippy --all-targets -- -D warnings` must be clean, and
+`Cargo.toml` turns on the **pedantic** group
+([spec §3.5](../spec/03-dependencies-and-format-agnosticism.md)), so
+pedantic findings fail the build too.
+
+For a crate this small it comes to two habits: **`# Errors` on every public
+`fn` returning `Result`** — here, `Message::parse`, whose `Err` is `er7`'s
+with nothing added — and **backticks around anything that is code**, which
+`doc_markdown` checks.
+
+Where a lint is wrong for one line, `#[allow(..., reason = "...")]` next to
+that line — never a crate-level hole in the group.
+
 ## Doc comments
 
 Every public item carries a rustdoc comment, in this shape:
