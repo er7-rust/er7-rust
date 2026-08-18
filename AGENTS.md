@@ -21,6 +21,7 @@ drives changes.
 | Repository   | https://github.com/er7-rust/er7-redact                                      |
 | Crate        | https://crates.io/crates/er7-redact                                         |
 | Docs         | https://docs.rs/er7-redact/                                                 |
+| Website      | https://er7-rust.github.io/er7-redact/ — source in the sibling repo `er7-rust.github.io` |
 | Maintainer   | Joel Parker Henderson — joel@joelparkerhenderson.com                        |
 
 ## How this repo is documented

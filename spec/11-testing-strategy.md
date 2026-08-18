@@ -26,7 +26,7 @@ it. A rule with no test is a bug in this table.
 | D11 | `replacement_text_cannot_break_the_message` | `tests/integration.rs` |
 | D12 | `pseudonyms_are_stable_and_keyed`, `pseudonyms_link_across_messages` | `src/pseudonym.rs`, `tests/integration.rs` |
 | D13 | `a_report_carries_no_values` | `src/redact.rs` |
-| D14 | `the_default_policy_names_the_documented_positions` — and *by review* for the claim itself, which no test can make | `src/policy.rs` |
+| D14 | `the_default_policy_names_the_documented_positions`, `the_documented_positions_match_the_built_in_policy` — and *by review* for the compliance claim itself, which no test can make | `src/policy.rs`, `tests/integration.rs` |
 | D15 | `reports_a_bad_policy_line`, `cli_reports_errors_on_stderr` | `src/policy.rs`, `tests/integration.rs` |
 | D16 | `the_crate_has_one_runtime_dependency` | `tests/integration.rs` |
 | D17 | `an_untouched_message_round_trips` | `tests/integration.rs` |
@@ -39,6 +39,21 @@ whole-message properties every rule exists to produce:
 `cli_a_policy_that_changes_nothing_is_not_an_error`
 ([§10.4](10-command-line-interface.md)).
 
+The table is **checked by `cargo test`**, not only by review:
+`every_rule_has_a_coverage_row` reads this file and
+[§1.4](01-purpose-and-scope.md) and fails if a rule is declared with no row
+here, or covered here without being declared.
+`every_spec_section_is_indexed_and_present` does the same for the section
+files and [`index.md`](index.md), and
+`the_documented_positions_match_the_built_in_policy` holds
+[§5.1](05-built-in-policies.md) and `Policy::patient_identifiers` to each
+other, position by position.
+
+Those three are what make "the spec is the single source of truth" a
+property of the build rather than a habit — and the third matters most,
+because §5.1 is the one table a reader is most likely to trust without
+checking the code.
+
 ## 11.2 Where a test belongs
 
 | Kind of test | Home |
@@ -47,6 +62,7 @@ whole-message properties every rule exists to produce:
 | anything crossing module boundaries | `tests/integration.rs` |
 | anything a caller can observe through the public API only | `tests/integration.rs` |
 | the CLI contract ([§10](10-command-line-interface.md)) | `tests/integration.rs`, `cli_*` prefix |
+| an invariant of the spec itself — the rule index, the section files, the §5.1 table | `tests/integration.rs` (§11.1) |
 | an illustration a reader should see in the docs | a rustdoc `Example:` block, which runs as a doc-test |
 
 ## 11.3 The four checks

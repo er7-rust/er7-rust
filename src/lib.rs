@@ -1,5 +1,7 @@
 //! # ER7 redact
 //!
+//! **[website](https://er7-rust.github.io/er7-redact/)**
+//! •
 //! **[documentation](https://docs.rs/er7-redact/)**
 //! •
 //! **[source](https://github.com/er7-rust/er7-redact)**

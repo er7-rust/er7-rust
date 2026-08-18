@@ -477,3 +477,98 @@ fn cli_prints_help_and_version() {
         );
     }
 }
+
+/// Every `| D<n> |` cell at the start of a table row in `text`.
+fn rule_ids(text: &str) -> Vec<String> {
+    text.lines()
+        .filter_map(|line| line.strip_prefix("| D"))
+        .filter_map(|rest| rest.split_once(" |"))
+        .map(|(number, _)| format!("D{number}"))
+        .filter(|id| id[1..].chars().all(|c| c.is_ascii_digit()))
+        .collect()
+}
+
+#[test]
+fn every_rule_has_a_coverage_row() {
+    // Spec-driven development only works if the spec is the single source
+    // of truth. A rule in the §1.4 index with no row in the §11.1 coverage
+    // table is a rule nobody agreed to test, and a row in §11.1 for a rule
+    // that no longer exists is a table nobody re-read
+    // (AGENTS/spec-driven-development.md).
+    let declared = rule_ids(include_str!("../spec/01-purpose-and-scope.md"));
+    let covered = rule_ids(include_str!("../spec/11-testing-strategy.md"));
+
+    assert_eq!(declared.len(), 18, "§1.4 should index D1–D18");
+    let missing: Vec<&String> = declared.iter().filter(|d| !covered.contains(d)).collect();
+    assert!(missing.is_empty(), "no row in §11.1 for {missing:?}");
+    let orphan: Vec<&String> = covered.iter().filter(|d| !declared.contains(d)).collect();
+    assert!(
+        orphan.is_empty(),
+        "§11.1 covers {orphan:?}, which §1.4 does not declare"
+    );
+}
+
+#[test]
+fn every_spec_section_is_indexed_and_present() {
+    // The section files and the table of contents drift apart silently: a
+    // new section nobody linked, or a link to a file that was renamed.
+    let index = include_str!("../spec/index.md");
+    let directory = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("spec");
+
+    let mut linked: Vec<String> = index
+        .match_indices("](")
+        .filter_map(|(at, _)| index[at + 2..].split_once(')').map(|(name, _)| name))
+        .filter(|name| name.len() > 3 && name.as_bytes()[2] == b'-' && name.ends_with(".md"))
+        .map(str::to_string)
+        .collect();
+    linked.sort();
+    linked.dedup();
+
+    let mut on_disk: Vec<String> = std::fs::read_dir(&directory)
+        .expect("spec directory")
+        .filter_map(|entry| entry.ok())
+        .map(|entry| entry.file_name().to_string_lossy().into_owned())
+        .filter(|name| name.ends_with(".md") && name.as_bytes()[0].is_ascii_digit())
+        .collect();
+    on_disk.sort();
+
+    assert_eq!(linked, on_disk, "spec/index.md and spec/ disagree");
+
+    // And every section names itself, so a file that was copied keeps its
+    // own number rather than its neighbour's.
+    for name in &on_disk {
+        let number = name[..2].trim_start_matches('0');
+        let heading = format!("# {number}. ");
+        let text = std::fs::read_to_string(directory.join(name)).expect("section");
+        assert!(
+            text.contains(&heading),
+            "{name} has no `{heading}` heading of its own"
+        );
+    }
+}
+
+#[test]
+fn the_documented_positions_match_the_built_in_policy() {
+    // D14: spec §5.1 is the normative table and `Policy::patient_identifiers`
+    // is its executable form. They are changed together, so a path in one
+    // and not the other is a bug in whichever was forgotten.
+    let spec = include_str!("../spec/05-built-in-policies.md");
+    // §5.1 only: §5.4 tabulates the positions the policy deliberately does
+    // *not* touch, which are paths in the same shape.
+    let spec = spec.split("## 5.2").next().expect("§5.1 comes first");
+    let documented: Vec<String> = spec
+        .lines()
+        .filter_map(|line| line.strip_prefix("| `"))
+        .filter_map(|rest| rest.split_once('`'))
+        .map(|(path, _)| path.to_string())
+        .filter(|path| path.contains('-') && path.as_bytes()[0].is_ascii_uppercase())
+        .collect();
+
+    let policy: Vec<String> = Policy::patient_identifiers()
+        .rules
+        .iter()
+        .map(|rule| rule.path.to_string())
+        .collect();
+
+    assert_eq!(documented, policy, "spec §5.1 and Policy disagree");
+}
