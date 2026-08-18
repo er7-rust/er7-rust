@@ -131,3 +131,111 @@ fn error_messages_still_name_the_missing_field() {
     let err = serde_json::from_str::<Message>(r#"{"segments":[]}"#).unwrap_err();
     assert!(err.to_string().contains("separators"), "{err}");
 }
+
+/// The `[dependencies]` and `[dev-dependencies]` tables of this crate's
+/// own manifest, as raw lines.
+fn manifest_dependencies(table: &str) -> Vec<String> {
+    let manifest = include_str!("../Cargo.toml");
+    let mut inside = false;
+    let mut lines = Vec::new();
+    for line in manifest.lines() {
+        let line = line.trim();
+        if line.starts_with('[') {
+            inside = line == table;
+            continue;
+        }
+        if !inside || line.is_empty() || line.starts_with('#') {
+            continue;
+        }
+        lines.push(line.to_string());
+    }
+    lines
+}
+
+#[test]
+fn the_crate_has_exactly_two_runtime_dependencies() {
+    // S1: `serde` is the trait vocabulary this crate implements against and
+    // `er7` is the tree it wraps. Both are the point of the crate; a third
+    // would be an audit surface for every downstream healthcare project
+    // (spec §3.1).
+    assert_eq!(
+        manifest_dependencies("[dependencies]"),
+        [r#"serde = "1""#, r#"er7 = "0""#]
+    );
+}
+
+#[test]
+fn no_format_crate_is_a_runtime_dependency() {
+    // S2: this crate is format-agnostic. `serde_json` appears in the tests,
+    // the doctests, and the examples because JSON is the easiest format to
+    // read on a page — never in `[dependencies]` (spec §3.2).
+    let runtime = manifest_dependencies("[dependencies]").join(" ");
+    for format in ["serde_json", "serde_yaml", "toml", "ciborium", "postcard"] {
+        assert!(
+            !runtime.contains(format),
+            "{format} is a runtime dependency"
+        );
+    }
+    assert!(
+        manifest_dependencies("[dev-dependencies]")
+            .iter()
+            .any(|line| line.starts_with("serde_json")),
+        "serde_json belongs in dev-dependencies, where the tests use it"
+    );
+}
+
+/// Every `| S<n> |` cell at the start of a table row in `text`.
+fn rule_ids(text: &str) -> Vec<String> {
+    text.lines()
+        .filter_map(|line| line.strip_prefix("| S"))
+        .filter_map(|rest| rest.split_once(" |"))
+        .map(|(number, _)| format!("S{number}"))
+        .filter(|id| id[1..].chars().all(|c| c.is_ascii_digit()))
+        .collect()
+}
+
+#[test]
+fn every_rule_has_a_coverage_row() {
+    // Spec-driven development only works if the spec is the single source
+    // of truth. A rule in the index with no row in the §7.1 coverage table
+    // is a rule nobody agreed to test, and a row for a rule that no longer
+    // exists is a table nobody re-read.
+    let declared = rule_ids(include_str!("../spec/index.md"));
+    let covered = rule_ids(include_str!("../spec/07-testing-strategy.md"));
+
+    assert_eq!(declared.len(), 12, "the rule index should hold S1–S12");
+    let missing: Vec<&String> = declared.iter().filter(|s| !covered.contains(s)).collect();
+    assert!(missing.is_empty(), "no row in §7.1 for {missing:?}");
+    let orphan: Vec<&String> = covered.iter().filter(|s| !declared.contains(s)).collect();
+    assert!(
+        orphan.is_empty(),
+        "§7.1 covers {orphan:?}, which the rule index does not declare"
+    );
+}
+
+#[test]
+fn every_spec_section_is_indexed_and_present() {
+    // The section files and the table of contents drift apart silently: a
+    // new section nobody linked, or a link to a file that was renamed.
+    let index = include_str!("../spec/index.md");
+    let directory = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("spec");
+
+    let mut linked: Vec<String> = index
+        .match_indices("](")
+        .filter_map(|(at, _)| index[at + 2..].split_once(')').map(|(name, _)| name))
+        .filter(|name| name.len() > 3 && name.as_bytes()[2] == b'-' && name.ends_with(".md"))
+        .map(str::to_string)
+        .collect();
+    linked.sort();
+    linked.dedup();
+
+    let mut on_disk: Vec<String> = std::fs::read_dir(&directory)
+        .expect("spec directory")
+        .filter_map(|entry| entry.ok())
+        .map(|entry| entry.file_name().to_string_lossy().into_owned())
+        .filter(|name| name.ends_with(".md") && name.as_bytes()[0].is_ascii_digit())
+        .collect();
+    on_disk.sort();
+
+    assert_eq!(linked, on_disk, "spec/index.md and spec/ disagree");
+}

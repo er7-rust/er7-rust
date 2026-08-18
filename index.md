@@ -117,9 +117,23 @@ and
 | [`examples/`](examples/README.md) | runnable programs, one concept each |
 | [`spec/`](spec/index.md) | the normative specification — source of truth for behaviour |
 | [`AGENTS.md`](AGENTS.md) | conventions and required checks for anyone, human or agent, changing this code |
+| [`AGENTS/`](AGENTS/index.md) | the topical guides: architecture, conventions, testing, safety, workflows, release, spec-driven development |
 
 Rendered API docs are at <https://docs.rs/serde-er7/>, or locally with
-`cargo doc --no-deps --open`.
+`cargo doc --no-deps --open`. A tutorial-style version of the same material
+is at <https://er7-rust.github.io/serde-er7/>.
+
+## The crate family
+
+| Crate | Adds |
+| ----- | ---- |
+| [`er7`](https://crates.io/crates/er7) | the encoding itself: parse, query, edit, and write ER7, with zero dependencies |
+| **`serde-er7`** | this crate: Serde support for every type in that tree |
+| [`er7-redact`](https://crates.io/crates/er7-redact) | redaction: remove patient detail without changing the shape of the message |
+| [`hl7-2-5-to-xml`](https://crates.io/crates/hl7-2-5-to-xml) / [`hl7-2-5-to-json`](https://crates.io/crates/hl7-2-5-to-json) | the HL7 v2.5 dictionary: data types, message structures, and a renderer |
+
+The boundary between them is `er7`'s own spec §1.3.1, and they are
+presented together at <https://er7-rust.github.io/ecosystem/>.
 
 ## Development
 

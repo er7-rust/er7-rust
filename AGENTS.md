@@ -18,7 +18,11 @@ changes.
 | Language     | Rust (edition 2024)                                                         |
 | License      | MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only            |
 | Runtime deps | exactly two: `serde` and `er7` (spec S1) — no format crate (spec S2)        |
-| Sibling      | `er7` at `../er7-rust` (path dependency during development)                 |
+| Repository   | https://github.com/er7-rust/serde-er7                                       |
+| Crate        | https://crates.io/crates/serde-er7                                          |
+| Docs         | https://docs.rs/serde-er7/                                                  |
+| Website      | https://er7-rust.github.io/serde-er7/                                       |
+| Sibling      | `er7` is a **registry** dependency (`er7 = "0"`); `tests/` reads that crate's `samples/` from `../er7-rust` via `include_str!` |
 | Maintainer   | Joel Parker Henderson — joel@joelparkerhenderson.com                        |
 
 ## How this repo is documented
@@ -33,7 +37,10 @@ AGENTS/
 ├── architecture.md        ← repo layout, wrapper-type pattern, module map
 ├── conventions.md         ← coding style and doc-comment shape
 ├── testing.md             ← unit tests, doctests, integration tests, the four checks
-└── release.md             ← versioning and publish steps
+├── safety.md              ← what changes when the data is clinical
+├── workflows.md           ← cargo commands, daily flow, pitfalls
+├── release.md             ← versioning and publish steps
+└── spec-driven-development.md  ← how the spec/ files drive changes
 docs/
 ├── api/index.md           ← full public API reference
 ├── usage/index.md         ← tutorial-style walk-through

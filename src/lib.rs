@@ -1,5 +1,15 @@
 //! # serde-er7
 //!
+//! **[website](https://er7-rust.github.io/serde-er7/)**
+//! •
+//! **[documentation](https://docs.rs/serde-er7/)**
+//! •
+//! **[source](https://github.com/er7-rust/serde-er7)**
+//! •
+//! **[crate](https://crates.io/crates/serde-er7)**
+//! •
+//! **[email](mailto:joel@joelparkerhenderson.com)**
+//!
 //! Serde support for [`er7`], the pipe-hat encoding that carries HL7 v2
 //! messages between healthcare systems.
 //!
