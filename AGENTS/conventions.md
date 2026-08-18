@@ -120,10 +120,26 @@ They are the same three as
 
 ## Lints
 
-- `cargo clippy --all-targets -- -D warnings` must be clean. `--all-targets`
-  covers `examples/` and `tests/` too.
-- Do not silence clippy with `#[allow(…)]` without a comment on the same
-  item explaining why.
+`cargo clippy --all-targets -- -D warnings` must be clean. `--all-targets`
+covers `examples/` and `tests/` too.
+
+`Cargo.toml` turns on clippy's **pedantic** group, and the four checks run
+clippy with `-D warnings`, so pedantic findings fail the build
+([`spec/15-dependencies-and-build.md`](../spec/15-dependencies-and-build.md)
+§15.7). In practice that means three habits:
+
+- **`#[must_use]` on every pure accessor and constructor.** A discarded
+  `to_er7()` or `query()` is a bug the caller cannot see.
+- **`# Errors` on every public `fn` returning `Result`**, naming the
+  variants and — as importantly — what is *not* an error. `query` returning
+  `Ok(None)` for a position the message lacks is the whole of R20, and the
+  doc says so.
+- **`# Panics` only where a panic is reachable.** If it is not, restructure
+  the code until clippy agrees rather than documenting a panic that cannot
+  happen.
+
+Where a lint is wrong for one line, `#[allow(..., reason = "...")]` next to
+that line — never a crate-level hole in the group.
 
 ## Tests
 

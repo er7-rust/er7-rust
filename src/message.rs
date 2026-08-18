@@ -157,6 +157,7 @@ impl Subcomponent {
     /// // The explicit null reads as empty; ask `is_null` to tell them apart.
     /// assert_eq!(Subcomponent::new(r#""""#).value(&separators), "");
     /// ```
+    #[must_use]
     pub fn value(&self, separators: &Separators) -> Cow<'_, str> {
         if self.is_null() {
             return Cow::Borrowed("");
@@ -207,6 +208,7 @@ impl Subcomponent {
     /// assert!(empty.is_empty());
     /// assert!(!empty.is_null());
     /// ```
+    #[must_use]
     pub fn is_null(&self) -> bool {
         self.raw == NULL
     }
@@ -216,6 +218,7 @@ impl Subcomponent {
     /// together they separate "nothing to say" from "clear this" (R11).
     ///
     /// See [`Subcomponent::is_null`] for a worked example of both.
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         self.raw.is_empty()
     }
@@ -250,6 +253,7 @@ impl Component {
     /// ```
     ///
     /// See also [`Component::subcomponent_mut`] to edit one.
+    #[must_use]
     pub fn subcomponent(&self, n: usize) -> Option<&Subcomponent> {
         self.subcomponents.get(n.checked_sub(1)?)
     }
@@ -282,6 +286,7 @@ impl Component {
     /// # Ok(())
     /// # }
     /// ```
+    #[must_use]
     pub fn is_null(&self) -> bool {
         matches!(self.subcomponents.as_slice(), [only] if only.is_null())
     }
@@ -304,6 +309,7 @@ impl Repetition {
     /// # Ok(())
     /// # }
     /// ```
+    #[must_use]
     pub fn component(&self, n: usize) -> Option<&Component> {
         self.components.get(n.checked_sub(1)?)
     }
@@ -321,6 +327,7 @@ impl Repetition {
 
     /// True when this repetition is exactly the explicit null `""` — one
     /// component, and that component null.
+    #[must_use]
     pub fn is_null(&self) -> bool {
         matches!(self.components.as_slice(), [only] if only.is_null())
     }
@@ -342,6 +349,7 @@ impl Field {
     /// # Ok(())
     /// # }
     /// ```
+    #[must_use]
     pub fn repetition(&self, n: usize) -> Option<&Repetition> {
         self.repetitions.get(n.checked_sub(1)?)
     }
@@ -365,6 +373,7 @@ impl Field {
     /// # Ok(())
     /// # }
     /// ```
+    #[must_use]
     pub fn component(&self, n: usize) -> Option<&Component> {
         self.repetitions.first()?.component(n)
     }
@@ -400,6 +409,7 @@ impl Field {
     /// # Ok(())
     /// # }
     /// ```
+    #[must_use]
     pub fn is_null(&self) -> bool {
         matches!(self.repetitions.as_slice(), [only] if only.is_null())
     }
@@ -428,6 +438,7 @@ impl Segment {
     /// # Ok(())
     /// # }
     /// ```
+    #[must_use]
     pub fn field(&self, n: usize) -> Option<&Field> {
         self.fields.get(n.checked_sub(1)?)
     }
@@ -451,6 +462,7 @@ impl Segment {
     /// # Ok(())
     /// # }
     /// ```
+    #[must_use]
     pub fn component(&self, field: usize, component: usize) -> Option<&Component> {
         self.field(field)?.component(component)
     }
@@ -470,6 +482,7 @@ impl Segment {
     /// # Ok(())
     /// # }
     /// ```
+    #[must_use]
     pub fn is_header(&self) -> bool {
         is_header_name(&self.name)
     }
@@ -528,6 +541,7 @@ impl Message {
     /// # Ok(())
     /// # }
     /// ```
+    #[must_use]
     pub fn segment(&self, name: &str) -> Option<&Segment> {
         self.segments.iter().find(|s| s.name == name)
     }
@@ -547,6 +561,7 @@ impl Message {
     /// # Ok(())
     /// # }
     /// ```
+    #[must_use]
     pub fn segment_at(&self, name: &str, occurrence: usize) -> Option<&Segment> {
         self.segments
             .iter()
@@ -579,6 +594,7 @@ impl Message {
     /// # Ok(())
     /// # }
     /// ```
+    #[must_use]
     pub fn header(&self) -> Option<&Segment> {
         self.segments.first()
     }
@@ -610,6 +626,10 @@ impl Message {
     /// # Ok(())
     /// # }
     /// ```
+    /// # Errors
+    ///
+    /// [`Error::BadPath`] only — and only for a malformed path. A position
+    /// the message does not carry is `Ok(None)`, never an error (R20).
     pub fn query(&self, path: &str) -> Result<Option<String>, Error> {
         Ok(self.query_path(&Path::parse(path)?).into_iter().next())
     }
@@ -641,6 +661,10 @@ impl Message {
     /// # Ok(())
     /// # }
     /// ```
+    /// # Errors
+    ///
+    /// [`Error::BadPath`] only; see [`Message::query`]. A path that matches
+    /// nothing gives an empty `Vec`.
     pub fn query_all(&self, path: &str) -> Result<Vec<String>, Error> {
         Ok(self.query_path(&Path::parse(path)?))
     }
@@ -666,6 +690,7 @@ impl Message {
     /// # Ok(())
     /// # }
     /// ```
+    #[must_use]
     pub fn query_path(&self, path: &Path) -> Vec<String> {
         self.query_path_mode(path, true)
     }
@@ -696,6 +721,7 @@ impl Message {
     /// # Ok(())
     /// # }
     /// ```
+    #[must_use]
     pub fn query_path_raw(&self, path: &Path) -> Vec<String> {
         self.query_path_mode(path, false)
     }
@@ -785,9 +811,10 @@ impl Message {
             return;
         };
         if let Some(subcomponent) = component.subcomponent(number) {
-            out.push(match decode {
-                true => subcomponent.value(separators).into_owned(),
-                false => subcomponent.raw.clone(),
+            out.push(if decode {
+                subcomponent.value(separators).into_owned()
+            } else {
+                subcomponent.raw.clone()
             });
         }
     }
@@ -826,12 +853,14 @@ impl Message {
     /// # Ok(())
     /// # }
     /// ```
+    #[must_use]
     pub fn message_code(&self) -> Option<String> {
         self.first_value("MSH-9.1")
     }
 
     /// MSH-9.2, the trigger event, e.g. `A08` — what happened that caused
     /// the message. See [`Message::message_code`] for an example.
+    #[must_use]
     pub fn trigger_event(&self) -> Option<String> {
         self.first_value("MSH-9.2")
     }
@@ -846,6 +875,7 @@ impl Message {
     /// Derive it in the dictionary layer that knows the version.
     ///
     /// See [`Message::message_code`] for an example.
+    #[must_use]
     pub fn message_structure(&self) -> Option<String> {
         self.first_value("MSH-9.3")
     }
@@ -854,6 +884,7 @@ impl Message {
     /// this message, and what an acknowledgement quotes back in MSA-2.
     ///
     /// See [`Message::message_code`] for an example.
+    #[must_use]
     pub fn control_id(&self) -> Option<String> {
         self.first_value("MSH-10")
     }
@@ -865,6 +896,7 @@ impl Message {
     /// first component is the version ID (spec §10.1).
     ///
     /// See [`Message::message_code`] for an example.
+    #[must_use]
     pub fn version(&self) -> Option<String> {
         self.first_value("MSH-12.1")
     }

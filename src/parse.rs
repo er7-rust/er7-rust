@@ -45,6 +45,14 @@ const BATCH_ENVELOPE: [&str; 4] = ["FHS", "BHS", "BTS", "FTS"];
 ///
 /// See also [`parse_with`] for a fragment with no header of its own, and
 /// [`split_messages`] for input holding more than one message.
+///
+/// # Errors
+///
+/// One of the three header failures, and nothing else (R6):
+/// [`Error::Empty`] when the input holds no segments,
+/// [`Error::MissingHeader`] when the first segment is not `MSH`, `FHS`, or
+/// `BHS`, and [`Error::BadHeader`] when that header declares a delimiter
+/// set that cannot be used. Everything below the header is data.
 pub fn parse(text: &str) -> Result<Message, Error> {
     let text = strip_bom(text);
     let lines = segment_lines(text);
@@ -88,6 +96,7 @@ pub fn parse(text: &str) -> Result<Message, Error> {
 /// ```
 ///
 /// See also [`parse()`] when the text carries its own header.
+#[must_use]
 pub fn parse_with(text: &str, separators: Separators) -> Message {
     Message {
         separators,
@@ -132,6 +141,7 @@ pub fn parse_with(text: &str, separators: Separators) -> Message {
 ///
 /// This does not unframe MLLP: transport is out of scope, so strip the
 /// 0x0B / 0x1C 0x0D bytes before calling this.
+#[must_use]
 pub fn split_messages(text: &str) -> Vec<&str> {
     let text = strip_bom(text);
     let mut spans: Vec<(usize, usize)> = Vec::new();

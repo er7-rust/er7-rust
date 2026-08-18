@@ -90,6 +90,7 @@ impl Message {
     /// # Ok(())
     /// # }
     /// ```
+    #[must_use]
     pub fn to_er7(&self) -> String {
         self.to_er7_with(RenderOptions::default())
     }
@@ -115,6 +116,7 @@ impl Message {
     /// # Ok(())
     /// # }
     /// ```
+    #[must_use]
     pub fn to_er7_with(&self, options: RenderOptions) -> String {
         let mut out = String::new();
         for (index, segment) in self.segments.iter().enumerate() {

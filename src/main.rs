@@ -15,6 +15,7 @@
 //! specified by spec §12, and pinned by the `cli_*` tests in
 //! `tests/integration.rs`.
 
+use std::fmt::Write as _;
 use std::io::{Read, Write};
 use std::process::ExitCode;
 
@@ -238,7 +239,7 @@ fn outline(messages: &[Message], raw: bool) -> String {
             out.push('\n');
         }
         if messages.len() > 1 {
-            out.push_str(&format!("# message {}{}\n", index + 1, describe(message)));
+            let _ = writeln!(out, "# message {}{}", index + 1, describe(message));
         }
         let rows = rows(message, raw);
         let width = rows
@@ -248,7 +249,7 @@ fn outline(messages: &[Message], raw: bool) -> String {
             .unwrap_or(0)
             .clamp(8, 28);
         for (label, value) in rows {
-            out.push_str(&format!("{label:<width$}  {value}\n"));
+            let _ = writeln!(out, "{label:<width$}  {value}");
         }
     }
     out

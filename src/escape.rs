@@ -158,6 +158,7 @@ impl Escape<'_> {
 /// ```
 ///
 /// See also [`unescape`] and [`escape`], the two passes built on this.
+#[must_use]
 pub fn escapes<'a>(text: &'a str, separators: &Separators) -> Escapes<'a> {
     Escapes {
         rest: text,
@@ -254,6 +255,7 @@ fn classify(body: &str) -> Escape<'_> {
 /// assert_eq!(decode_hex("A"), None);    // odd length
 /// assert_eq!(decode_hex("XYZ"), None);  // not hexadecimal
 /// ```
+#[must_use]
 pub fn decode_hex(body: &str) -> Option<String> {
     if body.is_empty() || !body.len().is_multiple_of(2) || !body.is_ascii() {
         return None;
@@ -261,7 +263,10 @@ pub fn decode_hex(body: &str) -> Option<String> {
     let mut bytes = Vec::with_capacity(body.len() / 2);
     let mut digits = body.chars();
     while let (Some(high), Some(low)) = (digits.next(), digits.next()) {
-        bytes.push((high.to_digit(16)? * 16 + low.to_digit(16)?) as u8);
+        // Two hex digits are one byte by construction: each is at most 15,
+        // so the value is at most 0xFF and the conversion cannot fail.
+        let byte = high.to_digit(16)? * 16 + low.to_digit(16)?;
+        bytes.push(u8::try_from(byte).ok()?);
     }
     Some(String::from_utf8_lossy(&bytes).into_owned())
 }
@@ -300,6 +305,7 @@ pub fn decode_hex(body: &str) -> Option<String> {
 ///
 /// See also [`escape`] for the inverse, and [`escapes`] for the token
 /// stream both are built on.
+#[must_use]
 pub fn unescape<'a>(text: &'a str, separators: &Separators) -> Cow<'a, str> {
     if !text.contains(separators.escape) {
         return Cow::Borrowed(text);
@@ -354,6 +360,7 @@ pub fn unescape<'a>(text: &'a str, separators: &Separators) -> Cow<'a, str> {
 ///     assert_eq!(unescape(&escape(value, &separators), &separators), value);
 /// }
 /// ```
+#[must_use]
 pub fn escape<'a>(text: &'a str, separators: &Separators) -> Cow<'a, str> {
     // The truncation character is deliberately absent here: it is only
     // structural inside MSH-2, so it needs no sequence when it appears in a

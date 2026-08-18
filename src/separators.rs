@@ -43,6 +43,7 @@ pub enum Terminator {
 
 impl Terminator {
     /// The characters this terminator writes.
+    #[must_use]
     pub fn as_str(self) -> &'static str {
         match self {
             Terminator::Cr => "\r",
@@ -144,6 +145,10 @@ impl Separators {
     /// # Ok(())
     /// # }
     /// ```
+    /// # Errors
+    ///
+    /// [`Error::BadHeader`] when the header carries no field separator, or
+    /// when the set it declares fails [`Separators::validate`].
     pub fn from_header(line: &str) -> Result<Separators, Error> {
         let mut chars = line.chars().skip(3);
         let field = chars
@@ -196,6 +201,11 @@ impl Separators {
     /// let terminator = Separators { repetition: '\r', ..Separators::default() };
     /// assert!(terminator.validate().is_err());
     /// ```
+    /// # Errors
+    ///
+    /// [`Error::BadHeader`] naming the offending character, when a
+    /// delimiter is alphanumeric, is a line ending, or is used for two
+    /// roles at once (R2, spec §3.3).
     pub fn validate(&self) -> Result<(), Error> {
         for (role, c) in self.roles() {
             if c.is_alphanumeric() {
@@ -237,6 +247,7 @@ impl Separators {
     /// assert!(!separators.is_delimiter('#'));
     /// assert!(!separators.is_delimiter('A'));
     /// ```
+    #[must_use]
     pub fn is_delimiter(&self, c: char) -> bool {
         self.roles().iter().any(|&(_, d)| d == c)
     }
@@ -254,6 +265,7 @@ impl Separators {
     /// let v27 = Separators { truncation: Some('#'), ..Separators::default() };
     /// assert_eq!(v27.encoding_characters(), r"^~\&#");
     /// ```
+    #[must_use]
     pub fn encoding_characters(&self) -> String {
         let mut s = String::with_capacity(5);
         s.push(self.component);

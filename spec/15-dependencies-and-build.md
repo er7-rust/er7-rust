@@ -89,3 +89,26 @@ library does not expose, the library is missing it.
 Day-to-day commands live in
 [`AGENTS/workflows.md`](../AGENTS/workflows.md); release mechanics in
 [`AGENTS/release.md`](../AGENTS/release.md).
+
+## 15.7 Lints
+
+`Cargo.toml` carries a `[lints.clippy]` table setting the **pedantic**
+group to `warn`:
+
+```toml
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+```
+
+This is build configuration rather than a dependency, and it is recorded
+here for the same reason the empty dependency table is: it is part of what
+a reviewer sees when they open the manifest.
+
+The four checks run `cargo clippy --all-targets -- -D warnings`
+([§13.3](13-testing-strategy.md)), so a pedantic finding fails the build
+like any other warning. `priority = -1` lets a specific lint be re-set
+without turning the group off.
+
+Where a pedantic lint is wrong for a particular line, the fix is an
+`#[allow]` carrying a `reason`, next to the code it excuses — not a hole in
+the group.

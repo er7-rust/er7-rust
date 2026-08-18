@@ -27,6 +27,12 @@ include = [
 # HL7 crates, and nothing in ER7 needs a dependency.
 [dependencies]
 
+# Pedantic lints are on, and the four checks run clippy with `-D warnings`,
+# so a pedantic finding fails the build like any other. See
+# spec/15-dependencies-and-build.md §15.7.
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+
 [[bin]]
 name = "er7"
 path = "src/main.rs"

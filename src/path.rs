@@ -91,6 +91,12 @@ impl Path {
     /// ```
     ///
     /// See also [`FromStr`], which is the same thing via `.parse()`.
+    ///
+    /// # Errors
+    ///
+    /// [`Error::BadPath`] naming the path and the problem: no segment name,
+    /// an index of `0`, a missing number, an unclosed `[`, or trailing
+    /// text (R18).
     pub fn parse(text: &str) -> Result<Path, Error> {
         let text = text.trim();
         let mut rest = text;

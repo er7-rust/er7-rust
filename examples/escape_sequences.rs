@@ -11,7 +11,7 @@
 use er7::Separators;
 use er7::escape::{Escape, decode_hex, escape, escapes, unescape};
 
-fn main() -> Result<(), er7::Error> {
+fn main() {
     let separators = Separators::default();
 
     // --- Sequences that stand for characters decode -----------------------
@@ -109,7 +109,6 @@ fn main() -> Result<(), er7::Error> {
     assert_eq!(escape("a#b", &custom), "a?F?b");
 
     println!("ok");
-    Ok(())
 }
 
 /// Flatten a formatted-text value into plain text, honouring `\.br\` and

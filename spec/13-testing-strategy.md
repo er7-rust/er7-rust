@@ -71,6 +71,16 @@ cargo fmt --check                         # formatting
 cargo rustdoc --lib -- -W missing-docs    # every public item documented
 ```
 
+The second check is stricter than it looks: `Cargo.toml` sets
+`[lints.clippy] pedantic = "warn"`, so **the pedantic group is on** and
+`-D warnings` turns any of it into a failure. That is a deliberate choice
+for a crate meant to sit at the bottom of a healthcare stack — the group's
+`must_use_candidate`, `missing_errors_doc`, and `missing_panics_doc` are
+exactly the lints that make a public API hard to misuse from the outside,
+and a discarded `to_er7()` or an undocumented `Err` case is a real bug in
+this domain. Where a pedantic lint is wrong for a specific line, the fix is
+an `#[allow]` **with a `reason`**, not a hole in the group.
+
 `--all-targets` matters: it is what compiles `examples/` and so keeps the
 tutorials from rotting.
 
