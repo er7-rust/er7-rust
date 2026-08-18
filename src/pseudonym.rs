@@ -60,6 +60,7 @@ const PRIME: u64 = 0x0000_0100_0000_01b3;
 /// // Distinct: different identifiers do not collide into one patient.
 /// assert_ne!(pseudonym(0, "PATID1234"), pseudonym(0, "PATID1235"));
 /// ```
+#[must_use]
 pub fn pseudonym(key: u64, value: &str) -> String {
     let mut hash = OFFSET;
     for byte in key.to_be_bytes().iter().chain(value.as_bytes()) {

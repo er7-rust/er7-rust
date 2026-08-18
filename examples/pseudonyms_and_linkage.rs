@@ -5,6 +5,12 @@
 
 use er7_redact::{Action, Policy, Redactor, pseudonym};
 
+// Any u64 will do. This one is a date, which is why its digits are not
+// grouped in threes — see spec §7.2 for what the key does and does not
+// protect.
+#[allow(clippy::unreadable_literal, reason = "the digits are a date")]
+const KEY: u64 = 20260815;
+
 fn main() -> Result<(), er7_redact::Error> {
     let admit = "MSH|^~\\&|ADT1|MCM||||||ADT^A01|MSG1|P|2.5\r\
                  PID|1||PATID1234^^^ADT1^MR||EVERYWOMAN^EVE";
@@ -12,7 +18,7 @@ fn main() -> Result<(), er7_redact::Error> {
                   PID|1||PATID1234^^^ADT1^MR||EVERYWOMAN^EVE\r\
                   OBX|1|NM|2093-3^Cholesterol^LN||187";
 
-    let redactor = Redactor::new(Policy::patient_identifiers()).with_key(20260815);
+    let redactor = Redactor::new(Policy::patient_identifiers()).with_key(KEY);
 
     let mut admit = er7::parse(admit)?;
     let mut result = er7::parse(result)?;
@@ -39,7 +45,7 @@ fn main() -> Result<(), er7_redact::Error> {
 
     // The function is available directly, for building an expected value
     // in a test.
-    assert_eq!(pseudonym(20260815, "PATID1234"), one);
+    assert_eq!(pseudonym(KEY, "PATID1234"), one);
 
     // What it costs. A pseudonym preserves equality on purpose, so anyone
     // holding the redacted data can count how many messages each patient

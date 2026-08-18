@@ -13,6 +13,7 @@
 //! The input/output contract — options, formats, exit codes — is specified
 //! by spec §10, and pinned by the `cli_*` tests in `tests/integration.rs`.
 
+use std::fmt::Write as _;
 use std::io::{Read, Write};
 use std::process::ExitCode;
 
@@ -176,9 +177,10 @@ fn run() -> Result<(), Exit> {
         terminator,
         trailing_terminator: true,
     };
-    let rendered = match report_only {
-        true => report(&reports),
-        false => messages.iter().map(|m| m.to_er7_with(options)).collect(),
+    let rendered = if report_only {
+        report(&reports)
+    } else {
+        messages.iter().map(|m| m.to_er7_with(options)).collect()
     };
     write_output(output.as_deref(), &rendered)
 }
@@ -250,7 +252,7 @@ fn report(reports: &[Report]) -> String {
             out.push('\n');
         }
         if reports.len() > 1 {
-            out.push_str(&format!("# message {}\n", index + 1));
+            let _ = writeln!(out, "# message {}", index + 1);
         }
         let width = report
             .changes
@@ -261,7 +263,7 @@ fn report(reports: &[Report]) -> String {
             .clamp(8, 28);
         for change in &report.changes {
             let path = change.path.to_string();
-            out.push_str(&format!("{path:<width$}  {}\n", change.action));
+            let _ = writeln!(out, "{path:<width$}  {}", change.action);
         }
     }
     out

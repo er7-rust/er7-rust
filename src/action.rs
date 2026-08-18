@@ -101,6 +101,7 @@ impl Action {
     /// assert_eq!(Action::redacted(), Action::Replace("REDACTED".to_string()));
     /// assert_eq!(Action::redacted().to_string(), "replace REDACTED");
     /// ```
+    #[must_use]
     pub fn redacted() -> Action {
         Action::Replace(REDACTED.to_string())
     }
@@ -130,6 +131,13 @@ impl Action {
     /// # Ok(())
     /// # }
     /// ```
+    ///
+    /// # Errors
+    ///
+    /// [`Error::BadPolicy`] naming the problem: an unknown action name, an
+    /// argument where none belongs, a `mask` argument that is not one
+    /// character, or a `first`/`last` count that is not a number (spec
+    /// §6.4).
     pub fn parse(text: &str) -> Result<Action, Error> {
         let text = text.trim();
         let (name, argument) = match text.split_once(char::is_whitespace) {
@@ -139,11 +147,14 @@ impl Action {
         let bad = |detail: String| Err(Error::BadPolicy(detail));
         // An argument where none belongs is a typo worth reporting, not
         // something to ignore: `clear PID-5` is a rule missing a newline.
-        let none = |action: Action| match argument.is_empty() {
-            true => Ok(action),
-            false => Err(Error::BadPolicy(format!(
-                "action {name:?} takes no argument, but got {argument:?}"
-            ))),
+        let none = |action: Action| {
+            if argument.is_empty() {
+                Ok(action)
+            } else {
+                Err(Error::BadPolicy(format!(
+                    "action {name:?} takes no argument, but got {argument:?}"
+                )))
+            }
         };
         let count = |what: &str| match argument.parse::<usize>() {
             Ok(n) => Ok(n),
@@ -159,14 +170,15 @@ impl Action {
             "replace" if argument.is_empty() => Ok(Action::redacted()),
             "replace" => Ok(Action::Replace(argument.to_string())),
             "mask" if argument.is_empty() => Ok(Action::Mask(MASK)),
-            "mask" => match argument.chars().count() {
-                1 => Ok(Action::Mask(
-                    argument.chars().next().expect("one character"),
-                )),
-                _ => bad(format!(
-                    "action \"mask\" wants one character, not {argument:?}"
-                )),
-            },
+            "mask" => {
+                let mut characters = argument.chars();
+                match (characters.next(), characters.next()) {
+                    (Some(mask), None) => Ok(Action::Mask(mask)),
+                    _ => bad(format!(
+                        "action \"mask\" wants one character, not {argument:?}"
+                    )),
+                }
+            }
             "first" => Ok(Action::First(count("first")?)),
             "last" => Ok(Action::Last(count("last")?)),
             "" => bad("expected an action".to_string()),
@@ -197,6 +209,7 @@ impl Action {
     /// assert_eq!(Action::First(99).apply("MR", 0).as_deref(), Some("MR"));
     /// assert_eq!(Action::Last(99).apply("MR", 0).as_deref(), Some("MR"));
     /// ```
+    #[must_use]
     pub fn apply(&self, value: &str, key: u64) -> Option<String> {
         match self {
             Action::Keep | Action::Null => None,

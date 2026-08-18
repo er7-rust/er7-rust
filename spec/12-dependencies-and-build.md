@@ -43,7 +43,33 @@ test suite needs a data format.
 | Targets | anything `std` builds for; no platform-specific code |
 | `no_std` | not supported; the crate owns `String`s throughout |
 
-## 12.3 Layout
+## 12.3 Lints
+
+`Cargo.toml` carries a `[lints.clippy]` table setting the **pedantic**
+group to `warn`:
+
+```toml
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+```
+
+The four checks run `cargo clippy --all-targets -- -D warnings`
+([§11.3](11-testing-strategy.md)), so a pedantic finding fails the build.
+`priority = -1` lets a specific lint be re-set without turning the group
+off.
+
+Three of the group's lints earn their place here in particular:
+
+| Lint | Why it matters in this crate |
+| ---- | ---------------------------- |
+| `must_use_candidate` | a discarded `Report` is a redaction nobody reviewed |
+| `missing_errors_doc` | reading a policy is the one place this crate is strict ([§9.3](09-error-handling.md)); a caller needs to know what it refuses |
+| `missing_panics_doc` | the built-in policies `expect` on their own literals — the docs say so, and a test proves it cannot happen |
+
+Where a pedantic lint is wrong for a line, the fix is an `#[allow]`
+carrying a `reason`, next to that line — not a hole in the group.
+
+## 12.4 Layout
 
 ```
 src/lib.rs         crate docs, `Error`, re-exports

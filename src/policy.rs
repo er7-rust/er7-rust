@@ -44,7 +44,10 @@ pub struct Rule {
 impl Rule {
     /// A rule from a path and an action.
     ///
-    /// The `Err` case is a path that is not a path; see [`er7::Path`].
+    /// # Errors
+    ///
+    /// [`Error::Er7`] wrapping [`er7::Error::BadPath`] when `path` is not
+    /// an HL7 path — a zero index, a missing field number, trailing text.
     pub fn new(path: &str, action: Action) -> Result<Rule, Error> {
         Ok(Rule {
             path: Path::parse(path)?,
@@ -69,6 +72,12 @@ impl Rule {
     /// # Ok(())
     /// # }
     /// ```
+    ///
+    /// # Errors
+    ///
+    /// [`Error::BadPolicy`] naming the rule and the problem: a line with
+    /// no action, an action that does not exist, or a path that is not a
+    /// path.
     pub fn parse(line: &str) -> Result<Rule, Error> {
         let at = |e: Error| Error::BadPolicy(format!("rule {:?}: {e}", line.trim()));
         let Some((path, action)) = split_line(line) else {
@@ -140,6 +149,7 @@ impl Policy {
     /// [`Policy::patient_identifiers`]; there is deliberately no `Default`
     /// implementation, because either choice of default would be a silent
     /// one.
+    #[must_use]
     pub fn new() -> Policy {
         Policy {
             rules: Vec::new(),
@@ -178,6 +188,14 @@ impl Policy {
     /// # Ok(())
     /// # }
     /// ```
+    ///
+    /// # Panics
+    ///
+    /// Only if the table below is edited to hold something that is not an
+    /// HL7 path — every entry is a literal, and
+    /// `the_documented_positions_match_the_built_in_policy` in
+    /// `tests/integration.rs` checks the whole table against spec §5.1.
+    #[must_use]
     pub fn patient_identifiers() -> Policy {
         // Spec §5.1 is the normative table; this list is its executable
         // form, in the same order, and the two are changed together.
@@ -269,6 +287,12 @@ impl Policy {
     /// # Ok(())
     /// # }
     /// ```
+    ///
+    /// # Panics
+    ///
+    /// Only if the `MSH` literal below stops being an HL7 path, which no
+    /// caller can cause.
+    #[must_use]
     pub fn everything() -> Policy {
         Policy::new()
             .with("MSH", Action::Keep)
@@ -278,7 +302,9 @@ impl Policy {
 
     /// Add a rule, for building a policy in one expression.
     ///
-    /// The `Err` case is a path that is not a path.
+    /// # Errors
+    ///
+    /// [`Error::Er7`] when `path` is not an HL7 path; see [`Rule::new`].
     pub fn with(mut self, path: &str, action: Action) -> Result<Policy, Error> {
         self.rules.push(Rule::new(path, action)?);
         Ok(self)
@@ -288,6 +314,7 @@ impl Policy {
     ///
     /// [`Action::Keep`] means "no fallback", which is also the default,
     /// so that the policy file's `* keep` and this method agree.
+    #[must_use]
     pub fn fallback(mut self, action: Action) -> Policy {
         self.fallback = match action {
             Action::Keep => None,
@@ -324,6 +351,13 @@ impl Policy {
     /// # Ok(())
     /// # }
     /// ```
+    ///
+    /// # Errors
+    ///
+    /// [`Error::BadPolicy`] naming the **line number**, the line, and the
+    /// problem. Reading a policy is the one place this crate is strict,
+    /// because a typo means a value that silently was not redacted (spec
+    /// §6.4).
     pub fn parse(text: &str) -> Result<Policy, Error> {
         let mut policy = Policy::new();
         for (index, line) in text.lines().enumerate() {
@@ -370,6 +404,7 @@ impl Policy {
 
     /// True when the policy would do nothing at all: no rules, no
     /// fallback.
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         self.rules.is_empty() && self.fallback.is_none()
     }
@@ -426,9 +461,10 @@ fn split_line(line: &str) -> Option<(&str, &str)> {
     let line = line.trim();
     let (path, action) = line.split_once(char::is_whitespace)?;
     let action = action.trim();
-    match action.is_empty() {
-        true => None,
-        false => Some((path, action)),
+    if action.is_empty() {
+        None
+    } else {
+        Some((path, action))
     }
 }
 

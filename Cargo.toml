@@ -29,6 +29,12 @@ include = [
 [dependencies]
 er7 = "0"
 
+# Pedantic lints are on, and the four checks run clippy with `-D warnings`,
+# so a pedantic finding fails the build like any other. See
+# spec/12-dependencies-and-build.md §12.4.
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+
 [[bin]]
 name = "er7-redact"
 path = "src/main.rs"

@@ -80,11 +80,13 @@ impl Report {
     /// True when nothing changed — which means either that the message
     /// carried none of the positions the policy names, or that the policy
     /// is wrong. The crate does not presume to say which (spec §2.5).
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         self.changes.is_empty()
     }
 
     /// How many positions changed.
+    #[must_use]
     pub fn len(&self) -> usize {
         self.changes.len()
     }
@@ -133,6 +135,7 @@ pub struct Redactor {
 
 impl Redactor {
     /// A redactor for this policy, with the default pseudonym key `0`.
+    #[must_use]
     pub fn new(policy: Policy) -> Redactor {
         Redactor { policy, key: 0 }
     }
@@ -143,17 +146,20 @@ impl Redactor {
     /// so cannot be joined; two under the same key can. The key is a
     /// number in a configuration file, not a managed secret — read spec
     /// §7.3 before treating it as one.
+    #[must_use]
     pub fn with_key(mut self, key: u64) -> Redactor {
         self.key = key;
         self
     }
 
     /// The policy this redactor applies.
+    #[must_use]
     pub fn policy(&self) -> &Policy {
         &self.policy
     }
 
     /// The pseudonym key.
+    #[must_use]
     pub fn key(&self) -> u64 {
         self.key
     }

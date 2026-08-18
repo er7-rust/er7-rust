@@ -22,6 +22,26 @@ value after it.
 The one place `raw` is assigned is the explicit null, which is structure
 rather than text.
 
+## Lints
+
+`cargo clippy --all-targets -- -D warnings` must be clean, and
+`Cargo.toml` turns on the **pedantic** group
+([spec §12.3](../spec/12-dependencies-and-build.md)), so pedantic findings
+fail the build too. Three habits follow:
+
+- **`#[must_use]` on every pure accessor and builder step.** A discarded
+  `Report` is a redaction nobody reviewed.
+- **`# Errors` on every public `fn` returning `Result`**, naming what it
+  refuses — reading a policy is the one place this crate is strict.
+- **`# Panics` only where a panic is reachable.** The built-in policies
+  `expect` on their own literals; the docs say exactly that, and
+  `the_documented_positions_match_the_built_in_policy` proves it cannot
+  happen. Where a panic is *not* reachable, restructure until clippy
+  agrees rather than documenting a fiction.
+
+Where a lint is wrong for one line, `#[allow(..., reason = "...")]` next to
+that line — never a crate-level hole in the group.
+
 ## Doc comments
 
 Every public item is documented, and `cargo rustdoc --lib -- -W

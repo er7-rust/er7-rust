@@ -478,6 +478,13 @@ fn cli_prints_help_and_version() {
     }
 }
 
+/// Whether `name` is a Markdown file, by extension.
+fn is_markdown(name: &str) -> bool {
+    std::path::Path::new(name)
+        .extension()
+        .is_some_and(|extension| extension == "md")
+}
+
 /// Every `| D<n> |` cell at the start of a table row in `text`.
 fn rule_ids(text: &str) -> Vec<String> {
     text.lines()
@@ -518,7 +525,7 @@ fn every_spec_section_is_indexed_and_present() {
     let mut linked: Vec<String> = index
         .match_indices("](")
         .filter_map(|(at, _)| index[at + 2..].split_once(')').map(|(name, _)| name))
-        .filter(|name| name.len() > 3 && name.as_bytes()[2] == b'-' && name.ends_with(".md"))
+        .filter(|name| name.len() > 3 && name.as_bytes()[2] == b'-' && is_markdown(name))
         .map(str::to_string)
         .collect();
     linked.sort();
@@ -526,9 +533,9 @@ fn every_spec_section_is_indexed_and_present() {
 
     let mut on_disk: Vec<String> = std::fs::read_dir(&directory)
         .expect("spec directory")
-        .filter_map(|entry| entry.ok())
+        .filter_map(Result::ok)
         .map(|entry| entry.file_name().to_string_lossy().into_owned())
-        .filter(|name| name.ends_with(".md") && name.as_bytes()[0].is_ascii_digit())
+        .filter(|name| is_markdown(name) && name.as_bytes()[0].is_ascii_digit())
         .collect();
     on_disk.sort();
 
