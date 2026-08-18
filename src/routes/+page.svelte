@@ -232,7 +232,8 @@ cat batch.er7 | er7 --message 2`}</code></pre>
     <p>
       Keeping them apart means the encoding is maintained and tested once, and a dictionary crate
       can choose its own version. See the <a href="/ecosystem/">ecosystem</a> for the crates built
-      on top: the HL7 v2.5 dictionary, and <code>er7-redact</code> for removing patient detail.
+      on top: the HL7 v2.5 dictionary, and tools such as <code>er7-redact</code> and
+      <code>serde-er7</code>.
     </p>
   </div>
 </section>

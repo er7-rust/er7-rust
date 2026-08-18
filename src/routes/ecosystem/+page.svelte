@@ -6,7 +6,7 @@
   <title>Ecosystem — er7</title>
   <meta
     name="description"
-    content="The crate family: er7 for the ER7 encoding, er7-redact for removing patient detail, and hl7-2-5-to-xml and hl7-2-5-to-json for the HL7 v2.5 dictionary layer on top of it."
+    content="The crate family: er7 for the ER7 encoding, er7-redact and serde-er7 as tools on top of it, and hl7-2-5-to-xml and hl7-2-5-to-json for the HL7 v2.5 dictionary layer."
   />
 </svelte:head>
 
@@ -36,17 +36,18 @@
     <p>
       What sits on top comes in two kinds. A <strong>dictionary</strong> knows what a position
       <em>means</em> in one HL7 version. A <strong>tool</strong> does one job to any message and
-      needs no dictionary at all — <code>er7-redact</code> is one: to remove a patient name it has
-      to know which position holds it, not what a name is.
+      needs no dictionary at all: <code>er7-redact</code> removes a patient name knowing only which
+      position holds it, and <code>serde-er7</code> moves the tree through a Serde format knowing
+      only its shape. Neither has to choose an HL7 version, which is why neither is a dictionary.
     </p>
   </div>
 
   <pre><code>{`  ┌──────────────────────────────────┐  ┌──────────────────────────────────┐
-  │  er7-redact                      │  │  hl7-2-5-to-xml                  │
-  │  policies, actions,              │  │  hl7-2-5-to-json                 │
-  │  pseudonyms, reports             │  │  v2.5 types, structures, render  │
+  │  er7-redact       serde-er7      │  │  hl7-2-5-to-xml                  │
+  │  policies, actions, pseudonyms;  │  │  hl7-2-5-to-json                 │
+  │  Serde impls for the value tree  │  │  v2.5 types, structures, render  │
   └──────────────────────────────────┘  └──────────────────────────────────┘
-     Tool — any HL7 version               HL7 v2.5 dictionary
+     Tools — any HL7 version              HL7 v2.5 dictionary
                    │                                     │
                    └─────────────────┬───────────────────┘
                           depends on │
@@ -98,6 +99,7 @@
         <tr><td>Which positions carry patient detail</td><td><code>er7-redact</code></td></tr>
         <tr><td>Masking a value without moving the shape</td><td><code>er7-redact</code></td></tr>
         <tr><td>Stable pseudonyms across messages</td><td><code>er7-redact</code></td></tr>
+        <tr><td>Serialize and deserialize the tree</td><td><code>serde-er7</code></td></tr>
         <tr><td>Which data type each field carries</td><td>dictionary crate</td></tr>
         <tr><td>Composite component names (XPN.1, CX.4, …)</td><td>dictionary crate</td></tr>
         <tr><td>Message-structure grammars and grouping</td><td>dictionary crate</td></tr>
@@ -113,7 +115,7 @@
 <section class="section">
   <h2 class="section-heading">
     <span class="section-heading-eyebrow">Worked example</span>
-    The same message, four ways
+    The same message, five ways
   </h2>
   <div class="prose">
     <p>
@@ -138,6 +140,26 @@ assert_eq!(message.to_er7(), text);  // unchanged`}</code></pre>
   <pre><code>{`PID[1]-3[1].1.1  pseudonym
 PID[1]-5[1].1.1  replace REDACTED
 PID[1]-5[1].2.1  replace REDACTED`}</code></pre>
+
+  <h3><code>serde-er7</code> — how does the tree travel?</h3>
+  <pre><code>{`{
+  "name": "PID",
+  "fields": [
+    [[["1"]]],
+    [],
+    [[["241900"]]],
+    [],
+    [[["TEST"], ["FOUAZ"]]]
+  ]
+}`}</code></pre>
+  <div class="prose">
+    <p>
+      Positions, not names: field, repetition, component, subcomponent, nested in that order, with
+      <code>PID-2</code> an empty array because it was sent empty. Compare it with the
+      <code>hl7-2-5-to-json</code> output below — same message, same format, and the difference
+      between them is exactly the dictionary.
+    </p>
+  </div>
 
   <h3><code>hl7-2-5-to-xml</code> — what does it mean, as v2.xml?</h3>
   <pre><code>{`<PID>

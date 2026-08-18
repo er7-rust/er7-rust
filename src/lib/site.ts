@@ -41,7 +41,7 @@ export type Crate = {
   layer: string;
 };
 
-/** The four crates in the family, from the bottom of the stack up. */
+/** The five crates in the family, from the bottom of the stack up. */
 export const crates: Crate[] = [
   {
     name: 'er7',
@@ -59,6 +59,15 @@ export const crates: Crate[] = [
     repository: 'https://github.com/er7-rust/er7-redact',
     crate: 'https://crates.io/crates/er7-redact',
     docs: 'https://docs.rs/er7-redact/',
+    layer: 'Tool'
+  },
+  {
+    name: 'serde-er7',
+    description:
+      'Gives every er7 type a Serialize and Deserialize implementation, so a message tree can flow through JSON, YAML, or any other Serde data format.',
+    repository: 'https://github.com/er7-rust/serde-er7',
+    crate: 'https://crates.io/crates/serde-er7',
+    docs: 'https://docs.rs/serde-er7/',
     layer: 'Tool'
   },
   {
