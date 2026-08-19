@@ -12,7 +12,7 @@ file with no setup, invoked via `cargo run --example <name>`.
 | [redact_all_but](redact_all_but.rs) | The other posture: a fallback over everything, with `keep` rules for what a test needs. |
 | [pseudonyms_and_linkage](pseudonyms_and_linkage.rs) | Why an identifier becomes a pseudonym rather than a blank, what that buys, and what it costs. |
 | [read_the_report](read_the_report.rs) | The audit trail: one row per position changed, and no values in it. |
-| [absent_empty_null](absent_empty_null.rs) | The three states HL7 keeps apart, and why redaction leaves two of them alone. |
+| [redact_absent_empty_null](redact_absent_empty_null.rs) | The three states HL7 keeps apart, and why redaction leaves two of them alone. |
 
 ## Running
 
@@ -26,7 +26,7 @@ cargo run --example redact_a_message
 
 # Run them all.
 for e in redact_a_message write_a_policy redact_all_but \
-         pseudonyms_and_linkage read_the_report absent_empty_null; do
+         pseudonyms_and_linkage read_the_report redact_absent_empty_null; do
     echo "== $e"; cargo run --quiet --example "$e";
 done
 ```
@@ -39,7 +39,7 @@ one before:
 1. **redact_a_message** — what redaction does, and what it leaves.
 2. **write_a_policy** — how to say what you want redacted.
 3. **read_the_report** — how to check what actually happened.
-4. **absent_empty_null** — the distinction that matters most clinically.
+4. **redact_absent_empty_null** — the distinction that matters most clinically.
 5. **pseudonyms_and_linkage** — how to keep a message joinable, and the
    price of doing so.
 6. **redact_all_but** — what to do when you do not trust the list.

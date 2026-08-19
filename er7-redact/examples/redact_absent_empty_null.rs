@@ -4,7 +4,7 @@
 //! Getting this wrong is a patient-safety bug rather than a privacy one,
 //! so it is worth seeing worked through.
 //!
-//! Run with: `cargo run --example absent_empty_null`
+//! Run with: `cargo run --example redact_absent_empty_null`
 
 use er7_redact::{Action, Policy, Redactor};
 
