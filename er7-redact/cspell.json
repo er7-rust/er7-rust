@@ -1,0 +1,26 @@
+{
+    "version": "0.2",
+    "ignorePaths": [],
+    "dictionaryDefinitions": [],
+    "dictionaries": [],
+    "words": [
+        "ADT",
+        "cargo",
+        "clippy",
+        "docsrs",
+        "hemolysed",
+        "Hl7",
+        "pseudonymisation",
+        "pseudonymise",
+        "pseudonymised",
+        "pseudonymize",
+        "quasi",
+        "redactor",
+        "rustdoc",
+        "subcomponent",
+        "subcomponents",
+        "unescape"
+    ],
+    "ignoreWords": [],
+    "import": []
+}
