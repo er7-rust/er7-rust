@@ -4,9 +4,9 @@
 
 How code in this crate is written. Match the existing style; do not invent
 new ones. This crate follows `er7`'s own
-[`AGENTS/conventions.md`](https://github.com/er7-rust/er7-rust/blob/main/AGENTS/conventions.md)
-wherever it applies unmodified; this file only states what differs or adds
-to it.
+[`AGENTS/conventions.md`](../../er7/AGENTS/conventions.md) — the sibling
+workspace member's copy, not a remote snapshot — wherever it applies
+unmodified; this file only states what differs or adds to it.
 
 ## Formatting
 

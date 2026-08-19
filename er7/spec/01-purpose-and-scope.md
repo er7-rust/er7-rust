@@ -53,10 +53,11 @@ than repeat it.
 | [`serde-er7`](https://crates.io/crates/serde-er7) | `Serialize`/`Deserialize` for every type in the tree, so a message can flow through any Serde format | `er7`, `serde` |
 | [`hl7-2-5-to-xml`](https://crates.io/crates/hl7-2-5-to-xml), [`hl7-2-5-to-json`](https://crates.io/crates/hl7-2-5-to-json) | the HL7 v2.5 dictionary — data types, message structures, and a renderer | `er7` |
 
-The first two are maintained alongside this crate in the
-[`er7-rust`](https://github.com/er7-rust) organisation; the dictionary
-crates are separate, and their port onto `er7` is what
-[§16.3](16-roadmap.md) records.
+The first two are maintained alongside this crate as sibling members of
+the same Cargo workspace, in the same repository; the dictionary crates
+are separate repositories in the
+[`er7-rust`](https://github.com/er7-rust) organisation, and their port
+onto `er7` is what [§16.3](16-roadmap.md) records.
 
 Each of these is a crate rather than a feature of this one for the same
 reason: a caller who only routes messages should pay for nothing they do

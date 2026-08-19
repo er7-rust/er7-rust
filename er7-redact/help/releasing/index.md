@@ -42,7 +42,7 @@ No stray file, and **no message that is not synthetic** — see
 ```sh
 cargo publish --dry-run
 cargo publish
-git tag -a v0.1.0 -m "er7-redact 0.1.0"
+git tag -a er7-redact-v0.1.1 -m "er7-redact 0.1.1"   # prefixed: this repo holds 3 crates
 git push --tags
 ```
 

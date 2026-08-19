@@ -45,8 +45,8 @@ the build rather than a habit.
 3. **Integration tests** (`tests/integration.rs`) — black-box, through the
    public API only, exercising real message shapes: the `er7` crate's own
    `samples/*.er7` files (read via `include_str!` from the sibling
-   checkout, so this crate is tested against the same fixtures `er7` tests
-   itself against), plus the specific guarantees in [§4](04-round-trip-guarantee.md)
+   workspace member, so this crate is tested against the same fixtures
+   `er7` tests itself against), plus the specific guarantees in [§4](04-round-trip-guarantee.md)
    and [§5](05-error-handling.md) that only make sense as an end-to-end
    round trip.
 4. **Examples** (`examples/*.rs`) — not `#[test]`s themselves, but built

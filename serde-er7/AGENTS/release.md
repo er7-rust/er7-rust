@@ -9,10 +9,13 @@
    actual `Serialize`/`Deserialize` behaviour — if it does not, that is a
    bug per [`spec/index.md`](../spec/index.md)'s own rule ("a code change
    that isn't reflected here is a bug").
-3. `Cargo.toml`'s `er7` dependency — if still a path dependency
-   (`{ path = "../er7-rust" }`), switch to a version requirement matching
-   the `er7` release this version was tested against before publishing to
-   crates.io; a path dependency cannot be published as-is.
+3. `Cargo.toml`'s `er7` dependency is a path dependency during development
+   (`{ path = "../er7", version = "0" }`) so the workspace picks up local
+   `er7` changes immediately. Before publishing, confirm the `version`
+   requirement matches the `er7` release this version was tested against
+   — `cargo publish` strips the `path` and publishes against the version
+   requirement alone, so an out-of-date requirement would silently pull a
+   different `er7` than what was tested.
 4. `examples/` all still run: `for e in round_trip_via_json
    build_message_from_json inspect_a_segment_as_json; do cargo run
    --example "$e"; done`.

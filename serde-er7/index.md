@@ -1,6 +1,6 @@
 # serde-er7
 
-Serde support for [`er7`](https://github.com/er7-rust/er7-rust), the
+Serde support for [`er7`](https://github.com/er7-rust/er7-rust/tree/main/er7), the
 pipe-hat encoding that carries HL7 v2 messages between healthcare systems —
 so a parsed message can flow through JSON, YAML, or any other Serde data
 format, and come back out unchanged.

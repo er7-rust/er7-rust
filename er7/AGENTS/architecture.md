@@ -5,7 +5,11 @@
 How the repository is laid out, what each module owns, and where the
 boundaries are.
 
-## Repository layout
+## Crate layout
+
+This crate is one workspace member among three — see the workspace root's
+[`AGENTS.md`](../../AGENTS.md) for how `er7`, `er7-redact`, and `serde-er7`
+relate. What follows is `er7`'s own layout, inside `er7/`:
 
 ```
 Cargo.toml            Package metadata; [dependencies] is empty and stays empty (R25)

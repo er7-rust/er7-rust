@@ -12,9 +12,9 @@ authors:
     orcid: 'https://orcid.org/0009-0000-4681-282X'
 identifiers:
   - type: url
-    value: 'https://github.com/er7-rust/er7-redact/'
+    value: 'https://github.com/er7-rust/er7-rust/tree/main/er7-redact/'
     description: ER7 Redact: Remove patient detail from HL7 v2 messages in the ER7 pipe-hat encoding, without changing the shape of the message.
-repository-code: 'https://github.com/er7-rust/er7-redact/'
+repository-code: 'https://github.com/er7-rust/er7-rust/tree/main/er7-redact/'
 abstract: >-
   ER7 Redact: Remove patient detail from HL7 v2 messages in the ER7 pipe-hat encoding, without changing the shape of the message.
 license: See license file

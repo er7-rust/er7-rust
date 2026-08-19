@@ -6,7 +6,11 @@
 crate's contract.
 **Companion docs:** [`AGENTS.md`](../AGENTS.md) for agent guidance,
 [`index.md`](../index.md) for the user-facing README,
-[`docs/api/index.md`](../docs/api/index.md) for the rendered API surface.
+[`docs/api/index.md`](../docs/api/index.md) for the rendered API surface,
+and the workspace root's
+[`spec/01-family-policy.md`](../../spec/01-family-policy.md) for the
+dependency, testing, and safety policy this crate shares with its
+siblings `er7-redact` and `serde-er7`.
 
 This directory is the **canonical specification** — one file per section,
 indexed below — that drives spec-driven development (see

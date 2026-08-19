@@ -4,7 +4,7 @@
 
 ## 1.1 What this crate is
 
-`serde-er7` gives every public type in the [`er7`](https://github.com/er7-rust/er7-rust)
+`serde-er7` gives every public type in the [`er7`](https://github.com/er7-rust/er7-rust/tree/main/er7)
 crate — `Message`, `Segment`, `Field`, `Repetition`, `Component`,
 `Subcomponent`, `Separators`, `Terminator` — a hand-written `Serialize` and
 `Deserialize` implementation, via a same-named wrapper type per level. That

@@ -5,7 +5,7 @@ for behaviour. Where the rustdoc, README, or any other document disagrees
 with this one, this one is right; where this document and a test disagree,
 that is a bug in whichever one is wrong, and the fix updates both together.
 
-This crate is a companion to [`er7`](https://github.com/er7-rust/er7-rust)
+This crate is a companion to [`er7`](https://github.com/er7-rust/er7-rust/tree/main/er7)
 and its own spec (`spec/index.md` in that repository, hereafter "the `er7`
 spec"). This document does not restate anything the `er7` spec already
 settles — parsing rules, escape sequences, the meaning of absent/empty/null

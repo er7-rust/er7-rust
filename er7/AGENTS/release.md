@@ -62,7 +62,7 @@ cargo publish --dry-run
 # 4. Commit and tag
 git add -A
 git commit -m "Release x.y.z"
-git tag -a vx.y.z -m "Release x.y.z"
+git tag -a er7-vx.y.z -m "Release x.y.z"   # prefixed: this repo holds 3 crates
 git push && git push --tags
 
 # 5. Publish

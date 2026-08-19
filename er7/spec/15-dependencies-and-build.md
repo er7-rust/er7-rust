@@ -57,7 +57,7 @@ and R25 exists to stop exactly that. Task T6 closed on this basis.
 | Field | Value |
 | ----- | ----- |
 | name | `er7` |
-| version | `0.1.0` |
+| version | `0.1.1` |
 | edition | `2024` |
 | license | `MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only` |
 | repository | <https://github.com/er7-rust/er7-rust> |

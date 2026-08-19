@@ -42,11 +42,12 @@ cargo rustdoc --lib -- -W missing-docs
 ## The sibling fixtures
 
 `tests/integration.rs` reads `er7`'s own `samples/*.er7` files directly via
-`include_str!("../../er7-rust/samples/...")`. This means:
+`include_str!("../../er7/samples/...")`. This means:
 
-- These tests **require the sibling checkout** to exist at
-  `../er7-rust` relative to this crate — the same layout the path
-  dependency in `Cargo.toml` already requires.
+- These tests **require the sibling workspace member** to exist at
+  `../er7` relative to this crate — the same layout the path
+  dependency in `Cargo.toml` already requires. Both crates live in the
+  same workspace, so this is automatic; nothing to check out separately.
 - The sample files end with a trailing segment terminator that `er7`
   itself normalizes away at parse time; `tests/integration.rs`'s `sample()`
   helper trims it before comparing, so the round-trip assertion tests this

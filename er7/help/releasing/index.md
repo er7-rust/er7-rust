@@ -47,8 +47,11 @@ the reasoning. Versioning rules are
 ## 5. Commit, tag, publish
 
 - [ ] `git add -A && git commit -m "Release x.y.z"`
-- [ ] `git tag -a vx.y.z -m "Release x.y.z"` — put the release summary in
-      the tag annotation; there is no CHANGELOG file.
+- [ ] `git tag -a er7-vx.y.z -m "Release x.y.z"` — put the release summary
+      in the tag annotation; there is no CHANGELOG file. The `er7-` prefix
+      is required: this repository holds three crates, and an unprefixed
+      `vx.y.z` tag would collide with a release of `er7-redact` or
+      `serde-er7`.
 - [ ] `git push && git push --tags`
 - [ ] `cargo publish`
 

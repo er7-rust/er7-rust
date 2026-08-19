@@ -18,7 +18,8 @@ drives changes.
 | Language     | Rust (edition 2024, MSRV 1.85)                                              |
 | License      | MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only           |
 | Runtime deps | exactly one: [`er7`](https://crates.io/crates/er7) (D16)                     |
-| Repository   | https://github.com/er7-rust/er7-redact                                      |
+| Workspace    | one of three members in this repository — see [`../AGENTS.md`](../AGENTS.md) |
+| Repository   | https://github.com/er7-rust/er7-rust (shared with `er7`, `serde-er7`)       |
 | Crate        | https://crates.io/crates/er7-redact                                         |
 | Docs         | https://docs.rs/er7-redact/                                                 |
 | Website      | https://er7-rust.github.io/er7-redact/ — source in the sibling repo `er7-rust.github.io` |
@@ -92,10 +93,10 @@ expanded in the matching topical guide.
    [`AGENTS/safety.md`](AGENTS/safety.md) **before** writing code.
 6. Run `cargo test` to confirm a green baseline before changing anything.
 
-The sibling crate [`er7`](https://github.com/er7-rust/er7-rust) supplies
-the encoding layer, and its spec settles everything about parsing, escape
-sequences, and the absent/empty/null distinction. Do not reimplement any of
-it here.
+The sibling workspace member [`../er7`](../er7/) supplies the encoding
+layer, and its spec (`../er7/spec/index.md`) settles everything about
+parsing, escape sequences, and the absent/empty/null distinction. Do not
+reimplement any of it here.
 
 ## Common commands
 

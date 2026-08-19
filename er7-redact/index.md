@@ -4,7 +4,7 @@
 •
 **[documentation](https://docs.rs/er7-redact/)**
 •
-**[source](https://github.com/er7-rust/er7-redact)**
+**[source](https://github.com/er7-rust/er7-rust/tree/main/er7-redact)**
 •
 **[crate](https://crates.io/crates/er7-redact)**
 •
@@ -200,10 +200,11 @@ commit a real one. See [`AGENTS/safety.md`](AGENTS/safety.md).
 
 ## See also
 
-- [`er7`](https://github.com/er7-rust/er7-rust) — parse, query, edit, and
-  write ER7, with zero dependencies. The layer underneath this one.
-- [`serde-er7`](https://github.com/er7-rust/serde-er7) — Serde support for
-  the same value tree.
+- [`er7`](https://github.com/er7-rust/er7-rust/tree/main/er7) — parse,
+  query, edit, and write ER7, with zero dependencies. The layer underneath
+  this one.
+- [`serde-er7`](https://github.com/er7-rust/er7-rust/tree/main/serde-er7) —
+  Serde support for the same value tree.
 - [`hl7-2-5-to-xml`](https://crates.io/crates/hl7-2-5-to-xml) and
   [`hl7-2-5-to-json`](https://crates.io/crates/hl7-2-5-to-json) — the HL7
   v2.5 dictionary layer.

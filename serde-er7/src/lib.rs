@@ -4,7 +4,7 @@
 //! •
 //! **[documentation](https://docs.rs/serde-er7/)**
 //! •
-//! **[source](https://github.com/er7-rust/serde-er7)**
+//! **[source](https://github.com/er7-rust/er7-rust/tree/main/serde-er7)**
 //! •
 //! **[crate](https://crates.io/crates/serde-er7)**
 //! •

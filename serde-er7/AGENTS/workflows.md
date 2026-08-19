@@ -35,16 +35,17 @@ must stay that way.
 
 ## Pitfalls
 
-- **The integration tests read `../er7-rust/samples/`.** `tests/integration.rs`
-  pulls the `er7` crate's own sample messages straight from a sibling
-  checkout via `include_str!`, so `cargo test` needs `er7-rust` checked out
-  beside this repository. That is deliberate — it tests this crate against
-  the same fixtures `er7` tests itself against, rather than against
-  literals written to order — and it is why `tests/` is excluded from the
-  published package.
-- **`er7` is a registry dependency, not a path dependency.** `Cargo.toml`
-  says `er7 = "0"`. To try a change to both crates together, add a
-  `[patch.crates-io]` entry locally and do not commit it.
+- **The integration tests read `../er7/samples/`.** `tests/integration.rs`
+  pulls the `er7` crate's own sample messages straight from the sibling
+  workspace member via `include_str!`. That is deliberate — it tests this
+  crate against the same fixtures `er7` tests itself against, rather than
+  against literals written to order — and it is why `tests/` is excluded
+  from the published package.
+- **`er7` is a path dependency, not a registry dependency.** `Cargo.toml`
+  says `er7 = { path = "../er7", version = "0" }`, so a local change to
+  `er7` is picked up immediately — no `[patch.crates-io]` needed. Only
+  when this crate is published on its own does the `version` requirement
+  take over.
 - **A wire shape is a compatibility surface.** Changing one is a breaking
   change even when the Rust signature is untouched
   ([§8](../spec/08-versioning-and-compatibility.md)).

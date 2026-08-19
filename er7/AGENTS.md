@@ -18,15 +18,19 @@ changes.
 | Language     | Rust (edition 2024, MSRV 1.85)                                               |
 | License      | MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only            |
 | Runtime deps | **none**, and that is a guarantee (R25)                                      |
-| Repository   | https://github.com/er7-rust/er7-rust                                         |
+| Workspace    | one of three members in this repository — see [`../AGENTS.md`](../AGENTS.md) |
+| Repository   | https://github.com/er7-rust/er7-rust (shared with `er7-redact`, `serde-er7`) |
 | Crate        | https://crates.io/crates/er7                                                 |
 | Docs         | https://docs.rs/er7/                                                         |
 | Website      | https://er7-rust.github.io/ — source in the sibling repo `er7-rust.github.io` |
 | Maintainer   | Joel Parker Henderson — joel@joelparkerhenderson.com                         |
 
-## How this repo is documented
+## How this crate is documented
 
-The documentation is layered so each reader can stop at the depth they need:
+This crate lives at `er7/` inside the `er7-rust` workspace, alongside its
+siblings `er7-redact/` and `serde-er7/` — the tree below is `er7`'s own
+layout, not the whole repository's. The documentation is layered so each
+reader can stop at the depth they need:
 
 ```
 index.md                   ← README (user-facing introduction; README.md links here)

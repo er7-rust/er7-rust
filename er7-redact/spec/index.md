@@ -13,11 +13,12 @@ indexed below — that drives spec-driven development. When the spec and the
 code disagree, the spec is the source of truth and the code is a bug — or
 the spec needs updating *before* the code changes.
 
-This crate is a companion to [`er7`](https://github.com/er7-rust/er7-rust)
-and its own spec (`spec/index.md` in that repository, hereafter "the `er7`
-spec"). This document does not restate anything the `er7` spec already
-settles — how text is parsed, what an escape sequence means, how absent,
-empty, and null differ. It specifies only the one thing this crate adds:
+This crate is a companion to [`er7`](../../er7/), a sibling member of the
+same workspace, and its own spec (`../../er7/spec/index.md`, hereafter
+"the `er7` spec"). This document does not restate anything the `er7` spec
+already settles — how text is parsed, what an escape sequence means, how
+absent, empty, and null differ. It specifies only the one thing this crate
+adds:
 **removing patient detail from a message without breaking it**.
 
 The discipline:

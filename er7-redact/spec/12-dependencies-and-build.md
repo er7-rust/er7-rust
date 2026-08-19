@@ -6,12 +6,15 @@
 
 ```toml
 [dependencies]
-er7 = "0"
+er7 = { path = "../er7", version = "0" }
 ```
 
 And that is the whole table. `er7` is the value tree this crate edits and
 the path notation its policies are written in; there is nothing else it
-needs.
+needs. The `path` points at the sibling workspace member so local changes
+to `er7` are picked up immediately; the `version` requirement is kept
+alongside it so the manifest is still valid once this crate is packaged
+and published on its own (see [§13.4](13-compatibility-and-versioning.md)).
 
 Healthcare integration code gets audited, and every transitive dependency
 is another crate somebody has to review. `er7` guarantees zero

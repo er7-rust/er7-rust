@@ -18,11 +18,12 @@ changes.
 | Language     | Rust (edition 2024)                                                         |
 | License      | MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only            |
 | Runtime deps | exactly two: `serde` and `er7` (spec S1) — no format crate (spec S2)        |
-| Repository   | https://github.com/er7-rust/serde-er7                                       |
+| Workspace    | one of three members in this repository — see [`../AGENTS.md`](../AGENTS.md) |
+| Repository   | https://github.com/er7-rust/er7-rust (shared with `er7`, `er7-redact`)      |
 | Crate        | https://crates.io/crates/serde-er7                                          |
 | Docs         | https://docs.rs/serde-er7/                                                  |
 | Website      | https://er7-rust.github.io/serde-er7/                                       |
-| Sibling      | `er7` is a **registry** dependency (`er7 = "0"`); `tests/` reads that crate's `samples/` from `../er7-rust` via `include_str!` |
+| Sibling      | `er7` is a **path** dependency (`{ path = "../er7", version = "0" }`); `tests/` reads that crate's `samples/` from `../er7` via `include_str!` |
 | Maintainer   | Joel Parker Henderson — joel@joelparkerhenderson.com                        |
 
 ## How this repo is documented
