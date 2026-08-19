@@ -235,7 +235,7 @@ println!("{}", message.to_er7());`}</code></pre>
   <h2 class="section-heading">Examples</h2>
   <div class="prose">
     <p>
-      Three runnable programs in the crate's <a href={`${crate.repository}/tree/main/examples`}
+      Three runnable programs in the crate's <a href={`${crate.repository}/examples`}
         ><code>examples/</code></a
       > directory, each asserting its own results.
     </p>
@@ -293,7 +293,7 @@ println!("{}", message.to_er7());`}</code></pre>
     <a class="tag" href={crate.repository}>Source</a>
     <a class="tag" href={crate.crate}>Crate</a>
     <a class="tag" href={crate.docs}>API documentation</a>
-    <a class="tag" href={`${crate.repository}/tree/main/spec`}>Specification</a>
+    <a class="tag" href={`${crate.repository}/spec`}>Specification</a>
     <a class="tag" href="/api/">er7 API</a>
     <a class="tag" href="/ecosystem/">Ecosystem</a>
   </div>

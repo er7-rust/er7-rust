@@ -32,7 +32,7 @@
     { name: 'redact_all_but', shows: 'A fallback over everything, with keep rules for what a test needs.' },
     { name: 'pseudonyms_and_linkage', shows: 'Why an identifier becomes a pseudonym rather than a blank, and what that costs.' },
     { name: 'read_the_report', shows: 'The audit trail: one row per position changed, and no values in it.' },
-    { name: 'absent_empty_null', shows: 'The three states HL7 keeps apart, and why redaction leaves two of them alone.' }
+    { name: 'redact_absent_empty_null', shows: 'The three states HL7 keeps apart, and why redaction leaves two of them alone.' }
   ];
 </script>
 
@@ -311,7 +311,7 @@ NTE-3    clear              # free text, where identifiers hide
   <h2 class="section-heading">Examples</h2>
   <div class="prose">
     <p>
-      Six runnable programs in the crate's <a href={`${crate.repository}/tree/main/examples`}
+      Six runnable programs in the crate's <a href={`${crate.repository}/examples`}
         ><code>examples/</code></a
       > directory. Each asserts its own results, so a clean exit means it passed.
     </p>
@@ -373,7 +373,7 @@ NTE-3    clear              # free text, where identifiers hide
     <a class="tag" href={crate.repository}>Source</a>
     <a class="tag" href={crate.crate}>Crate</a>
     <a class="tag" href={crate.docs}>API documentation</a>
-    <a class="tag" href={`${crate.repository}/tree/main/spec`}>Specification</a>
+    <a class="tag" href={`${crate.repository}/spec`}>Specification</a>
     <a class="tag" href="/paths/">Path notation</a>
     <a class="tag" href="/ecosystem/">Ecosystem</a>
   </div>

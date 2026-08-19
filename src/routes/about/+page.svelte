@@ -5,7 +5,7 @@
   author  = {Henderson, Joel Parker},
   title   = {ER7 Rust: Parse, query, edit, and write HL7 v2 messages
              in the ER7 pipe-hat encoding, with zero dependencies},
-  url     = {https://github.com/er7-rust/er7-rust},
+  url     = {https://github.com/er7-rust/er7-rust/tree/main/er7},
   version = {${version}}
 }`;
 </script>
@@ -37,7 +37,7 @@
         <tr><th>Language</th><td>Rust, edition 2024, MSRV 1.85</td></tr>
         <tr><th>Runtime dependencies</th><td>none, and that is a guarantee</td></tr>
         <tr><th>License</th><td>MIT, Apache-2.0, BSD-3-Clause, GPL-2.0-only, or GPL-3.0-only</td></tr>
-        <tr><th>Source</th><td><a href={links.repository}>github.com/er7-rust/er7-rust</a></td></tr>
+        <tr><th>Source</th><td><a href="{links.repository}/tree/main/er7">github.com/er7-rust/er7-rust/tree/main/er7</a></td></tr>
         <tr><th>Crate</th><td><a href={links.crate}>crates.io/crates/er7</a></td></tr>
         <tr><th>API docs</th><td><a href={links.docs}>docs.rs/er7</a></td></tr>
         <tr><th>Maintainer</th><td><a href={links.email}>Joel Parker Henderson</a></td></tr>

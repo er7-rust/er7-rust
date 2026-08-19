@@ -49,7 +49,7 @@ export const crates: Crate[] = [
     name: 'er7',
     description:
       'The ER7 encoding: parse, query, edit, and write HL7 v2 messages, with a byte-for-byte round trip and no dependencies.',
-    repository: 'https://github.com/er7-rust/er7-rust',
+    repository: 'https://github.com/er7-rust/er7-rust/tree/main/er7',
     crate: 'https://crates.io/crates/er7',
     docs: 'https://docs.rs/er7/',
     layer: 'Encoding'
@@ -58,7 +58,7 @@ export const crates: Crate[] = [
     name: 'er7-redact',
     description:
       'Removes patient detail from a message without moving its shape: a policy of HL7 paths and actions, stable pseudonyms, and a report of every position it changed.',
-    repository: 'https://github.com/er7-rust/er7-redact',
+    repository: 'https://github.com/er7-rust/er7-rust/tree/main/er7-redact',
     crate: 'https://crates.io/crates/er7-redact',
     docs: 'https://docs.rs/er7-redact/',
     layer: 'Tool'
@@ -67,7 +67,7 @@ export const crates: Crate[] = [
     name: 'serde-er7',
     description:
       'Gives every er7 type a Serialize and Deserialize implementation, so a message tree can flow through JSON, YAML, or any other Serde data format.',
-    repository: 'https://github.com/er7-rust/serde-er7',
+    repository: 'https://github.com/er7-rust/er7-rust/tree/main/serde-er7',
     crate: 'https://crates.io/crates/serde-er7',
     docs: 'https://docs.rs/serde-er7/',
     layer: 'Tool'
