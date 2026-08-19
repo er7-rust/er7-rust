@@ -4,7 +4,7 @@
 //! •
 //! **[documentation](https://docs.rs/er7-redact/)**
 //! •
-//! **[source](https://github.com/er7-rust/er7-redact)**
+//! **[source](https://github.com/er7-rust/er7-rust/tree/main/er7-redact)**
 //! •
 //! **[crate](https://crates.io/crates/er7-redact)**
 //! •
