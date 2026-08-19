@@ -27,7 +27,7 @@ include = [
 # value tree being edited and the path notation policies are written in.
 # See spec/12-dependencies-and-build.md §12.1, rule D16.
 [dependencies]
-er7 = "0"
+er7 = { path = "../er7", version = "0" }
 
 # Pedantic lints are on, and the four checks run clippy with `-D warnings`,
 # so a pedantic finding fails the build like any other. See

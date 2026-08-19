@@ -301,7 +301,10 @@ fn the_crate_has_one_runtime_dependency() {
         }
         dependencies.push(line.to_string());
     }
-    assert_eq!(dependencies, [r#"er7 = "0""#]);
+    assert_eq!(
+        dependencies,
+        [r#"er7 = { path = "../er7", version = "0" }"#]
+    );
 }
 
 /// Run the command with `args`, feeding it `stdin`, and return

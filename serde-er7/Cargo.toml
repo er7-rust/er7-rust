@@ -25,7 +25,7 @@ include = [
 # tree it wraps. See spec/03-dependencies-and-format-agnosticism.md.
 [dependencies]
 serde = "1"
-er7 = "0"
+er7 = { path = "../er7", version = "0" }
 
 # Pedantic lints are on, and the four checks run clippy with `-D warnings`,
 # so a pedantic finding fails the build like any other. See

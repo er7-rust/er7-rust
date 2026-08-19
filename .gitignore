@@ -1,4 +1,2 @@
 /target
-Cargo.lock
-tmp
 .claude/settings.local.json

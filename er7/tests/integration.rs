@@ -174,12 +174,19 @@ fn the_crate_has_no_runtime_dependencies() {
         panic!("expected no dependencies, found {line:?} in Cargo.toml");
     }
 
-    // The lock file is the second witness: this crate and nothing else.
-    let lock = include_str!("../Cargo.lock");
-    assert_eq!(
-        lock.matches("name = ").count(),
-        1,
-        "expected Cargo.lock to hold exactly one package, this crate"
+    // The lock file is the second witness. er7 now shares a workspace lock
+    // with its siblings, so the whole-file package count no longer proves
+    // anything — instead, find er7's own [[package]] entry and check that
+    // entry carries no `dependencies` key.
+    let lock = include_str!("../../Cargo.lock");
+    let start = lock
+        .find("name = \"er7\"\n")
+        .expect("expected Cargo.lock to contain an er7 package entry");
+    let entry = &lock[start..];
+    let entry = &entry[..entry.find("\n\n").unwrap_or(entry.len())];
+    assert!(
+        !entry.contains("dependencies"),
+        "expected er7's Cargo.lock entry to have no dependencies, found: {entry:?}"
     );
 }
 

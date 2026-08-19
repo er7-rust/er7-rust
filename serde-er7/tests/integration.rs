@@ -16,9 +16,9 @@ fn sample(text: &str) -> &str {
     text.trim_end_matches(['\r', '\n'])
 }
 
-const ORU: &str = include_str!("../../er7-rust/samples/oru_r01.er7");
-const ADT: &str = include_str!("../../er7-rust/samples/adt_a08.er7");
-const BATCH: &str = include_str!("../../er7-rust/samples/batch.er7");
+const ORU: &str = include_str!("../../er7/samples/oru_r01.er7");
+const ADT: &str = include_str!("../../er7/samples/adt_a08.er7");
+const BATCH: &str = include_str!("../../er7/samples/batch.er7");
 
 fn round_trips_through_json(text: &str) {
     let text = sample(text);
@@ -160,7 +160,10 @@ fn the_crate_has_exactly_two_runtime_dependencies() {
     // (spec §3.1).
     assert_eq!(
         manifest_dependencies("[dependencies]"),
-        [r#"serde = "1""#, r#"er7 = "0""#]
+        [
+            r#"serde = "1""#,
+            r#"er7 = { path = "../er7", version = "0" }"#
+        ]
     );
 }
 

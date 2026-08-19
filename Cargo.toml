@@ -1,0 +1,7 @@
+[workspace]
+resolver = "2"
+members = [
+    "er7",
+    "er7-redact",
+    "serde-er7",
+]
