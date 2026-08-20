@@ -54,6 +54,13 @@ The `&str` forms parse the path each call and can fail with
 `Error::BadPath`; the `&Path` forms take an already-parsed path, which is
 what you want when applying one path to many messages.
 
+`query` stops at the first match rather than collecting every match and
+keeping its head. The two are indistinguishable in what they return; they
+are not indistinguishable in what they cost, because a path with no
+segment occurrence matches *every* segment of that name (R19), so
+`query("NTE-3")` on a result carrying two hundred `NTE` segments used to
+build two hundred strings to hand back one.
+
 Rules:
 
 - **[R19]** An omitted **segment occurrence** matches every segment of that

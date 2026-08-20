@@ -185,6 +185,39 @@ impl Subcomponent {
     /// assert_eq!(leaf.raw, r"Smith \T\ Jones");
     /// assert_eq!(leaf.value(&separators), "Smith & Jones");
     /// ```
+    ///
+    /// # This takes text, not ER7
+    ///
+    /// Everything handed to `set` is data, so every delimiter in it is
+    /// encoded — including `~`. Passing a whole field's ER7 through here
+    /// therefore *collapses* it: three repetitions arrive as one value
+    /// holding two `\R\` sequences. That is `set` doing its job, and the
+    /// wrong tool for moving a value that is more than one leaf.
+    ///
+    /// Copy the structure instead. Every level of the tree is a public
+    /// `Vec` and every node is `Clone`, so a repeating field moves as
+    /// itself (spec §5.5):
+    ///
+    /// ```
+    /// # fn main() -> Result<(), er7::Error> {
+    /// use er7::Field;
+    ///
+    /// let source = er7::parse("MSH|^~\\&|LAB\rPID|1||A~B~C")?;
+    /// let mut target = er7::parse("MSH|^~\\&|LAB\rPID|1")?;
+    ///
+    /// let ids = source.segment("PID").unwrap().field(3).unwrap().clone();
+    /// let pid = target.segment_at_mut("PID", 1).unwrap();
+    /// if pid.fields.len() < 3 {
+    ///     pid.fields.resize(3, Field::default());   // 1-based position 3
+    /// }
+    /// pid.fields[2] = ids;
+    ///
+    /// // All three repetitions are still repetitions.
+    /// assert_eq!(target.to_er7(), "MSH|^~\\&|LAB\rPID|1||A~B~C");
+    /// assert_eq!(target.query("PID-3[2]")?.as_deref(), Some("B"));
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn set(&mut self, value: &str, separators: &Separators) {
         self.raw = crate::escape::escape(value, separators).into_owned();
     }
@@ -631,7 +664,15 @@ impl Message {
     /// [`Error::BadPath`] only — and only for a malformed path. A position
     /// the message does not carry is `Ok(None)`, never an error (R20).
     pub fn query(&self, path: &str) -> Result<Option<String>, Error> {
-        Ok(self.query_path(&Path::parse(path)?).into_iter().next())
+        // `stop_after_first`, rather than taking the head of
+        // `query_path`: a path that matches every `OBX` of a result
+        // otherwise builds one string per segment and drops all but one,
+        // which made this call cost grow with the length of the message it
+        // was reading a single value out of.
+        Ok(self
+            .query_path_mode(&Path::parse(path)?, true, true)
+            .into_iter()
+            .next())
     }
 
     /// Every value matching `path`, in message order: one per matching
@@ -692,7 +733,7 @@ impl Message {
     /// ```
     #[must_use]
     pub fn query_path(&self, path: &Path) -> Vec<String> {
-        self.query_path_mode(path, true)
+        self.query_path_mode(path, true, false)
     }
 
     /// [`Message::query_path`] without decoding: every value comes back
@@ -723,58 +764,92 @@ impl Message {
     /// ```
     #[must_use]
     pub fn query_path_raw(&self, path: &Path) -> Vec<String> {
-        self.query_path_mode(path, false)
+        self.query_path_mode(path, false, false)
     }
 
-    fn query_path_mode(&self, path: &Path, decode: bool) -> Vec<String> {
-        let separators = &self.separators;
+    /// The shared walk behind [`Message::query`], [`Message::query_path`]
+    /// and [`Message::query_path_raw`]. `decode` chooses text or raw;
+    /// `stop_after_first` returns as soon as one value has been collected,
+    /// which is all [`Message::query`] ever looks at.
+    fn query_path_mode(&self, path: &Path, decode: bool, stop_after_first: bool) -> Vec<String> {
         let mut out = Vec::new();
-        let segments: Vec<&Segment> = match path.segment_occurrence {
-            Some(occurrence) => self
-                .segment_at(&path.segment, occurrence)
-                .into_iter()
-                .collect(),
-            None => self.segments_named(&path.segment).collect(),
-        };
-        for segment in segments {
-            let Some(number) = path.field else {
-                out.push(write(
-                    segment,
-                    separators,
-                    decode,
-                    Segment::to_er7,
-                    Segment::to_text,
-                ));
-                continue;
-            };
-            let Some(field) = segment.field(number) else {
-                continue;
-            };
-            // A header segment's first two fields are the delimiters, which
-            // are structure rather than data and so are never decoded.
-            if segment.is_header() && number <= 2 {
-                out.push(field.to_er7(separators));
-                continue;
+        match path.segment_occurrence {
+            Some(occurrence) => {
+                if let Some(segment) = self.segment_at(&path.segment, occurrence) {
+                    self.push_from_segment(&mut out, segment, path, decode, stop_after_first);
+                }
             }
-            if path.repetition.is_none() && path.component.is_none() {
-                out.push(write(
-                    field,
-                    separators,
-                    decode,
-                    Field::to_er7,
-                    Field::to_text,
-                ));
-                continue;
-            }
-            let repetitions: Vec<&Repetition> = match path.repetition {
-                Some(n) => field.repetition(n).into_iter().collect(),
-                None => field.repetitions.iter().collect(),
-            };
-            for repetition in repetitions {
-                self.push_below_repetition(&mut out, repetition, path, decode);
+            None => {
+                // The check sits after the body rather than before it, so a
+                // path that has what it came for stops without walking the
+                // rest of the message looking for segments it will not use.
+                for segment in self.segments_named(&path.segment) {
+                    self.push_from_segment(&mut out, segment, path, decode, stop_after_first);
+                    if stop_after_first && !out.is_empty() {
+                        break;
+                    }
+                }
             }
         }
         out
+    }
+
+    /// Descend from one matching segment into the field, repetition,
+    /// component and subcomponent the path asks for, appending whatever it
+    /// lands on.
+    fn push_from_segment(
+        &self,
+        out: &mut Vec<String>,
+        segment: &Segment,
+        path: &Path,
+        decode: bool,
+        stop_after_first: bool,
+    ) {
+        let separators = &self.separators;
+        let Some(number) = path.field else {
+            out.push(write(
+                segment,
+                separators,
+                decode,
+                Segment::to_er7,
+                Segment::to_text,
+            ));
+            return;
+        };
+        let Some(field) = segment.field(number) else {
+            return;
+        };
+        // A header segment's first two fields are the delimiters, which
+        // are structure rather than data and so are never decoded.
+        if segment.is_header() && number <= 2 {
+            out.push(field.to_er7(separators));
+            return;
+        }
+        if path.repetition.is_none() && path.component.is_none() {
+            out.push(write(
+                field,
+                separators,
+                decode,
+                Field::to_er7,
+                Field::to_text,
+            ));
+            return;
+        }
+        match path.repetition {
+            Some(n) => {
+                if let Some(repetition) = field.repetition(n) {
+                    self.push_below_repetition(out, repetition, path, decode);
+                }
+            }
+            None => {
+                for repetition in &field.repetitions {
+                    self.push_below_repetition(out, repetition, path, decode);
+                    if stop_after_first && !out.is_empty() {
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     /// Descend from a repetition into the component and subcomponent the

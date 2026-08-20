@@ -103,7 +103,27 @@ with `set` becomes `O'BRIEN \T\ SONS` and cannot break the structure;
 written by assignment, the `&` would split the component in two the next
 time the message was parsed.
 
+**`set` takes text, not ER7.** Everything given to it is data, so every
+delimiter in it is encoded — `~` included. Handing it a whole field's ER7
+therefore collapses that field: `A~B~C` becomes one value holding two
+`\R\` sequences, which is `set` doing exactly what it promises and the
+wrong tool for the job. Copying a value that is more than one leaf — a
+repeating field, a composite — is a structural edit, below.
+
 Structural edits — adding a repetition, extending a segment with more
-fields — are done by manipulating the public `Vec` fields directly. The
-crate does not offer `push_field`-style helpers; `Vec` already has them,
-and wrapping them would only add surface without adding meaning.
+fields, moving a field from one message to another — are done by
+manipulating the public `Vec` fields directly. Every level is a public
+`Vec` and every node is `Clone`, so a repeating field moves as itself:
+
+```rust,ignore
+let ids = source.segment("PID").unwrap().field(3).unwrap().clone();
+let pid = target.segment_at_mut("PID", 1).unwrap();
+if pid.fields.len() < 3 {
+    pid.fields.resize(3, Field::default());   // 1-based position 3
+}
+pid.fields[2] = ids;                          // repetitions stay repetitions
+```
+
+The crate does not offer `push_field`- or `set_field`-style helpers; `Vec`
+already has them, and wrapping them would only add surface without adding
+meaning.
