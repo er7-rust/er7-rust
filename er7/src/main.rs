@@ -120,7 +120,15 @@ fn run() -> Result<(), Exit> {
                     _ => return fail(format!("--terminator wants cr, lf, or crlf, not {text:?}")),
                 }
             }
-            "-" => input = Some("-".to_string()),
+            // Guarded like any other input argument: without the check, a
+            // second input given as "-" would silently replace the first
+            // and read standard input instead of the named file.
+            "-" => {
+                if input.is_some() {
+                    return fail("more than one input file given");
+                }
+                input = Some("-".to_string());
+            }
             _ if arg.starts_with('-') => return fail(format!("unknown option: {arg}")),
             _ if input.is_some() => return fail("more than one input file given"),
             _ => input = Some(arg),

@@ -125,6 +125,9 @@ fn run() -> Result<(), Exit> {
                     _ => return fail(format!("--terminator wants cr, lf, or crlf, not {text:?}")),
                 }
             }
+            // Guarded like any other input: without the check, a second
+            // "-" would silently replace the first input with stdin.
+            "-" if input.is_some() => return fail("more than one input file given"),
             "-" => input = Some("-".to_string()),
             _ if arg.starts_with('-') => return fail(format!("unknown option: {arg}")),
             _ if input.is_some() => return fail("more than one input file given"),

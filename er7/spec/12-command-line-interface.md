@@ -16,7 +16,9 @@ er7 [OPTIONS] [FILE]
 ```
 
 `FILE` holds one or more messages, or a batch file. `-` or no argument
-reads standard input. Input is split per [§9](09-batch-input.md), and
+reads standard input. At most one input may be named: a second one, `-`
+included, is an error rather than a silent replacement of the first.
+Input is split per [§9](09-batch-input.md), and
 **every message is parsed before anything is written**, so a malformed
 message late in a batch fails the run rather than producing half an output.
 
