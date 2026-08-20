@@ -1,2 +1,10 @@
 /target
 .claude/settings.local.json
+
+# cargo-fuzz working state: the built fuzzers, the corpus they grow, and
+# the inputs they save when a target fails. The targets themselves and
+# their Cargo.toml are tracked; none of this is.
+er7/fuzz/target
+er7/fuzz/corpus
+er7/fuzz/artifacts
+er7/fuzz/Cargo.lock

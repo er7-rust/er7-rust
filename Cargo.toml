@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
     "er7",
+    "er7-bench",
     "er7-redact",
     "serde-er7",
 ]

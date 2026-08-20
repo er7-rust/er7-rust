@@ -1,0 +1,40 @@
+[package]
+name = "er7-fuzz"
+version = "0.0.0"
+edition = "2024"
+authors = ["Joel Parker Henderson <joel@joelparkerhenderson.com>"]
+publish = false
+
+# Its own workspace, and deliberately not a member of the one above: the
+# fuzzers need `libfuzzer-sys` and a nightly toolchain, and `er7` itself
+# must keep an empty dependency table — a rule its own test enforces
+# (`the_crate_has_no_runtime_dependencies`, spec §15.1, R25).
+[workspace]
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+er7 = { path = ".." }
+
+[[bin]]
+name = "parse_roundtrip"
+path = "fuzz_targets/parse_roundtrip.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "escape_roundtrip"
+path = "fuzz_targets/escape_roundtrip.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "query_paths"
+path = "fuzz_targets/query_paths.rs"
+test = false
+doc = false
+bench = false

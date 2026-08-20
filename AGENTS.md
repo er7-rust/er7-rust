@@ -38,6 +38,33 @@ cargo fmt --check                                  # workspace-wide
 cargo test -p er7-redact                           # one crate only
 ```
 
+## Benchmarks and fuzzing
+
+Both live outside the crates they measure, so that `er7` can keep an empty
+dependency table — not even a development one, which its own test enforces
+(`the_crate_has_no_runtime_dependencies`, `er7` spec §15.1, R25).
+
+```sh
+cargo bench -p er7-bench                          # criterion; er7-bench/benches/
+cargo bench -p er7-bench -- --save-baseline before   # then compare a change
+```
+
+`er7-bench` is a workspace member with `publish = false`; it exists only to
+own the `criterion` dependency.
+
+```sh
+cd er7 && cargo +nightly fuzz list                # parse_roundtrip, escape_roundtrip, query_paths
+cd er7 && cargo +nightly fuzz run parse_roundtrip -- -max_total_time=60
+```
+
+`er7/fuzz` is its own workspace (nightly plus `libfuzzer-sys`), and each
+target asserts a property the spec states rather than merely checking for
+panics — rendering is a fixed point, tokenizing is lossless, encoding then
+decoding is the identity, `query` agrees with the head of `query_all`. A
+crash writes its input to `er7/fuzz/artifacts/<target>/`; reproduce it with
+`cargo +nightly fuzz run <target> <that file>`. Corpus and artifacts are
+gitignored.
+
 See [§1.2](spec/01-family-policy.md#12-the-four-checks) for what each of
 the four checks verifies and why they're the same across all three crates.
 

@@ -1,0 +1,29 @@
+[package]
+name = "er7-bench"
+version = "0.0.0"
+edition = "2024"
+authors = ["Joel Parker Henderson <joel@joelparkerhenderson.com>"]
+description = "Criterion benchmarks for the er7 crate; not published"
+license = "MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only"
+publish = false
+
+# This crate exists so that `er7` itself can keep an empty `[dependencies]`
+# *and* an empty `[dev-dependencies]` — a rule its own test enforces
+# (`the_crate_has_no_runtime_dependencies`, spec §15.1 R25). Criterion lives
+# here instead, one directory over, where it cannot reach the audit surface
+# of the crate being measured.
+[dependencies]
+er7 = { path = "../er7", version = "0" }
+
+[dev-dependencies]
+criterion = { version = "0.5", default-features = false, features = ["cargo_bench_support"] }
+
+[lib]
+path = "src/lib.rs"
+
+[[bench]]
+name = "er7"
+harness = false
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
