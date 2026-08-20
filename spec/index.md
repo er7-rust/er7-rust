@@ -21,6 +21,7 @@ does.
 | Section | Covers |
 | ------- | ------ |
 | [§1 Family policy](01-family-policy.md) | Dependency minimalism, the four build checks, the spec-driven-development discipline itself, the synthetic-data safety rule, and how workspace path dependencies relate to published version requirements |
+| [§2 Rust MSRV: N-3](rust-msrv-n-minus-3.md) | The shared minimum supported Rust version — current stable minus three releases — why the window is that wide, and what an MSRV bump implies for a release |
 
 ## What belongs here vs. in a crate's own spec
 
@@ -30,6 +31,7 @@ does.
 | "What the four checks are and why they run" | Rule IDs for behaviour those checks enforce |
 | "What spec-driven development means, generically" | This crate's own section map and rule index |
 | "Never commit real patient data" | Crate-specific safety consequences (e.g. what a redaction crate must never do with a report) |
+| "The MSRV is current stable minus three" | The `rust-version` value that crate's `Cargo.toml` actually declares |
 
 If you are about to write something that is true of one crate but not
 necessarily the other two, it belongs in that crate's own `spec/`, not

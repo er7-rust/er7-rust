@@ -42,9 +42,17 @@ test suite needs a data format.
 | Field | Value |
 | ----- | ----- |
 | Edition | 2024 |
-| MSRV | 1.85 — the edition-2024 floor, matching `er7` |
+| MSRV | 1.95 — current stable minus three, matching `er7` |
 | Targets | anything `std` builds for; no platform-specific code |
 | `no_std` | not supported; the crate owns `String`s throughout |
+
+The MSRV comes from the workspace-wide **N-3** policy — this family
+supports at least current stable Rust minus three releases — stated once in
+[`spec/rust-msrv-n-minus-3.md`](../../spec/rust-msrv-n-minus-3.md) and
+pinned as `rust-version` in `Cargo.toml`. Edition 2024's own 1.85 floor is
+below that and no longer binds. This crate never holds a floor older than
+`er7`'s: it depends on `er7`, so a caller who can build this crate must be
+able to build that one too.
 
 ## 12.3 Lints
 

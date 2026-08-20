@@ -15,7 +15,7 @@ changes.
 | Crate        | `er7`                                                                        |
 | Purpose      | Parse, query, edit, and write HL7 v2 messages in the ER7 pipe-hat encoding.  |
 | Layer        | Encoding only — no dictionary, no validation, no transport.                  |
-| Language     | Rust (edition 2024, MSRV 1.85)                                               |
+| Language     | Rust (edition 2024, MSRV 1.95)                                               |
 | License      | MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only            |
 | Runtime deps | **none**, and that is a guarantee (R25)                                      |
 | Workspace    | one of three members in this repository — see [`../AGENTS.md`](../AGENTS.md) |

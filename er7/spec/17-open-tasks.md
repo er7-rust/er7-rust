@@ -30,16 +30,26 @@ Done when: a `cargo-fuzz` target feeds arbitrary bytes to `parse` and
 in [§13.5](13-testing-strategy.md); and the fuzz target lives outside the
 published crate so R25 still holds.
 
-## T2 — Pin and check the MSRV
+## T2 — Check the pinned MSRV in CI
 
 **Scheduled:** [§16.1](16-roadmap.md) priority 2.
 
-[§14.4](14-compatibility-and-versioning.md) states an MSRV of 1.85, but
-nothing enforces it, so a future change can raise it silently.
+`rust-version = "1.95"` is now pinned in `Cargo.toml`, matching the
+workspace **N-3** policy
+([`spec/rust-msrv-n-minus-3.md`](../../spec/rust-msrv-n-minus-3.md)) and
+[§14.4](14-compatibility-and-versioning.md). Pinning alone does not prove
+the crate still builds there: `rust-version` is a declaration Cargo checks
+against the *caller's* toolchain, not evidence that this code compiles on
+1.95. Nothing yet stops a change from using a 1.97 API and only failing for
+a downstream user.
 
-Done when: `rust-version = "1.85"` is in `Cargo.toml`, and the value is
-verified against the earliest toolchain that compiles the crate rather than
-assumed from the edition.
+Done when: CI builds and tests the crate on the pinned toolchain
+(`rustup toolchain install 1.95 && cargo +1.95 test`) on every push, so the
+declared value is verified rather than asserted; and the same job exists
+for `er7-redact` and `serde-er7`, since the policy is workspace-wide. The
+rolling window means the pinned value changes as stable advances, so the
+job should read `rust-version` from the manifest rather than hard-coding a
+version.
 
 ## T3 — Decide whether benchmarks earn their keep
 

@@ -159,8 +159,12 @@ gets audited, and this crate is meant to sit at the bottom of a stack.
 
 ## What Rust version does it need?
 
-Edition 2024, so Rust 1.85 or later. There is no `no_std` support — the
-crate uses `String` and `Vec` throughout.
+Rust 1.95 or later. The workspace policy is **N-3** — the minimum
+supported version is whatever stable Rust is today, minus three releases —
+so the floor moves forward roughly twice a year rather than being frozen
+([spec §14.4](../../spec/14-compatibility-and-versioning.md)). Edition 2024
+sets a hard floor of 1.85 underneath that, which no longer binds. There is
+no `no_std` support — the crate uses `String` and `Vec` throughout.
 
 ## Is it fast?
 

@@ -15,7 +15,7 @@ changes.
 | Crate        | `serde-er7`                                                                  |
 | Purpose      | Serde `Serialize`/`Deserialize` for every `er7` type, so an ER7 message can flow through any Serde data format. |
 | Layer        | A bridge crate on top of `er7`'s encoding layer — no dictionary, no format, no validation of its own. |
-| Language     | Rust (edition 2024)                                                         |
+| Language     | Rust (edition 2024, MSRV 1.95)                                              |
 | License      | MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only            |
 | Runtime deps | exactly two: `serde` and `er7` (spec S1) — no format crate (spec S2)        |
 | Workspace    | one of three members in this repository — see [`../AGENTS.md`](../AGENTS.md) |

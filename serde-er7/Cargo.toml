@@ -2,6 +2,7 @@
 name = "serde-er7"
 version = "0.1.1"
 edition = "2024"
+rust-version = "1.95"
 authors = ["Joel Parker Henderson <joel@joelparkerhenderson.com>"]
 description = "Serialize and deserialize ER7 (HL7 v2 pipe-hat encoding) message trees with Serde, so they can flow through JSON, YAML, or any other Serde data format"
 license = "MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only"

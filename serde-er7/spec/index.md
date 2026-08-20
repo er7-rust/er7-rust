@@ -23,7 +23,7 @@ tree `er7` already defines.
 | [5](05-error-handling.md) | Error handling | How malformed input is reported, and by what mechanism |
 | [6](06-ergonomics.md) | Ergonomics: Deref and From | The non-normative conveniences layered over the wrapper types |
 | [7](07-testing-strategy.md) | Testing strategy | Unit, doc, and integration tests, and what each layer is responsible for catching |
-| [8](08-versioning-and-compatibility.md) | Versioning and compatibility | SemVer commitments, the wire-shape table as a compatibility surface |
+| [8](08-versioning-and-compatibility.md) | Versioning and compatibility | SemVer commitments, the wire-shape table as a compatibility surface, the N-3 Rust MSRV |
 | [9](09-roadmap-and-open-questions.md) | Roadmap and open questions | What is deliberately deferred, and why |
 | [10](10-glossary.md) | Glossary | Terms this document uses that are specific to this crate |
 

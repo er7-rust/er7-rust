@@ -14,7 +14,7 @@ it ships. There is no separate `plan.md`.
 | Priority | Item | Task | Rationale |
 | -------- | ---- | ---- | --------- |
 | 1 | Prove panic-freedom by fuzzing the parser | [T1](17-open-tasks.md) | R6 claims nothing below the header fails. Today that is argued from the code, not demonstrated. It is the single most load-bearing unproven claim in the spec. |
-| 2 | Pin and check the MSRV | [T2](17-open-tasks.md) | [§14.4](14-compatibility-and-versioning.md) states 1.85 but nothing enforces it, so it can drift silently. |
+| 2 | Check the pinned MSRV in CI | [T2](17-open-tasks.md) | `rust-version = "1.95"` is pinned per the workspace N-3 policy, but no job builds on that toolchain, so the declared floor can drift from the real one silently. |
 | 3 | Streaming reader for large batch files | [T4](17-open-tasks.md) | `split_messages` holds the whole input in memory. Batch files in production reach hundreds of megabytes. |
 
 ## 16.2 Toward 1.0.0

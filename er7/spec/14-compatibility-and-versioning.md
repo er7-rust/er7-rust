@@ -54,13 +54,22 @@ Anything that *would* require knowing the version is out of scope by R24.
 | Item | Value |
 | ---- | ----- |
 | Edition | 2024 |
-| Minimum supported Rust version | 1.85 (the first release supporting edition 2024) |
+| Minimum supported Rust version | 1.95 — current stable minus three releases |
 | Target support | any target with `std`; no platform-specific code |
 | `no_std` | not supported — the crate uses `String` and `Vec` throughout |
 
-The MSRV is not currently pinned in `Cargo.toml` or checked in CI;
-[T2](17-open-tasks.md) tracks doing so. Raising the MSRV is treated as a
-breaking change.
+The MSRV comes from the workspace-wide **N-3** policy — this family
+supports at least current stable Rust minus three releases — stated in
+[`spec/rust-msrv-n-minus-3.md`](../../spec/rust-msrv-n-minus-3.md) and
+shared with `er7-redact` and `serde-er7`. Edition 2024 sets a hard floor of
+1.85, so the effective MSRV is `max(1.85, N-3)`; that floor stopped binding
+once stable reached 1.88. The value is pinned as `rust-version` in
+`Cargo.toml`, but no CI job yet builds against that exact toolchain —
+[T2](17-open-tasks.md) tracks closing that gap. N-3 is a floor this crate
+promises to stay above, not a value chased release by release: the pin
+moves when the code genuinely needs something newer, and that bump is a
+breaking change, so it lands in a release allowed to break rather than in a
+patch.
 
 ## 14.5 Stability of spec identifiers
 
