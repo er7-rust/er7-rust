@@ -21,7 +21,7 @@ it. A rule with no test is a bug in this table.
 | D6 | `null_collapses_the_named_position` | `src/redact.rs` |
 | D7 | `applies_rules_in_order` | `src/redact.rs` |
 | D8 | `a_rule_that_matches_nothing_does_nothing` | `src/redact.rs` |
-| D9 | `the_fallback_covers_what_no_rule_named` | `src/redact.rs` |
+| D9 | `rejecting_by_default_covers_what_no_rule_named`, `a_segment_wide_accept_is_not_narrowed` | `src/redact.rs` |
 | D10 | `every_action_but_pseudonym_is_idempotent` | `src/action.rs` |
 | D11 | `replacement_text_cannot_break_the_message` | `tests/integration.rs` |
 | D12 | `pseudonyms_are_stable_and_keyed`, `pseudonyms_link_across_messages` | `src/pseudonym.rs`, `tests/integration.rs` |
@@ -31,13 +31,20 @@ it. A rule with no test is a bug in this table.
 | D16 | `the_crate_has_one_runtime_dependency` | `tests/integration.rs` |
 | D17 | `an_untouched_message_round_trips` | `tests/integration.rs` |
 | D18 | `a_policy_round_trips_through_display`, `parses_every_action`, `the_sample_policy_exercises_every_action` | `src/policy.rs`, `src/action.rs`, `tests/integration.rs` |
+| D19 | `reject_beats_accept_for_the_same_field`, `reject_segment_beats_a_narrower_accept` | `src/redact.rs` |
+| D20 | `appending_never_weakens_the_defaults` | `src/policy.rs` |
+| D21 | `an_unrecognised_payload_follows_the_policy`, `cli_masks_an_unrecognised_payload` | `src/redact.rs`, `tests/integration.rs` |
 
-Three further tests carry no single rule, because they assert the
-whole-message properties every rule exists to produce:
-`redacts_the_identifiers_a_sample_carries` ([§11.5](#115-the-property-every-action-test-asserts)),
-`redaction_is_reproducible` ([§2.7](02-redaction-model.md)), and
+Further tests carry no single rule, because they assert the whole-message
+properties every rule exists to produce, or a contract that is a table
+rather than a rule: `redacts_the_identifiers_a_sample_carries`
+([§11.5](#115-the-property-every-action-test-asserts)),
+`redaction_is_reproducible` ([§2.7](02-redaction-model.md)),
 `cli_a_policy_that_changes_nothing_is_not_an_error`
-([§10.4](10-command-line-interface.md)).
+([§10.4](10-command-line-interface.md)),
+`the_two_bare_postures_say_what_they_are` ([§5.6](05-built-in-policies.md)),
+and the `cli_*` tests that pin [§10.2](10-command-line-interface.md)'s
+table of which policy runs.
 
 The table is **checked by `cargo test`**, not only by review:
 `every_rule_has_a_coverage_row` reads this file and
@@ -87,7 +94,7 @@ Test messages are either written inline or taken from `samples/`:
 | ------ | --------- |
 | `samples/adt_a08.er7` | an admission update carrying the full identifier set: `PID`, `NK1`, `PV1`, `GT1`, `IN1`, and a local `ZPD` segment |
 | `samples/oru_r01.er7` | a lab result: repeated `OBX`, a repeated field, subcomponents, an escaped `&`, and free text no positional policy touches |
-| `samples/de-identify.policy` | a policy file exercising every action, comments, blank lines, and a fallback |
+| `samples/de-identify.policy` | a policy file exercising every action, comments, blank lines, and both default lines |
 
 All sample data is **synthetic**, and this matters more here than in any
 sibling crate: a repository about redaction is exactly where somebody

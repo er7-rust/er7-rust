@@ -41,8 +41,20 @@ downstream crate has too.
    every position where it does not.
 3. **Record what was named.** Every leaf a rule reached goes into a
    `HashSet<Position>`, whether or not it changed. That is what makes
-   `Keep` exempt a position from the fallback.
-4. **Fallback last.** A second walk over every leaf not in that set.
+   `Keep` exempt a position from the posture.
+4. **The posture last.** Where the policy rejects by default, a second
+   walk applies its action to every leaf not in that set. Where it
+   accepts, there is no second walk at all.
+
+That ordering is also why a reject rule beats an accept rule for the same
+leaf whichever order the two are in (D19): `Keep` writes nothing, so it can
+only ever add a position to the set, never restore a value another rule
+already replaced.
+
+`Redactor::unrecognised` is the one thing outside the pass. A payload that
+`er7::parse` rejected has no tree to walk, so the policy's `Unrecognised`
+says what to write in its place — or `None`, meaning the caller reports
+that the payload did not parse (§2.8).
 
 `Position` is `(segment index, field, repetition, component,
 subcomponent)`, all 1-based below the segment.
@@ -60,8 +72,8 @@ subcomponent)`, all 1-based below the segment.
 
 ## The public API surface
 
-`Redactor`, `Policy`, `Rule`, `Action`, `Report`, `Change`, `pseudonym`,
-`Error`. Everything is re-exported at the crate root; the modules exist so
+`Redactor`, `Policy`, `Posture`, `Unrecognised`, `Rule`, `Action`,
+`Report`, `Change`, `pseudonym`, `Error`. Everything is re-exported at the crate root; the modules exist so
 that the code has somewhere to live, not so that callers navigate them.
 
 `Policy` and `Rule` have public fields, and that is deliberate: a policy is

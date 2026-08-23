@@ -1,9 +1,9 @@
-//! Rules, policies, the two built-in policies, and the policy file format.
+//! Rules, policies, the four built-in policies, and the policy file format.
 //!
 //! A [`Rule`] is one HL7 path and one [`Action`]. A [`Policy`] is an
-//! ordered list of rules, plus an optional fallback action that covers
-//! every leaf no rule named — which is what turns "redact these positions"
-//! into "redact everything except these positions".
+//! ordered list of rules plus the two things it does by default: its
+//! [`Posture`] — accept or reject every leaf no rule named — and what it
+//! does with a payload that is not ER7 at all ([`Unrecognised`]).
 //!
 //! Specified by spec §5 (the built-in policies) and §6 (the file format).
 
@@ -17,6 +17,11 @@ use std::fmt;
 /// (that crate's spec §8.1): an omitted occurrence index means *every*
 /// segment of that name and *every* repetition of that field, which is
 /// what lets `OBX-5` cover a message with forty results.
+///
+/// A rule whose action is [`Action::Keep`] **accepts** the position it
+/// names; a rule with any other action **rejects** it. Where both name the
+/// same leaf, the rejecting one wins, whichever order they are in (D19,
+/// spec §2.4).
 ///
 /// Example:
 ///
@@ -98,14 +103,224 @@ impl fmt::Display for Rule {
     }
 }
 
-/// The path that sets a policy's fallback rather than adding a rule.
-const FALLBACK: &str = "*";
+/// The first word that accepts by default rather than naming a position.
+const ACCEPT: &str = "accept";
 
-/// An ordered list of rules, plus the action for everything else.
+/// The first word that rejects by default.
+const REJECT: &str = "reject";
+
+/// The first word that says what an unrecognised payload gets.
+const UNRECOGNISED: &str = "unrecognised";
+
+/// The spelling of [`UNRECOGNISED`] this crate also reads. Both are in the
+/// field, and a policy file that fails over one letter helps nobody.
+const UNRECOGNIZED: &str = "unrecognized";
+
+/// The path that set the fallback before 0.2, kept only to be refused with
+/// a sentence naming its replacement (spec §6.3).
+const REMOVED_FALLBACK: &str = "*";
+
+/// The column the default lines pad their first word to.
+const DEFAULT_WIDTH: usize = UNRECOGNISED.len();
+
+/// What a policy does with every leaf that no rule named (D9, spec §2.6).
+///
+/// A policy has exactly one of these and cannot leave it unstated: "redact
+/// what is listed" and "redact everything except what is listed" are
+/// different enough that guessing between them is not something a
+/// redaction crate may do.
+///
+/// Example:
+///
+/// ```
+/// # fn main() -> Result<(), er7_redact::Error> {
+/// use er7_redact::{Action, Policy, Posture, Redactor};
+///
+/// // Accept by default: only what a rule names is redacted.
+/// let listed = Policy::accept_all().with("PID-5", Action::redacted())?;
+///
+/// // Reject by default: only what a `keep` rule names survives.
+/// let all_but = Policy::reject_all().with("PID-5", Action::Keep)?;
+///
+/// assert_eq!(listed.posture, Posture::Accept);
+/// assert_eq!(all_but.posture, Posture::Reject(Action::redacted()));
+///
+/// let text = "MSH|^~\\&|LAB\rPID|1||9||SMITH";
+/// let mut one = er7::parse(text)?;
+/// let mut two = er7::parse(text)?;
+/// Redactor::new(listed).redact(&mut one);
+/// Redactor::new(all_but).redact(&mut two);
+///
+/// assert_eq!(one.to_er7(), "MSH|^~\\&|LAB\rPID|1||9||REDACTED");
+/// assert_eq!(two.to_er7(), "MSH|^~\\&|REDACTED\rPID|REDACTED||REDACTED||SMITH");
+/// # Ok(())
+/// # }
+/// ```
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Posture {
+    /// Accept by default: a leaf no rule named is left exactly as it is.
+    Accept,
+    /// Reject by default: a leaf no rule named gets this action.
+    ///
+    /// `Reject(Action::Keep)` is a contradiction — rejecting a value by
+    /// leaving it alone — and [`Policy::posture`] normalises it to
+    /// [`Posture::Accept`], which is what it means.
+    Reject(Action),
+}
+
+impl Posture {
+    /// How strict this posture is, for D20; see [`Policy::append`].
+    fn strictness(&self) -> u8 {
+        match self {
+            Posture::Accept => 0,
+            Posture::Reject(_) => 1,
+        }
+    }
+
+    /// Read `accept` or `reject [ACTION]` (spec §6.3).
+    fn parse(word: &str, argument: &str) -> Result<Posture, Error> {
+        if word == ACCEPT {
+            if argument.is_empty() {
+                Ok(Posture::Accept)
+            } else {
+                Err(Error::BadPolicy(format!(
+                    "{ACCEPT:?} takes no argument, but got {argument:?}"
+                )))
+            }
+        } else if argument.is_empty() {
+            // A bare `reject` means the placeholder the built-in policies
+            // write, the same way a bare `replace` does (spec §6.2).
+            Ok(Posture::Reject(Action::redacted()))
+        } else {
+            Ok(normalise_posture(Posture::Reject(Action::parse(argument)?)))
+        }
+    }
+}
+
+impl fmt::Display for Posture {
+    /// The policy file spelling, so a policy written out re-reads as
+    /// itself (D18, spec §6.5).
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Posture::Accept => write!(f, "{ACCEPT}"),
+            Posture::Reject(action) => write!(f, "{REJECT:<DEFAULT_WIDTH$}  {action}"),
+        }
+    }
+}
+
+/// What a policy does with a payload that is not ER7 (D21, spec §2.8).
+///
+/// A payload with no header, or one that `er7` cannot parse, has no
+/// positions in it: no rule can name anything, and the posture has no leaf
+/// to reach. This is the only thing a policy can say about it.
+///
+/// Example:
+///
+/// ```
+/// use er7_redact::{Action, Policy, Redactor, Unrecognised};
+///
+/// let junk = "{\"patient\": \"EVERYWOMAN\"}";
+///
+/// // The curated policies refuse: nothing is written, and the caller says so.
+/// assert_eq!(Redactor::default().unrecognised(junk), None);
+///
+/// // `accept_all` passes it through, because it redacts nothing at all.
+/// let passed = Redactor::new(Policy::accept_all()).unrecognised(junk);
+/// assert_eq!(passed.as_deref(), Some(junk));
+///
+/// // `reject_all` masks it whole, because it rejects everything else.
+/// let masked = Redactor::new(Policy::reject_all()).unrecognised(junk);
+/// assert_eq!(masked.as_deref(), Some("*************************"));
+/// ```
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Unrecognised {
+    /// Write the payload out unchanged.
+    Pass,
+    /// Apply this action to the whole payload, as if it were one value.
+    ///
+    /// `Apply(Action::Keep)` and `Apply(Action::Null)` write nothing in
+    /// the payload's place, which is [`Unrecognised::Pass`];
+    /// [`Policy::on_unrecognised`] normalises both to it.
+    Apply(Action),
+    /// Write nothing, and tell the caller the payload did not parse.
+    ///
+    /// The library does not raise this as an error — [`crate::Redactor`]
+    /// cannot fail (spec §9.2). It returns `None`, and the caller decides
+    /// what a refusal costs; the CLI makes it a diagnostic and exit 1
+    /// (spec §10.4).
+    Refuse,
+}
+
+impl Unrecognised {
+    /// Read `refuse`, `pass`, or an action (spec §6.3).
+    fn parse(argument: &str) -> Result<Unrecognised, Error> {
+        match argument.to_ascii_lowercase().as_str() {
+            "" => Err(Error::BadPolicy(format!(
+                "{UNRECOGNISED:?} wants \"refuse\", \"pass\", or an action"
+            ))),
+            "refuse" => Ok(Unrecognised::Refuse),
+            "pass" => Ok(Unrecognised::Pass),
+            _ => Ok(normalise_unrecognised(Unrecognised::Apply(Action::parse(
+                argument,
+            )?))),
+        }
+    }
+}
+
+impl fmt::Display for Unrecognised {
+    /// The policy file spelling, after the `unrecognised` keyword.
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Unrecognised::Pass => write!(f, "pass"),
+            Unrecognised::Apply(action) => write!(f, "{action}"),
+            Unrecognised::Refuse => write!(f, "refuse"),
+        }
+    }
+}
+
+/// A posture that rejects by keeping is an accepting one; see
+/// [`Posture::Reject`].
+fn normalise_posture(posture: Posture) -> Posture {
+    match posture {
+        Posture::Reject(Action::Keep) => Posture::Accept,
+        posture => posture,
+    }
+}
+
+/// A disposition that writes nothing in the payload's place passes it
+/// through; see [`Unrecognised::Apply`].
+fn normalise_unrecognised(unrecognised: Unrecognised) -> Unrecognised {
+    match unrecognised {
+        Unrecognised::Apply(Action::Keep | Action::Null) => Unrecognised::Pass,
+        unrecognised => unrecognised,
+    }
+}
+
+/// An ordered list of rules, plus what to do with everything they do not
+/// name.
 ///
 /// Rules apply **in order**, each to the message as it stands (D7, spec
-/// §2.4). The fallback, if there is one, runs last over every leaf that no
-/// rule named (D9, spec §2.6).
+/// §2.4). The [`Posture`] then runs over every leaf that no rule named
+/// (D9, spec §2.6), and [`Unrecognised`] covers a payload that is not ER7
+/// at all (D21, spec §2.8).
+///
+/// # A reject beats an accept (D19)
+///
+/// A rule whose action is [`Action::Keep`] **accepts** the position it
+/// names; any other action **rejects** it. Where a leaf is named by both,
+/// the rejecting rule wins — **whichever order the two rules are in**, and
+/// at whatever depth, so a reject naming a whole segment beats an accept
+/// naming one field inside it.
+///
+/// A leaf named by both is a policy somebody got wrong, and redacting it
+/// is the direction that fails safely (spec §1.5, priority 1): a value
+/// redacted by mistake costs a policy edit, and a value left behind by
+/// mistake cannot be recalled.
+///
+/// The mirror of that rule: an accept naming a whole segment is **not**
+/// narrowed by the posture. `MSH keep` exempts every leaf of the header,
+/// including ones the policy's author never saw. Only a reject rule
+/// reaches back into it.
 ///
 /// Example:
 ///
@@ -114,14 +329,12 @@ const FALLBACK: &str = "*";
 /// use er7_redact::{Action, Policy, Redactor};
 ///
 /// // Redact what is listed...
-/// let listed = Policy::new()
+/// let listed = Policy::accept_all()
 ///     .with("PID-5", Action::redacted())?
 ///     .with("PID-7", Action::First(4))?;
 ///
 /// // ...or redact everything that is not.
-/// let everything_else = Policy::new()
-///     .with("MSH", Action::Keep)?
-///     .fallback(Action::redacted());
+/// let everything_else = Policy::reject_all().with("MSH", Action::Keep)?;
 ///
 /// let mut message = er7::parse("MSH|^~\\&|LAB\rPID|1||9||SMITH^JOHN||19610615")?;
 /// Redactor::new(listed).redact(&mut message);
@@ -133,32 +346,103 @@ const FALLBACK: &str = "*";
 pub struct Policy {
     /// The rules, in the order they apply.
     pub rules: Vec<Rule>,
-    /// What to do with every leaf no rule named, if anything.
-    pub fallback: Option<Action>,
+    /// What every leaf no rule named gets.
+    pub posture: Posture,
+    /// What a payload that is not ER7 gets.
+    pub unrecognised: Unrecognised,
 }
 
-// `Default` is deliberately not implemented. An empty default would
-// silently redact nothing, and a curated default would silently redact
-// forty positions; both are surprises a redaction crate cannot afford, so
-// a caller names the policy they mean (spec §5).
-#[allow(clippy::new_without_default)]
+// `Default` is deliberately not implemented, and neither is a `new`. Both
+// would have to choose a posture without being asked: an accepting empty
+// policy silently redacts nothing, and a curated one silently redacts
+// forty positions. A caller names the policy they mean (spec §5).
 impl Policy {
-    /// An empty policy: no rules, no fallback, and so no effect.
+    /// Accept everything: no rules, nothing redacted, and a payload that
+    /// is not ER7 passed through unchanged (spec §5.6).
     ///
-    /// This is the starting point for building one. The curated policy is
-    /// [`Policy::patient_identifiers`]; there is deliberately no `Default`
-    /// implementation, because either choice of default would be a silent
-    /// one.
+    /// This is the starting point for building a policy rule by rule. On
+    /// its own it does nothing at all, and it says so: a policy named
+    /// "accept all" that quietly replaced an unparseable payload with
+    /// `***` would be the one surprise it has no excuse for.
+    ///
+    /// A policy *file* that states no defaults is not quite this: it
+    /// accepts by default too, but it refuses an unrecognised payload,
+    /// because it was written by somebody who did not think about one
+    /// (spec §6.1). Ask for [`Unrecognised::Pass`] in the file to get it.
+    ///
+    /// Example:
+    ///
+    /// ```
+    /// # fn main() -> Result<(), er7_redact::Error> {
+    /// use er7_redact::{Action, Policy, Posture, Redactor, Unrecognised};
+    ///
+    /// let policy = Policy::accept_all();
+    /// assert_eq!(policy.posture, Posture::Accept);
+    /// assert_eq!(policy.unrecognised, Unrecognised::Pass);
+    /// assert!(policy.is_empty());
+    ///
+    /// // It changes nothing, and reports nothing.
+    /// let mut message = er7::parse("MSH|^~\\&|LAB\rPID|1||9||SMITH")?;
+    /// let report = Redactor::new(policy).redact(&mut message);
+    /// assert_eq!(message.to_er7(), "MSH|^~\\&|LAB\rPID|1||9||SMITH");
+    /// assert!(report.is_empty());
+    /// # Ok(())
+    /// # }
+    /// ```
     #[must_use]
-    pub fn new() -> Policy {
+    pub fn accept_all() -> Policy {
         Policy {
             rules: Vec::new(),
-            fallback: None,
+            posture: Posture::Accept,
+            unrecognised: Unrecognised::Pass,
+        }
+    }
+
+    /// Reject everything: no rules, `replace REDACTED` over every leaf,
+    /// and a payload that is not ER7 masked whole (spec §5.6).
+    ///
+    /// The strictest thing in the crate, and it takes the header with it:
+    /// everything from `MSH-3` on reads `REDACTED`, so the message is no
+    /// longer routable or identifiable. [`Policy::all_but_the_header`] is
+    /// the same posture with the header kept, and is usually what is
+    /// wanted.
+    ///
+    /// `MSH-1` and `MSH-2` survive, as they survive everything: they are
+    /// the delimiters themselves (D5, spec §4.4).
+    ///
+    /// Example:
+    ///
+    /// ```
+    /// # fn main() -> Result<(), er7_redact::Error> {
+    /// use er7_redact::{Action, Policy, Redactor};
+    ///
+    /// let policy = Policy::reject_all().with("OBX-2", Action::Keep)?;
+    /// let mut message = er7::parse("MSH|^~\\&|LAB\rOBX|1|NM|2093-3||187")?;
+    /// Redactor::new(policy).redact(&mut message);
+    ///
+    /// assert_eq!(
+    ///     message.to_er7(),
+    ///     "MSH|^~\\&|REDACTED\rOBX|REDACTED|NM|REDACTED||REDACTED",
+    /// );
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[must_use]
+    pub fn reject_all() -> Policy {
+        Policy {
+            rules: Vec::new(),
+            posture: Posture::Reject(Action::redacted()),
+            unrecognised: Unrecognised::Apply(Action::Mask('*')),
         }
     }
 
     /// The curated policy: the positions that carry a patient identifier
     /// in `PID`, `NK1`, `PV1`, `GT1`, and `IN1`.
+    ///
+    /// It **accepts by default**, so a position the table does not name is
+    /// left as it is, and it **refuses** a payload that is not ER7: a list
+    /// of positions has no opinion about input with no positions in it,
+    /// and refusing is the fail-closed answer (spec §2.8).
     ///
     /// The whole table is written out in spec §5.1, with a reason for each
     /// action. **It is a starting point, not a compliance certification**
@@ -258,17 +542,25 @@ impl Policy {
             .collect();
         Policy {
             rules,
-            fallback: None,
+            posture: Posture::Accept,
+            unrecognised: Unrecognised::Refuse,
         }
     }
 
-    /// The other posture: replace every value in the message, except the
-    /// `MSH` header that keeps it routable (spec §5.2).
+    /// The other posture, curated: reject every value, and keep the `MSH`
+    /// header so the message stays routable (spec §5.2).
     ///
     /// Use it when the message is unfamiliar, or when the answer to "is
     /// there anything else in here?" has to be "no" rather than "not that
     /// I listed". The cost is that nothing below `MSH` is clinically
     /// meaningful afterwards; add `Keep` rules for what a test needs.
+    ///
+    /// Like [`Policy::patient_identifiers`] it **refuses** a payload that
+    /// is not ER7 rather than guessing (spec §2.8).
+    ///
+    /// The header exception is an ordinary accept rule, so an ordinary
+    /// reject rule overrides it (D19) — `.with("MSH", Action::redacted())`
+    /// takes the header too.
     ///
     /// Example:
     ///
@@ -276,7 +568,7 @@ impl Policy {
     /// # fn main() -> Result<(), er7_redact::Error> {
     /// use er7_redact::{Action, Policy, Redactor};
     ///
-    /// let policy = Policy::everything().with("OBX-2", Action::Keep)?;
+    /// let policy = Policy::all_but_the_header().with("OBX-2", Action::Keep)?;
     /// let mut message = er7::parse("MSH|^~\\&|LAB\rOBX|1|NM|2093-3||187")?;
     /// Redactor::new(policy).redact(&mut message);
     ///
@@ -293,11 +585,11 @@ impl Policy {
     /// Only if the `MSH` literal below stops being an HL7 path, which no
     /// caller can cause.
     #[must_use]
-    pub fn everything() -> Policy {
-        Policy::new()
+    pub fn all_but_the_header() -> Policy {
+        Policy::reject_all()
             .with("MSH", Action::Keep)
             .expect("built-in paths are well-formed")
-            .fallback(Action::redacted())
+            .on_unrecognised(Unrecognised::Refuse)
     }
 
     /// Add a rule, for building a policy in one expression.
@@ -310,40 +602,65 @@ impl Policy {
         Ok(self)
     }
 
-    /// Set the action for every leaf no rule named (spec §2.6).
+    /// Set what every leaf no rule named gets (spec §2.6).
     ///
-    /// [`Action::Keep`] means "no fallback", which is also the default,
-    /// so that the policy file's `* keep` and this method agree.
+    /// [`Posture::Reject`] with [`Action::Keep`] is normalised to
+    /// [`Posture::Accept`], so that the policy file's `reject keep` and
+    /// this method agree about what they mean.
+    ///
+    /// This is the only way to make a policy *less* strict: appending one
+    /// policy to another never weakens it (D20, [`Policy::append`]).
     #[must_use]
-    pub fn fallback(mut self, action: Action) -> Policy {
-        self.fallback = match action {
-            Action::Keep => None,
-            action => Some(action),
-        };
+    pub fn posture(mut self, posture: Posture) -> Policy {
+        self.posture = normalise_posture(posture);
+        self
+    }
+
+    /// Set what a payload that is not ER7 gets (spec §2.8).
+    ///
+    /// [`Unrecognised::Apply`] with an action that writes nothing —
+    /// [`Action::Keep`] or [`Action::Null`] — is normalised to
+    /// [`Unrecognised::Pass`], which is what it does.
+    #[must_use]
+    pub fn on_unrecognised(mut self, unrecognised: Unrecognised) -> Policy {
+        self.unrecognised = normalise_unrecognised(unrecognised);
         self
     }
 
     /// Read a policy file (spec §6).
     ///
-    /// Blank lines and `#` comments are ignored; every other line is a
-    /// path, whitespace, and an action, in the order they apply. A path of
-    /// `*` sets the fallback rather than adding a rule.
+    /// Blank lines and `#` comments are ignored; every other line is
+    /// either a path, whitespace, and an action, in the order they apply,
+    /// or one of the three reserved first words — `accept`, `reject`, and
+    /// `unrecognised` — that set what the policy does by default.
+    ///
+    /// A file that states no defaults accepts by default and **refuses** a
+    /// payload that is not ER7: unlike [`Policy::accept_all`], a file was
+    /// written by somebody who may simply not have considered one, and
+    /// refusing is the answer that cannot lose a value quietly.
     ///
     /// Example:
     ///
     /// ```
     /// # fn main() -> Result<(), er7_redact::Error> {
-    /// use er7_redact::{Action, Policy};
+    /// use er7_redact::{Action, Policy, Posture, Unrecognised};
     ///
     /// let policy = Policy::parse("
     ///     MSH    keep      # everything but the header...
     ///     OBX-5  keep      # ...and the numbers the test asserts on
     ///
-    ///     *      replace REDACTED
+    ///     reject replace REDACTED
+    ///     unrecognised mask *
     /// ")?;
     ///
     /// assert_eq!(policy.rules.len(), 2);
-    /// assert_eq!(policy.fallback, Some(Action::redacted()));
+    /// assert_eq!(policy.posture, Posture::Reject(Action::redacted()));
+    /// assert_eq!(policy.unrecognised, Unrecognised::Apply(Action::Mask('*')));
+    ///
+    /// // A file that says nothing accepts, and refuses what it cannot read.
+    /// let quiet = Policy::parse("PID-5 clear")?;
+    /// assert_eq!(quiet.posture, Posture::Accept);
+    /// assert_eq!(quiet.unrecognised, Unrecognised::Refuse);
     ///
     /// // A malformed line names itself.
     /// let e = Policy::parse("PID-5 obfuscate").unwrap_err();
@@ -359,7 +676,7 @@ impl Policy {
     /// because a typo means a value that silently was not redacted (spec
     /// §6.4).
     pub fn parse(text: &str) -> Result<Policy, Error> {
-        let mut policy = Policy::new();
+        let mut policy = Policy::accept_all().on_unrecognised(Unrecognised::Refuse);
         for (index, line) in text.lines().enumerate() {
             // A `#` starts a comment wherever it appears, so replacement
             // text cannot contain one (spec §16.4).
@@ -373,46 +690,117 @@ impl Policy {
             }
             let number = index + 1;
             let at = |e: Error| Error::BadPolicy(format!("policy line {number}: {line:?}: {e}"));
-            let Some((path, action)) = split_line(line) else {
+
+            // The reserved words come first, and a line is one or the
+            // other: three characters is the whole of a segment name, so
+            // none of them can be a path (spec §6.3).
+            let (word, argument) = match split_line(line) {
+                Some((word, argument)) => (word, argument),
+                None => (line, ""),
+            };
+            let lowercase = word.to_ascii_lowercase();
+            match lowercase.as_str() {
+                ACCEPT | REJECT => {
+                    // A second one replaces the first rather than being
+                    // ignored: a policy has one posture, and quietly
+                    // keeping the earlier one would hide an editing
+                    // mistake (spec §6.3).
+                    policy.posture = Posture::parse(&lowercase, argument).map_err(at)?;
+                    continue;
+                }
+                UNRECOGNISED | UNRECOGNIZED => {
+                    policy.unrecognised = Unrecognised::parse(argument).map_err(at)?;
+                    continue;
+                }
+                REMOVED_FALLBACK => {
+                    // Refused rather than read as a synonym: `*` never
+                    // said which of the two postures it meant (spec §6.3).
+                    let replacement = match argument {
+                        "" | "keep" => ACCEPT.to_string(),
+                        action => format!("{REJECT} {action}"),
+                    };
+                    return Err(at(Error::BadPolicy(format!(
+                        "the default line is now {replacement:?}, not {REMOVED_FALLBACK:?}"
+                    ))));
+                }
+                _ => {}
+            }
+
+            if argument.is_empty() {
                 return Err(at(Error::BadPolicy(
                     "expected a path and an action".to_string(),
                 )));
-            };
-            let action = Action::parse(action).map_err(at)?;
-            if path == FALLBACK {
-                // A second fallback replaces the first rather than being
-                // ignored: a policy has one, and quietly keeping the
-                // earlier one would hide an editing mistake (spec §6.3).
-                policy = policy.fallback(action);
-                continue;
             }
-            policy.rules.push(Rule::new(path, action).map_err(at)?);
+            let action = Action::parse(argument).map_err(at)?;
+            policy.rules.push(Rule::new(word, action).map_err(at)?);
         }
         Ok(policy)
     }
 
-    /// Append another policy's rules, and its fallback if it has one.
+    /// Append another policy's rules, take the stricter posture, and
+    /// take the appended policy's disposition for an unrecognised payload
+    /// (D20, spec §2.6).
     ///
     /// This is how the command line concatenates several `--policy` files
-    /// and `--rule` arguments; order is significant (D7).
+    /// and `--rule` arguments; order is significant for the rules (D7).
+    ///
+    /// The **posture** cannot be weakened by appending, and deliberately:
+    /// a file of extra rules says nothing about its posture, so it accepts
+    /// by default, and adopting that would switch redaction off for
+    /// everything the file did not name. Silence is indistinguishable from
+    /// a decision, so silence is not trusted. To relax a posture, say so
+    /// with [`Policy::posture`].
+    ///
+    /// The disposition for an **unrecognised payload** is different, and
+    /// the appended policy's wins outright. Nothing is silent there:
+    /// [`Policy::parse`] gives a file that says nothing the strictest
+    /// disposition there is, [`Unrecognised::Refuse`], so every value one
+    /// carries is somebody's decision — and a file that goes to the
+    /// trouble of writing `unrecognised pass` should not be quietly
+    /// overruled by a default it never saw.
+    ///
+    /// Example:
+    ///
+    /// ```
+    /// # fn main() -> Result<(), er7_redact::Error> {
+    /// use er7_redact::{Action, Policy, Posture};
+    ///
+    /// let mut policy = Policy::all_but_the_header();
+    /// policy.append(Policy::parse("OBX-2 keep")?);
+    ///
+    /// // The appended file accepts by default; the strict policy still rejects.
+    /// assert_eq!(policy.posture, Posture::Reject(Action::redacted()));
+    ///
+    /// // And a stricter action in the appended policy does win.
+    /// policy.append(Policy::parse("reject clear")?);
+    /// assert_eq!(policy.posture, Posture::Reject(Action::Clear));
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn append(&mut self, other: Policy) {
         self.rules.extend(other.rules);
-        if let Some(fallback) = other.fallback {
-            self.fallback = Some(fallback);
+        if other.posture.strictness() >= self.posture.strictness() {
+            self.posture = other.posture;
         }
+        self.unrecognised = other.unrecognised;
     }
 
-    /// True when the policy would do nothing at all: no rules, no
-    /// fallback.
+    /// True when the policy would redact nothing at all: no rules, and it
+    /// accepts by default.
+    ///
+    /// What it does with an unrecognised payload is not part of this: a
+    /// policy that refuses one still redacts nothing.
     #[must_use]
     pub fn is_empty(&self) -> bool {
-        self.rules.is_empty() && self.fallback.is_none()
+        self.rules.is_empty() && self.posture == Posture::Accept
     }
 }
 
 impl fmt::Display for Policy {
     /// The canonical policy file (spec §6.5): one rule per line, paths
-    /// padded to a common width, the fallback last.
+    /// padded to a common width, then the two default lines — always
+    /// both, whatever they say, so that a reader never has to know which
+    /// default was the quiet one.
     ///
     /// Example:
     ///
@@ -420,15 +808,17 @@ impl fmt::Display for Policy {
     /// # fn main() -> Result<(), er7_redact::Error> {
     /// use er7_redact::{Action, Policy};
     ///
-    /// let policy = Policy::new()
+    /// let policy = Policy::accept_all()
     ///     .with("PID-5", Action::redacted())?
     ///     .with("PID-7", Action::First(4))?
-    ///     .fallback(Action::Clear);
+    ///     .posture(er7_redact::Posture::Reject(Action::Clear));
     ///
     /// assert_eq!(policy.to_string(), "\
     /// PID-5  replace REDACTED
     /// PID-7  first 4
-    /// *      clear
+    ///
+    /// reject        clear
+    /// unrecognised  pass
     /// ");
     ///
     /// // And it reads back as the same policy.
@@ -441,22 +831,22 @@ impl fmt::Display for Policy {
             .rules
             .iter()
             .map(|rule| rule.path.to_string().len())
-            .chain(self.fallback.iter().map(|_| FALLBACK.len()))
             .max()
             .unwrap_or(0);
         for rule in &self.rules {
             let path = rule.path.to_string();
             writeln!(f, "{path:<width$}  {}", rule.action)?;
         }
-        if let Some(fallback) = &self.fallback {
-            writeln!(f, "{FALLBACK:<width$}  {fallback}")?;
+        if !self.rules.is_empty() {
+            writeln!(f)?;
         }
-        Ok(())
+        writeln!(f, "{}", self.posture)?;
+        writeln!(f, "{UNRECOGNISED:<DEFAULT_WIDTH$}  {}", self.unrecognised)
     }
 }
 
-/// Split a policy line into its path and its action, or `None` when it has
-/// only one of the two.
+/// Split a policy line into its first word and the rest, or `None` when it
+/// has only the one.
 fn split_line(line: &str) -> Option<(&str, &str)> {
     let line = line.trim();
     let (path, action) = line.split_once(char::is_whitespace)?;
@@ -477,35 +867,62 @@ mod tests {
         // D18: the file format is a compatibility surface, so a policy
         // written out must read back as the same policy (spec §6.5).
         for policy in [
-            Policy::new(),
+            Policy::accept_all(),
+            Policy::reject_all(),
             Policy::patient_identifiers(),
-            Policy::everything(),
+            Policy::all_but_the_header(),
+            Policy::accept_all()
+                .posture(Posture::Reject(Action::Null))
+                .on_unrecognised(Unrecognised::Apply(Action::First(4))),
         ] {
             assert_eq!(Policy::parse(&policy.to_string()).unwrap(), policy);
         }
     }
 
     #[test]
-    fn parses_comments_blank_lines_and_the_fallback() {
+    fn parses_comments_blank_lines_and_the_defaults() {
         let policy = Policy::parse(
             "\
             # a comment on its own line\n\
             \n\
             PID-5   replace REDACTED   # and one after a rule\n\
             \t OBX-5  keep \n\
-            *       clear\n",
+            REJECT  clear\n\
+            Unrecognized  pass\n",
         )
         .unwrap();
         assert_eq!(policy.rules.len(), 2);
         assert_eq!(policy.rules[0].action, Action::redacted());
         assert_eq!(policy.rules[1].path.to_string(), "OBX-5");
-        assert_eq!(policy.fallback, Some(Action::Clear));
+        assert_eq!(policy.posture, Posture::Reject(Action::Clear));
+        assert_eq!(policy.unrecognised, Unrecognised::Pass);
 
-        // A later fallback replaces an earlier one, and `* keep` means
-        // none at all (spec §6.3).
-        let replaced = Policy::parse("* clear\n* replace X").unwrap();
-        assert_eq!(replaced.fallback, Some(Action::Replace("X".to_string())));
-        assert_eq!(Policy::parse("* keep").unwrap().fallback, None);
+        // A later default line replaces an earlier one (spec §6.3).
+        let replaced = Policy::parse("reject clear\nreject replace X").unwrap();
+        assert_eq!(
+            replaced.posture,
+            Posture::Reject(Action::Replace("X".to_string()))
+        );
+
+        // A bare `reject` is the placeholder the built-ins write, and
+        // rejecting by keeping is accepting.
+        assert_eq!(
+            Policy::parse("reject").unwrap().posture,
+            Posture::Reject(Action::redacted())
+        );
+        assert_eq!(
+            Policy::parse("reject keep").unwrap().posture,
+            Posture::Accept
+        );
+        assert_eq!(
+            Policy::parse("unrecognised null").unwrap().unrecognised,
+            Unrecognised::Pass
+        );
+
+        // A file that says nothing accepts, and refuses what it cannot read.
+        let quiet = Policy::parse("PID-5 clear").unwrap();
+        assert_eq!(quiet.posture, Posture::Accept);
+        assert_eq!(quiet.unrecognised, Unrecognised::Refuse);
     }
 
     #[test]
@@ -532,6 +949,30 @@ mod tests {
                 "policy line 3: \"PID-7 first three\": action \"first\" wants a number \
                  of characters, not \"three\"",
             ),
+            (
+                "accept everything",
+                "policy line 1: \"accept everything\": \"accept\" takes no argument, \
+                 but got \"everything\"",
+            ),
+            (
+                "unrecognised",
+                "policy line 1: \"unrecognised\": \"unrecognised\" wants \"refuse\", \
+                 \"pass\", or an action",
+            ),
+            (
+                "unrecognised sideways",
+                "policy line 1: \"unrecognised sideways\": unknown action \"sideways\"",
+            ),
+            // The `*` line of 0.1, refused with its replacement (spec §6.3).
+            (
+                "MSH keep\n* replace REDACTED",
+                "policy line 2: \"* replace REDACTED\": the default line is now \
+                 \"reject replace REDACTED\", not \"*\"",
+            ),
+            (
+                "* keep",
+                "policy line 1: \"* keep\": the default line is now \"accept\", not \"*\"",
+            ),
         ];
         for (text, expected) in cases {
             let error = Policy::parse(text).unwrap_err();
@@ -547,7 +988,8 @@ mod tests {
         // the list the spec documents.
         let policy = Policy::patient_identifiers();
         assert_eq!(policy.rules.len(), 40);
-        assert_eq!(policy.fallback, None);
+        assert_eq!(policy.posture, Posture::Accept);
+        assert_eq!(policy.unrecognised, Unrecognised::Refuse);
 
         let named: Vec<String> = policy.rules.iter().map(|r| r.path.to_string()).collect();
         for path in [
@@ -560,15 +1002,83 @@ mod tests {
             assert!(!named.contains(&path.to_string()), "unexpected {path}");
         }
 
-        assert!(Policy::new().is_empty());
+        assert!(Policy::accept_all().is_empty());
+        assert!(!Policy::reject_all().is_empty());
+    }
+
+    #[test]
+    fn the_two_bare_postures_say_what_they_are() {
+        // Spec §5.6: no rules and no field table, and the two defaults
+        // that match what each one claims about itself.
+        let accept = Policy::accept_all();
+        assert!(accept.rules.is_empty());
+        assert_eq!(accept.posture, Posture::Accept);
+        assert_eq!(accept.unrecognised, Unrecognised::Pass);
+
+        let reject = Policy::reject_all();
+        assert!(reject.rules.is_empty());
+        assert_eq!(reject.posture, Posture::Reject(Action::redacted()));
+        assert_eq!(reject.unrecognised, Unrecognised::Apply(Action::Mask('*')));
+
+        // The curated one is the same posture, with the header kept and a
+        // refusal in place of the mask (spec §5.2).
+        let curated = Policy::all_but_the_header();
+        assert_eq!(curated.posture, reject.posture);
+        assert_eq!(curated.unrecognised, Unrecognised::Refuse);
+        assert_eq!(curated.rules.len(), 1);
+        assert_eq!(curated.rules[0].to_string(), "MSH keep");
     }
 
     #[test]
     fn appends_in_order() {
-        let mut policy = Policy::new().with("PID-5", Action::redacted()).unwrap();
-        policy.append(Policy::parse("PID-7 first 4\n* clear").unwrap());
+        let mut policy = Policy::accept_all()
+            .with("PID-5", Action::redacted())
+            .unwrap();
+        policy.append(Policy::parse("PID-7 first 4\nreject clear").unwrap());
         assert_eq!(policy.rules.len(), 2);
         assert_eq!(policy.rules[1].action, Action::First(4));
-        assert_eq!(policy.fallback, Some(Action::Clear));
+        assert_eq!(policy.posture, Posture::Reject(Action::Clear));
+    }
+
+    #[test]
+    fn appending_never_weakens_the_defaults() {
+        // D20: a file of extra rules says nothing about its posture, so it
+        // accepts by default. Adopting that would switch redaction off for
+        // everything the file did not name — the one failure spec §1.5
+        // puts first (spec §2.6).
+        let mut strict = Policy::all_but_the_header();
+        strict.append(Policy::parse("OBX-2 keep").unwrap());
+        assert_eq!(strict.posture, Posture::Reject(Action::redacted()));
+        assert_eq!(strict.unrecognised, Unrecognised::Refuse);
+
+        // Even when the appended policy says `accept` outright.
+        let mut strict = Policy::all_but_the_header();
+        strict.append(Policy::parse("accept").unwrap());
+        assert_eq!(strict.posture, Posture::Reject(Action::redacted()));
+
+        // A file that says nothing about an unrecognised payload is given
+        // the strictest disposition when it is read, so adopting it can
+        // only tighten a rejecting policy that masked one.
+        let mut masking = Policy::reject_all();
+        masking.append(Policy::parse("OBX-2 keep").unwrap());
+        assert_eq!(masking.unrecognised, Unrecognised::Refuse);
+
+        // But a file that asks for one outright is not overruled: nothing
+        // else in the run said anything about it.
+        let mut masking = Policy::reject_all();
+        masking.append(Policy::parse("unrecognised pass").unwrap());
+        assert_eq!(masking.unrecognised, Unrecognised::Pass);
+
+        // Strictening works, in both directions of travel.
+        // `mask #` is unwritable in a file — a `#` starts a comment
+        // wherever it appears (spec §16.4) — so this uses another one.
+        let mut lax = Policy::accept_all();
+        lax.append(Policy::parse("reject mask X\nunrecognised refuse").unwrap());
+        assert_eq!(lax.posture, Posture::Reject(Action::Mask('X')));
+        assert_eq!(lax.unrecognised, Unrecognised::Refuse);
+
+        // And relaxing one is done deliberately, which is the only way.
+        let relaxed = Policy::all_but_the_header().posture(Posture::Accept);
+        assert_eq!(relaxed.posture, Posture::Accept);
     }
 }

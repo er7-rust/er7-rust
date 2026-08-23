@@ -4,9 +4,22 @@
 
 Implemented in `src/policy.rs`.
 
-There are exactly two. **Both are a starting point, not a compliance
-certification [D14]** — read [§5.5](#55-what-these-policies-do-not-do)
-before relying on either.
+There are four, and they are the only way to make a `Policy`: a policy
+cannot exist without a posture ([§2.6](02-redaction-model.md)), so there
+is no `Policy::new` and no `Policy::default` to make one without saying
+which posture is meant.
+
+| Policy | Posture | Rules | Unrecognised payload |
+| ------ | ------- | ----- | -------------------- |
+| [`accept_all()`](#56-policyaccept_all-and-policyreject_all) | accept | none | pass |
+| [`reject_all()`](#56-policyaccept_all-and-policyreject_all) | reject `replace REDACTED` | none | `mask *` |
+| [`patient_identifiers()`](#51-policypatient_identifiers) | accept | the curated table below | refuse |
+| [`all_but_the_header()`](#52-policyall_but_the_header) | reject `replace REDACTED` | `MSH keep` | refuse |
+
+The first two are the bare postures, and carry no knowledge of HL7 at all.
+The last two are **curated**: somebody wrote down a list. **Both are a
+starting point, not a compliance certification [D14]** — read
+[§5.5](#55-what-these-policies-do-not-do) before relying on either.
 
 ## 5.1 `Policy::patient_identifiers()`
 
@@ -26,6 +39,10 @@ There is deliberately no `Policy::default()`. An empty default would
 silently redact nothing and a curated one would silently redact forty
 positions; a redaction crate can afford neither surprise, so a caller
 names the policy they mean.
+
+It **accepts by default**: a position this table does not name is left as
+it is. That is the whole of its risk, and [§5.4](#54-what-the-default-policy-deliberately-does-not-touch)
+is the list of what that means in practice.
 
 ### PID — patient identification
 
@@ -96,30 +113,43 @@ most often objected to in a shared message.
 | `IN1-36` | Policy number | `pseudonym` |
 | `IN1-49.1` | Insured's ID number | `pseudonym` |
 
-## 5.2 `Policy::everything()`
+## 5.2 `Policy::all_but_the_header()`
 
-The other posture: a fallback of `replace REDACTED` over every leaf, with
-one `keep` rule for the whole `MSH` segment so the message stays routable
-and identifiable.
+The other posture, curated: **reject by default** with `replace REDACTED`,
+and one `keep` rule for the whole `MSH` segment so the message stays
+routable and identifiable.
 
 ```
 MSH  keep
-*    replace REDACTED
+
+reject        replace REDACTED
+unrecognised  refuse
 ```
 
 Use it when the message is unfamiliar, when it is full of `Z` segments
 nobody has documented, or when the answer to "is there anything else in
-here?" has to be "no" rather than "not that I listed". The cost is that
-the result is no longer clinically meaningful: every code, every value,
-and every timestamp below `MSH` reads `REDACTED`.
+here?" has to be "no" rather than "not that I listed". The cost is that the
+result is no longer clinically meaningful: every code, every value, and
+every timestamp below `MSH` reads `REDACTED`.
 
 Add `keep` rules for the positions a test actually needs:
 
 ```rust
-let policy = Policy::everything()
+let policy = Policy::all_but_the_header()
     .with("OBX-2", Action::Keep)?   // value type
     .with("OBX-3", Action::Keep)?;  // observation identifier
 ```
+
+The header exception is an ordinary accept rule, so an ordinary reject
+rule overrides it (D19, [§2.4](02-redaction-model.md)) — this redacts the
+sending facility too, and everything else `MSH-3` and beyond carries:
+
+```rust
+let policy = Policy::all_but_the_header().with("MSH", Action::redacted())?;
+```
+
+`MSH-1` and `MSH-2` survive that, as they survive everything: they are the
+delimiters themselves (D5, [§4.4](04-what-redaction-preserves.md)).
 
 ## 5.3 Why this crate may hold a field table at all
 
@@ -139,15 +169,16 @@ the capability it exists to add. The table is:
 
 | Position | Why not |
 | -------- | ------- |
-| `NTE-3`, `OBX-5` and other free text | identifiers hide in free text constantly, and no positional rule can find them. Redacting them wholesale would destroy the clinical content that makes a test message useful. Redact these explicitly, or use `Policy::everything()` |
+| `NTE-3`, `OBX-5` and other free text | identifiers hide in free text constantly, and no positional rule can find them. Redacting them wholesale would destroy the clinical content that makes a test message useful. Redact these explicitly, or reject by default ([§5.2](#52-policyall_but_the_header)) |
 | `PID-8` (sex), `PID-10` (race), `PID-15` (language), `PID-16` (marital status), `PID-17` (religion), `PID-22` (ethnic group) | sensitive, but not identifiers, and the values a clinical test is usually about. They are also quasi-identifiers in combination: in a small population, redact them too |
 | `MSH-3` to `MSH-6` (sending and receiving application and facility) | organisational, not personal — and a facility name is often what makes the message reproducible. It is also, in a small enough system, a quasi-identifier |
-| `Z` segments | local extensions, so no position means anything the crate could know. `Policy::everything()` is the answer here |
+| `Z` segments | local extensions, so no position means anything the crate could know. Rejecting by default is the answer here |
 | `PID-1`, `OBX-1` and other set IDs | ordinal numbers, not data |
 
 ## 5.5 What these policies do not do [D14]
 
-A built-in policy is a list of positions someone wrote down. It is not:
+A curated policy ([§5.1](#51-policypatient_identifiers), [§5.2](#52-policyall_but_the_header))
+is a list of positions someone wrote down. It is not:
 
 - **a compliance determination.** Whether a data set is de-identified is a
   judgement about the whole set, its recipients, and what else they hold —
@@ -164,3 +195,27 @@ A built-in policy is a list of positions someone wrote down. It is not:
 
 The honest summary: this crate removes the values you name, in the
 positions you name, and reports what it did. Everything else is yours.
+
+## 5.6 `Policy::accept_all()` and `Policy::reject_all()`
+
+The two bare postures, with no rules and no field table:
+
+| | `accept_all()` | `reject_all()` |
+| - | -------------- | -------------- |
+| a leaf no rule names | is left alone | becomes `REDACTED` |
+| the `MSH` header | untouched | redacted from `MSH-3` on |
+| an unrecognised payload | passes through | is masked whole |
+| redacts, on its own | nothing at all | everything it can reach |
+
+`accept_all()` is the starting point for building a policy up rule by
+rule; it is what `Policy::parse` starts from, and what the CLI applies
+`--policy` and `--rule` on top of ([§10.2](10-command-line-interface.md)).
+On its own it is a no-op, and an honest one: it does not pretend to have
+redacted anything, and it passes a payload it cannot parse through
+unchanged rather than mangling it ([§2.8](02-redaction-model.md)).
+
+`reject_all()` is the strictest thing in the crate. It leaves no value
+below `MSH-2` and no unrecognised payload legible, which also means it
+leaves nothing routable: prefer
+[`all_but_the_header()`](#52-policyall_but_the_header) unless the header
+really is meant to go too.

@@ -10,3 +10,6 @@ PID-11     clear
 PID-13     mask *        # keep the shape of a phone number
 PID-19     null          # tell the receiver to clear its copy
 NTE-3      last 0        # free text: keep nothing
+
+accept                   # only the positions above are redacted
+unrecognised  refuse     # a payload that is not ER7 fails the run

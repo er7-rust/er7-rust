@@ -24,9 +24,10 @@ repository, pasted into a ticket, or fed to a test suite.
 | Capability | Section |
 | ---------- | ------- |
 | A policy: an ordered list of rules, each an HL7 path and an action | [§2](02-redaction-model.md) |
+| Two postures: accept by default, or reject by default | [§2.6](02-redaction-model.md) |
 | Eight actions — keep, clear, null, replace, mask, first, last, pseudonym | [§3](03-actions.md) |
 | Shape preservation, and the absent/empty/null contract | [§4](04-what-redaction-preserves.md) |
-| Two built-in policies, and the curated positions behind them | [§5](05-built-in-policies.md) |
+| Four built-in policies, and the curated positions behind two of them | [§5](05-built-in-policies.md) |
 | A line-oriented policy file, readable and writable | [§6](06-policy-file-format.md) |
 | Stable pseudonyms, so an identifier maps the same way in every message | [§7](07-pseudonyms.md) |
 | An audit report of every position that changed | [§8](08-report.md) |
@@ -53,7 +54,7 @@ A message this crate has redacted is **a message with less in it**, which
 is progress, and is not the same thing as a safe one. See
 [§5.5](05-built-in-policies.md) for how to think about the gap.
 
-## 1.4 Rule index (D1–D18)
+## 1.4 Rule index (D1–D21)
 
 Every behavioural rule the crate guarantees, with a stable ID. Prose,
 tests, code comments, and commit messages cite these. **IDs are never
@@ -70,7 +71,7 @@ enforces it.
 | D6 | `Null` is the only action that changes shape: it collapses the named position to `""`. | [§3.4](03-actions.md) |
 | D7 | Rules apply in order, each to the message as it stands. | [§2.4](02-redaction-model.md) |
 | D8 | A rule that matches nothing is not an error. | [§2.5](02-redaction-model.md) |
-| D9 | A policy's fallback action applies to every leaf that no rule named. | [§2.6](02-redaction-model.md) |
+| D9 | A policy accepts or rejects by default; rejecting applies its action to every leaf no rule named. | [§2.6](02-redaction-model.md) |
 | D10 | Every action except `Pseudonym` is idempotent. | [§3.6](03-actions.md) |
 | D11 | Replacement text is encoded on the way in, so redaction can never introduce a delimiter. | [§3.5](03-actions.md) |
 | D12 | A pseudonym is stable for a given key and value, and is not a cryptographic guarantee. | [§7](07-pseudonyms.md) |
@@ -80,8 +81,11 @@ enforces it.
 | D16 | Exactly one runtime dependency: `er7`. | [§12](12-dependencies-and-build.md) |
 | D17 | A message no rule touches is written back byte for byte. | [§4.5](04-what-redaction-preserves.md) |
 | D18 | The policy file format is one rule per line, and it is part of the public API. | [§6](06-policy-file-format.md) |
+| D19 | A reject rule beats an accept rule for the same leaf, whichever order they are in. | [§2.4](02-redaction-model.md) |
+| D20 | Appending one policy to another never weakens what it does by default. | [§2.6](02-redaction-model.md) |
+| D21 | A payload that is not ER7 is refused, passed through, or acted on whole, as the policy says. | [§2.8](02-redaction-model.md) |
 
-The next rule ID is **D19**.
+The next rule ID is **D22**.
 
 ## 1.5 Design priorities, in order
 

@@ -11,7 +11,7 @@ The complete public surface. Rendered rustdoc is at
 | ------ | ----- | ---- |
 | `er7_redact` | `Error`, and re-exports of everything below | [§9](../../spec/09-error-handling.md) |
 | `er7_redact::action` | `Action` | [§3](../../spec/03-actions.md) |
-| `er7_redact::policy` | `Rule`, `Policy` | [§5](../../spec/05-built-in-policies.md), [§6](../../spec/06-policy-file-format.md) |
+| `er7_redact::policy` | `Rule`, `Policy`, `Posture`, `Unrecognised` | [§5](../../spec/05-built-in-policies.md), [§6](../../spec/06-policy-file-format.md) |
 | `er7_redact::pseudonym` | `pseudonym` | [§7](../../spec/07-pseudonyms.md) |
 | `er7_redact::redact` | `Redactor`, `Report`, `Change` | [§2](../../spec/02-redaction-model.md), [§8](../../spec/08-report.md) |
 
@@ -27,6 +27,7 @@ The only thing that edits a message.
 | `new` | `fn new(policy: Policy) -> Redactor` | pseudonym key defaults to `0` |
 | `with_key` | `fn with_key(self, key: u64) -> Redactor` | builder |
 | `redact` | `fn redact(&self, message: &mut er7::Message) -> Report` | edits in place; cannot fail |
+| `unrecognised` | `fn unrecognised(&self, payload: &str) -> Option<String>` | what to write for a payload that is not ER7; `None` means the policy refuses it |
 | `policy` | `fn policy(&self) -> &Policy` | |
 | `key` | `fn key(&self) -> u64` | |
 | `Default` | `Redactor::default()` | `patient_identifiers()`, key `0` |
@@ -36,16 +37,43 @@ The only thing that edits a message.
 | Item | Signature | Notes |
 | ---- | --------- | ----- |
 | `rules` | `Vec<Rule>` | public; applied in order |
-| `fallback` | `Option<Action>` | public; applied last, to every leaf no rule named |
-| `new` | `fn new() -> Policy` | empty. There is deliberately **no** `Default` |
-| `patient_identifiers` | `fn patient_identifiers() -> Policy` | the curated table, [spec §5.1](../../spec/05-built-in-policies.md) |
-| `everything` | `fn everything() -> Policy` | `MSH keep`, then a fallback of `replace REDACTED` |
+| `posture` | `Posture` | public; what every leaf no rule named gets |
+| `unrecognised` | `Unrecognised` | public; what a payload that is not ER7 gets |
+| `accept_all` | `fn accept_all() -> Policy` | no rules; accepts, and passes an unrecognised payload |
+| `reject_all` | `fn reject_all() -> Policy` | no rules; `replace REDACTED` over everything, masks an unrecognised payload |
+| `patient_identifiers` | `fn patient_identifiers() -> Policy` | the curated table, [spec §5.1](../../spec/05-built-in-policies.md); accepts, refuses |
+| `all_but_the_header` | `fn all_but_the_header() -> Policy` | `MSH keep`, then `reject replace REDACTED`; refuses |
 | `with` | `fn with(self, path: &str, action: Action) -> Result<Policy, Error>` | builder |
-| `fallback` | `fn fallback(self, action: Action) -> Policy` | `Action::Keep` means "none" |
-| `parse` | `fn parse(text: &str) -> Result<Policy, Error>` | the file format |
-| `append` | `fn append(&mut self, other: Policy)` | concatenate, order preserved |
-| `is_empty` | `fn is_empty(&self) -> bool` | no rules and no fallback |
-| `Display` | | the canonical policy file; re-parses to an equal policy |
+| `posture` | `fn posture(self, posture: Posture) -> Policy` | `Reject(Keep)` normalises to `Accept` |
+| `on_unrecognised` | `fn on_unrecognised(self, u: Unrecognised) -> Policy` | `Apply(Keep)` and `Apply(Null)` normalise to `Pass` |
+| `parse` | `fn parse(text: &str) -> Result<Policy, Error>` | the file format; a file that says nothing accepts and **refuses** |
+| `append` | `fn append(&mut self, other: Policy)` | rules in order; the stricter posture (D20); the appended disposition |
+| `is_empty` | `fn is_empty(&self) -> bool` | no rules, and accepts by default |
+| `Display` | | the canonical policy file, both defaults stated; re-parses to an equal policy |
+
+There is deliberately **no** `Policy::new` and no `Default`: a policy
+cannot exist without saying which posture it takes.
+
+## `Posture` and `Unrecognised`
+
+```rust
+pub enum Posture {
+    Accept,
+    Reject(Action),
+}
+
+pub enum Unrecognised {
+    Pass,
+    Apply(Action),
+    Refuse,
+}
+```
+
+`Posture` is what every leaf no rule named gets
+([spec §2.6](../../spec/02-redaction-model.md)); `Unrecognised` is what a
+payload that is not ER7 gets ([spec §2.8](../../spec/02-redaction-model.md)).
+Both implement `Display` in the policy file spelling — `accept`,
+`reject clear`, `refuse`, `pass`, `mask *`.
 
 ## `Rule`
 

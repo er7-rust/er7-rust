@@ -3,12 +3,15 @@
 //!
 //! Run with: `cargo run --example write_a_policy`
 
-use er7_redact::{Action, Policy, Redactor};
+use er7_redact::{Action, Policy, Posture, Redactor, Unrecognised};
 
 fn main() -> Result<(), er7_redact::Error> {
     // 1. Built in Rust, rule by rule. Order matters: rules apply in the
-    //    order they are listed.
-    let built = Policy::new()
+    //    order they are listed. `accept_all` is the starting point that
+    //    redacts nothing until a rule says so — the other one is
+    //    `reject_all`, which redacts everything until a `keep` rule says
+    //    otherwise.
+    let built = Policy::accept_all()
         .with("PID-3.1", Action::Pseudonym)?
         .with("PID-5", Action::redacted())?
         .with("PID-7", Action::First(4))?
@@ -24,6 +27,24 @@ fn main() -> Result<(), er7_redact::Error> {
         PID-19   clear
         ",
     )?;
+    assert_eq!(built.rules, read.rules);
+
+    // Both accept by default: a position no rule names is left alone.
+    assert_eq!(built.posture, Posture::Accept);
+    assert_eq!(read.posture, Posture::Accept);
+
+    // They differ on one thing, and it is worth knowing about. A payload
+    // that is not ER7 at all has no positions in it, so no rule can speak
+    // to it. `accept_all` passes one through, because it is a policy that
+    // redacts nothing and says so. A policy *file* that mentions no
+    // disposition refuses one instead: it was written by somebody who may
+    // simply not have considered the case, and refusing loses no value
+    // quietly.
+    assert_eq!(built.unrecognised, Unrecognised::Pass);
+    assert_eq!(read.unrecognised, Unrecognised::Refuse);
+
+    // Either way, say it outright and the two agree.
+    let built = built.on_unrecognised(Unrecognised::Refuse);
     assert_eq!(built, read);
 
     // 3. Start from a built-in and add to it. `--show-policy` on the

@@ -44,10 +44,14 @@ const MASK: char = '*';
 pub enum Action {
     /// Leave the value exactly as it is.
     ///
-    /// Its use is to exempt a position from a policy's fallback (spec
-    /// §2.6). It does **not** undo an earlier rule: rules apply in order to
-    /// the message as it stands, so once a value has been replaced there is
-    /// nothing left to restore it from (D7, spec §2.4).
+    /// This is the action that **accepts** a position: its use is to
+    /// exempt one from a policy that rejects by default (spec §2.6).
+    ///
+    /// It does **not** undo an earlier rule: rules apply in order to the
+    /// message as it stands, so once a value has been replaced there is
+    /// nothing left to restore it from (D7, spec §2.4). That is also why a
+    /// rejecting rule beats a `Keep` for the same leaf whichever order the
+    /// two are in (D19).
     Keep,
     /// Empty the value, leaving the position in place.
     ///

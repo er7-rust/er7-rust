@@ -11,14 +11,16 @@ recipients, and what else they hold — which is a judgement a person makes
 and is accountable for.
 
 What the crate does give you is a report to review before you share, and a
-`--all` mode for when "not that I listed" is not a good enough answer.
+reject-by-default posture (`--all-but-the-header`) for when "not that I
+listed" is not a good enough answer.
 
 ## Does it find identifiers in free text?
 
 Not yet. A name in an `NTE-3` comment survives every positional policy, and
 that is the biggest gap in the crate — recorded as
 [T1](../../spec/15-open-tasks.md). Today the answers are to name those
-positions (`NTE-3 clear`) or to use `Policy::everything()`.
+positions (`NTE-3 clear`) or to reject by default with
+`Policy::all_but_the_header()`.
 
 Pattern matching was considered and declined
 ([spec §16.2](../../spec/16-open-questions-and-declined-decisions.md)):
@@ -70,21 +72,55 @@ it would strengthen the claim more than the deployment: the key would still
 be a number in a config file next to the data
 ([spec §16.3](../../spec/16-open-questions-and-declined-decisions.md)).
 
-## Why does `Policy` have no `Default`?
+## Why does `Policy` have no `Default`, and no `new`?
 
-Because either default would be a silent choice. An empty one would redact
-nothing — the failure this crate exists to prevent — and a curated one
-would redact forty positions without being asked. Name the policy you mean:
-`Policy::new()`, `Policy::patient_identifiers()`, or `Policy::everything()`.
+Because either default would be a silent choice about the posture. An
+accepting empty policy would redact nothing — the failure this crate exists
+to prevent — and a curated one would redact forty positions without being
+asked. Name the policy you mean: `Policy::accept_all()`,
+`Policy::reject_all()`, `Policy::patient_identifiers()`, or
+`Policy::all_but_the_header()`.
 
 `Redactor::default()` does exist, and is the curated policy with key `0`.
+
+## What is the difference between `accept_all` and `patient_identifiers`?
+
+Both accept by default. `accept_all` has no rules, so it redacts nothing at
+all; `patient_identifiers` carries the curated table of about forty
+positions. They also differ on a payload that is not ER7: `accept_all`
+passes one through, and `patient_identifiers` refuses it, because a list of
+positions has no opinion about input with no positions in it.
+
+## Why did my policy file's `reject` line get ignored?
+
+It did not — but a `--policy` file cannot weaken a posture the run already
+had. `er7-redact --all-but-the-header -p mine.policy` rejects by default
+whatever `mine.policy` says, because a file of extra rules says nothing
+about its posture and adopting that silence would switch redaction off for
+everything the file did not name
+([spec §2.6](../../spec/02-redaction-model.md), D20).
+
+`--accept-all` is applied last and is the one thing that can relax it.
+
+## Why `accept` and `reject` rather than `allow` and `deny`?
+
+Because allow/deny describes who may reach a thing, and this crate decides
+whether a value survives into the output. A reader who maps `deny` onto
+"blocked, and therefore safe" has it backwards: a rejected value is
+rewritten, not withheld, and everything around it is still emitted
+([spec §16.8](../../spec/16-open-questions-and-declined-decisions.md)).
 
 ## Why did `keep` not undo my earlier rule?
 
 Rules apply in order, to the message as it stands, so once a value has been
-replaced there is nothing left to restore it from. `keep` exempts a
-position from the **fallback**, which is what it is for
+replaced there is nothing left to restore it from. `keep` **accepts** a
+position, exempting it from the posture, which is what it is for
 ([spec §2.4](../../spec/02-redaction-model.md)).
+
+The same thing seen from the other side: a reject rule beats an accept rule
+for the same position, whichever order the two are in. A field in both
+lists is a policy somebody got wrong, and redacting it is the direction
+that fails safely (D19).
 
 ## My policy matched nothing and the command still exited 0
 

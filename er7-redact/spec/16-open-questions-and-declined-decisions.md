@@ -66,9 +66,11 @@ somebody wants a `#`; a policy built in Rust has no such limit.
 
 ## 16.5 Open: whether `Keep` should be able to undo
 
-`Keep` exempts a position from the fallback; it does not undo an earlier
+`Keep` exempts a position from the posture; it does not undo an earlier
 rule (D7, [§2.4](02-redaction-model.md)), because rules apply in order to
-the message as it stands and there is nothing to restore from.
+the message as it stands and there is nothing to restore from. That is
+also what makes a reject beat an accept whichever order the two are in
+(D19), which is the behaviour the model is now kept for.
 
 An alternative model — decide every leaf's final action first, then apply
 once — would make `Keep` undo, and would make a later `mask` apply to the
@@ -102,3 +104,41 @@ straight themselves; the CLI does this with `# message N` headings
 A `redact_all` over a slice would carry the pairing in the type. It has
 not been added because the loop is two lines and the borrow is clearer
 when the caller writes it. Revisit if the CLI's bookkeeping grows.
+
+## 16.8 Declined: `allow` and `deny` for the two postures
+
+The postures are **accept** and **reject** ([§2.6](02-redaction-model.md)),
+not allow and deny.
+
+Allow/deny is the older and more widely recognised pair, and the one an
+access-control reader arrives with. It was declined because that is the
+problem: allow/deny describes *who may reach a thing*, and this crate
+decides *whether a value survives into the output*. A reader who maps
+`deny` onto "blocked, and therefore safe" has the guarantee backwards —
+a rejected value is rewritten, not withheld, and everything around it is
+still emitted.
+
+Accept/reject also matches what the actions do. A rejected leaf is not
+refused; it is replaced, cleared, masked, or pseudonymised, and the report
+says which ([§8](08-report.md)).
+
+The prose does not use allow/deny as synonyms either, including in
+examples, so that a search for one word finds every place the concept
+appears.
+
+## 16.9 Open: an accept rule that could narrow a reject
+
+D19 makes a reject rule win over an accept rule for the same leaf, at any
+depth ([§2.4](02-redaction-model.md)). There is no way to say "reject the
+whole of `PID`, except `PID-5`" with rules alone: the accept loses.
+
+The way to express it today is the posture — reject by default, and accept
+the positions a test needs — which is the same statement from the other
+side, and is what [§5.2](05-built-in-policies.md) does with `MSH`.
+
+A specificity rule (the narrowest path wins) would make both spellings
+work. It was not adopted with D19 because "narrowest wins" and "safest
+wins" disagree exactly where a policy is already wrong, and the ordering
+in [§1.5](01-purpose-and-scope.md) says which of the two to prefer when
+they do. Revisit if real policies turn out to need the carve-out more
+often than they need the guard.

@@ -13,7 +13,7 @@ cargo doc --no-deps --open                  # build and open rustdoc
 cargo run -- samples/adt_a08.er7            # redact a sample
 cargo run -- --report samples/adt_a08.er7   # what would change
 cargo run -- --show-policy                  # the built-in policy, as a file
-cargo run -- --all samples/oru_r01.er7      # redact everything but MSH
+cargo run -- --all-but-the-header samples/oru_r01.er7   # reject all but MSH
 cargo run --example redact_a_message        # run an example
 
 cargo clippy --all-targets -- -D warnings   # lint
@@ -56,7 +56,7 @@ by reading the outline.
 - **Samples are CR-terminated.** Editing `samples/*.er7` with a tool that
   normalises line endings turns them into `\n` and breaks the round-trip
   tests.
-- **`Policy::new()` is empty and there is no `Default`.** That is
+- **`Policy::accept_all()` is empty and there is no `Default`.** That is
   deliberate ([spec §5.1](../spec/05-built-in-policies.md)).
 - **Rules apply in order.** A later rule sees the earlier one's output, and
   `Keep` does not undo.

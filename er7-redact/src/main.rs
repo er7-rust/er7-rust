@@ -17,8 +17,8 @@ use std::fmt::Write as _;
 use std::io::{Read, Write};
 use std::process::ExitCode;
 
-use er7::{RenderOptions, Terminator};
-use er7_redact::{Policy, Redactor, Report, Rule};
+use er7::{Message, RenderOptions, Terminator};
+use er7_redact::{Policy, Posture, Redactor, Report, Rule, Unrecognised};
 
 const USAGE: &str = "\
 Redact patient detail from HL7 v2 messages in the ER7 pipe-hat encoding.
@@ -33,7 +33,12 @@ Options:
   -p, --policy <FILE>      Read rules from a policy file; may be repeated
   -r, --rule <RULE>        Add one rule, e.g. \"PID-5 replace REDACTED\";
                            may be repeated
-  -a, --all                Redact everything except the MSH header
+      --accept-all         Accept every value no rule names; applied last,
+                           this switches off a policy file's \"reject\"
+      --reject-all         Reject every value no rule names, the MSH
+                           header included
+      --all-but-the-header Reject every value no rule names, but keep the
+                           MSH header so the message stays routable
   -k, --key <KEY>          Pseudonym key, a number; default 0
   -m, --message <N>        Use only the Nth message of the input
   -t, --terminator <KIND>  Segment terminator to write: cr (default), lf, crlf
@@ -43,9 +48,12 @@ Options:
   -h, --help               Print help
   -V, --version            Print version
 
-With no --policy, --rule, or --all, the built-in policy of the crate's
-spec section 5.1 is applied: the patient identifiers in PID, NK1, PV1,
-GT1, and IN1. It is a starting point, not a compliance certification.";
+With no --policy, --rule, or posture flag, the built-in policy of the
+crate's spec section 5.1 is applied: the patient identifiers in PID, NK1,
+PV1, GT1, and IN1. It is a starting point, not a compliance certification.
+
+A payload that is not ER7 fails the run, unless a policy file says to pass
+it through or to mask it whole, or --reject-all masks it.";
 
 fn main() -> ExitCode {
     match run() {
@@ -78,7 +86,8 @@ fn fail<T>(message: impl Into<String>) -> Result<T, Exit> {
 fn run() -> Result<(), Exit> {
     let mut policies: Vec<String> = Vec::new();
     let mut rules: Vec<String> = Vec::new();
-    let mut all = false;
+    let mut start: Option<Start> = None;
+    let mut accept_all = false;
     let mut key: u64 = 0;
     let mut report_only = false;
     let mut show_policy = false;
@@ -96,7 +105,22 @@ fn run() -> Result<(), Exit> {
         match arg.as_str() {
             "-h" | "--help" => return Err(Exit::Help),
             "-V" | "--version" => return Err(Exit::Version),
-            "-a" | "--all" => all = true,
+            // Removed in 0.2, and refused by name rather than as an
+            // unknown option: `-a` meant *reject* everything, so a script
+            // that kept running under a renamed flag could silently have
+            // switched posture (spec §10.2).
+            "-a" | "--all" => {
+                return fail(
+                    "--all is now --all-but-the-header \
+                     (or --reject-all, which redacts the header too)",
+                );
+            }
+            "--accept-all" => {
+                accept_all = true;
+                start = Some(Start::Neutral);
+            }
+            "--reject-all" => start = Some(Start::RejectAll),
+            "--all-but-the-header" => start = Some(Start::AllButTheHeader),
             "--report" => report_only = true,
             "--show-policy" => show_policy = true,
             "-p" | "--policy" => policies.push(value("--policy")?),
@@ -135,7 +159,7 @@ fn run() -> Result<(), Exit> {
         }
     }
 
-    let policy = policy(all, &policies, &rules)?;
+    let policy = policy(start, accept_all, &policies, &rules)?;
     if show_policy {
         // Deliberately before any input is read, so this works with no
         // FILE argument and never blocks on standard input (spec §10.3).
@@ -143,59 +167,140 @@ fn run() -> Result<(), Exit> {
     }
 
     let text = read_input(input.as_deref())?;
-    let mut sources = er7::split_messages(&text);
-    if sources.is_empty() {
-        return fail("input contains no HL7 segments");
-    }
-    if let Some(n) = which {
-        match sources.get(n - 1) {
-            Some(&source) => sources = vec![source],
-            None => {
-                return fail(format!(
-                    "--message {n}, but the input holds {}",
-                    sources.len()
-                ));
-            }
-        }
-    }
-
-    // Every message is parsed before anything is written, so a malformed
-    // message late in a batch fails the run rather than producing a
-    // half-redacted output (spec §10.1).
-    let mut messages = Vec::with_capacity(sources.len());
-    for (index, source) in sources.iter().enumerate() {
-        match er7::parse(source) {
-            Ok(message) => messages.push(message),
-            Err(e) => return fail(format!("message {}: {e}", index + 1)),
-        }
-    }
+    let sources = split_input(&text, which)?;
 
     let redactor = Redactor::new(policy).with_key(key);
-    let reports: Vec<Report> = messages
-        .iter_mut()
-        .map(|message| redactor.redact(message))
-        .collect();
+    let payloads = redact_payloads(&redactor, &sources)?;
 
     let options = RenderOptions {
         terminator,
         trailing_terminator: true,
     };
     let rendered = if report_only {
-        report(&reports)
+        report(&payloads, redactor.policy())
     } else {
-        messages.iter().map(|m| m.to_er7_with(options)).collect()
+        payloads
+            .iter()
+            .map(|payload| payload.to_er7_with(options))
+            .collect()
     };
     write_output(output.as_deref(), &rendered)
+}
+
+/// Cut the input into payloads, and keep the one `--message` asked for
+/// (spec §10.1).
+fn split_input(text: &str, which: Option<usize>) -> Result<Vec<&str>, Exit> {
+    let sources = er7::split_messages(text);
+    if sources.is_empty() {
+        return fail("input contains no HL7 segments");
+    }
+    let Some(n) = which else { return Ok(sources) };
+    match sources.get(n - 1) {
+        Some(&source) => Ok(vec![source]),
+        None => fail(format!(
+            "--message {n}, but the input holds {}",
+            sources.len()
+        )),
+    }
+}
+
+/// Redact every payload of the input (spec §10.1).
+///
+/// All of them are parsed before any is written, so one the policy refuses
+/// fails the run rather than producing a half-redacted output, however
+/// late in a batch it is.
+fn redact_payloads(redactor: &Redactor, sources: &[&str]) -> Result<Vec<Payload>, Exit> {
+    let mut payloads = Vec::with_capacity(sources.len());
+    for (index, source) in sources.iter().enumerate() {
+        match er7::parse(source) {
+            Ok(mut message) => {
+                let report = redactor.redact(&mut message);
+                payloads.push(Payload::Message(Box::new(message), report));
+            }
+            // D21: what a payload that is not ER7 gets is the policy's to
+            // say, and only refusing it fails the run (spec §2.8).
+            Err(e) => match redactor.unrecognised(source) {
+                Some(text) => payloads.push(Payload::Unrecognised(text)),
+                None => return fail(format!("message {}: {e}", index + 1)),
+            },
+        }
+    }
+    Ok(payloads)
+}
+
+/// Which built-in policy the run starts from (spec §10.2).
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Start {
+    /// An empty accepting policy that still refuses a payload it cannot
+    /// read: what `--policy` and `--rule` are applied on top of, and what
+    /// `--accept-all` starts from. The CLI keeps the fail-closed
+    /// disposition here even though `Policy::accept_all` passes, because
+    /// a run that was asked for no policy at all has been told nothing
+    /// about what an unreadable payload is worth (spec §10.2).
+    Neutral,
+    /// `--reject-all`.
+    RejectAll,
+    /// `--all-but-the-header`.
+    AllButTheHeader,
+}
+
+/// One payload of the input, after the policy has had its say.
+enum Payload {
+    /// It parsed: the redacted message, and what changed in it.
+    Message(Box<Message>, Report),
+    /// It did not parse and the policy did not refuse it: the text to
+    /// write in its place (spec §2.8).
+    Unrecognised(String),
+}
+
+impl Payload {
+    /// What to write for this payload, terminated so that the next one
+    /// starts on its own segment.
+    fn to_er7_with(&self, options: RenderOptions) -> String {
+        match self {
+            Payload::Message(message, _) => message.to_er7_with(options),
+            Payload::Unrecognised(text) => {
+                let mut text = text.clone();
+                // A passed-through payload usually carries its own line
+                // ending; a masked one has had every character of it
+                // replaced, and without this would run into the payload
+                // after it.
+                if !text.ends_with(['\r', '\n']) {
+                    text.push_str(match options.terminator {
+                        Terminator::Cr => "\r",
+                        Terminator::Lf => "\n",
+                        Terminator::CrLf => "\r\n",
+                    });
+                }
+                text
+            }
+        }
+    }
 }
 
 /// Assemble the policy the run applies (spec §10.2). The built-in default
 /// is used only when nothing else is asked for, so that what runs can be
 /// predicted from the arguments.
-fn policy(all: bool, policies: &[String], rules: &[String]) -> Result<Policy, Exit> {
-    let mut policy = match (all, policies.is_empty() && rules.is_empty()) {
-        (true, _) => Policy::everything(),
-        (false, true) => Policy::patient_identifiers(),
-        (false, false) => Policy::new(),
+fn policy(
+    start: Option<Start>,
+    accept_all: bool,
+    policies: &[String],
+    rules: &[String],
+) -> Result<Policy, Exit> {
+    // The CLI's own empty policy still refuses a payload it cannot read,
+    // where `Policy::accept_all` passes one: a run that was handed rules
+    // and nothing else has been told nothing about what an unreadable
+    // payload is worth, and refusing is the answer that loses no value
+    // quietly (spec §10.2).
+    let neutral = || Policy::accept_all().on_unrecognised(Unrecognised::Refuse);
+    let named_nothing = start.is_none() && policies.is_empty() && rules.is_empty();
+    let mut policy = match start {
+        // The built-in default is used only when nothing else was asked
+        // for, so that what runs can be predicted from the arguments.
+        _ if named_nothing => Policy::patient_identifiers(),
+        Some(Start::RejectAll) => Policy::reject_all(),
+        Some(Start::AllButTheHeader) => Policy::all_but_the_header(),
+        Some(Start::Neutral) | None => neutral(),
     };
     for path in policies {
         let text = match std::fs::read_to_string(path) {
@@ -212,6 +317,12 @@ fn policy(all: bool, policies: &[String], rules: &[String]) -> Result<Policy, Ex
             Ok(rule) => policy.rules.push(rule),
             Err(e) => return fail(e.to_string()),
         }
+    }
+    // Last, and so it wins: appending never weakens a posture (D20), which
+    // would leave no way at all to run a policy file's rules without its
+    // `reject` line (spec §10.2).
+    if accept_all {
+        policy = policy.posture(Posture::Accept);
     }
     Ok(policy)
 }
@@ -248,15 +359,30 @@ fn write_output(path: Option<&str>, text: &str) -> Result<(), Exit> {
 }
 
 /// Lay every change out next to the path that names it (spec §10.3).
-fn report(reports: &[Report]) -> String {
+fn report(payloads: &[Payload], policy: &Policy) -> String {
     let mut out = String::new();
-    for (index, report) in reports.iter().enumerate() {
+    for (index, payload) in payloads.iter().enumerate() {
         if index > 0 {
             out.push('\n');
         }
-        if reports.len() > 1 {
+        if payloads.len() > 1 {
             let _ = writeln!(out, "# message {}", index + 1);
         }
+        let report = match payload {
+            Payload::Message(_, report) => report,
+            // A payload with no positions in it has no rows to write. It
+            // gets a comment instead, which no reader can mistake for a
+            // change (spec §10.3).
+            Payload::Unrecognised(_) => {
+                let what = match &policy.unrecognised {
+                    Unrecognised::Pass => "passed through".to_string(),
+                    Unrecognised::Apply(action) => action.to_string(),
+                    Unrecognised::Refuse => unreachable!("a refused payload failed the run"),
+                };
+                let _ = writeln!(out, "# message {}: unrecognised payload, {what}", index + 1);
+                continue;
+            }
+        };
         let width = report
             .changes
             .iter()

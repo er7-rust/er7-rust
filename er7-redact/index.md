@@ -88,7 +88,10 @@ straight into a ticket.
 er7-redact --show-policy > de-identify.policy   # the built-in list, as a file to edit
 er7-redact -p de-identify.policy message.er7    # apply it
 er7-redact -r "NTE-3 clear" message.er7         # or one rule, inline
-er7-redact --all message.er7                    # redact everything except MSH
+
+# The two postures, as flags
+er7-redact --all-but-the-header message.er7     # reject every value but keep MSH
+er7-redact --accept-all -p strict.policy m.er7  # run its rules, not its reject
 ```
 
 ## Library
@@ -108,7 +111,7 @@ A policy is an ordered list of rules — an HL7 path and an action:
 ```rust
 use er7_redact::{Action, Policy};
 
-let policy = Policy::new()
+let policy = Policy::accept_all()
     .with("PID-3.1", Action::Pseudonym)?   // stable stand-in, so messages still join
     .with("PID-5", Action::redacted())?    // REDACTED^REDACTED^REDACTED
     .with("PID-7", Action::First(4))?      // 19610615 → 1961
@@ -127,13 +130,24 @@ PID-11   clear
 PID-19   null
 ```
 
-Invert it — redact everything, name what to keep — when the message is
-unfamiliar:
+Invert it — reject every value by default, and name what to accept — when
+the message is unfamiliar:
 
 ```rust
-let policy = Policy::everything()
+let policy = Policy::all_but_the_header()
     .with("OBX-3", Action::Keep)?
     .with("OBX-5", Action::Keep)?;
+```
+
+The same thing as a file ends with the two lines that say what the policy
+does by default:
+
+```
+OBX-3  keep
+OBX-5  keep
+
+reject        replace REDACTED
+unrecognised  refuse
 ```
 
 ## What it does
@@ -160,7 +174,7 @@ This is a **positional editor, not a compliance tool**.
   `er7 message.er7` and read what is actually in there.
 - It does not find an identifier written into free text. A name in an
   `NTE-3` comment survives every positional policy; name that position, or
-  use `--all`.
+  reject by default.
 - `pseudonym` is **not** cryptographic. It is a keyed hash that preserves
   equality on purpose, and anyone with the key can invert it. Use it inside
   your own trust boundary; for data leaving it, `clear` or `replace`.

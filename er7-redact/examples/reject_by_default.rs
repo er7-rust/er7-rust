@@ -1,10 +1,11 @@
-//! The other posture: redact everything, and name what to keep.
+//! The other posture: reject every value by default, and name what to
+//! accept.
 //!
 //! Use this when the message is unfamiliar — full of `Z` segments nobody
 //! documented, say — and the answer to "is there anything else in here?"
 //! has to be "no" rather than "not that I listed".
 //!
-//! Run with: `cargo run --example redact_all_but`
+//! Run with: `cargo run --example reject_by_default`
 
 use er7_redact::{Action, Policy, Redactor};
 
@@ -14,9 +15,10 @@ fn main() -> Result<(), er7_redact::Error> {
                 OBX|1|NM|2093-3^Cholesterol^LN||187|mg/dL|100-199|H|||F\r\
                 ZPD|1|LOCAL^EXTENSION^SEGMENT";
 
-    // The fallback covers every leaf no rule named; a `keep` rule is how a
-    // position is exempted from it.
-    let policy = Policy::everything()
+    // Rejecting by default covers every leaf no rule named; a `keep` rule
+    // accepts a position, exempting it from that. A rejecting rule would
+    // beat the `keep` whichever order the two were written in (D19).
+    let policy = Policy::all_but_the_header()
         .with("OBX-2", Action::Keep)? // value type
         .with("OBX-3", Action::Keep)? // observation identifier
         .with("OBX-5", Action::Keep)? // the number the test asserts on
@@ -45,5 +47,20 @@ fn main() -> Result<(), er7_redact::Error> {
     assert_eq!(message.query("OBX-8")?.as_deref(), Some("REDACTED"));
 
     println!("{} positions changed", report.len());
+
+    // And what this posture is really for: a payload that is not ER7 at
+    // all has no positions to name, so the policy says outright what
+    // becomes of it. The curated policy above refuses one, which is what
+    // makes the CLI exit non-zero rather than write it out.
+    let redactor = Redactor::new(Policy::all_but_the_header());
+    assert_eq!(redactor.unrecognised("{\"name\": \"EVERYWOMAN\"}"), None);
+
+    // `Policy::reject_all` masks it whole instead — nothing routable
+    // survives, and neither does anything else.
+    let redactor = Redactor::new(Policy::reject_all());
+    assert_eq!(
+        redactor.unrecognised("EVERYWOMAN").as_deref(),
+        Some("**********")
+    );
     Ok(())
 }

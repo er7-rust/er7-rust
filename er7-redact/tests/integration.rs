@@ -51,7 +51,8 @@ fn every_sample_keeps_its_shape() {
     for sample in [ADT, ORU] {
         for policy in [
             Policy::patient_identifiers(),
-            Policy::everything(),
+            Policy::all_but_the_header(),
+            Policy::reject_all(),
             Policy::parse(POLICY).expect("the sample policy parses"),
         ] {
             let mut message = parse(sample);
@@ -78,7 +79,7 @@ fn a_cleared_field_reads_back_as_an_empty_one() {
     // (`er7` R7). The field still occupies its position, so nothing shifts
     // (spec §4.1).
     let mut message = parse("MSH|^~\\&|LAB\rPID|1||9|X^Y");
-    let policy = Policy::new()
+    let policy = Policy::accept_all()
         .with("PID-3", Action::Clear)
         .unwrap()
         .with("PID-4", Action::Clear)
@@ -146,7 +147,7 @@ fn an_untouched_message_round_trips() {
     // D17: a policy that names nothing the message carries leaves the tree
     // exactly as it was, so `er7`'s round-trip guarantee carries through
     // (spec §4.5).
-    let policy = Policy::new()
+    let policy = Policy::accept_all()
         .with("ZZZ-1", Action::redacted())
         .unwrap()
         .with("PID-99", Action::Clear)
@@ -172,7 +173,7 @@ fn replacement_text_cannot_break_the_message() {
     // delimiter inside it is escaped rather than splitting the message
     // (spec §3.5).
     let mut message = parse("MSH|^~\\&|LAB\rPID|1||9||SMITH^JOHN");
-    let policy = Policy::new()
+    let policy = Policy::accept_all()
         .with("PID-5", Action::Replace("A|B^C~D&E".to_string()))
         .unwrap();
     Redactor::new(policy).redact(&mut message);
@@ -196,7 +197,9 @@ fn replacement_text_cannot_break_the_message() {
 
     // The same holds for a mask character that is itself a delimiter.
     let mut message = parse("MSH|^~\\&|LAB\rPID|AB");
-    let policy = Policy::new().with("PID-1", Action::Mask('|')).unwrap();
+    let policy = Policy::accept_all()
+        .with("PID-1", Action::Mask('|'))
+        .unwrap();
     Redactor::new(policy).redact(&mut message);
     assert_eq!(message.to_er7(), "MSH|^~\\&|LAB\rPID|\\F\\\\F\\");
     assert_eq!(
@@ -221,9 +224,13 @@ fn pseudonyms_link_across_messages() {
         // the identifier really is in field 19.
         let text = format!("MSH|^~\\&|LAB\rPV1|1|I{}|PATID1234", "|".repeat(16));
         let mut message = parse(&text);
-        Redactor::new(Policy::new().with("PV1-19.1", Action::Pseudonym).unwrap())
-            .with_key(42)
-            .redact(&mut message);
+        Redactor::new(
+            Policy::accept_all()
+                .with("PV1-19.1", Action::Pseudonym)
+                .unwrap(),
+        )
+        .with_key(42)
+        .redact(&mut message);
         message.query("PV1-19.1").unwrap().expect("a value")
     };
     assert_eq!(one, two);
@@ -356,8 +363,10 @@ fn cli_takes_rules_instead_of_the_built_in_policy() {
 }
 
 #[test]
-fn cli_redacts_everything_with_all() {
-    let (ok, stdout, _) = cli(&["--all"], ADT);
+fn cli_rejects_everything_but_the_header() {
+    // Spec §10.2: the two rejecting flags differ by exactly one rule —
+    // whether the header survives to make the message routable.
+    let (ok, stdout, _) = cli(&["--all-but-the-header"], ADT);
     assert!(ok);
     assert!(stdout.starts_with("MSH|^~\\&|ADT1|MCM|"), "{stdout}");
     assert!(stdout.contains("EVN|REDACTED|REDACTED"), "{stdout}");
@@ -366,6 +375,91 @@ fn cli_redacts_everything_with_all() {
         "{stdout}"
     );
     assert!(er7::parse(&stdout).is_ok());
+
+    let (ok, stdout, _) = cli(&["--reject-all"], ADT);
+    assert!(ok);
+    // The delimiters survive, because they are the delimiters (D5); the
+    // rest of the header does not.
+    assert!(
+        stdout.starts_with("MSH|^~\\&|REDACTED|REDACTED|"),
+        "{stdout}"
+    );
+    assert!(!stdout.contains("ADT1"), "{stdout}");
+    assert!(er7::parse(&stdout).is_ok());
+
+    // `--all` was removed, and says so rather than reading as unknown.
+    let (ok, _, stderr) = cli(&["--all"], ADT);
+    assert!(!ok);
+    assert!(
+        stderr.contains("--all is now --all-but-the-header"),
+        "{stderr}"
+    );
+}
+
+#[test]
+fn cli_accept_all_switches_off_a_policy_files_reject() {
+    // Spec §10.2: appending never weakens (D20), so `--accept-all` is
+    // applied last and is the one thing that can.
+    let policy = "OBX-3 clear\nreject replace REDACTED\n";
+    let path = std::env::temp_dir().join("er7-redact-accept-all.policy");
+    std::fs::write(&path, policy).expect("writes the policy");
+    let path = path.to_string_lossy().into_owned();
+
+    let (ok, rejecting, _) = cli(&["-p", &path], ORU);
+    assert!(ok);
+    assert!(rejecting.contains("REDACTED"), "{rejecting}");
+
+    let (ok, accepting, _) = cli(&["--accept-all", "-p", &path], ORU);
+    assert!(ok);
+    assert!(!accepting.contains("REDACTED"), "{accepting}");
+    // The file's own rule still ran; only its posture was overridden.
+    assert!(!accepting.contains("2093-3"), "{accepting}");
+    let _ = std::fs::remove_file(&path);
+}
+
+#[test]
+fn cli_masks_an_unrecognised_payload() {
+    // D21: what a payload that is not ER7 gets is the policy's to say,
+    // and only refusing it fails the run (spec §2.8, §10.4).
+    //
+    // The junk comes first because `er7::split_messages` cuts at headers:
+    // anything after a message belongs to it, so the first payload is the
+    // only one that can be unrecognised (spec §2.8).
+    let batch = format!("{{\"patient\": \"EVERYWOMAN\"}}\r{ADT}");
+
+    // The built-in default refuses, which is what it did before 0.2.
+    let (ok, stdout, stderr) = cli(&[], &batch);
+    assert!(!ok, "{stdout}");
+    assert!(stdout.is_empty(), "{stdout}");
+    assert!(stderr.contains("message 1"), "{stderr}");
+
+    // `--reject-all` masks it whole, and nothing of it survives.
+    let (ok, stdout, _) = cli(&["--reject-all"], &batch);
+    assert!(ok);
+    assert!(!stdout.contains("EVERYWOMAN"), "{stdout}");
+    assert!(stdout.starts_with("****"), "{stdout}");
+    // The message after it was still redacted.
+    assert!(!stdout.contains("JONES"), "{stdout}");
+    // What comes out is not itself a message, and cannot be: a masked
+    // payload is a wall of asterisks where a header would have to be.
+    assert!(er7::parse(&stdout).is_err());
+
+    // A policy file can ask for either, and the report says which.
+    let path = std::env::temp_dir().join("er7-redact-unrecognised.policy");
+    std::fs::write(&path, "PID-5 clear\nunrecognised pass\n").expect("writes the policy");
+    let path = path.to_string_lossy().into_owned();
+
+    let (ok, stdout, _) = cli(&["-p", &path], &batch);
+    assert!(ok);
+    assert!(stdout.contains("{\"patient\": \"EVERYWOMAN\"}"), "{stdout}");
+
+    let (ok, stdout, _) = cli(&["-p", &path, "--report"], &batch);
+    assert!(ok);
+    assert!(
+        stdout.contains("# message 1: unrecognised payload, passed through"),
+        "{stdout}"
+    );
+    let _ = std::fs::remove_file(&path);
 }
 
 #[test]
@@ -393,13 +487,22 @@ fn cli_shows_the_policy_without_reading_input() {
     let (ok, stdout, _) = cli(&["--show-policy"], "");
     assert!(ok);
     assert!(stdout.starts_with("PID-2.1   pseudonym\n"), "{stdout}");
+    // Both defaults are stated, so a reader never has to know which one
+    // was the quiet one (spec §6.5).
+    assert!(
+        stdout.ends_with("\naccept\nunrecognised  refuse\n"),
+        "{stdout}"
+    );
     // What it writes is a policy file that reads back.
     let policy = Policy::parse(&stdout).expect("the shown policy parses");
     assert_eq!(policy, Policy::patient_identifiers());
 
-    let (ok, stdout, _) = cli(&["--show-policy", "--all"], "");
+    let (ok, stdout, _) = cli(&["--show-policy", "--all-but-the-header"], "");
     assert!(ok);
-    assert_eq!(stdout, "MSH  keep\n*    replace REDACTED\n");
+    assert_eq!(
+        stdout,
+        "MSH  keep\n\nreject        replace REDACTED\nunrecognised  refuse\n"
+    );
 }
 
 #[test]
@@ -508,7 +611,7 @@ fn every_rule_has_a_coverage_row() {
     let declared = rule_ids(include_str!("../spec/01-purpose-and-scope.md"));
     let covered = rule_ids(include_str!("../spec/11-testing-strategy.md"));
 
-    assert_eq!(declared.len(), 18, "§1.4 should index D1–D18");
+    assert_eq!(declared.len(), 21, "§1.4 should index D1–D21");
     let missing: Vec<&String> = declared.iter().filter(|d| !covered.contains(d)).collect();
     assert!(missing.is_empty(), "no row in §11.1 for {missing:?}");
     let orphan: Vec<&String> = covered.iter().filter(|d| !declared.contains(d)).collect();

@@ -13,7 +13,7 @@ fn main() -> Result<(), er7_redact::Error> {
     // and PID-4 onwards was never sent at all.
     let text = "MSH|^~\\&|LAB\rPID|1||\"\"";
 
-    let policy = Policy::new()
+    let policy = Policy::accept_all()
         .with("PID-1", Action::redacted())?
         .with("PID-2", Action::redacted())?
         .with("PID-3", Action::redacted())?
@@ -46,13 +46,13 @@ fn main() -> Result<(), er7_redact::Error> {
     // for that, which is the one action that changes the shape of a
     // message, because an HL7 null is a single `""`.
     let mut message = er7::parse("MSH|^~\\&|LAB\rPID|1||9||SMITH^JOHN")?;
-    let policy = Policy::new().with("PID-5", Action::Null)?;
+    let policy = Policy::accept_all().with("PID-5", Action::Null)?;
     Redactor::new(policy).redact(&mut message);
     assert_eq!(message.to_er7(), "MSH|^~\\&|LAB\rPID|1||9||\"\"");
 
     // Compare with `clear`, which says nothing rather than saying "delete".
     let mut message = er7::parse("MSH|^~\\&|LAB\rPID|1||9||SMITH^JOHN")?;
-    let policy = Policy::new().with("PID-5", Action::Clear)?;
+    let policy = Policy::accept_all().with("PID-5", Action::Clear)?;
     Redactor::new(policy).redact(&mut message);
     assert_eq!(message.to_er7(), "MSH|^~\\&|LAB\rPID|1||9||^");
 

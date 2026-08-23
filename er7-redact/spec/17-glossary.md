@@ -10,8 +10,14 @@ the `er7` spec §19, which this document does not restate.
 | ---- | ------- |
 | **action** | what to do to a selected value: one of the eight in [§3](03-actions.md) |
 | **rule** | one HL7 path and one action |
-| **policy** | an ordered list of rules, plus an optional fallback action |
-| **fallback** | the action applied to every leaf no rule named ([§2.6](02-redaction-model.md)); what turns a policy from "redact these" into "redact all but these" |
+| **policy** | an ordered list of rules, plus a posture and what it does with an unrecognised payload |
+| **posture** | which of the two things a policy does with a leaf no rule named: **accept** it, or **reject** it ([§2.6](02-redaction-model.md)) |
+| **accept by default** | the posture that leaves an unnamed leaf as it is — "redact these". Written `accept` |
+| **reject by default** | the posture that applies an action to every unnamed leaf — "redact all but these". Written `reject ACTION` |
+| **accept rule** | a rule whose action is `keep`: it exempts the position it names from the posture, and never restores a value ([§2.4](02-redaction-model.md)) |
+| **reject rule** | a rule with any other action. It beats an accept rule for the same leaf, whichever order they are in (D19) |
+| **payload** | one chunk of input, as `er7::split_messages` returns it ([§2.8](02-redaction-model.md)) |
+| **unrecognised** | a payload that is not ER7, and so has no positions. A policy refuses it, passes it through, or acts on it whole ([§2.8](02-redaction-model.md)) |
 | **redactor** | a policy plus a pseudonym key; the only thing that edits a message |
 | **report** | the list of positions a redaction changed, and what changed them ([§8](08-report.md)) |
 | **change** | one row of a report: a fully qualified path and an action |

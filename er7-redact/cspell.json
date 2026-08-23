@@ -19,7 +19,9 @@
         "rustdoc",
         "subcomponent",
         "subcomponents",
-        "unescape"
+        "unescape",
+        "unrecognised",
+        "unrecognized"
     ],
     "ignoreWords": [],
     "import": []

@@ -70,7 +70,10 @@ expanded in the matching topical guide.
    empty field announces that something was there.
 3. **When in doubt, redact.** Privacy is priority 1
    ([§1.5](spec/01-purpose-and-scope.md)): a value that should have gone
-   and did not cannot be undone.
+   and did not cannot be undone. Two rules follow from it: a reject rule
+   beats an accept rule for the same position, whichever order they are in
+   (D19), and appending a policy never weakens its posture (D20). See
+   [`spec/02-redaction-model.md`](spec/02-redaction-model.md) §2.4, §2.6.
 4. **Do not claim more than the crate knows** (D14). This is a positional
    editor, not a compliance tool; `pseudonym` is not secure (D12). Never
    call an output "de-identified". See [`AGENTS/safety.md`](AGENTS/safety.md).

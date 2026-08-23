@@ -13,7 +13,7 @@ eight were not enough.
 
 | Action | Spelled | `PATID1234` becomes | Use for |
 | ------ | ------- | ------------------- | ------- |
-| `Keep` | `keep` | `PATID1234` | exempting a position from the fallback ([§2.6](02-redaction-model.md)) |
+| `Keep` | `keep` | `PATID1234` | accepting a position, so the posture does not reject it ([§2.6](02-redaction-model.md)) |
 | `Clear` | `clear` | (empty) | anything whose presence is not wanted, e.g. an address |
 | `Null` | `null` | `""` | telling a receiver to *clear its stored value*, not merely that none was sent |
 | `Replace(text)` | `replace REDACTED` | `REDACTED` | a name, where an obvious placeholder reads better than a blank |

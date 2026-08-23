@@ -6,10 +6,26 @@ In priority order. Each item says what it buys and what it would cost;
 items with a "done when" clause and an ID live in
 [§15](15-open-tasks.md).
 
-## 14.1 Now — 0.1
+## 14.1 Now — 0.2
 
-The shape described by §1–§13: policies, eight actions, two built-ins, the
-file format, pseudonyms, the report, and the CLI. Complete.
+The shape described by §1–§13: policies, eight actions, the two postures
+and the four built-ins they come in, the file format, pseudonyms, the
+report, and the CLI. Complete.
+
+0.2 made the posture explicit ([§2.6](02-redaction-model.md)). Before it,
+a policy carried an optional *fallback* action, and "accept by default"
+was the absence of one — a distinction a reader had to infer from a
+missing line. Now a policy states which of the two it takes, cannot be
+built without saying, and writes it out. Three rules came with it: a
+reject rule beats an accept rule for the same leaf (D19), appending never
+weakens a posture (D20), and a payload that is not ER7 is refused, passed,
+or acted on whole (D21, [§2.8](02-redaction-model.md)).
+
+What it cost: `Policy::new`, `Policy::fallback`, `Policy::everything`, the
+`*` line in a policy file, and the CLI's `--all`
+([§13](13-compatibility-and-versioning.md)). Each is refused by name
+rather than left to fail quietly, because the one outcome worth ruling out
+is a policy that still runs and has changed posture.
 
 ## 14.2 Next — free-text scanning
 
@@ -56,7 +72,7 @@ doing, not worth guessing at. [T5](15-open-tasks.md).
 The inverse tool: given a message and a policy, report the positions that
 carry text and are *not* named by any rule. This is how a caller finds out
 what a policy is missing, and it is a small amount of code on top of the
-existing walk — the fallback already computes exactly this set.
+existing walk — rejecting by default already computes exactly this set.
 [T6](15-open-tasks.md).
 
 ## 14.6 Not planned

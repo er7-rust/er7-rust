@@ -13,6 +13,7 @@ never write Rust at all:
 | the Rust API | adding a variant to `Action` or `Error`, removing an item, changing a signature |
 | the **policy file format** ([§6](06-policy-file-format.md), D18) | how a line is read, an action's spelling, the meaning of `*` |
 | the **CLI** ([§10](10-command-line-interface.md)) | removing an option, changing an exit code, changing which policy runs by default, changing the report layout |
+| the **posture** a policy or a flag carries ([§2.6](02-redaction-model.md)) | changing which of accept or reject a built-in policy, a policy file line, or a CLI flag means |
 | the **pseudonym function** ([§7](07-pseudonyms.md), D12) | any change to the value it returns, for any key and input |
 
 ## 13.2 The pseudonym function is frozen

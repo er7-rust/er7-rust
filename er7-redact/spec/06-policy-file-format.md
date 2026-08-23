@@ -10,7 +10,9 @@ read is a breaking change ([§13](13-compatibility-and-versioning.md)).
 
 ## 6.1 Shape
 
-One rule per line: a path, whitespace, an action.
+One rule per line: a path, whitespace, an action. Three reserved first
+words — `accept`, `reject`, and `unrecognised` — set what the policy does
+by default instead of naming a position ([§6.3](#63-the-default-lines)).
 
 ```
 # de-identify.policy — for messages from the LAB interface
@@ -22,6 +24,8 @@ PID-11   clear
 PID-19   clear
 NK1-2    replace
 OBX-5    keep
+
+accept
 ```
 
 - **Blank lines are ignored.**
@@ -33,7 +37,11 @@ OBX-5    keep
 - Leading and trailing whitespace is ignored; the separator between the
   path and the action is any run of spaces or tabs.
 - Rules are kept **in file order**, and order is significant (D7,
-  [§2.4](02-redaction-model.md)).
+  [§2.4](02-redaction-model.md)) — except between a `keep` rule and a
+  rejecting rule for the same position, where the rejecting one wins
+  whichever came first (D19).
+- A file that states no posture **accepts by default**, so a file of
+  nothing but rules means "redact these".
 
 ## 6.2 Action grammar
 
@@ -53,21 +61,58 @@ OBX-5    keep
 Action names are matched **case-insensitively** (`CLEAR` and `clear` are
 the same action); replacement text is taken as written.
 
-## 6.3 The fallback line
+## 6.3 The default lines
 
-A path of `*` sets the policy's fallback ([§2.6](02-redaction-model.md))
-rather than adding a rule:
+Three first words are reserved. Each sets one of the policy's defaults
+([§2.6](02-redaction-model.md), [§2.8](02-redaction-model.md)) rather than
+adding a rule, and each may appear anywhere in the file:
+
+| Written | Means |
+| ------- | ----- |
+| `accept` | accept by default: a leaf no rule named is left as it is |
+| `reject` | reject by default with `replace REDACTED` |
+| `reject ACTION` | reject by default with `ACTION`, in the grammar of [§6.2](#62-action-grammar) |
+| `unrecognised refuse` | a payload that is not ER7 fails the run |
+| `unrecognised pass` | a payload that is not ER7 is written out unchanged |
+| `unrecognised ACTION` | a payload that is not ER7 has `ACTION` applied to it whole |
 
 ```
 MSH  keep
-*    replace REDACTED
+
+reject        replace REDACTED
+unrecognised  mask *
 ```
 
-`*` may appear anywhere in the file; the fallback always runs last. A
-second `*` line replaces the first — a policy has one fallback, and
-silently keeping the earlier one would hide an editing mistake.
+The reserved words are matched **case-insensitively**, like action names,
+and `unrecognized` is accepted for `unrecognised`. Segment names are three
+characters, so none of the three can collide with a path.
 
-`* keep` is legal and means "no fallback", which is also the default.
+A second `accept` or `reject` line replaces the first, and so does a
+second `unrecognised` line: a policy has one of each, and silently keeping
+the earlier one would hide an editing mistake.
+
+`reject keep` is legal and means `accept`, and so does `unrecognised keep`
+for `unrecognised pass` — rejecting a leaf by leaving it alone is not
+rejecting it. Each is normalised on the way in, so that a policy written
+back out says what it does ([§6.5](#65-writing-a-policy-back-out)).
+
+Concatenating files is **not** the same as writing one: appending a policy
+can only make the defaults stricter, never looser (D20,
+[§2.6](02-redaction-model.md)).
+
+### The `*` line, removed
+
+Before 0.2 the posture was written `* ACTION`, with `* keep` for "no
+fallback". A `*` line is now an error naming its replacement:
+
+```
+policy line 9: "* replace REDACTED": the default line is now "reject replace REDACTED", not "*"
+```
+
+That is a breaking change to a compatibility surface (D18,
+[§13](13-compatibility-and-versioning.md)), and it is an error rather than
+a silent synonym on purpose: `*` said nothing about which of the two
+postures it meant, which is the whole of what this format now has to say.
 
 ## 6.4 Errors
 
@@ -78,6 +123,8 @@ A malformed line is an error naming the line number and what was wrong
 policy line 4: "PID-5 obfuscate": unknown action "obfuscate"
 policy line 7: "PID-0 clear": invalid HL7 path "PID-0": indices are 1-based, so 0 is not a position
 policy line 9: "first 4": expected a path and an action
+policy line 11: "accept everything": "accept" takes no argument, but got "everything"
+policy line 13: "unrecognised": "unrecognised" wants "refuse", "pass", or an action
 ```
 
 Reading a policy is the one place this crate is strict. A typo in a policy
@@ -90,14 +137,21 @@ prevent — so it is caught at load time instead
 
 `Policy` implements `Display`, and its output re-parses to an equal
 policy. The canonical form is one rule per line, with the paths padded to a
-common width and at least two spaces before the action, and the fallback
-last:
+common width and at least two spaces before the action; then a blank line;
+then the two default lines, always both, whatever they say:
 
 ```
 PID-3  pseudonym
 PID-5  replace REDACTED
-*      replace REDACTED
+
+reject        replace REDACTED
+unrecognised  refuse
 ```
+
+The defaults are written out **even when they are the quiet ones**. A
+policy file that ends `accept` / `unrecognised refuse` is longer than one
+that ends nowhere, and it is the difference between a reader knowing what
+happens to everything the file does not name and a reader assuming it.
 
 This is what the CLI's `--show-policy` prints
 ([§10](10-command-line-interface.md)), and it is how a caller turns the

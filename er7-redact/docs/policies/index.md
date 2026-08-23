@@ -2,7 +2,7 @@
 
 # Policies
 
-A reference for the policy file format and the two built-in policies. The
+A reference for the policy file format and the four built-in policies. The
 normative text is [spec §5](../../spec/05-built-in-policies.md) and
 [§6](../../spec/06-policy-file-format.md); this page is the working copy.
 
@@ -25,13 +25,14 @@ NTE-3    clear
 - `#` starts a comment, on its own line or after a rule. It also ends an
   action's argument, so replacement text cannot contain a `#`.
 - Rules apply **in order**, and order is significant.
-- A path of `*` sets the fallback rather than adding a rule.
+- Three reserved first words — `accept`, `reject`, and `unrecognised` —
+  set what the policy does by default rather than naming a position.
 
 ## The actions
 
 | Written | `PATID1234` becomes | Use for |
 | ------- | ------------------- | ------- |
-| `keep` | `PATID1234` | exempting a position from the fallback |
+| `keep` | `PATID1234` | **accepting** a position, so a rejecting posture leaves it alone |
 | `clear` | | an address, a phone number, anything a placeholder would not help |
 | `null` | `""` | telling a receiver to **clear its stored value** |
 | `replace` | `REDACTED` | shorthand for `replace REDACTED` |
@@ -55,16 +56,21 @@ Action names are case-insensitive; replacement text is taken as written.
 `clear` is almost always what redaction means. Use `null` only when the
 policy really is meant to say "this system must not hold this value".
 
-## Redact-these versus redact-all-but
+## Accept by default versus reject by default
 
-Without a fallback, a policy redacts what it lists:
+Every policy is one of the two, and says which on its last lines.
+
+**Accept by default** — redact what is listed, leave everything else:
 
 ```
 PID-5  replace REDACTED
 PID-7  first 4
+
+accept
+unrecognised  refuse
 ```
 
-With one, it redacts everything else instead, and `keep` becomes the
+**Reject by default** — redact everything, and `keep` becomes the
 interesting rule:
 
 ```
@@ -72,15 +78,52 @@ MSH    keep
 OBX-2  keep
 OBX-3  keep
 OBX-5  keep
-*      replace REDACTED
+
+reject        replace REDACTED
+unrecognised  mask *
 ```
 
-The fallback always runs last, wherever the `*` line appears. `* keep`
-means "no fallback", which is also the default.
+The posture always runs last, wherever its line appears in the file. A
+file that states no posture accepts by default; `reject keep` is legal and
+means `accept`.
 
-Note that `keep` **exempts a position from the fallback**; it does not undo
+### A reject beats an accept
+
+A `keep` rule **accepts** the position it names; a rule with any other
+action **rejects** it. Where a position is named by both, the rejecting
+rule wins — **whichever order they are in**, and at whatever depth:
+
+```
+PID    replace REDACTED   # rejecting the segment...
+PID-5  keep               # ...does not carve the name back out
+```
+
+A field in both lists is a policy somebody got wrong, and redacting it is
+the direction that fails safely: a value redacted by mistake costs a
+policy edit, and a value left behind by mistake cannot be recalled.
+
+Note that `keep` **exempts a position from the posture**; it does not undo
 an earlier rule. Rules run in order against the message as it stands, so
 once a value has been replaced there is nothing to restore it from.
+
+A `keep` naming a whole segment is not narrowed by the posture: `MSH keep`
+accepts every leaf of the header, including ones the policy's author never
+saw. Only a reject rule reaches back into it.
+
+### A payload that is not ER7
+
+Input that does not parse has no positions in it, so no rule and no
+posture can speak to it. The `unrecognised` line says what happens
+instead:
+
+| Written | Effect |
+| ------- | ------ |
+| `unrecognised refuse` | the run fails and writes nothing — the fail-closed default for a policy file, and for the CLI |
+| `unrecognised pass` | the payload is written out byte for byte |
+| `unrecognised mask *` | the payload is masked whole; any action works here |
+
+Only the first payload of an input can be unrecognised: messages are split
+at their headers, so junk after a message arrives as a segment of it.
 
 ## The built-in policies
 
@@ -107,22 +150,35 @@ Write it out to a file to see it all, and to pin it:
 er7-redact --show-policy > de-identify.policy
 ```
 
-### `everything` — the other posture
+### `all_but_the_header` — the other posture
 
 ```
 MSH  keep
-*    replace REDACTED
+
+reject        replace REDACTED
+unrecognised  refuse
 ```
 
 Everything below the header becomes `REDACTED`. Add `keep` rules for what
 a test actually needs. This is the only thing that covers a local `Z`
 segment, since no curated list can know what is in one.
 
+### `accept_all` and `reject_all` — the bare postures
+
+No rules, and no knowledge of HL7 at all. `accept_all` redacts nothing and
+passes a payload it cannot parse through unchanged; `reject_all` redacts
+everything it can reach — the header included, so the message stops being
+routable — and masks such a payload whole.
+
+They are the starting points, not the answers: `accept_all` is what you
+build a policy on top of, and `reject_all` is `all_but_the_header` without
+the one rule that keeps a message usable.
+
 ## What the default deliberately leaves alone
 
 | Position | Why |
 | -------- | --- |
-| `NTE-3`, `OBX-5`, other free text | identifiers hide there constantly, and redacting them wholesale destroys the clinical content that makes a message worth sharing. Name them explicitly, or use `--all` |
+| `NTE-3`, `OBX-5`, other free text | identifiers hide there constantly, and redacting them wholesale destroys the clinical content that makes a message worth sharing. Name them explicitly, or reject by default |
 | `PID-8`, `PID-10`, `PID-15`–`PID-17`, `PID-22` | sensitive, but not identifiers, and usually the point of the test. Quasi-identifiers in combination: in a small population, redact them too |
 | `MSH-3`–`MSH-6` | organisational rather than personal, and often what makes a message reproducible |
 | `Z` segments | local, so no position means anything a list could know |

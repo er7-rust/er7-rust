@@ -51,14 +51,41 @@
 //! # }
 //! ```
 //!
+//! # Accept by default, or reject by default
+//!
+//! Every policy is one of the two, and says which ([`Posture`], spec §2.6):
+//!
+//! ```
+//! # fn main() -> Result<(), er7_redact::Error> {
+//! use er7_redact::{Action, Policy, Redactor};
+//!
+//! // Accept by default — redact the positions the policy lists.
+//! let listed = Policy::patient_identifiers();
+//!
+//! // Reject by default — redact everything except what a `keep` rule names.
+//! let all_but = Policy::all_but_the_header().with("OBX-5", Action::Keep)?;
+//! # let _ = (listed, all_but);
+//! # Ok(())
+//! # }
+//! ```
+//!
+//! Accepting by default is the safer *message* — it leaves the clinical
+//! content a test needs. Rejecting by default is the safer *posture* — it
+//! is the only one that covers a `Z` segment nobody documented, or a field
+//! an interface started sending last week. Where the two disagree inside
+//! one policy, the reject wins (D19).
+//!
 //! # What is here
 //!
 //! | Item | Purpose |
 //! |------|---------|
 //! | [`Redactor`] | a policy and a pseudonym key; the only thing that edits a message |
 //! | [`Policy`], [`Rule`], [`Action`] | what to redact, where, and how |
+//! | [`Posture`] | accept by default, or reject by default |
+//! | [`Unrecognised`] | what a payload that is not ER7 gets |
 //! | [`Policy::patient_identifiers`] | the curated default: `PID`, `NK1`, `PV1`, `GT1`, `IN1` |
-//! | [`Policy::everything`] | the other posture: redact all but what you name |
+//! | [`Policy::all_but_the_header`] | the other posture, curated: redact all but what you name |
+//! | [`Policy::accept_all`], [`Policy::reject_all`] | the two bare postures, with no rules at all |
 //! | [`Policy::parse`] | read a policy file |
 //! | [`Report`], [`Change`] | what a redaction did, with no values in it |
 //! | [`pseudonym()`] | the stable stand-in an identifier is replaced by |
@@ -100,7 +127,7 @@ pub mod pseudonym;
 pub mod redact;
 
 pub use crate::action::Action;
-pub use crate::policy::{Policy, Rule};
+pub use crate::policy::{Policy, Posture, Rule, Unrecognised};
 pub use crate::pseudonym::pseudonym;
 pub use crate::redact::{Change, Redactor, Report};
 

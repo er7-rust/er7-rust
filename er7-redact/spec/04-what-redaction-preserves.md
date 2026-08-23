@@ -67,7 +67,7 @@ Before any action runs, two kinds of leaf are skipped:
 | empty (`\|\|`) | there is nothing to redact. Writing `REDACTED` into it would **invent** a value — and announce that a value used to be there, which is a disclosure in itself |
 | explicit null (`\|""\|`) | the null is an instruction to the receiver, not patient data. Overwriting it turns "clear this value" into a value, which corrupts a record (the `er7` spec §5.3, R10) |
 
-The skip is unconditional: it applies to rules and to the fallback alike,
+The skip is unconditional: it applies to rules and to the posture alike,
 and to every action. An explicitly written `PID-5 replace REDACTED` still
 leaves an empty `PID-5` empty.
 
@@ -78,7 +78,7 @@ write one ([§3.3](03-actions.md)).
 
 Fields 1 and 2 of a header segment — `MSH`, `FHS`, `BHS` — are the field
 separator and the encoding characters (`er7` R8). They are structure, not
-data, and no rule and no fallback ever changes them. A rule naming them is
+data, and neither a rule nor a posture ever changes them. A rule naming them is
 accepted, applied to nothing, and reported as nothing.
 
 A message whose `MSH-1` had been redacted would not parse; a message whose
@@ -88,7 +88,7 @@ patient detail in the first place.
 
 ## 4.5 An untouched message round-trips [D17]
 
-If no rule and no fallback names anything the message carries, then
+If no rule and no posture names anything the message carries, then
 `redact` leaves the tree exactly as it was, and writing it back reproduces
 the input byte for byte — the `er7` round-trip guarantee (R16) carries
 through unchanged.

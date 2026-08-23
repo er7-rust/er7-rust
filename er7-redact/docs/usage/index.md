@@ -58,7 +58,7 @@ A policy is an ordered list of rules. Build one in Rust:
 ```rust
 use er7_redact::{Action, Policy};
 
-let policy = Policy::new()
+let policy = Policy::accept_all()
     .with("PID-3.1", Action::Pseudonym)?
     .with("PID-5", Action::redacted())?
     .with("PID-7", Action::First(4))?
@@ -110,22 +110,31 @@ let policy = Policy::patient_identifiers()
 
 ## 5. When you do not trust the list
 
-If the message is unfamiliar, invert the model: redact everything, and
-name what to keep.
+If the message is unfamiliar, invert the posture: **reject by default**,
+and name what to accept.
 
 ```rust
-let policy = Policy::everything()   // MSH keep, then a fallback over the rest
+let policy = Policy::all_but_the_header()   // MSH kept; everything else rejected
     .with("OBX-2", Action::Keep)?
     .with("OBX-3", Action::Keep)?
     .with("OBX-5", Action::Keep)?;
 ```
 
 ```sh
-er7-redact --all message.er7
+er7-redact --all-but-the-header message.er7
 ```
 
 This is the only way to cover a `Z` segment nobody has documented, and the
 only honest answer to "is there anything else in there?".
+
+A `keep` rule **accepts** the position it names; any other action
+**rejects** it. Where a position is named by both, the reject wins,
+whichever order the two rules are in — a field in both lists is a policy
+somebody got wrong, and redacting it is the direction that fails safely.
+
+`--reject-all` goes one step further and takes the header too, which
+leaves the message unroutable; it is rarely what you want on a message,
+and is the posture to reach for when nothing about the input is trusted.
 
 ## 6. Keeping the message joinable
 
@@ -170,7 +179,7 @@ before sharing the message.
 
 - It does not find an identifier in free text. `NTE-3` saying "spoke with
   Mrs Everywoman" survives every positional policy, and the only current
-  answers are naming that position or using `--all`.
+  answers are naming that position or rejecting by default.
 - It does not tell you the result is de-identified. That is a judgement
   about a whole data set, made by a person who is accountable for it.
 - It does not go back. There is no mapping table and no undo.

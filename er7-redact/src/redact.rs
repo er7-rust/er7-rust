@@ -1,8 +1,9 @@
 //! The engine: applying a policy to a message, and reporting what changed.
 //!
 //! A [`Redactor`] is the only thing in this crate that edits a message. It
-//! walks the tree once per rule, in order, and then once more for the
-//! policy's fallback, rewriting leaf text and leaving the shape alone.
+//! walks the tree once per rule, in order, and then once more where the
+//! policy rejects by default, rewriting leaf text and leaving the shape
+//! alone.
 //!
 //! Specified by spec §2 (the model), §4 (what is preserved), and §8 (the
 //! report).
@@ -13,7 +14,7 @@ use std::fmt;
 use er7::message::NULL;
 use er7::{Component, Field, Message, Path, Repetition, Segment, Separators, Subcomponent};
 
-use crate::{Action, Policy};
+use crate::{Action, Policy, Posture, Unrecognised};
 
 /// One leaf's coordinates: the segment's index in the message, then the
 /// 1-based field, repetition, component, and subcomponent numbers.
@@ -58,7 +59,7 @@ impl fmt::Display for Change {
 /// use er7_redact::{Action, Policy, Redactor};
 ///
 /// let mut message = er7::parse("MSH|^~\\&|LAB\rPID|1||9||SMITH^JOHN")?;
-/// let policy = Policy::new().with("PID-5", Action::redacted())?;
+/// let policy = Policy::accept_all().with("PID-5", Action::redacted())?;
 /// let report = Redactor::new(policy).redact(&mut message);
 ///
 /// // One row per leaf that actually changed.
@@ -164,6 +165,62 @@ impl Redactor {
         self.key
     }
 
+    /// What to write in place of `payload`, which did not parse as ER7
+    /// (D21, spec §2.8).
+    ///
+    /// `None` means the policy **refuses** it: nothing should be written,
+    /// and the caller reports that the payload did not parse. That is not
+    /// an error this crate raises — [`Redactor::redact`] cannot fail — so
+    /// the caller decides what a refusal costs. The CLI makes it a
+    /// diagnostic and exit 1 (spec §10.4).
+    ///
+    /// `Some(text)` is the payload itself where the policy passes it
+    /// through, or the policy's action applied to the whole payload as if
+    /// it were one value.
+    ///
+    /// Example:
+    ///
+    /// ```
+    /// use er7_redact::{Action, Policy, Redactor, Unrecognised};
+    ///
+    /// let junk = "not a message";
+    ///
+    /// // The curated policies refuse a payload they cannot read.
+    /// assert_eq!(Redactor::default().unrecognised(junk), None);
+    ///
+    /// // The bare postures each do what their name says.
+    /// assert_eq!(
+    ///     Redactor::new(Policy::accept_all()).unrecognised(junk).as_deref(),
+    ///     Some("not a message"),
+    /// );
+    /// assert_eq!(
+    ///     Redactor::new(Policy::reject_all()).unrecognised(junk).as_deref(),
+    ///     Some("*************"),
+    /// );
+    ///
+    /// // And any of it is overridable.
+    /// let policy = Policy::accept_all().on_unrecognised(Unrecognised::Apply(Action::redacted()));
+    /// assert_eq!(
+    ///     Redactor::new(policy).unrecognised(junk).as_deref(),
+    ///     Some("REDACTED"),
+    /// );
+    /// ```
+    #[must_use]
+    pub fn unrecognised(&self, payload: &str) -> Option<String> {
+        match &self.policy.unrecognised {
+            Unrecognised::Refuse => None,
+            Unrecognised::Pass => Some(payload.to_string()),
+            // An action that writes nothing leaves the payload as it is:
+            // `Policy::on_unrecognised` normalises those away, so this
+            // arm is only reachable through the public field.
+            Unrecognised::Apply(action) => Some(
+                action
+                    .apply(payload, self.key)
+                    .unwrap_or_else(|| payload.to_string()),
+            ),
+        }
+    }
+
     /// Redact `message` in place, and report what changed.
     ///
     /// This cannot fail (spec §9.2): a rule that matches nothing does
@@ -207,14 +264,14 @@ impl Redactor {
             }
         }
 
-        if let Some(action) = &self.policy.fallback {
+        if let Posture::Reject(action) = &self.policy.posture {
             for index in 0..message.segments.len() {
                 let at = At {
                     name: &names[index],
                     index,
                     occurrence: counts[index],
                 };
-                pass.fallback(&mut message.segments[index], at, action);
+                pass.reject_the_rest(&mut message.segments[index], at, action);
             }
         }
 
@@ -243,9 +300,10 @@ struct At<'a> {
 struct Pass {
     key: u64,
     separators: Separators,
-    /// Every leaf position some rule named, so that the fallback can skip
-    /// them. A leaf a `Keep` rule named is in here too — that is what
-    /// `Keep` is for (spec §2.6).
+    /// Every leaf position some rule named, so that a rejecting posture
+    /// can skip them. A leaf a `Keep` rule named is in here too — that is
+    /// what `Keep` is for, and it is why an accept naming a whole segment
+    /// is not narrowed by the posture (spec §2.4, §2.6).
     named: HashSet<Position>,
     report: Report,
 }
@@ -337,12 +395,12 @@ impl Pass {
         }
     }
 
-    /// Apply the policy's fallback to every leaf of one segment that no
-    /// rule named (D9, spec §2.6).
-    fn fallback(&mut self, segment: &mut Segment, at: At, action: &Action) {
+    /// Apply a rejecting posture's action to every leaf of one segment
+    /// that no rule named (D9, spec §2.6).
+    fn reject_the_rest(&mut self, segment: &mut Segment, at: At, action: &Action) {
         let header = segment.is_header();
         for field in 1..=segment.fields.len() {
-            // D5 again: the fallback reaches no further than a rule does.
+            // D5 again: the posture reaches no further than a rule does.
             if header && field <= 2 {
                 continue;
             }
@@ -476,7 +534,7 @@ mod tests {
     }
 
     fn policy(rules: &[&str]) -> Policy {
-        let mut policy = Policy::new();
+        let mut policy = Policy::accept_all();
         for rule in rules {
             policy.rules.push(Rule::parse(rule).expect("rule parses"));
         }
@@ -561,10 +619,10 @@ mod tests {
     #[test]
     fn never_touches_the_delimiter_fields() {
         // D5: MSH-1 and MSH-2 are the delimiters. A rule naming them is
-        // accepted and applied to nothing, and neither is a fallback.
+        // accepted and applied to nothing, and so is a rejecting posture.
         let mut message = message();
         let mut policy = policy(&["MSH-1 replace X", "MSH-2 clear", "MSH-3 replace X"]);
-        policy = policy.fallback(Action::Mask('#'));
+        policy = policy.posture(Posture::Reject(Action::Mask('#')));
         redact(policy, &mut message);
         assert!(message.to_er7().starts_with("MSH|^~\\&|X|"));
         assert!(er7::parse(&message.to_er7()).is_ok());
@@ -623,16 +681,129 @@ mod tests {
     }
 
     #[test]
-    fn the_fallback_covers_what_no_rule_named() {
-        // D9: the fallback inverts the model — redact everything except
-        // what a rule named — and a `Keep` rule is how a position is
-        // exempted (spec §2.6).
+    fn rejecting_by_default_covers_what_no_rule_named() {
+        // D9: rejecting by default inverts the model — redact everything
+        // except what a rule named — and a `Keep` rule is how a position
+        // is exempted (spec §2.6).
         let mut message = er7::parse("MSH|^~\\&|LAB\rOBX|1|NM|2093-3||187").unwrap();
-        let policy = policy(&["MSH keep", "OBX-2 keep"]).fallback(Action::redacted());
+        let policy =
+            policy(&["MSH keep", "OBX-2 keep"]).posture(Posture::Reject(Action::redacted()));
         redact(policy, &mut message);
         assert_eq!(
             message.to_er7(),
             "MSH|^~\\&|LAB\rOBX|REDACTED|NM|REDACTED||REDACTED"
+        );
+    }
+
+    #[test]
+    fn a_segment_wide_accept_is_not_narrowed() {
+        // D9, spec §2.4: an accept naming a whole segment exempts every
+        // leaf of it from the posture — including the ones the policy's
+        // author never saw, which is the point of writing `MSH keep`
+        // rather than a rule per field.
+        let text = "MSH|^~\\&|LAB|ACME|EHR|CLINIC|20260815120000\rOBX|1|NM|2093-3||187";
+        let mut message = er7::parse(text).unwrap();
+        let policy = policy(&["MSH keep"]).posture(Posture::Reject(Action::redacted()));
+        redact(policy, &mut message);
+        assert_eq!(
+            message.to_er7(),
+            "MSH|^~\\&|LAB|ACME|EHR|CLINIC|20260815120000\rOBX|REDACTED|REDACTED|REDACTED||REDACTED"
+        );
+    }
+
+    #[test]
+    fn reject_beats_accept_for_the_same_field() {
+        // D19: a leaf named by an accept rule and a reject rule is a
+        // policy somebody got wrong, and redacting it is the direction
+        // that fails safely (spec §2.4, §1.5 priority 1). It does not
+        // depend on the order the two were written in.
+        for rules in [
+            vec!["PID-5 keep", "PID-5 replace REDACTED"],
+            vec!["PID-5 replace REDACTED", "PID-5 keep"],
+        ] {
+            let mut message = er7::parse("MSH|^~\\&|LAB\rPID|1||9||SMITH").unwrap();
+            redact(policy(&rules), &mut message);
+            assert_eq!(
+                message.query("PID-5").unwrap().as_deref(),
+                Some("REDACTED"),
+                "{rules:?} let the name through"
+            );
+        }
+
+        // And the accept still does its own job: exempting the position
+        // from the posture, for every leaf no reject rule reached.
+        let mut message = er7::parse("MSH|^~\\&|LAB\rPID|1||9||SMITH^JOHN").unwrap();
+        let policy = policy(&["MSH keep", "PID-5 keep", "PID-5.1 replace REDACTED"])
+            .posture(Posture::Reject(Action::Clear));
+        redact(policy, &mut message);
+        assert_eq!(
+            message.query("PID-5").unwrap().as_deref(),
+            Some("REDACTED^JOHN")
+        );
+    }
+
+    #[test]
+    fn reject_segment_beats_a_narrower_accept() {
+        // D19 across depths: a reject naming a whole segment beats an
+        // accept naming one field inside it, and the other way round —
+        // neither order carves the field back out (spec §2.4).
+        for rules in [
+            vec!["PID replace REDACTED", "PID-5 keep"],
+            vec!["PID-5 keep", "PID replace REDACTED"],
+        ] {
+            let mut message = er7::parse("MSH|^~\\&|LAB\rPID|1||9||SMITH").unwrap();
+            redact(policy(&rules), &mut message);
+            assert_eq!(
+                message.query("PID-5").unwrap().as_deref(),
+                Some("REDACTED"),
+                "{rules:?} carved the name out of a rejected segment"
+            );
+        }
+    }
+
+    #[test]
+    fn an_unrecognised_payload_follows_the_policy() {
+        // D21: a payload with no positions in it is the one thing rules
+        // and the posture cannot speak to, so the policy says outright
+        // what happens to it (spec §2.8).
+        let junk = "{\"name\": \"EVERYWOMAN\"}";
+
+        // The curated policies refuse: nothing is written, and the caller
+        // decides what that costs.
+        assert_eq!(
+            Redactor::new(Policy::patient_identifiers()).unrecognised(junk),
+            None
+        );
+        assert_eq!(
+            Redactor::new(Policy::all_but_the_header()).unrecognised(junk),
+            None
+        );
+
+        // The bare postures each do what their name claims.
+        assert_eq!(
+            Redactor::new(Policy::accept_all())
+                .unrecognised(junk)
+                .as_deref(),
+            Some(junk)
+        );
+        let masked = Redactor::new(Policy::reject_all())
+            .unrecognised(junk)
+            .expect("reject_all writes something");
+        assert_eq!(masked, "*".repeat(junk.chars().count()));
+        assert!(!masked.contains("EVERYWOMAN"));
+
+        // And every one of them is overridable, in either direction.
+        let policy = Policy::patient_identifiers().on_unrecognised(Unrecognised::Pass);
+        assert_eq!(
+            Redactor::new(policy).unrecognised(junk).as_deref(),
+            Some(junk)
+        );
+        let policy = Policy::accept_all().on_unrecognised(Unrecognised::Refuse);
+        assert_eq!(Redactor::new(policy).unrecognised(junk), None);
+        let policy = Policy::accept_all().on_unrecognised(Unrecognised::Apply(Action::Clear));
+        assert_eq!(
+            Redactor::new(policy).unrecognised(junk).as_deref(),
+            Some("")
         );
     }
 
