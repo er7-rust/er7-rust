@@ -1,0 +1,25 @@
+{
+    "version": "0.2",
+    "ignorePaths": ["pnpm-lock.yaml", "build", ".svelte-kit", "node_modules"],
+    "dictionaryDefinitions": [],
+    "dictionaries": [],
+    "words": [
+        "ADT",
+        "Caristix",
+        "docsrs",
+        "EVERYWOMAN",
+        "Hl7",
+        "lilydesignsystem",
+        "MLLP",
+        "pnpm",
+        "prerender",
+        "prerendered",
+        "rustdoc",
+        "subcomponent",
+        "subcomponents",
+        "sveltekit",
+        "unescape"
+    ],
+    "ignoreWords": [],
+    "import": []
+}
