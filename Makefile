@@ -26,10 +26,16 @@ publish:
 	@test "$$(git rev-parse --abbrev-ref HEAD)" = main || { \
 		echo "publish: on $$(git rev-parse --abbrev-ref HEAD), not main"; exit 1; }
 	git push origin main
-	git subtree push --prefix=$(SITE) site main
-	@echo
-	@echo 'Pages is building. Watch it with:'
-	@echo '  gh run watch $$(gh run list -R er7-rust/$(SITE) -L1 --json databaseId --jq ".[0].databaseId") -R er7-rust/$(SITE)'
+	@git fetch -q site main
+	@before=$$(git rev-parse site/main); \
+	git subtree push --prefix=$(SITE) site main; \
+	git fetch -q site main; \
+	if [ "$$before" = "$$(git rev-parse site/main)" ]; then \
+		echo; echo 'Site unchanged; nothing to deploy.'; \
+	else \
+		echo; echo 'Pages is building. Watch it with:'; \
+		echo '  gh run watch $$(gh run list -R er7-rust/$(SITE) -L1 --json databaseId --jq ".[0].databaseId") -R er7-rust/$(SITE)'; \
+	fi
 
 .PHONY: site-dev
 site-dev:
