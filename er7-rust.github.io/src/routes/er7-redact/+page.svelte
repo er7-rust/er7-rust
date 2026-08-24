@@ -4,7 +4,7 @@
   const crate = crates.find((c) => c.name === 'er7-redact')!;
 
   const actions = [
-    { written: 'keep', becomes: 'PATID1234', use: 'exempting a position from a fallback' },
+    { written: 'keep', becomes: 'PATID1234', use: 'accepting a position, so a rejecting posture leaves it alone' },
     { written: 'clear', becomes: '', use: 'an address, a phone number — anything a placeholder would not help' },
     { written: 'null', becomes: '""', use: 'telling a receiver to clear its stored value' },
     { written: 'replace REDACTED', becomes: 'REDACTED', use: 'a name, where a placeholder reads better than a blank' },
@@ -17,7 +17,9 @@
   const options = [
     { flag: '-p, --policy <FILE>', effect: 'Read rules from a policy file; may be repeated' },
     { flag: '-r, --rule <RULE>', effect: 'Add one rule, e.g. "PID-5 replace REDACTED"; may be repeated' },
-    { flag: '-a, --all', effect: 'Redact everything except the MSH header' },
+    { flag: '--accept-all', effect: 'Accept every value no rule names; applied last, this switches off a policy file’s reject' },
+    { flag: '--reject-all', effect: 'Reject every value no rule names, the MSH header included' },
+    { flag: '--all-but-the-header', effect: 'Reject every value no rule names, but keep the MSH header so the message stays routable' },
     { flag: '-k, --key <KEY>', effect: 'Pseudonym key, a number; default 0' },
     { flag: '-m, --message <N>', effect: 'Use only the Nth message of the input' },
     { flag: '-t, --terminator <KIND>', effect: 'Segment terminator to write: cr (default), lf, crlf' },
@@ -29,7 +31,7 @@
   const examples = [
     { name: 'redact_a_message', shows: 'The built-in policy end to end: what goes, what stays, and why the message still works.' },
     { name: 'write_a_policy', shows: 'Three ways to say what to redact — in Rust, from a file, or by extending a built-in.' },
-    { name: 'redact_all_but', shows: 'A fallback over everything, with keep rules for what a test needs.' },
+    { name: 'reject_by_default', shows: 'The other posture: reject every value, with keep rules accepting what a test needs.' },
     { name: 'pseudonyms_and_linkage', shows: 'Why an identifier becomes a pseudonym rather than a blank, and what that costs.' },
     { name: 'read_the_report', shows: 'The audit trail: one row per position changed, and no values in it.' },
     { name: 'redact_absent_empty_null', shows: 'The three states HL7 keeps apart, and why redaction leaves two of them alone.' }
@@ -166,9 +168,16 @@ PID[1]-7[1].1.1  first 4`}</code></pre>
   </div>
   <pre><code>{`use er7_redact::{Action, Policy};
 
-let policy = Policy::new()
+let policy = Policy::accept_all()
     .with("PID-5", Action::redacted())?
     .with("PID-7", Action::First(4))?;`}</code></pre>
+  <div class="prose">
+    <p>
+      <code>accept_all</code> is the starting point that redacts nothing until a rule says so. Every
+      policy states one of two <strong>postures</strong> — accept by default, or reject by default —
+      and there is no way to leave it unstated.
+    </p>
+  </div>
   <div class="prose">
     <p>
       Paths are <a href="/paths/"><code>er7</code> paths</a>, so everything that notation does works
@@ -190,18 +199,31 @@ er7-redact --policy de-identify.policy message.er7`}</code></pre>
   </div>
 
   <h3>5. When you do not trust the list</h3>
-  <pre><code>{`er7-redact --all message.er7`}</code></pre>
+  <pre><code>{`er7-redact --all-but-the-header message.er7`}</code></pre>
   <div class="prose">
     <p>
-      Redact everything except the <code>MSH</code> header, then name what to keep. This is the only
-      thing that covers a local <code>Z</code> segment nobody has documented, and the only honest
-      answer to &ldquo;is there anything else in there?&rdquo;.
+      Invert the posture: <strong>reject by default</strong>, keep the <code>MSH</code> header so the
+      message stays routable, and name what to accept. This is the only thing that covers a local
+      <code>Z</code> segment nobody has documented, and the only honest answer to &ldquo;is there
+      anything else in there?&rdquo;.
     </p>
   </div>
-  <pre><code>{`let policy = Policy::everything()
+  <pre><code>{`let policy = Policy::all_but_the_header()
     .with("OBX-2", Action::Keep)?
     .with("OBX-3", Action::Keep)?
     .with("OBX-5", Action::Keep)?;`}</code></pre>
+  <div class="prose">
+    <p>
+      A <code>keep</code> rule <strong>accepts</strong> the position it names; any other action
+      <strong>rejects</strong> it. Where a position is named by both, the reject wins — whichever
+      order the two rules are in, and at whatever depth. A field in both lists is a policy somebody
+      got wrong, and redacting it is the direction that fails safely.
+    </p>
+    <p>
+      <code>--reject-all</code> goes one step further and takes the header too, which leaves the
+      message unroutable. Reach for it when nothing about the input is trusted.
+    </p>
+  </div>
 </section>
 
 <section class="section" id="help">
@@ -249,13 +271,22 @@ PID-7    first 4            # a birth date reduced to its year
 PID-11   clear
 NTE-3    clear              # free text, where identifiers hide
 
-*        replace REDACTED   # optional: the fallback, always applied last`}</code></pre>
+accept                      # ...or "reject ACTION" for the other posture
+unrecognised  refuse        # a payload that is not ER7 fails the run`}</code></pre>
   <div class="prose">
     <p>
       One rule per line: a path, whitespace, an action. Blank lines are ignored, <code>#</code>
-      starts a comment, and rules apply <strong>in order</strong>. A path of <code>*</code> sets the
-      fallback, which turns the policy from &ldquo;redact these&rdquo; into &ldquo;redact everything
-      except these&rdquo; — and <code>keep</code> is how a position is exempted from it.
+      starts a comment, and rules apply <strong>in order</strong>. Three reserved first words —
+      <code>accept</code>, <code>reject</code>, and <code>unrecognised</code> — set what the policy
+      does by default rather than naming a position, and a policy written back out states all of
+      them, so a reader never has to infer which default was the quiet one.
+    </p>
+    <p>
+      <code>reject ACTION</code> turns the policy from &ldquo;redact these&rdquo; into &ldquo;redact
+      everything except these&rdquo;, and <code>keep</code> is how a position is accepted back out
+      of it. <code>unrecognised</code> covers input that is not ER7 at all: it has no positions in
+      it, so no rule can speak to it, and the policy says outright whether it is refused, passed
+      through, or masked whole.
     </p>
     <p>
       A malformed line is refused at load time, with the line number. That strictness is deliberate:
@@ -356,7 +387,7 @@ NTE-3    clear              # free text, where identifiers hide
       </li>
       <li>
         It does not find an identifier written into free text. A name in an <code>NTE-3</code>
-        comment survives every positional policy; name that position, or use <code>--all</code>.
+        comment survives every positional policy; name that position, or reject by default.
       </li>
       <li>There is no way back: no mapping table, no key escrow, no undo.</li>
     </ul>
