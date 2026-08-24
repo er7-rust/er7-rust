@@ -24,10 +24,10 @@ rather than text.
 
 ## Lints
 
-`cargo clippy --all-targets -- -D warnings` must be clean, and
-`Cargo.toml` turns on the **pedantic** group
-([spec §12.3](../spec/12-dependencies-and-build.md)), so pedantic findings
-fail the build too. Three habits follow:
+`cargo clippy --all-targets -- -D warnings` must be clean, and `Cargo.toml`
+turns on the **pedantic** group
+([spec §12.3](../spec/12-dependencies-and-build/index.md)), so pedantic
+findings fail the build too. Three habits follow:
 
 - **`#[must_use]` on every pure accessor and builder step.** A discarded
   `Report` is a redaction nobody reviewed.

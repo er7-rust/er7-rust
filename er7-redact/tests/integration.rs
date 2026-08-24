@@ -584,13 +584,6 @@ fn cli_prints_help_and_version() {
     }
 }
 
-/// Whether `name` is a Markdown file, by extension.
-fn is_markdown(name: &str) -> bool {
-    std::path::Path::new(name)
-        .extension()
-        .is_some_and(|extension| extension == "md")
-}
-
 /// Every `| D<n> |` cell at the start of a table row in `text`.
 fn rule_ids(text: &str) -> Vec<String> {
     text.lines()
@@ -608,8 +601,8 @@ fn every_rule_has_a_coverage_row() {
     // table is a rule nobody agreed to test, and a row in §11.1 for a rule
     // that no longer exists is a table nobody re-read
     // (AGENTS/spec-driven-development.md).
-    let declared = rule_ids(include_str!("../spec/01-purpose-and-scope.md"));
-    let covered = rule_ids(include_str!("../spec/11-testing-strategy.md"));
+    let declared = rule_ids(include_str!("../spec/01-purpose-and-scope/index.md"));
+    let covered = rule_ids(include_str!("../spec/11-testing-strategy/index.md"));
 
     assert_eq!(declared.len(), 21, "§1.4 should index D1–D21");
     let missing: Vec<&String> = declared.iter().filter(|d| !covered.contains(d)).collect();
@@ -623,15 +616,18 @@ fn every_rule_has_a_coverage_row() {
 
 #[test]
 fn every_spec_section_is_indexed_and_present() {
-    // The section files and the table of contents drift apart silently: a
-    // new section nobody linked, or a link to a file that was renamed.
+    // The section directories and the table of contents drift apart
+    // silently: a new section nobody linked, or a link to a section that
+    // was renamed. Each section is `<slug>/index.md`, so the slug is the
+    // directory name and the link is the slug plus `/index.md`.
     let index = include_str!("../spec/index.md");
     let directory = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("spec");
 
     let mut linked: Vec<String> = index
         .match_indices("](")
         .filter_map(|(at, _)| index[at + 2..].split_once(')').map(|(name, _)| name))
-        .filter(|name| name.len() > 3 && name.as_bytes()[2] == b'-' && is_markdown(name))
+        .filter_map(|name| name.strip_suffix("/index.md"))
+        .filter(|slug| slug.len() > 3 && slug.as_bytes()[2] == b'-')
         .map(str::to_string)
         .collect();
     linked.sort();
@@ -640,22 +636,23 @@ fn every_spec_section_is_indexed_and_present() {
     let mut on_disk: Vec<String> = std::fs::read_dir(&directory)
         .expect("spec directory")
         .filter_map(Result::ok)
+        .filter(|entry| entry.path().is_dir())
         .map(|entry| entry.file_name().to_string_lossy().into_owned())
-        .filter(|name| is_markdown(name) && name.as_bytes()[0].is_ascii_digit())
+        .filter(|slug| slug.as_bytes()[0].is_ascii_digit())
         .collect();
     on_disk.sort();
 
     assert_eq!(linked, on_disk, "spec/index.md and spec/ disagree");
 
-    // And every section names itself, so a file that was copied keeps its
-    // own number rather than its neighbour's.
-    for name in &on_disk {
-        let number = name[..2].trim_start_matches('0');
+    // And every section names itself, so a section that was copied keeps
+    // its own number rather than its neighbour's.
+    for slug in &on_disk {
+        let number = slug[..2].trim_start_matches('0');
         let heading = format!("# {number}. ");
-        let text = std::fs::read_to_string(directory.join(name)).expect("section");
+        let text = std::fs::read_to_string(directory.join(slug).join("index.md")).expect("section");
         assert!(
             text.contains(&heading),
-            "{name} has no `{heading}` heading of its own"
+            "{slug} has no `{heading}` heading of its own"
         );
     }
 }
@@ -665,7 +662,7 @@ fn the_documented_positions_match_the_built_in_policy() {
     // D14: spec §5.1 is the normative table and `Policy::patient_identifiers`
     // is its executable form. They are changed together, so a path in one
     // and not the other is a bug in whichever was forgotten.
-    let spec = include_str!("../spec/05-built-in-policies.md");
+    let spec = include_str!("../spec/05-built-in-policies/index.md");
     // §5.1 only: §5.4 tabulates the positions the policy deliberately does
     // *not* touch, which are paths in the same shape.
     let spec = spec.split("## 5.2").next().expect("§5.1 comes first");

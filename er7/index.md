@@ -94,7 +94,7 @@ cat samples/batch.er7 | er7 --message 2
 ```
 
 `er7 --help` lists the rest. The full contract is
-[spec §12](spec/12-command-line-interface.md).
+[spec §12](spec/12-command-line-interface/index.md).
 
 ## Library
 
@@ -154,7 +154,8 @@ There is a runnable program for each of these in
   ones that describe presentation are preserved as written. See
   [`docs/escapes/`](docs/escapes/index.md).
 - **HL7 paths**: `PID-5.1`, `OBX[2]-5`, `PID-13[2].1`, in either the
-  `PID-5.1` or `PID.5.1` spelling. See [`docs/paths/`](docs/paths/index.md).
+  `PID-5.1` or `PID.5.1` spelling. See
+  [`docs/paths/`](docs/paths/index.md).
 - **Absent, empty, and null** are three different answers, not one — the
   explicit `""` means *clear this value*, and losing that distinction
   corrupts patient records.
@@ -173,9 +174,9 @@ belongs in a layer above. It performs no validation, and no transport
 
 The one exception is a handful of `MSH` accessors — `message_code`,
 `trigger_event`, `message_structure`, `control_id`, `version` — because
-routing a message requires reading them and those positions have never moved
-in any HL7 v2 release. The reasoning, and what was declined, is in
-[spec §10](spec/10-msh-conveniences.md).
+routing a message requires reading them and those positions have never
+moved in any HL7 v2 release. The reasoning, and what was declined, is in
+[spec §10](spec/10-msh-conveniences/index.md).
 
 ### The crate family
 
@@ -190,7 +191,7 @@ a caller pays only for what they use.
 
 All four are presented together at
 <https://er7-rust.github.io/ecosystem/>, and the boundary between them is
-[spec §1.3.1](spec/01-purpose-and-scope.md).
+[spec §1.3.1](spec/01-purpose-and-scope/index.md).
 
 ## Documentation
 
@@ -203,7 +204,7 @@ All four are presented together at
 | [`docs/faq/`](docs/faq/index.md) | frequently asked questions |
 | [`examples/`](examples/README.md) | runnable programs, one concept each |
 | [`spec/`](spec/index.md) | the normative specification — source of truth for behaviour |
-| [`spec/02-er7-encoding.md`](spec/02-er7-encoding.md) | the ER7 format itself, independent of this crate |
+| [`spec/02-er7-encoding/index.md`](spec/02-er7-encoding/index.md) | the ER7 format itself, independent of this crate |
 | [`AGENTS.md`](AGENTS.md) | conventions and required checks for anyone, human or agent, changing this code |
 | [`samples/`](samples/) | example messages: a lab result, an admission update with a `Z` segment, a batch file |
 
@@ -223,7 +224,8 @@ cargo run --example parse_a_message       # try an example
 ```
 
 Behavioural changes start in [`spec/`](spec/index.md), not in the code —
-see [`AGENTS/spec-driven-development.md`](AGENTS/spec-driven-development.md).
+see
+[`AGENTS/spec-driven-development.md`](AGENTS/spec-driven-development.md).
 
 ## License
 

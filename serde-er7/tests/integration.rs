@@ -187,13 +187,6 @@ fn no_format_crate_is_a_runtime_dependency() {
     );
 }
 
-/// Whether `name` is a Markdown file, by extension.
-fn is_markdown(name: &str) -> bool {
-    std::path::Path::new(name)
-        .extension()
-        .is_some_and(|e| e == "md")
-}
-
 /// Every `| S<n> |` cell at the start of a table row in `text`.
 fn rule_ids(text: &str) -> Vec<String> {
     text.lines()
@@ -211,7 +204,7 @@ fn every_rule_has_a_coverage_row() {
     // is a rule nobody agreed to test, and a row for a rule that no longer
     // exists is a table nobody re-read.
     let declared = rule_ids(include_str!("../spec/index.md"));
-    let covered = rule_ids(include_str!("../spec/07-testing-strategy.md"));
+    let covered = rule_ids(include_str!("../spec/07-testing-strategy/index.md"));
 
     assert_eq!(declared.len(), 12, "the rule index should hold S1–S12");
     let missing: Vec<&String> = declared.iter().filter(|s| !covered.contains(s)).collect();
@@ -225,15 +218,18 @@ fn every_rule_has_a_coverage_row() {
 
 #[test]
 fn every_spec_section_is_indexed_and_present() {
-    // The section files and the table of contents drift apart silently: a
-    // new section nobody linked, or a link to a file that was renamed.
+    // The section directories and the table of contents drift apart
+    // silently: a new section nobody linked, or a link to a section that
+    // was renamed. Each section is `<slug>/index.md`, so the slug is the
+    // directory name and the link is the slug plus `/index.md`.
     let index = include_str!("../spec/index.md");
     let directory = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("spec");
 
     let mut linked: Vec<String> = index
         .match_indices("](")
         .filter_map(|(at, _)| index[at + 2..].split_once(')').map(|(name, _)| name))
-        .filter(|name| name.len() > 3 && name.as_bytes()[2] == b'-' && is_markdown(name))
+        .filter_map(|name| name.strip_suffix("/index.md"))
+        .filter(|slug| slug.len() > 3 && slug.as_bytes()[2] == b'-')
         .map(str::to_string)
         .collect();
     linked.sort();
@@ -242,8 +238,9 @@ fn every_spec_section_is_indexed_and_present() {
     let mut on_disk: Vec<String> = std::fs::read_dir(&directory)
         .expect("spec directory")
         .filter_map(Result::ok)
+        .filter(|entry| entry.path().is_dir())
         .map(|entry| entry.file_name().to_string_lossy().into_owned())
-        .filter(|name| is_markdown(name) && name.as_bytes()[0].is_ascii_digit())
+        .filter(|slug| slug.as_bytes()[0].is_ascii_digit())
         .collect();
     on_disk.sort();
 

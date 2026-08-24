@@ -2,8 +2,8 @@
 
 # Testing
 
-What must be covered is [spec §11](../spec/11-testing-strategy.md). This is
-how to write it.
+What must be covered is [spec §11](../spec/11-testing-strategy/index.md).
+This is how to write it.
 
 ## Where a test goes
 

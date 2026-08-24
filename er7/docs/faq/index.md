@@ -5,10 +5,10 @@
 ## What is ER7?
 
 The original text encoding for HL7 v2 messages: pipe-delimited, positional,
-compact. Also called *pipe-hat*, after `|` and `^`. It is defined in chapter
-2 of every HL7 v2 release and is still what nearly every production
+compact. Also called *pipe-hat*, after `|` and `^`. It is defined in
+chapter 2 of every HL7 v2 release and is still what nearly every production
 healthcare interface speaks. The format itself is described in
-[spec §2](../../spec/02-er7-encoding.md).
+[spec §2](../../spec/02-er7-encoding/index.md).
 
 ## Does this crate validate messages?
 
@@ -28,7 +28,7 @@ version's tables to everyone or all of them to everyone.
 Keeping the encoding separate lets a dictionary crate choose its own
 version, and lets a user who only needs to route or audit messages pay for
 nothing. The reasoning in full is
-[spec §18.1](../../spec/18-open-questions-and-divergences.md).
+[spec §18.1](../../spec/18-open-questions-and-divergences/index.md).
 
 The layers above this one ship as their own crates —
 [`er7-redact`](https://crates.io/crates/er7-redact) for redaction,
@@ -36,7 +36,7 @@ The layers above this one ship as their own crates —
 [`hl7-2-5-to-xml`](https://crates.io/crates/hl7-2-5-to-xml) and
 [`hl7-2-5-to-json`](https://crates.io/crates/hl7-2-5-to-json) for the HL7
 v2.5 dictionary. The full list is
-[spec §1.3.1](../../spec/01-purpose-and-scope.md).
+[spec §1.3.1](../../spec/01-purpose-and-scope/index.md).
 
 ## Then why does it read MSH-9 and MSH-10?
 
@@ -47,12 +47,13 @@ message, and those positions have not moved in any v2 release, so reading
 them requires no version knowledge.
 
 MSH-3 through MSH-7 fail the first test; deriving MSH-9.3 from MSH-9.1 and
-MSH-9.2 fails the second. See [spec §10](../../spec/10-msh-conveniences.md).
+MSH-9.2 fails the second. See
+[spec §10](../../spec/10-msh-conveniences/index.md).
 
 ## Will it change my message?
 
 No. Canonical input comes back byte for byte
-([spec §7.2](../../spec/07-writing.md)). Text is stored exactly as it
+([spec §7.2](../../spec/07-writing/index.md)). Text is stored exactly as it
 arrived and decoded only when you ask for a value.
 
 Parsing normalizes exactly two things, and nothing else: blank lines are
@@ -95,9 +96,9 @@ Everything, clinically.
 | `\|\|` | present, no value | leave the stored value alone |
 | `\|""\|` | explicit null | **clear** the stored value |
 
-Ask `is_null()` when it matters. A query decodes a null to the empty string,
-since that is the value being conveyed, so the query alone cannot tell you.
-See [spec §5.3](../../spec/05-value-tree.md).
+Ask `is_null()` when it matters. A query decodes a null to the empty
+string, since that is the value being conveyed, so the query alone cannot
+tell you. See [spec §5.3](../../spec/05-value-tree/index.md).
 
 ## `query` returned fewer results than I expected
 
@@ -115,8 +116,8 @@ separators included — `555-1111~555-2222`. A path that goes deeper splits
 into one answer per repetition.
 
 `PID-13` as a whole field is a meaningful thing to ask for, and joining its
-repetitions back with `~` is the only honest way to return it as one string.
-See [docs/paths](../paths/index.md).
+repetitions back with `~` is the only honest way to return it as one
+string. See [docs/paths](../paths/index.md).
 
 ## Does it handle messages that don't use `|^~\&`?
 
@@ -142,7 +143,7 @@ worked example in [docs/escapes](../escapes/index.md).
 
 Yes — every field of every type is `pub`, so struct literals work. There is
 no builder API today; whether one would earn its keep is tracked as
-[T7](../../spec/17-open-tasks.md).
+[T7](../../spec/17-open-tasks/index.md).
 
 ## Does it do MLLP?
 
@@ -153,18 +154,19 @@ frames. Strip the framing before parsing.
 ## Does it have any dependencies?
 
 None, and that is a guarantee enforced by a test
-([spec §15.1](../../spec/15-dependencies-and-build.md)). No runtime
+([spec §15.1](../../spec/15-dependencies-and-build/index.md)). No runtime
 dependencies, no dev-dependencies, no features. Healthcare integration code
 gets audited, and this crate is meant to sit at the bottom of a stack.
 
 ## What Rust version does it need?
 
-Rust 1.95 or later. The workspace policy is **N-3** — the minimum
-supported version is whatever stable Rust is today, minus three releases —
-so the floor moves forward roughly twice a year rather than being frozen
-([spec §14.4](../../spec/14-compatibility-and-versioning.md)). Edition 2024
-sets a hard floor of 1.85 underneath that, which no longer binds. There is
-no `no_std` support — the crate uses `String` and `Vec` throughout.
+Rust 1.95 or later. The workspace policy is **N-3** — the minimum supported
+version is whatever stable Rust is today, minus three releases — so the
+floor moves forward roughly twice a year rather than being frozen
+([spec §14.4](../../spec/14-compatibility-and-versioning/index.md)).
+Edition 2024 sets a hard floor of 1.85 underneath that, which no longer
+binds. There is no `no_std` support — the crate uses `String` and `Vec`
+throughout.
 
 ## Is it fast?
 
@@ -173,8 +175,8 @@ return `Cow::Borrowed` when there is nothing to do, and `split_messages`
 returns borrowed slices rather than copies.
 
 There are no benchmarks; whether they would earn their keep is tracked as
-[T3](../../spec/17-open-tasks.md). If you have a workload where this matters,
-please open an issue with the numbers.
+[T3](../../spec/17-open-tasks/index.md). If you have a workload where this
+matters, please open an issue with the numbers.
 
 ## How do I report a bug or ask for a feature?
 
@@ -184,5 +186,5 @@ Open a GitHub issue at
 redacted.
 
 If the answer turns out to be "this is deliberate", it will be recorded in
-[spec §18](../../spec/18-open-questions-and-divergences.md) so the next
-person finds the reasoning rather than re-asking.
+[spec §18](../../spec/18-open-questions-and-divergences/index.md) so the
+next person finds the reasoning rather than re-asking.

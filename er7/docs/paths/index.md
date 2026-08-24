@@ -8,7 +8,7 @@ The short notation that names one place in a message: `PID-5.1`,
 The notation is a de-facto standard among interface engineers rather than
 part of HL7 itself. This crate accepts the two spellings that are common in
 the field and writes the first. Normative rules are
-[spec §8](../../spec/08-paths-and-queries.md).
+[spec §8](../../spec/08-paths-and-queries/index.md).
 
 ## Grammar
 

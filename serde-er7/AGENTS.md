@@ -5,8 +5,8 @@ etc.) working in this repository.
 
 This file is the **entry point**. It is intentionally short. Drill into the
 topical guides under [`AGENTS/`](AGENTS/) for the full picture, and read
-[`spec/index.md`](spec/index.md) for the canonical specification that drives
-changes.
+[`spec/index.md`](spec/index.md) for the canonical specification that
+drives changes.
 
 ## Project snapshot
 
@@ -51,40 +51,48 @@ tests/                     ← black-box integration tests, incl. against er7's 
 ```
 
 There is **no separate** `plan.md` or `tasks.md` — both live as a spec
-section ([`spec/09-roadmap-and-open-questions.md`](spec/09-roadmap-and-open-questions.md)).
+section
+([`spec/09-roadmap-and-open-questions/index.md`](spec/09-roadmap-and-open-questions/index.md)).
 
 ## Rules that bind every change
 
 Each maps to an `S`-numbered rule in
 [`spec/index.md`](spec/index.md#rule-index).
 
-1. **Exactly two runtime dependencies: `serde` and `er7`.** No format
-   crate (`serde_json`, `serde_yaml`, ...) as a runtime dependency — only
-   as `[dev-dependencies]`, for tests, doctests, and examples (S1, S2). See
-   [`spec/03-dependencies-and-format-agnosticism.md`](spec/03-dependencies-and-format-agnosticism.md).
-2. **Do not change a wire shape without updating [`spec/02-wire-shapes.md`](spec/02-wire-shapes.md)
-   in the same change.** The JSON (or any-format) shape each type produces
-   is part of this crate's compatibility surface, not an implementation
-   detail (S10). See [`spec/08-versioning-and-compatibility.md`](spec/08-versioning-and-compatibility.md).
+1. **Exactly two runtime dependencies: `serde` and `er7`.** No format crate
+   (`serde_json`, `serde_yaml`, ...) as a runtime dependency — only as
+   `[dev-dependencies]`, for tests, doctests, and examples (S1, S2). See
+   [`spec/03-dependencies-and-format-agnosticism/index.md`](spec/03-dependencies-and-format-agnosticism/index.md).
+2. **Do not change a wire shape without updating
+   [`spec/02-wire-shapes/index.md`](spec/02-wire-shapes/index.md) in the
+   same change.** The JSON (or any-format) shape each type produces is part
+   of this crate's compatibility surface, not an implementation detail
+   (S10). See
+   [`spec/08-versioning-and-compatibility/index.md`](spec/08-versioning-and-compatibility/index.md).
 3. **Do not break the round trip.** `Message::parse(text)?` through any
    Serde format and back out through `.to_er7()` must reproduce what
    `er7::parse(text)?.to_er7()` alone would. This is why every
-   `Subcomponent` serializes `raw`, never the escape-decoded `value()` (S3).
-   See [`spec/04-round-trip-guarantee.md`](spec/04-round-trip-guarantee.md).
+   `Subcomponent` serializes `raw`, never the escape-decoded `value()`
+   (S3). See
+   [`spec/04-round-trip-guarantee/index.md`](spec/04-round-trip-guarantee/index.md).
 4. **Keep absent, empty, and null distinct** — the same patient-safety
    constraint `er7` itself enforces (its R10/R11), carried through
    unchanged because this crate changes no data, only its container. See
-   [`spec/04-round-trip-guarantee.md`](spec/04-round-trip-guarantee.md) §4.4.
-5. **Update the spec first.** Behavioural changes — even small ones —
-   start by editing the matching file under `spec/`, then the code, then
-   the tests. See [`spec/09-roadmap-and-open-questions.md`](spec/09-roadmap-and-open-questions.md) §9.3.
+   [`spec/04-round-trip-guarantee/index.md`](spec/04-round-trip-guarantee/index.md)
+   §4.4.
+5. **Update the spec first.** Behavioural changes — even small ones — start
+   by editing the matching file under `spec/`, then the code, then the
+   tests. See
+   [`spec/09-roadmap-and-open-questions/index.md`](spec/09-roadmap-and-open-questions/index.md)
+   §9.3.
 
 ## Quick orientation for a brand-new agent
 
 1. Read this file (you are here).
-2. Read [`spec/01-purpose-and-scope.md`](spec/01-purpose-and-scope.md) and
-   [`spec/02-wire-shapes.md`](spec/02-wire-shapes.md) — what this crate is,
-   and the exact shape every type must produce.
+2. Read
+   [`spec/01-purpose-and-scope/index.md`](spec/01-purpose-and-scope/index.md)
+   and [`spec/02-wire-shapes/index.md`](spec/02-wire-shapes/index.md) —
+   what this crate is, and the exact shape every type must produce.
 3. Skim [`spec/index.md`](spec/index.md) for the section map and the rule
    index.
 4. Skim [`AGENTS/architecture.md`](AGENTS/architecture.md) for the layout.

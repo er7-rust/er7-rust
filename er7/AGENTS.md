@@ -5,8 +5,8 @@ etc.) working in this repository.
 
 This file is the **entry point**. It is intentionally short. Drill into the
 topical guides under [`AGENTS/`](AGENTS/) for the full picture, and read
-[`spec/index.md`](spec/index.md) for the canonical specification that drives
-changes.
+[`spec/index.md`](spec/index.md) for the canonical specification that
+drives changes.
 
 ## Project snapshot
 
@@ -59,15 +59,16 @@ samples/                   ← example ER7 messages used by docs and tests
 ```
 
 There is **no separate** `plan.md` or `tasks.md` — both live as spec
-sections ([`spec/16-roadmap.md`](spec/16-roadmap.md),
-[`spec/17-open-tasks.md`](spec/17-open-tasks.md)). If a planning artefact
-needs a home, add a section there.
+sections ([`spec/16-roadmap/index.md`](spec/16-roadmap/index.md),
+[`spec/17-open-tasks/index.md`](spec/17-open-tasks/index.md)). If a
+planning artefact needs a home, add a section there.
 
 ## Five rules that bind every change
 
 These are the load-bearing constraints. Each is expanded in the matching
 topical guide, and each maps to a numbered rule in
-[`spec/01-purpose-and-scope.md`](spec/01-purpose-and-scope.md) §1.4.
+[`spec/01-purpose-and-scope/index.md`](spec/01-purpose-and-scope/index.md)
+§1.4.
 
 1. **Do not break the round trip.** `parse(text).to_er7()` reproduces
    canonical input byte for byte (R16). This is why leaf text is stored raw
@@ -93,11 +94,12 @@ topical guide, and each maps to a numbered rule in
 If you have just been spawned with no prior context, do this in order:
 
 1. Read this file (you are here).
-2. Read [`spec/01-purpose-and-scope.md`](spec/01-purpose-and-scope.md) — the
-   rule index in §1.4 is the whole contract in one table, and §1.5 tells you
-   which goal wins when two conflict.
-3. Skim [`spec/index.md`](spec/index.md) for the section map, and §16/§17 for
-   what work is currently in flight.
+2. Read
+   [`spec/01-purpose-and-scope/index.md`](spec/01-purpose-and-scope/index.md)
+   — the rule index in §1.4 is the whole contract in one table, and §1.5
+   tells you which goal wins when two conflict.
+3. Skim [`spec/index.md`](spec/index.md) for the section map, and §16/§17
+   for what work is currently in flight.
 4. Skim [`AGENTS/architecture.md`](AGENTS/architecture.md) for the layout.
 5. For any task touching behaviour, open
    [`AGENTS/safety.md`](AGENTS/safety.md) **before** writing code.

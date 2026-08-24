@@ -48,7 +48,7 @@ must stay that way.
   take over.
 - **A wire shape is a compatibility surface.** Changing one is a breaking
   change even when the Rust signature is untouched
-  ([§8](../spec/08-versioning-and-compatibility.md)).
+  ([§8](../spec/08-versioning-and-compatibility/index.md)).
 - **`serde_json` is a dev-dependency only.** If it ever appears under
   `[dependencies]`, `no_format_crate_is_a_runtime_dependency` fails, which
   is the point.

@@ -11,17 +11,17 @@ spec-driven development discipline in its own `spec/` directory.
 This root `spec/` is **not** a replacement for those. It holds only the
 policy that is genuinely shared across all three crates, stated once so it
 does not drift across three restatements. Every behavioural rule, every
-rule ID (`R<n>` for `er7`, `D<n>` for `er7-redact`, `S<n>` for `serde-er7`),
-and every crate-specific guarantee still lives in that crate's own
-`spec/index.md` — start there for anything about what a specific crate
-does.
+rule ID (`R<n>` for `er7`, `D<n>` for `er7-redact`, `S<n>` for
+`serde-er7`), and every crate-specific guarantee still lives in that
+crate's own `spec/index.md` — start there for anything about what a
+specific crate does.
 
 ## Contents
 
 | Section | Covers |
 | ------- | ------ |
-| [§1 Family policy](01-family-policy.md) | Dependency minimalism, the four build checks, the spec-driven-development discipline itself, the synthetic-data safety rule, and how workspace path dependencies relate to published version requirements |
-| [§2 Rust MSRV: N-3](rust-msrv-n-minus-3.md) | The shared minimum supported Rust version — current stable minus three releases — why the window is that wide, and what an MSRV bump implies for a release |
+| [§1 Family policy](01-family-policy/index.md) | Dependency minimalism, the four build checks, the spec-driven-development discipline itself, the synthetic-data safety rule, and how workspace path dependencies relate to published version requirements |
+| [§2 Rust MSRV: N-3](rust-msrv-n-minus-3/index.md) | The shared minimum supported Rust version — current stable minus three releases — why the window is that wide, and what an MSRV bump implies for a release |
 
 ## What belongs here vs. in a crate's own spec
 

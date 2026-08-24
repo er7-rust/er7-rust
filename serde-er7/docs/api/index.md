@@ -44,10 +44,10 @@ All eight types above additionally provide, uniformly:
 - Field `.0` is `pub`, so a wrapper can also be constructed or destructured
   directly: `Message(er7_message)`, `let Message(inner) = wrapped;`.
 
-See [`spec/02-wire-shapes.md`](../../spec/02-wire-shapes.md) for the
-complete, normative version of the wire-shape column above, and
-[`spec/06-ergonomics.md`](../../spec/06-ergonomics.md) for why the
-conventions above look the way they do.
+See [`spec/02-wire-shapes/index.md`](../../spec/02-wire-shapes/index.md)
+for the complete, normative version of the wire-shape column above, and
+[`spec/06-ergonomics/index.md`](../../spec/06-ergonomics/index.md) for why
+the conventions above look the way they do.
 
 ## The `er7` re-export
 
@@ -59,6 +59,6 @@ without a separate dependency on `er7` in your own `Cargo.toml`.
 
 No format-specific function (`to_json_string`, `from_yaml_str`, ...) is
 part of this API — see
-[`spec/03-dependencies-and-format-agnosticism.md`](../../spec/03-dependencies-and-format-agnosticism.md)
+[`spec/03-dependencies-and-format-agnosticism/index.md`](../../spec/03-dependencies-and-format-agnosticism/index.md)
 for why. Call your chosen format's own function
 (`serde_json::to_string(&message)`, and so on) directly.

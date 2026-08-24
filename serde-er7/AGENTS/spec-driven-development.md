@@ -18,11 +18,12 @@ is how code comments, tests, and commit messages cite the spec.
 2. **No silent behaviour changes.** A change to observable behaviour that
    does not touch the matching `spec/` section is incomplete. For this
    crate "observable behaviour" includes **every wire shape**
-   ([§2](../spec/02-wire-shapes.md)): the JSON somebody stored last year is
-   the compatibility surface, not the Rust signature that produced it.
-3. **Tests express the spec.** [§7.1](../spec/07-testing-strategy.md) maps
-   every rule to the test that enforces it, and `cargo test` checks that
-   mapping is complete.
+   ([§2](../spec/02-wire-shapes/index.md)): the JSON somebody stored last
+   year is the compatibility surface, not the Rust signature that produced
+   it.
+3. **Tests express the spec.** [§7.1](../spec/07-testing-strategy/index.md)
+   maps every rule to the test that enforces it, and `cargo test` checks
+   that mapping is complete.
 4. **Docs follow the spec.** `index.md`, `docs/**`, and `examples/**` are
    *derived*; they explain and illustrate, they do not define.
 
@@ -42,8 +43,8 @@ apart from `er7`'s `R` rules and `er7-redact`'s `D` rules when several are
 discussed together. **IDs are never reused.**
 
 Adding a rule means: a row in the index, a clause in the owning section, a
-test, and a row in the [§7.1](../spec/07-testing-strategy.md) coverage
-table — all in the same change. The coverage table is checked by
+test, and a row in the [§7.1](../spec/07-testing-strategy/index.md)
+coverage table — all in the same change. The coverage table is checked by
 `every_rule_has_a_coverage_row`, so a missing row fails the build rather
 than review.
 
@@ -51,13 +52,13 @@ than review.
 
 | Change | Section |
 | ------ | ------- |
-| any type's serialized shape | [§2](../spec/02-wire-shapes.md) — and read §8 first |
-| what is a dependency, or which formats are named | [§3](../spec/03-dependencies-and-format-agnosticism.md) |
-| what survives a round trip | [§4](../spec/04-round-trip-guarantee.md) |
-| how a malformed input is reported | [§5](../spec/05-error-handling.md) |
-| `Deref`, `From`, or any other convenience | [§6](../spec/06-ergonomics.md) |
-| what is tested, and where | [§7](../spec/07-testing-strategy.md) |
-| the SemVer commitments | [§8](../spec/08-versioning-and-compatibility.md) |
+| any type's serialized shape | [§2](../spec/02-wire-shapes/index.md) — and read §8 first |
+| what is a dependency, or which formats are named | [§3](../spec/03-dependencies-and-format-agnosticism/index.md) |
+| what survives a round trip | [§4](../spec/04-round-trip-guarantee/index.md) |
+| how a malformed input is reported | [§5](../spec/05-error-handling/index.md) |
+| `Deref`, `From`, or any other convenience | [§6](../spec/06-ergonomics/index.md) |
+| what is tested, and where | [§7](../spec/07-testing-strategy/index.md) |
+| the SemVer commitments | [§8](../spec/08-versioning-and-compatibility/index.md) |
 
 ## The change loop
 
@@ -65,7 +66,7 @@ than review.
 2. Update the rule index if a rule changed.
 3. Write the failing test.
 4. Change the code.
-5. Update the [§7.1](../spec/07-testing-strategy.md) coverage table.
+5. Update the [§7.1](../spec/07-testing-strategy/index.md) coverage table.
 6. Update the derived docs.
 7. Run the four checks ([workflows](workflows.md)).
 8. Commit, naming the section that changed.
@@ -73,7 +74,7 @@ than review.
 ## Planning lives in the spec
 
 There is no separate `plan.md` or `tasks.md`:
-[`spec/09-roadmap-and-open-questions.md`](../spec/09-roadmap-and-open-questions.md)
+[`spec/09-roadmap-and-open-questions/index.md`](../spec/09-roadmap-and-open-questions/index.md)
 holds both the roadmap and the open questions, including the decisions that
 were considered and **declined**. A recorded "no, and here is why" saves
 the next reader from re-litigating it.

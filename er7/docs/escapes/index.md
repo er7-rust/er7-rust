@@ -5,8 +5,8 @@
 How a value carries characters that would otherwise be read as structure —
 and, just as importantly, which sequences this crate leaves alone.
 
-Normative rules are [spec §6](../../spec/06-escape-sequences.md); the format
-background is [spec §2.5](../../spec/02-er7-encoding.md).
+Normative rules are [spec §6](../../spec/06-escape-sequences/index.md); the
+format background is [spec §2.5](../../spec/02-er7-encoding/index.md).
 
 ## The shape
 
@@ -229,4 +229,5 @@ unrecognized sequences stay literal, so such a value usually round-trips
 unchanged anyway; and `Subcomponent::raw` always holds exactly what
 arrived, so a caller who knows the data type can override.
 
-Recorded as [spec §18.2](../../spec/18-open-questions-and-divergences.md).
+Recorded as
+[spec §18.2](../../spec/18-open-questions-and-divergences/index.md).

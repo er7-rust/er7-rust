@@ -9,11 +9,11 @@ The complete public surface. Rendered rustdoc is at
 
 | Module | Holds | Spec |
 | ------ | ----- | ---- |
-| `er7_redact` | `Error`, and re-exports of everything below | [§9](../../spec/09-error-handling.md) |
-| `er7_redact::action` | `Action` | [§3](../../spec/03-actions.md) |
-| `er7_redact::policy` | `Rule`, `Policy`, `Posture`, `Unrecognised` | [§5](../../spec/05-built-in-policies.md), [§6](../../spec/06-policy-file-format.md) |
-| `er7_redact::pseudonym` | `pseudonym` | [§7](../../spec/07-pseudonyms.md) |
-| `er7_redact::redact` | `Redactor`, `Report`, `Change` | [§2](../../spec/02-redaction-model.md), [§8](../../spec/08-report.md) |
+| `er7_redact` | `Error`, and re-exports of everything below | [§9](../../spec/09-error-handling/index.md) |
+| `er7_redact::action` | `Action` | [§3](../../spec/03-actions/index.md) |
+| `er7_redact::policy` | `Rule`, `Policy`, `Posture`, `Unrecognised` | [§5](../../spec/05-built-in-policies/index.md), [§6](../../spec/06-policy-file-format/index.md) |
+| `er7_redact::pseudonym` | `pseudonym` | [§7](../../spec/07-pseudonyms/index.md) |
+| `er7_redact::redact` | `Redactor`, `Report`, `Change` | [§2](../../spec/02-redaction-model/index.md), [§8](../../spec/08-report/index.md) |
 
 Everything is re-exported at the crate root, so `use er7_redact::{Action,
 Policy, Redactor};` is the usual import.
@@ -41,7 +41,7 @@ The only thing that edits a message.
 | `unrecognised` | `Unrecognised` | public; what a payload that is not ER7 gets |
 | `accept_all` | `fn accept_all() -> Policy` | no rules; accepts, and passes an unrecognised payload |
 | `reject_all` | `fn reject_all() -> Policy` | no rules; `replace REDACTED` over everything, masks an unrecognised payload |
-| `patient_identifiers` | `fn patient_identifiers() -> Policy` | the curated table, [spec §5.1](../../spec/05-built-in-policies.md); accepts, refuses |
+| `patient_identifiers` | `fn patient_identifiers() -> Policy` | the curated table, [spec §5.1](../../spec/05-built-in-policies/index.md); accepts, refuses |
 | `all_but_the_header` | `fn all_but_the_header() -> Policy` | `MSH keep`, then `reject replace REDACTED`; refuses |
 | `with` | `fn with(self, path: &str, action: Action) -> Result<Policy, Error>` | builder |
 | `posture` | `fn posture(self, posture: Posture) -> Policy` | `Reject(Keep)` normalises to `Accept` |
@@ -70,10 +70,11 @@ pub enum Unrecognised {
 ```
 
 `Posture` is what every leaf no rule named gets
-([spec §2.6](../../spec/02-redaction-model.md)); `Unrecognised` is what a
-payload that is not ER7 gets ([spec §2.8](../../spec/02-redaction-model.md)).
-Both implement `Display` in the policy file spelling — `accept`,
-`reject clear`, `refuse`, `pass`, `mask *`.
+([spec §2.6](../../spec/02-redaction-model/index.md)); `Unrecognised` is
+what a payload that is not ER7 gets
+([spec §2.8](../../spec/02-redaction-model/index.md)). Both implement
+`Display` in the policy file spelling — `accept`, `reject clear`, `refuse`,
+`pass`, `mask *`.
 
 ## `Rule`
 
@@ -120,7 +121,7 @@ pub enum Action {
 | `Change::Display` | | `PID[1]-5[1].2.1 replace REDACTED` |
 
 A `Change` deliberately carries **no values** — not the old text, not the
-new ([spec §8.2](../../spec/08-report.md)).
+new ([spec §8.2](../../spec/08-report/index.md)).
 
 ## `pseudonym`
 
@@ -130,7 +131,7 @@ pub fn pseudonym(key: u64, value: &str) -> String
 
 Sixteen lowercase hexadecimal characters, stable for a given key and value
 in every release of this crate. Not a cryptographic guarantee — read
-[spec §7.3](../../spec/07-pseudonyms.md).
+[spec §7.3](../../spec/07-pseudonyms/index.md).
 
 ## `Error`
 
@@ -141,13 +142,14 @@ pub enum Error {
 }
 ```
 
-Two variants, two situations ([spec §9](../../spec/09-error-handling.md)).
-`From<er7::Error>` converts; `Display` is one sentence with no prefix;
-`source()` returns the `er7` error for the `Er7` variant. Redaction itself
-returns a `Report`, not a `Result`.
+Two variants, two situations
+([spec §9](../../spec/09-error-handling/index.md)). `From<er7::Error>`
+converts; `Display` is one sentence with no prefix; `source()` returns the
+`er7` error for the `Er7` variant. Redaction itself returns a `Report`, not
+a `Result`.
 
 ## Types from `er7`
 
 `er7::Message`, `er7::Path`, and `er7::Error` appear in this crate's public
 API, so an `er7` major version is a major version here too
-([spec §13.4](../../spec/13-compatibility-and-versioning.md)).
+([spec §13.4](../../spec/13-compatibility-and-versioning/index.md)).

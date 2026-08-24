@@ -24,9 +24,9 @@ detail is repeated here.
 **If your change is about the workspace itself** — the root `Cargo.toml`,
 how the three crates relate, a policy genuinely shared by all three — see
 [`spec/index.md`](spec/index.md), specifically
-[§1 Family policy](spec/01-family-policy.md): why dependencies are kept
-minimal, what the four build checks are, the shared spec-driven-development
-discipline, and the synthetic-data safety rule.
+[§1 Family policy](spec/01-family-policy/index.md): why dependencies are
+kept minimal, what the four build checks are, the shared
+spec-driven-development discipline, and the synthetic-data safety rule.
 
 ## Common commands
 
@@ -65,8 +65,9 @@ crash writes its input to `er7/fuzz/artifacts/<target>/`; reproduce it with
 `cargo +nightly fuzz run <target> <that file>`. Corpus and artifacts are
 gitignored.
 
-See [§1.2](spec/01-family-policy.md#12-the-four-checks) for what each of
-the four checks verifies and why they're the same across all three crates.
+See [§1.2](spec/01-family-policy/index.md#12-the-four-checks) for what each
+of the four checks verifies and why they're the same across all three
+crates.
 
 ## What is not here
 

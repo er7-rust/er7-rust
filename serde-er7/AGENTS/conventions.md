@@ -39,20 +39,21 @@ unmodified; this file only states what differs or adds to it.
   fields public" rule and letting a caller who does not need `From`/`Deref`
   construct or destructure a wrapper directly.
 - **`Deref`/`DerefMut`/`From` both ways, always** — see
-  [`spec/06-ergonomics.md`](../spec/06-ergonomics.md), rule S11. Do not add
-  a wrapper type without them.
+  [`spec/06-ergonomics/index.md`](../spec/06-ergonomics/index.md), rule
+  S11. Do not add a wrapper type without them.
 - **Clone during `Serialize`, not `Deserialize`.** Every multi-child
   `Serialize` impl clones its children to build owned wrapper values; every
   `Deserialize` impl builds owned values directly with no clone needed.
   This asymmetry is intentional — see
-  [`spec/06-ergonomics.md`](../spec/06-ergonomics.md) §6.4 — do not "fix"
-  it by adding `Cow`-based borrowing without updating that section first.
+  [`spec/06-ergonomics/index.md`](../spec/06-ergonomics/index.md) §6.4 — do
+  not "fix" it by adding `Cow`-based borrowing without updating that
+  section first.
 
 ## Lints
 
 `cargo clippy --all-targets -- -D warnings` must be clean, and
 `Cargo.toml` turns on the **pedantic** group
-([spec §3.5](../spec/03-dependencies-and-format-agnosticism.md)), so
+([spec §3.5](../spec/03-dependencies-and-format-agnosticism/index.md)), so
 pedantic findings fail the build too.
 
 For a crate this small it comes to two habits: **`# Errors` on every public
@@ -74,10 +75,11 @@ Every public item carries a rustdoc comment, in this shape:
 4. **`Example:`** section with a runnable doctest, for anything a caller
    calls directly.
 5. **Cross-references** to the matching `spec/` section, written as prose
-   with a Markdown link (`[§2](../spec/02-wire-shapes.md)` reads correctly
-   in rendered Markdown; rustdoc renders it as ordinary text, which is
-   fine — rustdoc cannot link out of the crate to a non-doc file anyway),
-   plus intra-doc links to sibling items and to the wrapped `er7` type.
+   with a Markdown link (`[§2](../spec/02-wire-shapes/index.md)` reads
+   correctly in rendered Markdown; rustdoc renders it as ordinary text,
+   which is fine — rustdoc cannot link out of the crate to a non-doc file
+   anyway), plus intra-doc links to sibling items and to the wrapped `er7`
+   type.
 
 `src/lib.rs` carries `#![warn(missing_docs)]`, and
 `cargo rustdoc --lib -- -W missing-docs` must be clean — including doc
@@ -106,8 +108,8 @@ over `# fn main() -> Result<(), er7::Error>` for any doctest that calls
 - Default to none. Well-named identifiers and the doc comments above
   already say *what*.
 - Add a `//` comment only when the **why** is non-obvious, and prefer
-  citing the spec: `// See spec/04-round-trip-guarantee.md §4.2.` A reader
-  can then find the reasoning rather than re-deriving it.
+  citing the spec: `// See spec/04-round-trip-guarantee/index.md §4.2.` A
+  reader can then find the reasoning rather than re-deriving it.
 
 ## Lints
 

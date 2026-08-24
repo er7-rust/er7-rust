@@ -2,8 +2,9 @@
 
 # Testing
 
-See [`spec/07-testing-strategy.md`](../spec/07-testing-strategy.md) for the
-normative version of this page; this is the practical how-to.
+See
+[`spec/07-testing-strategy/index.md`](../spec/07-testing-strategy/index.md)
+for the normative version of this page; this is the practical how-to.
 
 ## Running the suite
 

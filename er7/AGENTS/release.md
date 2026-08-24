@@ -3,23 +3,23 @@
 # Release
 
 How a version gets cut and published. The versioning rules themselves are
-[`spec/14-compatibility-and-versioning.md`](../spec/14-compatibility-and-versioning.md);
+[`spec/14-compatibility-and-versioning/index.md`](../spec/14-compatibility-and-versioning/index.md);
 this file is the procedure. A tick-box copy is in
 [`help/releasing/index.md`](../help/releasing/index.md).
 
 ## Deciding the version
 
-Read [§14.2](../spec/14-compatibility-and-versioning.md) and classify the
-change. The traps specific to this crate:
+Read [§14.2](../spec/14-compatibility-and-versioning/index.md) and classify
+the change. The traps specific to this crate:
 
 - **All tree fields are `pub`**, so adding a field to `Message`, `Segment`,
   `Field`, `Repetition`, `Component`, `Subcomponent`, `Separators`,
   `RenderOptions`, or `Path` breaks struct literals. Breaking.
 - **`Error` is matched exhaustively**, so a new variant is breaking
-  ([§11.3](../spec/11-error-handling.md)).
+  ([§11.3](../spec/11-error-handling/index.md)).
 - **The CLI is versioned with the library**
-  ([§12.5](../spec/12-command-line-interface.md)): removing an option,
-  changing an exit code, or changing the outline's label format is
+  ([§12.5](../spec/12-command-line-interface/index.md)): removing an
+  option, changing an exit code, or changing the outline's label format is
   breaking.
 - **Changing what a rule guarantees** is breaking even if the signature is
   identical. Rule IDs are the unit of contract, not function names.
@@ -35,9 +35,10 @@ bump.
    R24.
 3. **The spec matches the code.** Any behaviour changed since the last
    release has a matching `spec/` edit.
-4. **`spec/17-open-tasks.md` reflects reality.** Tasks that shipped are
-   deleted; the "next task ID" line is right.
-5. **`spec/16-roadmap.md` reflects reality.** Items that shipped are gone.
+4. **`spec/17-open-tasks/index.md` reflects reality.** Tasks that shipped
+   are deleted; the "next task ID" line is right.
+5. **`spec/16-roadmap/index.md` reflects reality.** Items that shipped are
+   gone.
 6. **The docs still read true** — `index.md`, `docs/**`, `examples/**`.
 7. **`spec/index.md` states the version it applies to.**
 
@@ -86,7 +87,8 @@ The published crate must build with **no network and no dependencies**
 2. Confirm <https://crates.io/crates/er7> shows the right description,
    keywords, categories, and license.
 3. Open the next cycle by editing
-   [`spec/16-roadmap.md`](../spec/16-roadmap.md) if the priorities moved.
+   [`spec/16-roadmap/index.md`](../spec/16-roadmap/index.md) if the
+   priorities moved.
 
 ## No changelog file
 

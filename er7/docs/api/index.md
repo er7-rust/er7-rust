@@ -6,16 +6,16 @@ The complete public API of the `er7` crate, in one page. Rendered rustdoc
 with full signatures is at <https://docs.rs/er7/>, or locally with
 `cargo doc --no-deps --open`.
 
-Behaviour is specified in [`spec/`](../../spec/index.md); this page is a map,
-not a contract.
+Behaviour is specified in [`spec/`](../../spec/index.md); this page is a
+map, not a contract.
 
 ## Entry points
 
 | Item | Signature | Notes |
 | ---- | --------- | ----- |
-| `er7::parse` | `fn(&str) -> Result<Message, Error>` | needs an `MSH`/`FHS`/`BHS` header ([§4.2](../../spec/04-parsing.md)) |
+| `er7::parse` | `fn(&str) -> Result<Message, Error>` | needs an `MSH`/`FHS`/`BHS` header ([§4.2](../../spec/04-parsing/index.md)) |
 | `er7::parse_with` | `fn(&str, Separators) -> Message` | for a headerless fragment; cannot fail |
-| `er7::split_messages` | `fn(&str) -> Vec<&str>` | batch or concatenated input; slices borrow ([§9](../../spec/09-batch-input.md)) |
+| `er7::split_messages` | `fn(&str) -> Vec<&str>` | batch or concatenated input; slices borrow ([§9](../../spec/09-batch-input/index.md)) |
 
 `er7::parse` names both a module and a function. That is legal — they live
 in different namespaces — so `er7::parse(text)` calls the function and
@@ -24,7 +24,7 @@ in different namespaces — so `er7::parse(text)` calls the function and
 ## The value tree
 
 Six types, one per level, all fields `pub`
-([§5.1](../../spec/05-value-tree.md)). All derive `Debug`, `Clone`,
+([§5.1](../../spec/05-value-tree/index.md)). All derive `Debug`, `Clone`,
 `PartialEq`, `Eq`; the four below `Segment` also derive `Default`.
 
 ```
@@ -74,7 +74,7 @@ Also `impl Display for Message`, equivalent to `to_er7()`.
 | ------ | ------- |
 | `repetition(usize)` / `repetition_mut(usize)` | `Option<&Repetition>` / `Option<&mut Repetition>` |
 | `component(usize)` | `Option<&Component>` — of the first repetition |
-| `is_empty()` / `is_null()` | `bool` ([§5.3](../../spec/05-value-tree.md)) |
+| `is_empty()` / `is_null()` | `bool` ([§5.3](../../spec/05-value-tree/index.md)) |
 | `to_er7(&Separators)` / `to_text(&Separators)` | `String` |
 
 ### `Repetition`
@@ -117,7 +117,7 @@ Fields: `field`, `component`, `repetition`, `escape`, `subcomponent`: `char`;
 | ---- | ------- | ------- |
 | `Separators::default()` | `Separators` | the HL7-recommended `\|^~\&` |
 | `from_header(&str)` | `Result<Separators, Error>` | read from an `MSH`/`FHS`/`BHS` line |
-| `validate()` | `Result<(), Error>` | reject an ambiguous set ([§3.3](../../spec/03-delimiters.md)) |
+| `validate()` | `Result<(), Error>` | reject an ambiguous set ([§3.3](../../spec/03-delimiters/index.md)) |
 | `is_delimiter(char)` | `bool` | does this character play a structural role |
 | `encoding_characters()` | `String` | the MSH-2 text |
 
@@ -146,7 +146,7 @@ Fields: `segment: String`; `segment_occurrence`, `field`, `repetition`,
 
 ## Escape sequences
 
-Module `er7::escape` ([§6](../../spec/06-escape-sequences.md)).
+Module `er7::escape` ([§6](../../spec/06-escape-sequences/index.md)).
 
 | Item | Signature |
 | ---- | --------- |
@@ -168,10 +168,10 @@ written.
 `Error` has four variants: `Empty`, `MissingHeader(String)`,
 `BadHeader(String)`, `BadPath(String)`. Derives `Debug`, `Clone`,
 `PartialEq`, `Eq`; implements `Display` and `std::error::Error`.
-See [§11](../../spec/11-error-handling.md).
+See [§11](../../spec/11-error-handling/index.md).
 
 ## Not in the API
 
 No dictionary, no validator, no transport, no dependencies. See
-[§1.3](../../spec/01-purpose-and-scope.md) for what that means and
-[§18.1](../../spec/18-open-questions-and-divergences.md) for why.
+[§1.3](../../spec/01-purpose-and-scope/index.md) for what that means and
+[§18.1](../../spec/18-open-questions-and-divergences/index.md) for why.

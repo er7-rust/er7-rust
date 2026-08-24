@@ -1,4 +1,4 @@
-[er7-rust](../index.md) → [spec](index.md) → Rust MSRV
+[er7-rust](../../index.md) → [spec](../index.md) → Rust MSRV
 
 # §2 Rust MSRV: N-3
 
@@ -49,7 +49,7 @@ sits below the new floor, and it is treated as one:
   reports a clear "requires rustc 1.x" rather than an error from the middle
   of a build.
 - The crate's own compatibility section is updated in the same change:
-  [`er7` §14.4](../er7/spec/14-compatibility-and-versioning.md),
+  [`er7` §14.4](../../er7/spec/14-compatibility-and-versioning/index.md),
   and the equivalent section in `er7-redact` and `serde-er7`.
 
 The window moving is not by itself a reason to bump. N-3 is the *minimum*
@@ -61,7 +61,7 @@ any more.
 ## §2.4 The gap this policy still has
 
 Nothing in CI builds against the pinned toolchain, so a declared floor can
-drift from the real one the moment a contributor uses a newer feature —
-the failure mode described above, arriving by accident rather than by
-decision. [`er7` T2](../er7/spec/17-open-tasks.md) tracks closing it. Until
+drift from the real one the moment a contributor uses a newer feature — the
+failure mode described above, arriving by accident rather than by decision.
+[`er7` T2](../../er7/spec/17-open-tasks/index.md) tracks closing it. Until
 then the pin is a statement of intent that no machine checks.

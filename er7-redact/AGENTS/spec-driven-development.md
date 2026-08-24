@@ -18,8 +18,9 @@ and commit messages cite the spec.
    and needs updating *before* the code changes.
 2. **No silent behaviour changes.** A change to observable behaviour that
    does not touch the matching `spec/` section is incomplete.
-3. **Tests express the spec.** [§11.1](../spec/11-testing-strategy.md) maps
-   every rule to the test that enforces it.
+3. **Tests express the spec.**
+   [§11.1](../spec/11-testing-strategy/index.md) maps every rule to the
+   test that enforces it.
 4. **Docs follow the spec.** `index.md`, `docs/**`, and `examples/**` are
    *derived*; they explain and illustrate, they do not define.
 
@@ -34,9 +35,10 @@ and commit messages cite the spec.
 ## Rules and tasks have stable IDs
 
 - **Rules** `D<n>` are the numbered behavioural guarantees, indexed in
-  [spec §1.4](../spec/01-purpose-and-scope.md). **IDs are never reused.**
+  [spec §1.4](../spec/01-purpose-and-scope/index.md). **IDs are never
+  reused.**
 - **Tasks** `T<n>` are units of pending work, in
-  [spec §15](../spec/15-open-tasks.md). Also never reused.
+  [spec §15](../spec/15-open-tasks/index.md). Also never reused.
 
 Adding a rule means: an entry in §1.4, a clause in the owning section, a
 test, and a row in the §11.1 coverage table — all in the same change.
@@ -45,16 +47,16 @@ test, and a row in the §11.1 coverage table — all in the same change.
 
 | Change | Section |
 | ------ | ------- |
-| what a rule selects, or the order rules apply in | [§2](../spec/02-redaction-model.md) |
-| what an action does | [§3](../spec/03-actions.md) |
-| what redaction preserves | [§4](../spec/04-what-redaction-preserves.md) |
-| the built-in policies | [§5](../spec/05-built-in-policies.md) |
-| the policy file format | [§6](../spec/06-policy-file-format.md) |
-| the pseudonym function | [§7](../spec/07-pseudonyms.md) — and read §13.2 first |
-| what a report holds | [§8](../spec/08-report.md) |
-| the `Error` enum | [§9](../spec/09-error-handling.md) |
-| any CLI option, output format, or exit code | [§10](../spec/10-command-line-interface.md) |
-| `Cargo.toml` `[dependencies]` | [§12](../spec/12-dependencies-and-build.md) |
+| what a rule selects, or the order rules apply in | [§2](../spec/02-redaction-model/index.md) |
+| what an action does | [§3](../spec/03-actions/index.md) |
+| what redaction preserves | [§4](../spec/04-what-redaction-preserves/index.md) |
+| the built-in policies | [§5](../spec/05-built-in-policies/index.md) |
+| the policy file format | [§6](../spec/06-policy-file-format/index.md) |
+| the pseudonym function | [§7](../spec/07-pseudonyms/index.md) — and read §13.2 first |
+| what a report holds | [§8](../spec/08-report/index.md) |
+| the `Error` enum | [§9](../spec/09-error-handling/index.md) |
+| any CLI option, output format, or exit code | [§10](../spec/10-command-line-interface/index.md) |
+| `Cargo.toml` `[dependencies]` | [§12](../spec/12-dependencies-and-build/index.md) |
 
 ## The change loop
 
@@ -70,16 +72,16 @@ test, and a row in the §11.1 coverage table — all in the same change.
 ## When spec and code disagree
 
 Record it in
-[spec §16](../spec/16-open-questions-and-declined-decisions.md) *before*
-deciding what to do about it. §16 is also where decisions that were
-considered and **declined** live — a recorded "no, and here is why" saves
-the next reader from re-litigating it.
+[spec §16](../spec/16-open-questions-and-declined-decisions/index.md)
+*before* deciding what to do about it. §16 is also where decisions that
+were considered and **declined** live — a recorded "no, and here is why"
+saves the next reader from re-litigating it.
 
 ## Planning and tasks live in the spec
 
 There is no separate `plan.md` or `tasks.md`:
-[§14](../spec/14-roadmap.md) is the roadmap,
-[§15](../spec/15-open-tasks.md) the backlog with `T<n>` IDs, and
-[§16](../spec/16-open-questions-and-declined-decisions.md) the open
+[§14](../spec/14-roadmap/index.md) is the roadmap,
+[§15](../spec/15-open-tasks/index.md) the backlog with `T<n>` IDs, and
+[§16](../spec/16-open-questions-and-declined-decisions/index.md) the open
 questions. Finish a task and delete it from §15 in the same change — the
 commit history is the archive.

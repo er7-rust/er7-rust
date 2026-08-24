@@ -4,8 +4,8 @@
 
 What to test, where to put it, and how to write it. The *coverage
 obligation* — which rule needs which test — is in
-[`spec/13-testing-strategy.md`](../spec/13-testing-strategy.md); this file
-is about craft.
+[`spec/13-testing-strategy/index.md`](../spec/13-testing-strategy/index.md);
+this file is about craft.
 
 ## The four checks
 
@@ -84,7 +84,7 @@ assert_eq!(er7::parse(text).unwrap().to_er7(), text);
 Add one whenever you add a parse rule, a write rule, or a sample. Use
 canonical text — `\r` terminators, no blank lines — or pass
 `RenderOptions` that match the input
-([§7.2](../spec/07-writing.md)).
+([§7.2](../spec/07-writing/index.md)).
 
 ## Doc-tests
 
@@ -112,7 +112,8 @@ the highest-leverage test in the crate. Requirements:
 
 The `cli()` helper in `tests/integration.rs` spawns the built binary via
 `env!("CARGO_BIN_EXE_er7")` and returns `(success, stdout, stderr)`. Use it
-for anything in [§12](../spec/12-command-line-interface.md), and assert on:
+for anything in [§12](../spec/12-command-line-interface/index.md), and
+assert on:
 
 - exit status,
 - exact `stdout` where the format is part of the contract,

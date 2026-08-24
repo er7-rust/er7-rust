@@ -52,14 +52,14 @@ samples/                   ← example ER7 messages and a policy file
 ```
 
 There is **no separate** `plan.md` or `tasks.md` — both live as spec
-sections ([`spec/14-roadmap.md`](spec/14-roadmap.md),
-[`spec/15-open-tasks.md`](spec/15-open-tasks.md)).
+sections ([`spec/14-roadmap/index.md`](spec/14-roadmap/index.md),
+[`spec/15-open-tasks/index.md`](spec/15-open-tasks/index.md)).
 
 ## Six rules that bind every change
 
 The load-bearing constraints. Each maps to a numbered rule in
-[`spec/01-purpose-and-scope.md`](spec/01-purpose-and-scope.md) §1.4 and is
-expanded in the matching topical guide.
+[`spec/01-purpose-and-scope/index.md`](spec/01-purpose-and-scope/index.md)
+§1.4 and is expanded in the matching topical guide.
 
 1. **Do not move the shape.** Redaction rewrites leaf text and nothing else
    (D1). A redaction that shifts a field is worse than none: the message
@@ -69,11 +69,13 @@ expanded in the matching topical guide.
    (D3), no explicit null is overwritten (D4). Writing `REDACTED` into an
    empty field announces that something was there.
 3. **When in doubt, redact.** Privacy is priority 1
-   ([§1.5](spec/01-purpose-and-scope.md)): a value that should have gone
-   and did not cannot be undone. Two rules follow from it: a reject rule
-   beats an accept rule for the same position, whichever order they are in
-   (D19), and appending a policy never weakens its posture (D20). See
-   [`spec/02-redaction-model.md`](spec/02-redaction-model.md) §2.4, §2.6.
+   ([§1.5](spec/01-purpose-and-scope/index.md)): a value that should have
+   gone and did not cannot be undone. Two rules follow from it: a reject
+   rule beats an accept rule for the same position, whichever order they
+   are in (D19), and appending a policy never weakens its posture (D20).
+   See
+   [`spec/02-redaction-model/index.md`](spec/02-redaction-model/index.md)
+   §2.4, §2.6.
 4. **Do not claim more than the crate knows** (D14). This is a positional
    editor, not a compliance tool; `pseudonym` is not secure (D12). Never
    call an output "de-identified". See [`AGENTS/safety.md`](AGENTS/safety.md).
@@ -86,9 +88,10 @@ expanded in the matching topical guide.
 ## Quick orientation for a brand-new agent
 
 1. Read this file (you are here).
-2. Read [`spec/01-purpose-and-scope.md`](spec/01-purpose-and-scope.md) —
-   the rule index in §1.4 is the whole contract in one table, and §1.5 says
-   which goal wins when two conflict.
+2. Read
+   [`spec/01-purpose-and-scope/index.md`](spec/01-purpose-and-scope/index.md)
+   — the rule index in §1.4 is the whole contract in one table, and §1.5
+   says which goal wins when two conflict.
 3. Skim [`spec/index.md`](spec/index.md) for the section map, and §14/§15
    for what work is in flight.
 4. Skim [`AGENTS/architecture.md`](AGENTS/architecture.md) for the layout.

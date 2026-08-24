@@ -23,14 +23,14 @@ include = [
 ]
 
 # This table is empty on purpose, and stays empty: see
-# spec/15-dependencies-and-build.md §15.1, rule R25. Healthcare integration
+# spec/15-dependencies-and-build/index.md §15.1, rule R25. Healthcare integration
 # code gets audited, this crate is meant to sit at the bottom of a stack of
 # HL7 crates, and nothing in ER7 needs a dependency.
 [dependencies]
 
 # Pedantic lints are on, and the four checks run clippy with `-D warnings`,
 # so a pedantic finding fails the build like any other. See
-# spec/15-dependencies-and-build.md §15.7.
+# spec/15-dependencies-and-build/index.md §15.7.
 [lints.clippy]
 pedantic = { level = "warn", priority = -1 }
 

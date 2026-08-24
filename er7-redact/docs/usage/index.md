@@ -82,8 +82,8 @@ The paths are `er7`'s, so everything that notation does works here: `OBX-5`
 covers every `OBX` in the message, `PID-13[2]` names one repetition, and
 `PID-5.1` reaches one component.
 
-The [eight actions](../../spec/03-actions.md) are `keep`, `clear`, `null`,
-`replace`, `mask`, `first`, `last`, and `pseudonym`.
+The [eight actions](../../spec/03-actions/index.md) are `keep`, `clear`,
+`null`, `replace`, `mask`, `first`, `last`, and `pseudonym`.
 
 ## 4. Starting from the built-in
 
@@ -96,9 +96,10 @@ er7-redact --policy de-identify.policy message.er7
 ```
 
 This is also how a policy gets pinned: the built-in list may **grow** in a
-minor release ([spec §13.3](../../spec/13-compatibility-and-versioning.md)),
-so a repository that needs the exact same redaction next year should check
-the file in.
+minor release
+([spec §13.3](../../spec/13-compatibility-and-versioning/index.md)), so a
+repository that needs the exact same redaction next year should check the
+file in.
 
 In Rust, the same thing without the file:
 
@@ -151,10 +152,10 @@ Different keys produce unrelated mappings, so two data sets redacted under
 different keys cannot be joined.
 
 The cost is real and is worth reading before relying on it
-([spec §7.3](../../spec/07-pseudonyms.md)): a pseudonym preserves equality
-on purpose, and anyone who has the key can invert the mapping by trying
-every candidate identifier. Use it inside your own trust boundary; for data
-leaving it, `clear` or `replace`.
+([spec §7.3](../../spec/07-pseudonyms/index.md)): a pseudonym preserves
+equality on purpose, and anyone who has the key can invert the mapping by
+trying every candidate identifier. Use it inside your own trust boundary;
+for data leaving it, `clear` or `replace`.
 
 ## 7. Checking the work
 

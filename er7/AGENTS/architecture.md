@@ -33,14 +33,14 @@ belong in the crate.
 
 | Module | Owns | Spec |
 | ------ | ---- | ---- |
-| `src/lib.rs` | crate docs, `Error`, re-exports | [§11](../spec/11-error-handling.md) |
-| `src/separators.rs` | `Separators`, `Terminator`; reading and validating a delimiter set | [§3](../spec/03-delimiters.md) |
-| `src/escape.rs` | `Escape`, `escapes`, `unescape`, `escape`, `decode_hex` | [§6](../spec/06-escape-sequences.md) |
-| `src/message.rs` | the value tree, accessors, absent/empty/null, queries, MSH conveniences | [§5](../spec/05-value-tree.md), [§8](../spec/08-paths-and-queries.md), [§10](../spec/10-msh-conveniences.md) |
-| `src/parse.rs` | `parse`, `parse_with`, `split_messages` | [§4](../spec/04-parsing.md), [§9](../spec/09-batch-input.md) |
-| `src/render.rs` | `to_er7`/`to_text` at every level, `RenderOptions` | [§7](../spec/07-writing.md) |
-| `src/path.rs` | `Path` and its notation | [§8.1](../spec/08-paths-and-queries.md) |
-| `src/main.rs` | the CLI | [§12](../spec/12-command-line-interface.md) |
+| `src/lib.rs` | crate docs, `Error`, re-exports | [§11](../spec/11-error-handling/index.md) |
+| `src/separators.rs` | `Separators`, `Terminator`; reading and validating a delimiter set | [§3](../spec/03-delimiters/index.md) |
+| `src/escape.rs` | `Escape`, `escapes`, `unescape`, `escape`, `decode_hex` | [§6](../spec/06-escape-sequences/index.md) |
+| `src/message.rs` | the value tree, accessors, absent/empty/null, queries, MSH conveniences | [§5](../spec/05-value-tree/index.md), [§8](../spec/08-paths-and-queries/index.md), [§10](../spec/10-msh-conveniences/index.md) |
+| `src/parse.rs` | `parse`, `parse_with`, `split_messages` | [§4](../spec/04-parsing/index.md), [§9](../spec/09-batch-input/index.md) |
+| `src/render.rs` | `to_er7`/`to_text` at every level, `RenderOptions` | [§7](../spec/07-writing/index.md) |
+| `src/path.rs` | `Path` and its notation | [§8.1](../spec/08-paths-and-queries/index.md) |
+| `src/main.rs` | the CLI | [§12](../spec/12-command-line-interface/index.md) |
 
 ## Dependency direction
 
@@ -68,7 +68,7 @@ Two properties to preserve:
 ## The data model
 
 Six types, one per level of the ER7 hierarchy
-([§5.1](../spec/05-value-tree.md)):
+([§5.1](../spec/05-value-tree/index.md)):
 
 ```
 Message { separators: Separators, segments: Vec<Segment> }
@@ -83,7 +83,7 @@ Three decisions worth knowing before you change any of it:
 
 - **All fields are `pub`.** A message can be built from literals as well as
   parsed. This makes struct shape part of the public contract
-  ([§14.2](../spec/14-compatibility-and-versioning.md)).
+  ([§14.2](../spec/14-compatibility-and-versioning/index.md)).
 - **Text lives only at the leaf, and only in `raw`.** Every level above
   holds structure. This is what makes the round trip possible (R16); it is
   the single most important decision in the crate.
@@ -116,7 +116,7 @@ resolves. The rendered surface is in
 
 | Not here | Where instead | Why |
 | -------- | ------------- | --- |
-| segment/field dictionaries | a layer above | [§18.1](../spec/18-open-questions-and-divergences.md) |
+| segment/field dictionaries | a layer above | [§18.1](../spec/18-open-questions-and-divergences/index.md) |
 | message-structure grammars | a layer above | same |
-| MLLP framing | a transport crate | [§9.4](../spec/09-batch-input.md) |
-| a `Builder` for messages | the public `Vec` fields | [§5.5](../spec/05-value-tree.md), and [T7](../spec/17-open-tasks.md) is open on it |
+| MLLP framing | a transport crate | [§9.4](../spec/09-batch-input/index.md) |
+| a `Builder` for messages | the public `Vec` fields | [§5.5](../spec/05-value-tree/index.md), and [T7](../spec/17-open-tasks/index.md) is open on it |

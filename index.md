@@ -17,9 +17,9 @@ without publishing.
 Each crate has its own README, specification, examples, and tests — start
 in that crate's own directory for anything crate-specific. This root only
 holds what the three genuinely share: see
-[`spec/01-family-policy.md`](spec/01-family-policy.md) for the shared
-dependency, testing, and safety policy, and [`AGENTS.md`](AGENTS.md) for
-agent guidance on the workspace as a whole.
+[`spec/01-family-policy/index.md`](spec/01-family-policy/index.md) for the
+shared dependency, testing, and safety policy, and [`AGENTS.md`](AGENTS.md)
+for agent guidance on the workspace as a whole.
 
 The whole family, and the boundary between the layers, is documented at
 <https://er7-rust.github.io/ecosystem/>.

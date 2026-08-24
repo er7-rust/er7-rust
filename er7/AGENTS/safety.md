@@ -25,7 +25,7 @@ commit message — including data a user pastes into a conversation.
 ## 2. Never collapse absent, empty, and null (R10, R11)
 
 This is the sharpest edge in the whole format
-([§5.3](../spec/05-value-tree.md)).
+([§5.3](../spec/05-value-tree/index.md)).
 
 | On the wire | Means | A receiver must |
 | ----------- | ----- | --------------- |
@@ -45,7 +45,8 @@ Concretely, in this codebase:
   value being conveyed — which is exactly why any code path that writes to
   a record must ask `is_null()` first and must not infer it from `value()`.
 - The CLI shows a null as `""` rather than as blank
-  ([§12.3](../spec/12-command-line-interface.md)) for the same reason.
+  ([§12.3](../spec/12-command-line-interface/index.md)) for the same
+  reason.
 
 ## 3. Never corrupt a message you are writing back (R16)
 
@@ -55,28 +56,28 @@ fails to parse: the failure is visible, the alteration is not.
 - Do not trim, normalize, case-fold, reorder, or decode at parse time.
 - Do not "fix" a message on the way out — not a missing field, not an odd
   delimiter, not a malformed escape.
-- When writing a value into a message, use
-  `Subcomponent::set` ([§5.5](../spec/05-value-tree.md)), which encodes
-  delimiters. Assigning `raw` directly with an unescaped `&` in it silently
-  splits the component the next time the message is parsed, shifting every
-  value after it.
+- When writing a value into a message, use `Subcomponent::set`
+  ([§5.5](../spec/05-value-tree/index.md)), which encodes delimiters.
+  Assigning `raw` directly with an unescaped `&` in it silently splits the
+  component the next time the message is parsed, shifting every value after
+  it.
 - A carriage return in a value must be written as `\X0D\`. A literal one
   ends the segment and truncates the message
-  ([§6.3](../spec/06-escape-sequences.md)).
+  ([§6.3](../spec/06-escape-sequences/index.md)).
 
 ## 4. Never claim more than the crate knows (R24)
 
 The crate is an encoding, not a dictionary
-([§1.3](../spec/01-purpose-and-scope.md)). It does not know what a value
-*means*.
+([§1.3](../spec/01-purpose-and-scope/index.md)). It does not know what a
+value *means*.
 
 - Do not add a validator. A partial validator is worse than none: it
   implies the messages it passes are correct.
 - Do not derive a message structure from the code and trigger event; that
   mapping is version-specific and a wrong answer routes a message to the
-  wrong handler ([§10.3](../spec/10-msh-conveniences.md)).
+  wrong handler ([§10.3](../spec/10-msh-conveniences/index.md)).
 - Do not guess a data type in order to decide whether to decode an escape
-  ([§18.2](../spec/18-open-questions-and-divergences.md)).
+  ([§18.2](../spec/18-open-questions-and-divergences/index.md)).
 - Do not add a field-name lookup, however small. `PID-5` is a patient name
   in one version and something else in another.
 
@@ -87,7 +88,7 @@ patch here. Say so.
 
 A receiver that rejects a message it could have read drops clinical
 information. Below the header, everything is data
-([§11.2](../spec/11-error-handling.md)).
+([§11.2](../spec/11-error-handling/index.md)).
 
 - Unknown segments, local `Z` segments, ragged field counts, unexpected
   component counts: parse them.
@@ -96,23 +97,23 @@ information. Below the header, everything is data
 - Do not add an `Error` variant for something recoverable.
 
 The one place strictness is correct is the delimiter set
-([§3.3](../spec/03-delimiters.md)): a message that reuses one character for
-two roles cannot be read back as the sender meant, so guessing would
-produce confidently wrong values.
+([§3.3](../spec/03-delimiters/index.md)): a message that reuses one
+character for two roles cannot be read back as the sender meant, so
+guessing would produce confidently wrong values.
 
 ## 6. Dependencies are an audit surface (R25)
 
 Healthcare integration code gets audited. Every transitive dependency is
 another thing to review and another supply-chain risk, and this crate is
 meant to sit at the bottom of a stack
-([§15.1](../spec/15-dependencies-and-build.md)).
+([§15.1](../spec/15-dependencies-and-build/index.md)).
 
 Do not add one without the user asking for it.
 
 ## If you are unsure
 
 Say so, and stop. Write the uncertainty into
-[`spec/18-open-questions-and-divergences.md`](../spec/18-open-questions-and-divergences.md)
+[`spec/18-open-questions-and-divergences/index.md`](../spec/18-open-questions-and-divergences/index.md)
 so the next reader inherits the question rather than a guess. A recorded
-open question is a good outcome; a silent assumption in a clinical
-codebase is not.
+open question is a good outcome; a silent assumption in a clinical codebase
+is not.

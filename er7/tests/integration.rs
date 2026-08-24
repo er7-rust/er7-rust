@@ -319,13 +319,6 @@ fn cli_prints_help_and_version() {
     assert!(stdout.starts_with("er7 "), "{stdout}");
 }
 
-/// Whether `name` is a Markdown file, by extension.
-fn is_markdown(name: &str) -> bool {
-    std::path::Path::new(name)
-        .extension()
-        .is_some_and(|extension| extension == "md")
-}
-
 /// Every `| R<n> |` cell at the start of a table row in `text`.
 fn rule_ids(text: &str) -> Vec<String> {
     text.lines()
@@ -344,8 +337,8 @@ fn every_rule_has_a_coverage_row() {
     // that no longer exists is a table nobody re-read. Both used to be
     // caught by review; this catches them by `cargo test`
     // (AGENTS/spec-driven-development.md).
-    let declared = rule_ids(include_str!("../spec/01-purpose-and-scope.md"));
-    let covered = rule_ids(include_str!("../spec/13-testing-strategy.md"));
+    let declared = rule_ids(include_str!("../spec/01-purpose-and-scope/index.md"));
+    let covered = rule_ids(include_str!("../spec/13-testing-strategy/index.md"));
 
     assert_eq!(declared.len(), 25, "§1.4 should index R1–R25");
     let missing: Vec<&String> = declared.iter().filter(|r| !covered.contains(r)).collect();
@@ -359,15 +352,18 @@ fn every_rule_has_a_coverage_row() {
 
 #[test]
 fn every_spec_section_is_indexed_and_present() {
-    // The section files and the table of contents drift apart silently:
-    // a new section nobody linked, or a link to a file that was renamed.
+    // The section directories and the table of contents drift apart
+    // silently: a new section nobody linked, or a link to a section that
+    // was renamed. Each section is `<slug>/index.md`, so the slug is the
+    // directory name and the link is the slug plus `/index.md`.
     let index = include_str!("../spec/index.md");
     let directory = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("spec");
 
     let mut linked: Vec<String> = index
         .match_indices("](")
         .filter_map(|(at, _)| index[at + 2..].split_once(')').map(|(name, _)| name))
-        .filter(|name| name.len() > 3 && name.as_bytes()[2] == b'-' && is_markdown(name))
+        .filter_map(|name| name.strip_suffix("/index.md"))
+        .filter(|slug| slug.len() > 3 && slug.as_bytes()[2] == b'-')
         .map(str::to_string)
         .collect();
     linked.sort();
@@ -376,22 +372,23 @@ fn every_spec_section_is_indexed_and_present() {
     let mut on_disk: Vec<String> = std::fs::read_dir(&directory)
         .expect("spec directory")
         .filter_map(Result::ok)
+        .filter(|entry| entry.path().is_dir())
         .map(|entry| entry.file_name().to_string_lossy().into_owned())
-        .filter(|name| is_markdown(name) && name.as_bytes()[0].is_ascii_digit())
+        .filter(|slug| slug.as_bytes()[0].is_ascii_digit())
         .collect();
     on_disk.sort();
 
     assert_eq!(linked, on_disk, "spec/index.md and spec/ disagree");
 
-    // And every section names itself, so a file that was copied keeps its
-    // own number rather than its neighbour's.
-    for name in &on_disk {
-        let number = &name[..2];
-        let text = std::fs::read_to_string(directory.join(name)).expect("section");
+    // And every section names itself, so a section that was copied keeps
+    // its own number rather than its neighbour's.
+    for slug in &on_disk {
+        let number = &slug[..2];
+        let text = std::fs::read_to_string(directory.join(slug).join("index.md")).expect("section");
         let heading = format!("# {}. ", number.trim_start_matches('0'));
         assert!(
             text.contains(&heading),
-            "{name} has no `{heading}` heading of its own"
+            "{slug} has no `{heading}` heading of its own"
         );
     }
 }

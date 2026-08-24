@@ -25,10 +25,10 @@ The whole value of this crate is that a message survives the trip. Two
 things make that true, and both are easy to break by accident:
 
 - **A subcomponent serializes its `raw` text** (S3,
-  [§2.2](../spec/02-wire-shapes.md)) — never the decoded value. Decoding is
-  lossy: a formatting escape such as `\.br\` has no plain-text form to
-  decode back to, so a wire format built on decoded values could not be
-  turned back into the original ER7.
+  [§2.2](../spec/02-wire-shapes/index.md)) — never the decoded value.
+  Decoding is lossy: a formatting escape such as `\.br\` has no plain-text
+  form to decode back to, so a wire format built on decoded values could
+  not be turned back into the original ER7.
 - **Absent, empty, and the explicit null stay three different things**
   (`er7`'s R10). An absent field is `[]`, an empty one carries an empty
   string, and the null is the text `""`. Collapsing any pair of them
@@ -45,10 +45,10 @@ Two, `serde` and `er7`, and both are the point of the crate (S1). Every
 transitive dependency is another crate somebody has to audit, in a domain
 where that audit is real. Do not add one without the user asking, and
 record what it bought in
-[`spec/09-roadmap-and-open-questions.md`](../spec/09-roadmap-and-open-questions.md).
+[`spec/09-roadmap-and-open-questions/index.md`](../spec/09-roadmap-and-open-questions/index.md).
 
 ## If you are unsure
 
 Say so, and stop. Write the uncertainty into
-[`spec/09-roadmap-and-open-questions.md`](../spec/09-roadmap-and-open-questions.md)
+[`spec/09-roadmap-and-open-questions/index.md`](../spec/09-roadmap-and-open-questions/index.md)
 so the next reader inherits the question rather than a guess.

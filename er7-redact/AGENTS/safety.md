@@ -22,22 +22,22 @@ synthetic message of the same shape and use that.
 
 ## 2. When in doubt, redact
 
-Priority 1 in [spec §1.5](../spec/01-purpose-and-scope.md). A value that
-should have been removed and was not cannot be undone; a value that was
-removed and was wanted is a policy edit away. A change that narrows what a
-rule reaches needs a reason in the spec, not just a passing test.
+Priority 1 in [spec §1.5](../spec/01-purpose-and-scope/index.md). A value
+that should have been removed and was not cannot be undone; a value that
+was removed and was wanted is a policy edit away. A change that narrows
+what a rule reaches needs a reason in the spec, not just a passing test.
 
 ## 3. Never claim more than the crate does
 
 The crate is a positional editor, not a compliance tool
-([spec §1.3](../spec/01-purpose-and-scope.md)). In documentation, in error
-messages, and in conversation with a user:
+([spec §1.3](../spec/01-purpose-and-scope/index.md)). In documentation, in
+error messages, and in conversation with a user:
 
 - do not say a message is "de-identified", "anonymised", or "HIPAA
   compliant". Say which positions were changed;
 - do not describe `pseudonym` as secure, hashed-and-therefore-safe, or
   irreversible. It is FNV-1a with a `u64` key
-  ([spec §7.3](../spec/07-pseudonyms.md));
+  ([spec §7.3](../spec/07-pseudonyms/index.md));
 - do not let a built-in policy imply completeness. It is a list somebody
   wrote down.
 
@@ -65,11 +65,12 @@ the CI transcript.
 
 One runtime dependency, `er7` (D16). Do not add another without the user
 asking, and record what it bought in
-[spec §16](../spec/16-open-questions-and-declined-decisions.md).
+[spec §16](../spec/16-open-questions-and-declined-decisions/index.md).
 
 ## If you are unsure
 
 Say so, and stop. Write the uncertainty into
-[spec §16](../spec/16-open-questions-and-declined-decisions.md) so the next
-reader inherits the question rather than a guess. A recorded open question
-is a good outcome; a silent assumption in a crate about privacy is not.
+[spec §16](../spec/16-open-questions-and-declined-decisions/index.md) so
+the next reader inherits the question rather than a guess. A recorded open
+question is a good outcome; a silent assumption in a crate about privacy is
+not.

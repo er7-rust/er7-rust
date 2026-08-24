@@ -23,14 +23,14 @@ include = [
 
 # Exactly two dependencies, and both are the point of this crate: `serde` is
 # the trait vocabulary this crate implements against, and `er7` is the value
-# tree it wraps. See spec/03-dependencies-and-format-agnosticism.md.
+# tree it wraps. See spec/03-dependencies-and-format-agnosticism/index.md.
 [dependencies]
 serde = "1"
 er7 = { path = "../er7", version = "0" }
 
 # Pedantic lints are on, and the four checks run clippy with `-D warnings`,
 # so a pedantic finding fails the build like any other. See
-# spec/03-dependencies-and-format-agnosticism.md §3.5.
+# spec/03-dependencies-and-format-agnosticism/index.md §3.5.
 [lints.clippy]
 pedantic = { level = "warn", priority = -1 }
 

@@ -2,19 +2,21 @@
 
 # Release checklist
 
-A tick-box copy of [`AGENTS/release.md`](../../AGENTS/release.md), which has
-the reasoning. Versioning rules are
-[spec §14](../../spec/14-compatibility-and-versioning.md).
+A tick-box copy of [`AGENTS/release.md`](../../AGENTS/release.md), which
+has the reasoning. Versioning rules are
+[spec §14](../../spec/14-compatibility-and-versioning/index.md).
 
 ## 1. Decide the version
 
-- [ ] Classify the change against [spec §14.2](../../spec/14-compatibility-and-versioning.md).
+- [ ] Classify the change against
+  [spec §14.2](../../spec/14-compatibility-and-versioning/index.md).
 - [ ] Did a public struct gain a field? All fields are `pub`, so that breaks
       struct literals — **breaking**.
 - [ ] Did `Error` gain a variant? Callers match exhaustively — **breaking**.
 - [ ] Did a CLI option, exit code, or the outline label format change?
       **Breaking**.
-- [ ] Did any rule in [spec §1.4](../../spec/01-purpose-and-scope.md) change
+- [ ] Did any rule in [spec §1.4](../../spec/01-purpose-and-scope/index.md)
+  change
       what it guarantees? **Breaking**, even with an identical signature.
 
 ## 2. Check the repository
@@ -26,8 +28,9 @@ the reasoning. Versioning rules are
 - [ ] Every rule in §1.4 appears in the §13.1 coverage table; the only
       permitted gap is R24.
 - [ ] Behaviour changed since the last release has a matching `spec/` edit.
-- [ ] `spec/17-open-tasks.md`: shipped tasks deleted, "next task ID" correct.
-- [ ] `spec/16-roadmap.md`: shipped items gone.
+- [ ] `spec/17-open-tasks/index.md`: shipped tasks deleted, "next task ID"
+  correct.
+- [ ] `spec/16-roadmap/index.md`: shipped items gone.
 - [ ] `index.md`, `docs/**`, `examples/**` still read true.
 - [ ] Every example still runs: `cargo build --examples`.
 
@@ -61,4 +64,4 @@ the reasoning. Versioning rules are
       an intra-doc link.
 - [ ] <https://crates.io/crates/er7> shows the right description, keywords,
       categories, and license.
-- [ ] `spec/16-roadmap.md` updated if priorities moved.
+- [ ] `spec/16-roadmap/index.md` updated if priorities moved.

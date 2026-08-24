@@ -17,6 +17,6 @@ they do not define it.
 See also:
 
 - [`examples/`](../examples/README.md) — runnable programs, one concept each
-- [`spec/02-er7-encoding.md`](../spec/02-er7-encoding.md) — the ER7 format
-  itself, independent of this crate
+- [`spec/02-er7-encoding/index.md`](../spec/02-er7-encoding/index.md) — the
+  ER7 format itself, independent of this crate
 - <https://docs.rs/er7/> — rendered API documentation

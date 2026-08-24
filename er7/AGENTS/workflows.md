@@ -45,8 +45,8 @@ cargo test --doc                   # Run the examples inside the doc comments
 Every public item must be documented and every `Example:` block must run;
 see [`conventions.md`](conventions.md) for the doc-comment shape.
 
-Rendered long-form docs live in [`docs/`](../docs/) and are written by hand,
-not generated. When you change behaviour, check whether
+Rendered long-form docs live in [`docs/`](../docs/) and are written by
+hand, not generated. When you change behaviour, check whether
 [`docs/api/index.md`](../docs/api/index.md) still describes it.
 
 ## Running the CLI
@@ -112,6 +112,6 @@ cargo run -- --raw suspect.er7 | grep '\\'   # Find every escape sequence
 | Symptom | Cause |
 | ------- | ----- |
 | a round-trip test fails on a file you edited | your editor added a trailing newline or converted `\r` to `\n`; the sample files use real `\r` bytes |
-| `parse` returns `MissingHeader` on a readable-looking message | the message was pretty-printed and the first line has leading whitespace ([§18.5](../spec/18-open-questions-and-divergences.md)) |
+| `parse` returns `MissingHeader` on a readable-looking message | the message was pretty-printed and the first line has leading whitespace ([§18.5](../spec/18-open-questions-and-divergences/index.md)) |
 | a doc-test fails but `cargo test --lib` passes | the example in a doc comment is out of date; run `cargo test --doc` |
 | clippy passes locally, CI fails | you ran it without `--all-targets`, so `examples/` was skipped |

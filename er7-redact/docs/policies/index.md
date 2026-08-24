@@ -3,8 +3,9 @@
 # Policies
 
 A reference for the policy file format and the four built-in policies. The
-normative text is [spec §5](../../spec/05-built-in-policies.md) and
-[§6](../../spec/06-policy-file-format.md); this page is the working copy.
+normative text is [spec §5](../../spec/05-built-in-policies/index.md) and
+[§6](../../spec/06-policy-file-format/index.md); this page is the working
+copy.
 
 ## The file format
 
@@ -130,7 +131,8 @@ at their headers, so junk after a message arrives as a segment of it.
 ### `patient_identifiers` — the default
 
 About forty positions across five segments. The full table with a reason
-per action is [spec §5.1](../../spec/05-built-in-policies.md); in summary:
+per action is [spec §5.1](../../spec/05-built-in-policies/index.md); in
+summary:
 
 | Segment | Covers |
 | ------- | ------ |
@@ -194,7 +196,8 @@ recipients, and no library can make it for you.
 ## See also
 
 - [`docs/usage/`](../usage/index.md) — the walk-through
-- [`spec/05`](../../spec/05-built-in-policies.md),
-  [`spec/06`](../../spec/06-policy-file-format.md) — the normative text
+- [`spec/05`](../../spec/05-built-in-policies/index.md),
+  [`spec/06`](../../spec/06-policy-file-format/index.md) — the normative
+  text
 - [`samples/de-identify.policy`](../../samples/de-identify.policy) — a
   policy file that exercises every action

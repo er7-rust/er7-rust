@@ -103,7 +103,8 @@ on the page — seeing an actual `PID` segment laid out is usually faster
 than composing it from the table by hand.
 
 The full normative table, including `Message` and `Segment`'s object
-shapes, is [`spec/02-wire-shapes.md`](../../spec/02-wire-shapes.md); the
+shapes, is
+[`spec/02-wire-shapes/index.md`](../../spec/02-wire-shapes/index.md); the
 [`docs/api/`](../api/index.md) reference lists every type with a link back
 to it.
 
@@ -127,7 +128,8 @@ let separators = back.separators;
 let decoded = back.query("OBX-3.2")?; // already decoded — `query` always is
 ```
 
-See [`spec/04-round-trip-guarantee.md`](../../spec/04-round-trip-guarantee.md)
+See
+[`spec/04-round-trip-guarantee/index.md`](../../spec/04-round-trip-guarantee/index.md)
 for exactly what this guarantee covers.
 
 ## §5 Working with one piece of a message

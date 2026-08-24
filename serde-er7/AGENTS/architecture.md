@@ -36,11 +36,11 @@ impl Serialize for X { .. }            // 4. hand-written, per spec §2
 impl<'de> Deserialize<'de> for X { .. }
 ```
 
-See [`spec/02-wire-shapes.md`](../spec/02-wire-shapes.md) for what each
-`Serialize`/`Deserialize` pair must produce and accept, and
-[`spec/06-ergonomics.md`](../spec/06-ergonomics.md) for why the pattern
-looks like this (in particular §6.3 on the orphan rule, which is *why*
-there is a wrapper at all).
+See [`spec/02-wire-shapes/index.md`](../spec/02-wire-shapes/index.md) for
+what each `Serialize`/`Deserialize` pair must produce and accept, and
+[`spec/06-ergonomics/index.md`](../spec/06-ergonomics/index.md) for why the
+pattern looks like this (in particular §6.3 on the orphan rule, which is
+*why* there is a wrapper at all).
 
 ## Two shapes of implementation
 
@@ -54,9 +54,9 @@ there is a wrapper at all).
   written as a string): `serialize_str` / `visit_str`.
 
 No module mixes shapes — each wrapper is exactly one of the three, which is
-what makes [`spec/02-wire-shapes.md`](../spec/02-wire-shapes.md)'s table a
-complete description of the crate's behaviour rather than an
-approximation.
+what makes
+[`spec/02-wire-shapes/index.md`](../spec/02-wire-shapes/index.md)'s table a
+complete description of the crate's behaviour rather than an approximation.
 
 ## Dependency direction
 
@@ -73,5 +73,5 @@ by design (spec §1.2). `er7` has no knowledge this crate exists.
 If `er7` grows a new public type, the pattern above is the template: a new
 `src/<name>.rs` module, a wrapper struct, conversions, `Deref`, and a
 hand-written `Serialize`/`Deserialize` pair whose shape gets documented in
-[`spec/02-wire-shapes.md`](../spec/02-wire-shapes.md) *before* the code is
-written (spec-driven, per [`AGENTS.md`](../AGENTS.md) rule 5).
+[`spec/02-wire-shapes/index.md`](../spec/02-wire-shapes/index.md) *before*
+the code is written (spec-driven, per [`AGENTS.md`](../AGENTS.md) rule 5).

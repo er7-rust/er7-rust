@@ -52,11 +52,11 @@ by reading the outline.
 
 - **A `#` in a policy argument.** It starts a comment, so `mask #` is read
   as a bare `mask`. Build the rule in Rust
-  ([spec §16.4](../spec/16-open-questions-and-declined-decisions.md)).
+  ([spec §16.4](../spec/16-open-questions-and-declined-decisions/index.md)).
 - **Samples are CR-terminated.** Editing `samples/*.er7` with a tool that
   normalises line endings turns them into `\n` and breaks the round-trip
   tests.
 - **`Policy::accept_all()` is empty and there is no `Default`.** That is
-  deliberate ([spec §5.1](../spec/05-built-in-policies.md)).
+  deliberate ([spec §5.1](../spec/05-built-in-policies/index.md)).
 - **Rules apply in order.** A later rule sees the earlier one's output, and
   `Keep` does not undo.

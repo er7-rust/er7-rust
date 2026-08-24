@@ -17,11 +17,12 @@ cargo build --examples
 
 ## 2. Confirm the spec and the code agree
 
-- `spec/15-open-tasks.md` holds no task this release claims to close.
-- Every rule in `spec/01-purpose-and-scope.md` §1.4 has a row in §11.1.
+- `spec/15-open-tasks/index.md` holds no task this release claims to close.
+- Every rule in `spec/01-purpose-and-scope/index.md` §1.4 has a row in
+  §11.1.
 - A change to `Policy::patient_identifiers` appears in `spec/05` §5.1.
 - A change to `pseudonym` — there must not be one. See
-  `spec/13-compatibility-and-versioning.md` §13.2.
+  `spec/13-compatibility-and-versioning/index.md` §13.2.
 
 ## 3. Bump the version
 

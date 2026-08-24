@@ -18,8 +18,8 @@ new ones.
 - Types use the standard's vocabulary: `Separators`, `Segment`, `Field`,
   `Repetition`, `Component`, `Subcomponent`. Where this crate and HL7 have
   different words for the same thing, HL7 wins — see
-  [§18.3](../spec/18-open-questions-and-divergences.md) for the one case
-  where that cost something.
+  [§18.3](../spec/18-open-questions-and-divergences/index.md) for the one
+  case where that cost something.
 - Accessors are nouns (`field`, `component`, `separators`); predicates are
   `is_*`; conversions are `to_*`.
 - Use UK spelling in user-facing prose (`behaviour`, `organisation`) and US
@@ -34,9 +34,9 @@ new ones.
 - **Return `Cow<'_, str>` when the common case needs no allocation** —
   `unescape` and `escape` both do, and both check cheaply before
   allocating.
-- **Keep public fields public.** Struct-literal construction is a documented
-  part of the API ([§5.1](../spec/05-value-tree.md)). Adding a field is
-  therefore a breaking change; think before you do.
+- **Keep public fields public.** Struct-literal construction is a
+  documented part of the API ([§5.1](../spec/05-value-tree/index.md)).
+  Adding a field is therefore a breaking change; think before you do.
 - **Do not memoize.** No caches, no lazily computed fields. Public mutable
   fields and a cache cannot both be safe, and the fields win.
 
@@ -116,7 +116,7 @@ They are the same three as
 - Below the header, return data, not `Result`. `parse_with` returns
   `Message`, not `Result<Message, Error>`, and that is the model.
 - Do not add an `Error` variant to describe something the crate can
-  recover from ([§11.3](../spec/11-error-handling.md)).
+  recover from ([§11.3](../spec/11-error-handling/index.md)).
 
 ## Lints
 
@@ -125,7 +125,7 @@ covers `examples/` and `tests/` too.
 
 `Cargo.toml` turns on clippy's **pedantic** group, and the four checks run
 clippy with `-D warnings`, so pedantic findings fail the build
-([`spec/15-dependencies-and-build.md`](../spec/15-dependencies-and-build.md)
+([`spec/15-dependencies-and-build/index.md`](../spec/15-dependencies-and-build/index.md)
 §15.7). In practice that means three habits:
 
 - **`#[must_use]` on every pure accessor and constructor.** A discarded
