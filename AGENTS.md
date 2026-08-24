@@ -14,6 +14,15 @@ workspace `Cargo.toml` and one `Cargo.lock`.
 (`{ path = "../er7", version = "0" }`), so a change to `er7` in this
 workspace is picked up by its siblings immediately, without publishing.
 
+One directory here is **not** a crate:
+[`er7-rust.github.io/`](er7-rust.github.io/) holds the source of
+<https://er7-rust.github.io/>, the site that documents all three. It was a
+separate repository until its history was merged into this one, so a change
+to a crate's public surface and the page that teaches it can now land
+together — and a page that still teaches a removed API is a broken change,
+not a follow-up. See
+[`er7-rust.github.io/AGENTS.md`](er7-rust.github.io/AGENTS.md).
+
 ## Where to work
 
 **If your change is specific to one crate**, go straight to that crate's

@@ -22,7 +22,7 @@ drives changes.
 | Repository   | https://github.com/er7-rust/er7-rust (shared with `er7-redact`, `serde-er7`) |
 | Crate        | https://crates.io/crates/er7                                                 |
 | Docs         | https://docs.rs/er7/                                                         |
-| Website      | https://er7-rust.github.io/ — source in the sibling repo `er7-rust.github.io` |
+| Website      | https://er7-rust.github.io/ — source in [`../er7-rust.github.io/`](../er7-rust.github.io/), a directory of this repository rather than a Cargo member |
 | Maintainer   | Joel Parker Henderson — joel@joelparkerhenderson.com                         |
 
 ## How this crate is documented
