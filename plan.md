@@ -40,11 +40,10 @@ Six workstreams, shared with the sibling repositories (`hl7-rust`,
 posture. Open items for each are in `tasks.md`.
 
 1. **Governance.** GOVERNANCE.md, MAINTAINERS.md, and RFC.md exist and are
-   candid about the single-maintainer model. The gap is placement: the code
-   of conduct lives at `er7/CODE_OF_CONDUCT.md`, and GOVERNANCE.md,
-   CONTRIBUTING.md, and MAINTAINERS.md all link into it there — GitHub's
-   community-health detection reads the root, so the repository presents as
-   having none.
+   candid about the single-maintainer model. The placement gap is closed
+   (2026-08-26): the code of conduct now lives at `/CODE_OF_CONDUCT.md`,
+   where GitHub's community-health detection reads it, with a
+   claim-accuracy clause added and the three linking documents repointed.
 
 2. **Compliance — licensing and trademarks.** The strongest of the five
    repositories here: TRADEMARKS.md, a checker, and an in-flight sweep

@@ -142,5 +142,5 @@ rather than as a hostile act: [`GOVERNANCE.md`](GOVERNANCE.md).
 ## Contributing and conduct
 
 [`CONTRIBUTING.md`](CONTRIBUTING.md) and
-[`er7/CODE_OF_CONDUCT.md`](er7/CODE_OF_CONDUCT.md) apply across the
-workspace, not only to the crate they sit in.
+[`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) apply across the
+workspace.

@@ -62,12 +62,13 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
 
 ### Governance
 
-- [ ] **Put the code of conduct at the root** — move or link
-      `er7/CODE_OF_CONDUCT.md` to `/CODE_OF_CONDUCT.md` so GitHub's
-      community-health detection finds it, and repoint the three links
-      (GOVERNANCE.md:227, CONTRIBUTING.md:258, MAINTAINERS.md:143) in the
-      same change. Consider adopting the claim-accuracy clause from the
-      `fhir-rust` version while touching it.
+- [x] **Put the code of conduct at the root** — done 2026-08-26:
+      `git mv er7/CODE_OF_CONDUCT.md CODE_OF_CONDUCT.md`, the three links
+      in GOVERNANCE.md, CONTRIBUTING.md, and MAINTAINERS.md repointed
+      (verified by `grep -rn er7/CODE_OF_CONDUCT`: zero hits outside the
+      site copy, which keeps its own), and the claim-accuracy clause
+      adapted from the `fhir-rust` version ("One Addition Specific to
+      This Project").
 
 ### Compliance — licensing and trademarks
 

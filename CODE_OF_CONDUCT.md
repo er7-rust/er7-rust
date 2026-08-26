@@ -36,6 +36,19 @@ Examples of unacceptable behavior include:
 * Other conduct which could reasonably be considered inappropriate in a
   professional setting
 
+## One Addition Specific to This Project
+
+**Do not overstate what the software does.** These crates handle clinical
+message formats, and a wrong claim about them has clinical cost. Asserting in
+an issue, a pull request, a review, or a public post that this software does
+something it has not been shown to do — a check it does not perform, a
+guarantee no test backs, a compliance property no document supports — is
+treated here as a conduct problem as well as a technical one, because someone
+may act on it.
+
+Correcting such a claim — including one made by a maintainer — is welcome, and
+is not a hostile act. Say what you did not verify.
+
 ## Enforcement Responsibilities
 
 Community leaders are responsible for clarifying and enforcing our standards of
