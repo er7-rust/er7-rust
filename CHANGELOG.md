@@ -15,10 +15,18 @@ raised minimum supported Rust version, which is always a breaking change
 and never lands in a patch
 ([`spec/rust-msrv-n-minus-3/index.md`](spec/rust-msrv-n-minus-3/index.md)).
 
-## Unreleased
+## 2026-08-26 — `er7` 0.1.3, `serde-er7` 0.1.3, `er7-redact` 0.2.1
 
-Documentation and policy only. No crate behaviour changed, so nothing here
-needs a release.
+Documentation, policy, and build posture. **No API changed**, no `Error`
+variant was added, and no command-line option or outline label format
+moved, so all three are patch releases under
+[`er7` §14.2](er7/spec/14-compatibility-and-versioning/index.md).
+
+What reaches a user of the published crates: the `®` on the first use of a
+word mark in every doc comment and both `--help` outputs, a trademark
+notice in each crate's rendered documentation and README, the corrected
+crate descriptions on crates.io, and `#![forbid(unsafe_code)]` on every
+crate root.
 
 ### Added
 
