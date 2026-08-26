@@ -110,8 +110,12 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
 
 ### Outreach
 
-- [ ] Add `.github/FUNDING.yml` carrying the donation routes
-      CONTRIBUTING.md's "Money" section already lists.
+- [x] **Add `.github/FUNDING.yml`** — done 2026-08-26: the three
+      URL-addressable routes from CONTRIBUTING.md's "Money" section
+      (PayPal, Venmo, linktr.ee) as `custom:` entries, and only those —
+      no GitHub Sponsors, because CONTRIBUTING.md does not list one. Bank
+      transfer is arranged by email and has no URL, which the file's
+      comment records. YAML validated with `yaml.safe_load`.
 - [ ] Add the governance surface to the site: security, governance,
       maintainers, RFC, and AI-statement routes in
       `er7-rust.github.io/src/routes/` — the work exists; it is just

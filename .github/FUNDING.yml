@@ -1,0 +1,11 @@
+# Surfaces the donation routes CONTRIBUTING.md's "Money" section lists —
+# and only those. That section is candid about what money does and does
+# not buy (not support, not a feature, not influence over the spec, not a
+# fix to the bus factor); nothing here changes that.
+#
+# The fourth route in CONTRIBUTING.md — bank transfer — is arranged by
+# email and has no URL, so it cannot appear in this file.
+custom:
+  - "https://www.paypal.com/paypalme/joelparkerhenderson"
+  - "https://www.venmo.com/joelparkerhenderson"
+  - "https://linktr.ee/joelparkerhenderson"

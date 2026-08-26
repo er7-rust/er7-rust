@@ -74,8 +74,8 @@ posture. Open items for each are in `tasks.md`.
    trademarks, news, and comparison pages — but none of the governance
    surface (security, governance, maintainers, RFC, AI statement), so the
    professionalization work is invisible to anyone who does not open the
-   repository. CONTRIBUTING.md's "Money" section lists donation routes with
-   no `.github/FUNDING.yml` to surface them.
+   repository. CONTRIBUTING.md's "Money" section's donation routes are
+   surfaced by `.github/FUNDING.yml` as of 2026-08-26.
 
 6. **Audit and harmonization.** No findings register and no plan/tasks
    history — this file and `tasks.md` are the start. Family conventions to
