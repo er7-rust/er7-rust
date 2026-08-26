@@ -131,10 +131,15 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
 
 ### Audit and harmonization
 
-- [ ] Re-sync `spec/special-files-for-public-repos/index.md` with the
-      `fhir-rust` canonical version (the local copy omits CODE_OF_CONDUCT.md,
-      PHI.md, LICENSES/, and FUNDING.yml, and carries the same two typos:
-      "optimizaiton", "Prker").
+- [x] **Re-sync `spec/special-files-for-public-repos/index.md`** — done
+      2026-08-26: the four missing entries added (CODE_OF_CONDUCT.md,
+      PHI.md, LICENSES/, FUNDING.yml), the two typos fixed
+      ("optimizaiton" → "optimization", "Prker" → "Parker", plus a third
+      the task did not name: "summries" → "summaries"), and a status
+      section added, adapted to this repository (all files exist as of
+      2026-08-26; the Covenant 2.0-vs-2.1 mismatch stated honestly). One
+      local addition kept: TRADEMARKS.md, which the canonical list omits
+      but this repository carries.
 - [ ] Bring `serde-er7/` and `er7-redact/` to per-crate document parity
       (conduct/contributing pointers) or record the decision that root-level
       files cover them.
