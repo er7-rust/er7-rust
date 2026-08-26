@@ -225,11 +225,11 @@ a security review — and the same list appears in
 [`MAINTAINERS.md`](MAINTAINERS.md), where it belongs to the continuity
 question:
 
-- **No hosted-CI track record.** A workflow (`.github/workflows/ci.yml`,
-  2026-08-26) now runs the four checks, an MSRV build, and the trademark
-  checker on every push and pull request, but it has not yet had a hosted
-  run; until one goes green, the checks that have actually run are the
-  ones run on one laptop, by one person, before a release.
+- **A hosted-CI track record of exactly one green run.** A workflow
+  (`.github/workflows/ci.yml`, 2026-08-26) runs the four checks, an MSRV
+  build, a fuzz smoke run, and the trademark checker on every push and
+  pull request; its first hosted run went green 2026-08-26. One run
+  proves the gate executes — it is not yet a history.
 - **No signed commits or tags**, and no key escrow.
 - **No bug bounty, and no security budget.**
 - **No second responder.** One email address, one person.

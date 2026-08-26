@@ -58,10 +58,10 @@ posture. Open items for each are in `tasks.md`.
    disclosed leak path, a 90-day disclosure deadline). CI now exists
    (`.github/workflows/ci.yml`, 2026-08-26): the four checks in
    `spec/01-family-policy/index.md` §1.2, an MSRV build, and the trademark
-   checker — first hosted run still pending — and, since later the same
-   day, a fuzz smoke job (nightly, build plus a brief run of each
-   target). Plus unsigned commits and tags, no
-   `cargo deny`/`cargo audit`, no SBOM.
+   checker — and, since later the same day, a fuzz smoke job (nightly,
+   build plus a brief run of each target). The first hosted run went
+   green 2026-08-26, all four jobs. Still open: unsigned commits and
+   tags, no `cargo deny`/`cargo audit`, no SBOM.
 
 4. **Privacy and patient data.** `er7-redact` is a PHI tool, and its claims
    are scoped correctly — "a starting point, not a compliance certification"
@@ -110,8 +110,8 @@ posture. Open items for each are in `tasks.md`.
   the compliance posture in crate doc-comments and manifests reaches
   crates.io only with each crate's next release.
 - SECURITY.md's "checkable properties" now have a CI workflow behind them,
-  but it has not yet had a hosted run; until one goes green they remain
-  claims, not guarantees.
+  and its first hosted run went green 2026-08-26 — a track record of one
+  run is still a short track record.
 - Pseudonyms in `er7-redact` are FNV-1a and documented as not a security
   primitive — any outreach that touches de-identification must repeat that
   framing, not soften it.

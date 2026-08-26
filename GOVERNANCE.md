@@ -87,7 +87,7 @@ The same path for everyone, maintainer included:
 4. **The documentation follows** — `index.md`, `docs/`, `examples/`, and
    the website are *derived*; they explain the spec and do not define it.
 5. **The checks pass** — on somebody's machine first, and in CI
-   (`.github/workflows/ci.yml`, still awaiting its first hosted run):
+   (`.github/workflows/ci.yml`, first hosted run green 2026-08-26):
 
    ```sh
    cargo test --workspace

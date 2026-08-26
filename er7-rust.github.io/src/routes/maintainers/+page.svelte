@@ -52,9 +52,10 @@
     <p>Named rather than quietly omitted, because absence is itself information:</p>
     <ul>
       <li>
-        <strong>No hosted-CI track record yet.</strong> A workflow exists and runs the four
-        checks, an MSRV build, a fuzz smoke run, and the trademark checker &mdash; but until its
-        first hosted run goes green it is a written gate, not a proven one.
+        <strong>A hosted-CI track record of exactly one green run.</strong> The workflow runs the
+        four checks, an MSRV build, a fuzz smoke run, and the trademark checker on every push;
+        its first hosted run went green on 2026-08-26. One run proves the gate works &mdash; it is
+        not yet a history.
       </li>
       <li><strong>No signed commits or tags</strong>, and no key escrow.</li>
       <li>

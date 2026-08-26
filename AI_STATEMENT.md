@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Version | 1.1.0 |
+| Version | 1.2.0 |
 | Effective date | 2026-08-26 |
 | Status | Active |
 | Author and owner | Joel Parker Henderson, maintainer |
@@ -155,11 +155,11 @@ cargo +1.95 check --workspace --all-targets       # the MSRV floor
   That is a standing hard rule, for humans and tools alike.
 
 What these controls do **not** prove is §12. And one caveat is named here
-rather than buried: **CI is new and unproven.** A workflow
-([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) now runs these
-gates on every push and pull request, but it has not yet had a hosted
-run; until then, the only executions of the gates remain the ones run on
-a laptop by one person. [`MAINTAINERS.md`](MAINTAINERS.md) says the same
+rather than buried: **CI is new.** A workflow
+([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs these gates
+on every push and pull request, and its first hosted run went green
+2026-08-26 — one run proves the gate executes, and is still the whole of
+the hosted track record. [`MAINTAINERS.md`](MAINTAINERS.md) says the same
 thing.
 
 ## 8. Licensing and provenance of AI output
@@ -246,12 +246,12 @@ This section exists because a disclosure without one is marketing.
 - **The gates prove what they test, not correctness.** The test suite
   demonstrates the behaviours it covers. Coverage is real and ratchets
   upward, and it is still a boundary.
-- **The machine enforcement of the gates is unproven.** A CI workflow
-  exists as of 2026-08-26 (`.github/workflows/ci.yml`) but has not yet
-  had a hosted run. A gate that depends on one person remembering to run
-  it is weaker than one a robot refuses to skip, and until the first
-  hosted run goes green this project still has the weaker kind in
-  practice.
+- **The machine enforcement of the gates has run exactly once.** A CI
+  workflow exists as of 2026-08-26 (`.github/workflows/ci.yml`) and its
+  first hosted run went green the same day. A gate that depends on one
+  person remembering to run it is weaker than one a robot refuses to
+  skip; this project now has the stronger kind, with a history one run
+  deep.
 - **Review depth is one person's.** [`MAINTAINERS.md`](MAINTAINERS.md) says
   the bus factor is one. "The maintainer understands and can explain every
   committed change" is the honest claim; "every line was independently
@@ -317,6 +317,7 @@ FerroEHR project, whose AI statement is the structural model for this one.
 |---|---|---|
 | 1.0.0 | 2026-08-26 | First issue. |
 | 1.1.0 | 2026-08-26 | §7 and §12 updated: a CI workflow now exists (`.github/workflows/ci.yml`); its first hosted run is still pending. |
+| 1.2.0 | 2026-08-26 | §7 and §12 updated again: the first hosted run went green (all four jobs, including the fuzz smoke run added the same day). |
 
 ## Annex B. Machine-readable summary
 
@@ -325,7 +326,7 @@ is authoritative where the two could ever disagree.
 
 ```yaml
 ai-statement:
-  version: 1.1.0
+  version: 1.2.0
   last-updated: 2026-08-26
   vocabulary: w3c-ai-content-disclosure
   disclosure-default: ai-generated

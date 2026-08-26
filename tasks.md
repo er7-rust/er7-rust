@@ -50,8 +50,14 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       `spec/01-family-policy/index.md` §1.2, an MSRV 1.95 build, and
       `bin/check-trademarks`; MAINTAINERS.md "What is not here yet" and
       AI_STATEMENT.md §7/§12 updated in the same change. YAML validated
-      locally; the first hosted run has not yet happened, so no green
-      badge is claimed. Fuzz smoke was deliberately left out (next item).
+      locally. Fuzz smoke was deliberately left out (next item, since
+      done). **The first hosted run went green 2026-08-26** (run
+      32987307797, head `77ad805`, all four jobs — the four checks, MSRV,
+      fuzz smoke, trademarks — after GitHub Actions' outage that day
+      delayed the push event by half an hour); the "not yet proven"
+      wording in MAINTAINERS.md, SECURITY.md, GOVERNANCE.md,
+      AI_STATEMENT.md, and plan.md was retired in the same change that
+      records this.
 - [x] **Add a fuzz smoke run to CI** — done 2026-08-26: a `fuzz` job in
       `.github/workflows/ci.yml` (nightly toolchain with the `rustfmt,
       clippy` components named explicitly — the `snomed-rust` job broke

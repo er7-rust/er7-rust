@@ -61,13 +61,14 @@ committer identity in the history.
 Named rather than quietly omitted, because their absence is itself
 information for an evaluation:
 
-- **No hosted-CI track record yet.** A workflow now exists
-  ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) running the four
+- **A hosted-CI track record of exactly one green run.** The workflow
+  ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs the four
   checks in [§1.2 of the family policy](spec/01-family-policy/index.md), a
-  build on the MSRV toolchain, and `bin/check-trademarks` on every push and
-  pull request — but it has not yet had a hosted run, so until one goes
-  green it is a written gate, not a proven one. Before that, the checks ran
-  on a laptop by one person before a release.
+  build on the MSRV toolchain, a fuzz smoke run, and `bin/check-trademarks`
+  on every push and pull request; its first hosted run went green
+  2026-08-26, all four jobs. One run is a proof the gate works, not yet a
+  track record — before it, the checks ran on a laptop by one person
+  before a release.
 - **No signed commits or tags**, as above.
 - **No second security responder.** [`SECURITY.md`](SECURITY.md) is the
   policy, and it terminates at one email address —
