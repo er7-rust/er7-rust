@@ -60,8 +60,14 @@ any more.
 
 ## §2.4 The gap this policy still has
 
-Nothing in CI builds against the pinned toolchain, so a declared floor can
-drift from the real one the moment a contributor uses a newer feature — the
-failure mode described above, arriving by accident rather than by decision.
-[`er7` T2](../../er7/spec/17-open-tasks/index.md) tracks closing it. Until
-then the pin is a statement of intent that no machine checks.
+Until 2026-08-26 nothing in CI built against the pinned toolchain, so a
+declared floor could drift from the real one the moment a contributor used
+a newer feature — the failure mode described above, arriving by accident
+rather than by decision. The `msrv` job in
+[`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) now runs
+`cargo check --workspace --all-targets` on the pinned toolchain on every
+push and pull request; it has not yet had a hosted run, and it hard-codes
+the version and checks rather than tests, so
+[`er7` T2](../../er7/spec/17-open-tasks/index.md) stays open until the job
+runs `cargo test` on a manifest-read toolchain and has a green hosted run
+behind it.

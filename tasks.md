@@ -1,0 +1,116 @@
+# Tasks
+
+Execution checklist; rationale and workstreams live in [`plan.md`](plan.md).
+A `[x]` here means the work is **verified done**, not intended — check items
+off in the same change that completes them, with the evidence named.
+
+Per-crate engineering tasks stay in the crate specs
+(`er7/spec/17-open-tasks/`, `er7-redact/spec/15-open-tasks/`,
+`serde-er7/spec/09-roadmap-and-open-questions/`); this file holds the
+workspace-level professionalization work only.
+
+## Done (verified 2026-08-26, the state this file starts from)
+
+- [x] Three crates released independently on crates.io (er7 0.1.2,
+      serde-er7 0.1.2, er7-redact 0.2.0), recorded in `CHANGELOG.md`.
+- [x] Root document set exists and is substantive: GOVERNANCE.md, SECURITY.md,
+      LICENSE.md, CONTRIBUTING.md, MAINTAINERS.md, AI_STATEMENT.md,
+      TRADEMARKS.md, RFC.md, CODEOWNERS, CITATION.cff, NEWS.md,
+      COMPARISONS.md, BENCHMARKS.md, INSTALL.md, CHANGELOG.md.
+- [x] Trademark fair use is specified (`spec/hl7-trademarks-fair-use/`) and
+      mechanically checked (`bin/check-trademarks`, rules T1/T2/T3), with a
+      mark-by-mark TRADEMARKS.md.
+- [x] PHI claims in `er7-redact` are scoped honestly and consistently:
+      "a starting point, not a compliance certification" in the spec,
+      SECURITY.md, and the CLI usage text; pseudonyms documented as not a
+      security primitive.
+- [x] SECURITY.md documents checkable properties with the commands that check
+      them, a disclosed leak path (`er7::Error::MissingHeader`), and a 90-day
+      coordinated-disclosure deadline.
+
+## Next up
+
+Grouped by `plan.md` workstream. Order within a group is priority order.
+
+### In flight — land it first
+
+- [ ] **Commit the 86-file trademark-compliance sweep** (® on first prose
+      use, disclaimer in pages, doc-comments, manifests, CLI usage; anchor
+      fixes; site copy). Run `bin/check-trademarks` and the four checks
+      before committing; until it lands the working tree and the published
+      crates disagree about compliance posture.
+
+### Security and supply chain
+
+- [x] **Stand up CI at the repository root** — done 2026-08-26:
+      `.github/workflows/ci.yml` runs the four checks from
+      `spec/01-family-policy/index.md` §1.2, an MSRV 1.95 build, and
+      `bin/check-trademarks`; MAINTAINERS.md "What is not here yet" and
+      AI_STATEMENT.md §7/§12 updated in the same change. YAML validated
+      locally; the first hosted run has not yet happened, so no green
+      badge is claimed. Fuzz smoke was deliberately left out (next item).
+- [ ] Add a fuzz smoke run to CI (the three targets under `er7/fuzz/`
+      need a nightly toolchain and `cargo-fuzz`; kept out of the first
+      workflow to keep it dependency-free).
+- [ ] Tag releases and sign commits/tags going forward; record the posture
+      change in MAINTAINERS.md.
+- [ ] Add dependency auditing (`cargo deny`: advisories, licenses, bans,
+      sources) on push plus a weekly cron — even with runtime dependency
+      counts of 0/1/2, the dev-dependency tree under `er7-bench` is 51
+      packages.
+- [ ] Add `.github/ISSUE_TEMPLATE/` and a stated issue-response expectation.
+
+### Governance
+
+- [ ] **Put the code of conduct at the root** — move or link
+      `er7/CODE_OF_CONDUCT.md` to `/CODE_OF_CONDUCT.md` so GitHub's
+      community-health detection finds it, and repoint the three links
+      (GOVERNANCE.md:227, CONTRIBUTING.md:258, MAINTAINERS.md:143) in the
+      same change. Consider adopting the claim-accuracy clause from the
+      `fhir-rust` version while touching it.
+
+### Compliance — licensing and trademarks
+
+- [ ] Add `LICENSES/` with the full text of all five licenses in the SPDX
+      expression (REUSE convention; `fhir-rust/LICENSES/` is the model) —
+      license texts are currently URLs only.
+- [ ] Set `CITATION.cff`'s `license` field to the SPDX expression instead of
+      "See license file", and add `version`/`date-released`; add the missing
+      `CITATION.cff` to `serde-er7/`.
+
+### Privacy and patient data
+
+- [ ] **Add root `PHI.md`** consolidating the dispersed, correct claims into
+      one page a privacy officer can read, including an explicit HIPAA Safe
+      Harbor 18-identifier coverage/non-coverage table for `er7-redact`
+      (which identifiers the built-in policy addresses, which it structurally
+      cannot — free text above all, per
+      `er7-redact/spec/14-roadmap/index.md` §14.2).
+
+### Outreach
+
+- [ ] Add `.github/FUNDING.yml` carrying the donation routes
+      CONTRIBUTING.md's "Money" section already lists.
+- [ ] Add the governance surface to the site: security, governance,
+      maintainers, RFC, and AI-statement routes in
+      `er7-rust.github.io/src/routes/` — the work exists; it is just
+      invisible off-repo.
+- [ ] Write `help/outreach/index.md` at the workspace level (the other four
+      family repositories each have one; this one has only per-crate
+      `help/` directories), gated on CI and the conduct file landing first.
+
+### Audit and harmonization
+
+- [ ] Re-sync `spec/special-files-for-public-repos/index.md` with the
+      `fhir-rust` canonical version (the local copy omits CODE_OF_CONDUCT.md,
+      PHI.md, LICENSES/, and FUNDING.yml, and carries the same two typos:
+      "optimizaiton", "Prker").
+- [ ] Bring `serde-er7/` and `er7-redact/` to per-crate document parity
+      (conduct/contributing pointers) or record the decision that root-level
+      files cover them.
+
+## Trademarks
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

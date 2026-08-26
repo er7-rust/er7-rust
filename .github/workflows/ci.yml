@@ -1,0 +1,59 @@
+# CI for the Rust workspace: the four checks every crate shares
+# (spec/01-family-policy/index.md §1.2), the MSRV floor
+# (spec/rust-msrv-n-minus-3/index.md), and the trademark fair-use rules
+# (spec/hl7-trademarks-fair-use/index.md, enforced by bin/check-trademarks).
+#
+# The site is not built here: it deploys from the er7-rust.github.io
+# repository this monorepo's er7-rust.github.io/ subdirectory is split
+# into, and that repository carries its own workflow.
+
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # The four checks from spec/01-family-policy/index.md §1.2, verbatim.
+  # `cargo rustdoc --lib` needs one package at a time, so the fourth
+  # check runs once per library crate.
+  checks:
+    name: the four checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - run: cargo test
+      - run: cargo clippy --all-targets -- -D warnings
+      - run: cargo fmt --check
+      - run: cargo rustdoc -p er7 --lib -- -W missing-docs
+      - run: cargo rustdoc -p serde-er7 --lib -- -W missing-docs
+      - run: cargo rustdoc -p er7-redact --lib -- -W missing-docs
+
+  # The declared floor (rust-version = "1.95" in every publishable
+  # crate) actually builds, so the pin cannot silently drift from the
+  # real minimum — the gap spec/rust-msrv-n-minus-3/index.md §2.4 names.
+  msrv:
+    name: msrv 1.95
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.95"
+      - run: cargo check --workspace --all-targets
+
+  # Rules T1, T2, and T3 of spec/hl7-trademarks-fair-use/index.md,
+  # across every page in the tree.
+  trademarks:
+    name: trademarks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bin/check-trademarks

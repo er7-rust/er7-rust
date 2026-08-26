@@ -1,0 +1,216 @@
+#!/usr/bin/env python3
+"""Enforce spec/hl7-trademarks-fair-use rules T1, T2, and T3.
+
+T1  Every page that uses a word mark in prose carries the registration mark
+    immediately after that mark's first use on the page.
+T2  Every page that uses a word mark carries the disclaimer, verbatim.
+T3  A page whose prose refers to Fast Healthcare Interoperability Resources
+    says "HL7(R) FHIR(R) standard" at least once.
+
+Run from the workspace root:  bin/check-trademarks
+"""
+
+import os
+import re
+import sys
+
+MARKS = ("HL7", "FHIR", "CDA")
+R = "®"
+
+DISCLAIMER = (
+    "are the registered trademarks of Health Level Seven",
+    "International and their use of these trademarks does not constitute an",
+    "endorsement by HL7.",
+)
+FHIR_STANDARD = f"HL7{R} FHIR{R} standard"
+
+SKIP_DIRS = {"target", "node_modules", ".git", "build", ".svelte-kit"}
+
+problems = []
+
+
+def fail(page, rule, detail):
+    problems.append(f"{page}: {rule}: {detail}")
+
+
+def has_disclaimer(text):
+    """The disclaimer, allowing any line wrapping and any comment prefix."""
+    flat = re.sub(r"\s+", " ", re.sub(r"(?m)^\s*(//[!/]|#)\s?", "", text))
+    flat = flat.replace("&reg;", R)
+    return all(re.sub(r"\s+", " ", part) in flat for part in DISCLAIMER)
+
+
+def blanked(text, patterns):
+    """Replace each match with NULs, so offsets are preserved."""
+    for pattern in patterns:
+        text = re.sub(pattern, lambda m: "\0" * len(m.group()), text)
+    return text
+
+
+def prose_markdown(text):
+    return blanked(
+        text,
+        [
+            r"(?ms)^([ \t]*)(`{3,}|~{3,}).*?^\1\2[ \t]*$",
+            r"`[^`\n]+`",
+            r"\]\([^)]*\)",
+            r"<[^ >\n]+>",
+            r"(?s)<!--.*?-->",
+        ],
+    )
+
+
+def prose_web(text):
+    text = text.replace("&reg;", R)
+    return blanked(
+        text,
+        [
+            r"(?is)<pre.*?</pre>",
+            r"(?is)<code.*?</code>",
+            r"(?s)`[^`]*?@software\{.*?`",
+            r"`[^`\n]+`",
+            r'https?://[^\s"\'<>)]+',
+        ],
+    )
+
+
+def prose_rust_docs(text):
+    """Only doc comments, with their code fences removed."""
+    kept, fence = [], False
+    for line in text.split("\n"):
+        stripped = line.lstrip()
+        if not (stripped.startswith("//!") or stripped.startswith("///")):
+            kept.append("")
+            continue
+        body = re.sub(r"^\s*//[!/]", "", line)
+        if re.match(r"\s*```", body):
+            fence = not fence
+            kept.append("")
+            continue
+        kept.append("" if fence else body)
+    return blanked("\n".join(kept), [r"`[^`\n]+`"])
+
+
+def check_marks(page, prose):
+    for mark in MARKS:
+        first = re.search(r"\b" + mark + r"\b", prose)
+        if not first:
+            continue
+        if prose[first.end() : first.end() + 1] != R:
+            line = prose[: first.start()].count("\n") + 1
+            fail(page, "T1", f'first use of "{mark}" (line {line}) has no {R}')
+
+
+def check_fhir_standard(page, prose, full_text):
+    """T3 asks about references to the standard, not about the notice.
+
+    A page whose only "FHIR" is the one inside the disclaimer is not
+    referring to the standard at all, so the disclaimer comes out first.
+    """
+    body = re.sub(
+        r"HL7\u00ae,? and FHIR\u00ae are the registered trademarks.*?"
+        r"endorsement by HL7\.",
+        "",
+        prose.replace("\n", " "),
+        flags=re.S,
+    )
+    if re.search(r"\bFHIR\b", body) and FHIR_STANDARD not in full_text:
+        fail(page, "T3", f'uses "FHIR" but never says "{FHIR_STANDARD}"')
+
+
+def uses_a_mark(prose):
+    return any(re.search(r"\b" + mark + r"\b", prose) for mark in MARKS)
+
+
+def walk(extensions):
+    for dirpath, dirnames, filenames in os.walk("."):
+        dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
+        for name in sorted(filenames):
+            if name.endswith(extensions):
+                path = os.path.normpath(os.path.join(dirpath, name))
+                if not os.path.islink(path):
+                    yield path
+
+
+def read(path):
+    with open(path, encoding="utf-8") as handle:
+        return handle.read()
+
+
+# --- Markdown: T1, T2, T3 --------------------------------------------------
+
+for path in walk(".md"):
+    text = read(path)
+    prose = prose_markdown(text)
+    if not uses_a_mark(prose):
+        continue
+    check_marks(path, prose)
+    check_fhir_standard(path, prose, text)
+    if not has_disclaimer(text):
+        fail(path, "T2", "no trademark disclaimer")
+
+# --- Website: T1 and T3 per route; T2 satisfied once by the shared layout ---
+
+LAYOUT = os.path.join("er7-rust.github.io", "src", "routes", "+layout.svelte")
+if os.path.exists(LAYOUT):
+    if not has_disclaimer(read(LAYOUT)):
+        fail(LAYOUT, "T2", "the shared site footer carries no disclaimer")
+else:
+    fail(LAYOUT, "T2", "missing; nothing carries the site-wide disclaimer")
+
+for path in walk((".svelte", ".ts")):
+    if not path.startswith(os.path.join("er7-rust.github.io", "src")):
+        continue
+    text = read(path)
+    prose = prose_web(text)
+    if not uses_a_mark(prose):
+        continue
+    check_marks(path, prose)
+    check_fhir_standard(path, prose, text)
+
+# --- Rust: T1 per file's docs; T2 on each crate root -----------------------
+
+for path in walk(".rs"):
+    text = read(path)
+    prose = prose_rust_docs(text)
+    if not uses_a_mark(prose):
+        continue
+    check_marks(path, prose)
+    check_fhir_standard(path, prose, text)
+    if os.path.basename(path) == "lib.rs" and not has_disclaimer(prose):
+        fail(path, "T2", "crate root documentation carries no disclaimer")
+
+# --- Cargo.toml descriptions, and the command-line help --------------------
+
+for path in walk("Cargo.toml"):
+    match = re.search(r'(?m)^description = "(.*)"$', read(path))
+    if match:
+        check_marks(f"{path} [description]", match.group(1))
+
+for path in ("er7/src/main.rs", "er7-redact/src/main.rs"):
+    if not os.path.exists(path):
+        continue
+    match = re.search(
+        r'(?s)const USAGE: &str = "\\\n((?:[^"\\]|\\.)*)";', read(path)
+    )
+    if not match:
+        fail(path, "T1", "could not find the USAGE string")
+        continue
+    usage = match.group(1)
+    page = f"{path} [--help]"
+    if uses_a_mark(usage):
+        check_marks(page, usage)
+        check_fhir_standard(page, usage, usage)
+        if not has_disclaimer(usage):
+            fail(page, "T2", "--help output carries no disclaimer")
+
+# --- Report ----------------------------------------------------------------
+
+if problems:
+    print("Trademark check failed. See spec/hl7-trademarks-fair-use/index.md.\n")
+    for problem in problems:
+        print(f"  {problem}")
+    print(f"\n{len(problems)} problem(s).")
+    sys.exit(1)
+
+print("Trademark check passed: T1, T2, and T3 hold across the workspace.")

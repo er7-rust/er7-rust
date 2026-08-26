@@ -1,0 +1,22 @@
+# Code owners for this workspace.
+#
+# GitHub reads this file from the repository root, from `docs/`, or from
+# `.github/`; it stays at the root deliberately, where a reader browsing
+# the repository sees it next to MAINTAINERS.md. The workspace does have a
+# `.github/` directory now — `.github/workflows/ci.yml` runs the four
+# checks, the MSRV build, and the trademark checker — and the website
+# still deploys separately, from the `er7-rust.github.io` repository this
+# one's site subdirectory is split into.
+#
+# One line, one owner, no exceptions: this project has a single maintainer,
+# and MAINTAINERS.md says so plainly rather than implying a team. When a
+# second maintainer joins, this file gains a line for the areas they own,
+# and MAINTAINERS.md gains a row, in the same change.
+#
+# An email address is used rather than a GitHub handle deliberately: it is
+# the identity that owns the crates.io publishes and the commit history,
+# and it does not change if a username does. GitHub only auto-requests a
+# review from an email owner when that address belongs to a user with
+# access to the repository, which is the case here.
+
+*       joel@joelparkerhenderson.com
