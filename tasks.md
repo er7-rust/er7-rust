@@ -60,6 +60,16 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       fmt required reformatting `query_paths.rs` (done in the same
       change), clippy was clean, and all three targets built and ran a
       5-second smoke on nightly-aarch64-apple-darwin without findings.
+- [x] **Turn on the repository-side security settings** — done 2026-08-26
+      (not previously listed here, surfaced by SECURITY.md itself: it
+      offered GitHub private vulnerability reporting while the setting
+      was off). Enabled and verified by GET: private vulnerability
+      reporting, dependency alerts, automated security fixes, and secret
+      scanning; `.github/dependabot.yml` added with
+      `open-pull-requests-limit: 0` on the cargo entries so dependabot
+      opens security PRs only (the `fhir-rust` posture — its first hour
+      with default limits opened 47 version-bump PRs). SECURITY.md
+      records the correction in the same change.
 - [ ] Tag releases and sign commits/tags going forward; record the posture
       change in MAINTAINERS.md.
 - [ ] Add dependency auditing (`cargo deny`: advisories, licenses, bans,

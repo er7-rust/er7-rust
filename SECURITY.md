@@ -25,6 +25,13 @@ disclosure whether or not it was meant as one.
 
 You may also use GitHub's private vulnerability reporting on
 <https://github.com/er7-rust/er7-rust> if you prefer a tracked channel.
+It is enabled as of 2026-08-26 — an earlier revision of this file offered
+it while the repository setting was still off, which was exactly the kind
+of unverified claim this project tries not to make. Enabled the same day,
+and verifiable from the repository's settings: dependency alerts,
+automated security fixes (Dependabot security PRs only —
+`.github/dependabot.yml` keeps routine version bumps off, mirroring the
+sibling repositories' security-only posture), and secret scanning.
 
 A useful report contains:
 

@@ -1,0 +1,36 @@
+# Dependabot configuration. Alerts, automated security fixes, private
+# vulnerability reporting, and secret scanning are repository settings,
+# enabled 2026-08-26; this file registers the manifests so those have
+# full coverage, while keeping routine version-update PRs off.
+#
+# Two cargo entries: the root workspace (er7, er7-redact, serde-er7,
+# er7-bench — one lockfile), and er7/fuzz/, which is deliberately its own
+# workspace so that libfuzzer-sys never appears in er7's tree.
+#
+# `open-pull-requests-limit: 0` on the cargo entries, deliberately —
+# mirroring the sibling fhir-rust repository's security-only posture:
+# version updates here are security posture, not a treadmill (that
+# repository's first hour with default limits opened 47 PRs, many of
+# them major bumps). With the limit at 0 dependabot still watches every
+# manifest and opens PRs for SECURITY advisories, because automated
+# security fixes are enabled repository-side. Raising a limit is one
+# line here when the posture changes.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+  - package-ecosystem: cargo
+    directory: /
+    open-pull-requests-limit: 0
+    schedule:
+      interval: weekly
+      day: monday
+  - package-ecosystem: cargo
+    directory: /er7/fuzz
+    open-pull-requests-limit: 0
+    schedule:
+      interval: weekly
+      day: monday
