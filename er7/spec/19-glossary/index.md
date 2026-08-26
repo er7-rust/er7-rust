@@ -3,7 +3,7 @@
 
 # 19. Glossary
 
-Terms as this crate uses them. Where a term is HL7's, the HL7 sense is the
+Terms as this crate uses them. Where a term is HL7®'s, the HL7 sense is the
 one meant.
 
 | Term | Meaning |
@@ -42,3 +42,9 @@ one meant.
 | **trigger event** | MSH-9.2, e.g. `A08`; what happened that caused the message |
 | **truncation character** | MSH-2 position 5, marking a value the sender cut short; HL7 v2.7 and later ([§3.1](../03-delimiters/index.md)) |
 | **Z segment** | a locally defined segment, named `Z…`; carried through like any other ([§11.2](../11-error-handling/index.md)) |
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

@@ -1,6 +1,6 @@
 <script lang="ts">
   const options = [
-    { flag: '-q, --query <PATH>', effect: 'Print the values at an HL7 path, one per line. May be repeated; outputs appear in the order the options were given.' },
+    { flag: '-q, --query <PATH>', effect: 'Print the values at an HL7® path, one per line. May be repeated; outputs appear in the order the options were given.' },
     { flag: '-n, --normalize', effect: 'Rewrite the input as canonical ER7, with a trailing terminator on every message.' },
     { flag: '-m, --message <N>', effect: 'Use only the Nth message of the input, counting from 1.' },
     { flag: '-r, --raw', effect: 'Show text as sent, without decoding escape sequences.' },

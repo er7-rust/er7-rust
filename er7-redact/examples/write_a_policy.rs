@@ -2,6 +2,7 @@
 //! from a file, or start from a built-in and edit it.
 //!
 //! Run with: `cargo run --example write_a_policy`
+#![forbid(unsafe_code)]
 
 use er7_redact::{Action, Policy, Posture, Redactor, Unrecognised};
 

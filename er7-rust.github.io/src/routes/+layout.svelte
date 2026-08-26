@@ -34,18 +34,25 @@
 <footer class="site-footer">
   <div class="site-footer-inner">
     <p>
-      <code>er7</code> — parse, query, edit, and write HL7 v2 messages in the ER7 pipe-hat
+      <code>er7</code> — parse, query, edit, and write HL7® v2 messages in the ER7 pipe-hat
       encoding. Free open source: MIT, Apache-2.0, BSD-3-Clause, GPL-2.0, or GPL-3.0.
     </p>
     <p class="site-footer-trademark">
       Built with SvelteKit and the
       <a href="https://github.com/LilyDesignSystem">Lily Design System</a>™.
     </p>
+    <p class="site-footer-trademark">
+      HL7&reg;, and FHIR&reg; are the registered trademarks of Health Level Seven International and
+      their use of these trademarks does not constitute an endorsement by HL7.
+      <a href="/trademarks/">Trademark notice</a>.
+    </p>
     <div class="site-footer-links">
       <a href={links.repository}>Source</a>
       <a href={links.crate}>Crate</a>
       <a href={links.docs}>API docs</a>
       <a href="/ecosystem/">Ecosystem</a>
+      <a href="/news/">News</a>
+      <a href="/trademarks/">Trademarks</a>
       <a href="/about/">About</a>
     </div>
   </div>

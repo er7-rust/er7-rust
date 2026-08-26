@@ -8,7 +8,7 @@
 //! 3. **Escaped text is structurally safe**: no delimiter and no bare
 //!    carriage return survives encoding, so an encoded value can never
 //!    split the field, component, or segment it sits in.
-
+#![forbid(unsafe_code)]
 #![no_main]
 
 use er7::Separators;

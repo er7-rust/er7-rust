@@ -7,6 +7,7 @@
 //! JSON itself, so `serde_json` here is interchangeable with any other
 //! Serde format — YAML, CBOR, `MessagePack`, whatever your pipeline already
 //! uses. See `docs/usage/index.md` §1.
+#![forbid(unsafe_code)]
 
 use serde_er7::Message;
 

@@ -13,7 +13,7 @@ is the entire feature surface.
 ## 1.2 Why a wrapper crate rather than an added dependency
 
 `er7` has zero dependencies by its own rule (its spec §15, rule R25), and
-that is deliberate: it is meant to sit at the bottom of a stack of HL7
+that is deliberate: it is meant to sit at the bottom of a stack of HL7®
 crates in a domain where dependencies are audited. Adding `serde` to `er7`
 directly would impose that dependency on every consumer, including ones
 that never touch Serde. A separate crate lets the choice be the caller's:
@@ -50,3 +50,9 @@ directly, and every Serde-compatible sink or source works unmodified.
 
 See
 [the table in the index](../index.md#which-goal-wins-when-two-conflict).
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

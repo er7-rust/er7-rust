@@ -17,10 +17,10 @@ saying which posture is meant.
 | [`patient_identifiers()`](#51-policypatient_identifiers) | accept | the curated table below | refuse |
 | [`all_but_the_header()`](#52-policyall_but_the_header) | reject `replace REDACTED` | `MSH keep` | refuse |
 
-The first two are the bare postures, and carry no knowledge of HL7 at all.
+The first two are the bare postures, and carry no knowledge of HL7® at all.
 The last two are **curated**: somebody wrote down a list. **Both are a
 starting point, not a compliance certification [D14]** — read
-[§5.5](#55-what-these-policies-do-not-do) before relying on either.
+[§5.5](#55-what-these-policies-do-not-do-d14) before relying on either.
 
 ## 5.1 `Policy::patient_identifiers()`
 
@@ -221,3 +221,9 @@ below `MSH-2` and no unrecognised payload legible, which also means it
 leaves nothing routable: prefer
 [`all_but_the_header()`](#52-policyall_but_the_header) unless the header
 really is meant to go too.
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

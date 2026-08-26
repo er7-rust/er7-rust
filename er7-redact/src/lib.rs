@@ -10,7 +10,7 @@
 //! •
 //! **[email](mailto:joel@joelparkerhenderson.com)**
 //!
-//! Remove patient detail from HL7 v2 messages in the ER7 pipe-hat
+//! Remove patient detail from HL7® v2 messages in the ER7 pipe-hat
 //! encoding — without breaking the message.
 //!
 //! A redacted message still parses, still declares the same delimiters,
@@ -19,7 +19,13 @@
 //! That is the whole design: redaction rewrites leaf text and nothing else
 //! (D1).
 //!
-//! Example:
+//! # Trademarks
+//!
+//! HL7®, and FHIR® are the registered trademarks of Health Level Seven
+//! International and their use of these trademarks does not constitute an
+//! endorsement by HL7.
+//!
+//! # Example
 //!
 //! ```
 //! # fn main() -> Result<(), er7_redact::Error> {
@@ -118,7 +124,7 @@
 //! For the encoding layer underneath — parsing, queries, escape sequences,
 //! the absent/empty/null distinction — see the [`er7`] crate, which is
 //! this crate's only dependency.
-
+#![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
 pub mod action;

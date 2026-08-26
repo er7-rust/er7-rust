@@ -1,7 +1,7 @@
 # serde-er7
 
 Serde support for [`er7`](https://github.com/er7-rust/er7-rust/tree/main/er7), the
-pipe-hat encoding that carries HL7 v2 messages between healthcare systems —
+pipe-hat encoding that carries HL7® v2 messages between healthcare systems —
 so a parsed message can flow through JSON, YAML, or any other Serde data
 format, and come back out unchanged.
 
@@ -153,3 +153,9 @@ see [`AGENTS/spec-driven-development.md`](AGENTS/spec-driven-development.md).
 Multi-licensed, so a downstream project can pick whichever fits: MIT,
 Apache-2.0, BSD-3-Clause, GPL-2.0-only, or GPL-3.0-only. See
 [LICENSE.md](LICENSE.md).
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

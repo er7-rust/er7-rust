@@ -10,7 +10,7 @@ Implemented in `src/redact.rs` and `src/policy.rs`.
 | Noun | Is | Type |
 | ---- | -- | ---- |
 | **action** | what to do to a value | `Action` ([§3](../03-actions/index.md)) |
-| **rule** | one HL7 path and one action | `Rule` |
+| **rule** | one HL7® path and one action | `Rule` |
 | **policy** | an ordered list of rules, plus what it does by default | `Policy` |
 | **posture** | what a policy does with a leaf no rule named: accept it or reject it | `Posture` ([§2.6](#26-the-two-postures-d9)) |
 | **redactor** | a policy, plus the key pseudonyms are derived from | `Redactor` |
@@ -43,7 +43,7 @@ work here:
   a long message.
 - **A position the message does not have yields nothing** (`er7` R20). A
   rule for `PID-19` against a message with no `PID-19` does nothing, and
-  that is not an error ([§2.5](#25-a-rule-that-matches-nothing)).
+  that is not an error ([§2.5](#25-a-rule-that-matches-nothing-d8)).
 
 ## 2.3 What a rule reaches
 
@@ -254,3 +254,9 @@ Masking a payload whole preserves its length, and nothing else. That is the
 same leak `Mask` always has ([§5.5](../05-built-in-policies/index.md)),
 applied to a bigger value: use `clear` or `replace` where the size of what
 was dropped is itself worth hiding.
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

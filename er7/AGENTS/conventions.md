@@ -16,7 +16,7 @@ new ones.
 ## Naming
 
 - Types use the standard's vocabulary: `Separators`, `Segment`, `Field`,
-  `Repetition`, `Component`, `Subcomponent`. Where this crate and HL7 have
+  `Repetition`, `Component`, `Subcomponent`. Where this crate and HL7® have
   different words for the same thing, HL7 wins — see
   [§18.3](../spec/18-open-questions-and-divergences/index.md) for the one
   case where that cost something.
@@ -144,3 +144,9 @@ that line — never a crate-level hole in the group.
 ## Tests
 
 Test conventions live in [`testing.md`](testing.md).
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

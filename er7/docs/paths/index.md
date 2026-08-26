@@ -1,6 +1,6 @@
 [er7](../../index.md) → [docs](../) → paths
 
-# HL7 paths
+# HL7® paths
 
 The short notation that names one place in a message: `PID-5.1`,
 `OBX[2]-5`, `PID-13[2].1`.
@@ -165,3 +165,9 @@ Quote the path in a shell: `[` and `]` are glob characters.
 | accessors | you need the node itself — to edit it, to ask `is_null()`, or to avoid the intermediate `String` |
 
 See [docs/usage §4](../usage/index.md) for the accessor walk-through.
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

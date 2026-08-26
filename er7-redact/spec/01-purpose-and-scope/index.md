@@ -5,7 +5,7 @@ numbers (§1.x) are stable and cited from code, tests, and commit messages.
 
 ## 1.1 Purpose
 
-Remove or mask patient detail from HL7 v2 messages in the **ER7**
+Remove or mask patient detail from HL7® v2 messages in the **ER7**
 pipe-hat encoding, **without breaking the message**. A redacted message
 still parses, still carries its delimiters, and still has a value in every
 position that had one before — so the tools downstream of it (an interface
@@ -111,3 +111,9 @@ the rest of the spec predictable.
 5. **Ergonomics.** Paths, the policy file, and the CLI exist to make the
    positional structure legible. They come last: a convenience that costs
    any of the four goals above is not a convenience.
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

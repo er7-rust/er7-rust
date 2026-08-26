@@ -7,6 +7,7 @@
 //! and the round-trip guarantee that makes any of it safe.
 //!
 //! See `docs/usage/index.md` §7–8 and spec §5.5, §7.
+#![forbid(unsafe_code)]
 
 use er7::{Component, RenderOptions, Repetition, Subcomponent, Terminator};
 

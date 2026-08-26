@@ -10,7 +10,7 @@ the `er7` spec §19, which this document does not restate.
 | Term | Meaning |
 | ---- | ------- |
 | **action** | what to do to a selected value: one of the eight in [§3](../03-actions/index.md) |
-| **rule** | one HL7 path and one action |
+| **rule** | one HL7® path and one action |
 | **policy** | an ordered list of rules, plus a posture and what it does with an unrecognised payload |
 | **posture** | which of the two things a policy does with a leaf no rule named: **accept** it, or **reject** it ([§2.6](../02-redaction-model/index.md)) |
 | **accept by default** | the posture that leaves an unnamed leaf as it is — "redact these". Written `accept` |
@@ -33,3 +33,9 @@ the `er7` spec §19, which this document does not restate.
 | **key** | the `u64` a pseudonym is derived from. Not a secret in any managed sense ([§7.3](../07-pseudonyms/index.md)) |
 | **linkage** | joining two records that concern the same patient. What pseudonyms preserve on purpose, and what an attacker uses |
 | **free text** | a field holding prose rather than a coded value — `NTE-3`, `OBX-5` with a text value type. Where identifiers hide from positional rules |
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

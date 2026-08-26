@@ -8,6 +8,7 @@
 //!
 //! Run with `cargo bench -p er7-bench`; compare against a baseline with
 //! `cargo bench -p er7-bench -- --save-baseline before`.
+#![forbid(unsafe_code)]
 
 use criterion::{Criterion, criterion_group, criterion_main};
 use er7::escape::{escape, escapes, unescape};

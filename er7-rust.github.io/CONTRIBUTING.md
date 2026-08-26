@@ -1,11 +1,19 @@
 # Contributing
 
-We welcome people contributing. We welcome feedback, suggestions, ideas, and help.
+The canonical contributing guide for this workspace is
+[`CONTRIBUTING.md`](../CONTRIBUTING.md) at the repository root: how to
+report a problem without pasting patient data, the ways to help that are
+not code, the checks to run before a pull request, the donation channels,
+and what they do and do not buy.
 
-To contact a particular repository's team, a good way is to create a GitHub issue.
+Keeping one copy avoids the two drifting apart. Conventions specific to
+this site are in its own `AGENTS.md`.
 
-To contribute code to a particular repository, a good way is to create a GitHub pull request.
+If you need a direct contact, email Joel Parker Henderson at
+<joel@joelparkerhenderson.com>.
 
-To email a particular person, contact information will typically be provided in each repository's top level README file.
+---
 
-If you need more help, such as a direct contact person, then please contact Joel Parker Henderson at <joel@joelparkerhenderson.com>.
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

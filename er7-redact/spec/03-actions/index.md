@@ -44,7 +44,7 @@ Two consequences worth stating:
 
 ## 3.3 `Clear` versus `Null`
 
-The distinction is the sharpest edge in HL7 (the `er7` spec §5.3), and
+The distinction is the sharpest edge in HL7® (the `er7` spec §5.3), and
 choosing wrongly here is a patient-safety bug rather than a privacy one:
 
 | Action | Writes | A receiver reads it as |
@@ -110,3 +110,9 @@ unambiguous.
 
 [`er7::Subcomponent::value`]: https://docs.rs/er7/latest/er7/message/struct.Subcomponent.html#method.value
 [`er7::Subcomponent::set`]: https://docs.rs/er7/latest/er7/message/struct.Subcomponent.html#method.set
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

@@ -45,8 +45,14 @@ one place this is spelled out at the type most callers reach for first.
 child to construct a temporary wrapper it can pass to
 `SerializeSeq::serialize_element`, rather than maintaining a second,
 lifetime-parameterized family of borrowing wrapper types that could avoid
-the clone. This is a deliberate simplicity trade-off: an HL7 message is
+the clone. This is a deliberate simplicity trade-off: an HL7® message is
 kilobytes, not gigabytes, so the clone cost is not worth doubling the
 crate's type surface to avoid. If profiling ever shows this mattering for
 a real workload, the fix is additive — a borrowing family living alongside
 the existing owning one — not a rewrite of what already exists.
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

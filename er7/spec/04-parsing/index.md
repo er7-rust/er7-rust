@@ -92,7 +92,7 @@ are stored whole — never split on any delimiter, never escape-decoded —
 because doing either would be circular. The same applies to `FHS` and
 `BHS`.
 
-This keeps HL7's own numbering intact: `msh.field(1)` is the field
+This keeps HL7®'s own numbering intact: `msh.field(1)` is the field
 separator, `msh.field(9)` is the message type, exactly as the standard
 numbers them.
 
@@ -103,3 +103,9 @@ allocated per subcomponent and per segment name; nothing else is copied.
 Callers who want to avoid even that for a read-only pass should use
 [`split_messages`](../09-batch-input/index.md), which borrows, and query
 the resulting `&str` directly.
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

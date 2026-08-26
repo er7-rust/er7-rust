@@ -21,7 +21,7 @@ on it — to four audiences, in this order of priority:
 2. **A Rust developer evaluating a crate.** They need the API surface, the
    scope boundary, and enough of the design rationale to judge whether it
    fits.
-3. **Someone who arrived from a search for "ER7" or "HL7 pipe-hat".** They
+3. **Someone who arrived from a search for "ER7" or "HL7® pipe-hat".** They
    need the format explained accurately, whether or not they ever use Rust.
 4. **Someone who has already picked a subproject** — `er7-redact`,
    `serde-er7` — and needs to get it working today: install it, follow a
@@ -248,3 +248,9 @@ When a **new subproject** appears, follow §3.3.
 
 When a route is added or removed, update `navLinks`, `static/sitemap.xml`,
 the routes table in §3.1 above, and the one in `index.md`.
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

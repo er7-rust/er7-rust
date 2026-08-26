@@ -20,7 +20,7 @@ pub enum Error {
 | Situation | Variant |
 | --------- | ------- |
 | a policy file with an unknown action, a missing action, or a malformed count | `BadPolicy` |
-| a **policy line** naming something that is not an HL7 path | `BadPolicy`, wrapping `er7`'s wording and naming the line number |
+| a **policy line** naming something that is not an HL7® path | `BadPolicy`, wrapping `er7`'s wording and naming the line number |
 | a `Policy::with`, `Rule::new` **call** naming something that is not an HL7 path | `Er7(er7::Error::BadPath(_))` |
 
 The split follows what the caller can act on. A bad path in a file needs
@@ -68,3 +68,9 @@ invalid HL7 path "PID-0": indices are 1-based, so 0 is not a position
 
 The second is `er7`'s own text, passed through unchanged rather than
 reworded, so that a path error reads the same whichever crate reported it.
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

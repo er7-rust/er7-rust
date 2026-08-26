@@ -14,7 +14,7 @@ pub fn escapes<'a>(text: &'a str, separators: &Separators) -> Escapes<'a>
 ```
 
 Tokenizes text into `Escape` values: literal runs, plus one token per
-sequence, classified as HL7 defines them.
+sequence, classified as HL7® defines them.
 
 | Token | From | Body holds |
 | ----- | ---- | ---------- |
@@ -99,3 +99,9 @@ Every function here takes `&Separators`, so a message that declares
 `#*!?@` escapes and unescapes with `?F?` where a conventional one uses
 `\F\`. The `\X..\` selector letters (`X`, `Z`, `C`, `M`, and the leading
 `.`) are fixed by the standard and do not vary with the delimiter set.
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

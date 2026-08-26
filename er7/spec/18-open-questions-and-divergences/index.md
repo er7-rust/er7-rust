@@ -36,7 +36,7 @@ place; see [§16.3](../16-roadmap/index.md) for the detail.
 
 ## 18.2 Escape sequences are decoded in every field
 
-**Divergence from the standard.** HL7 scopes escaping to `ST`, `TX`, and
+**Divergence from the standard.** HL7® scopes escaping to `ST`, `TX`, and
 `FT` fields and to the fourth component of `ED`
 ([§2.5.1](../02-er7-encoding/index.md)). This crate decodes sequences
 wherever they appear.
@@ -128,3 +128,9 @@ relying on the documentation.
 **Current state:** kept, because the CLI outline and any human-facing
 display genuinely want a decoded field. Revisit if a user reports the
 misuse. No task is open, because there is no evidence of the problem yet.
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

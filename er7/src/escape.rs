@@ -17,7 +17,7 @@ use crate::Separators;
 use std::borrow::Cow;
 
 /// One token of escape-decoded text: either a literal run, or one escape
-/// sequence classified by what HL7 says it means.
+/// sequence classified by what HL7® says it means.
 ///
 /// Bodies are returned without the surrounding escape characters and
 /// without the letter that selects the sequence, so `\X0D\` yields

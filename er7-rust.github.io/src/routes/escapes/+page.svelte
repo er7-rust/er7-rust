@@ -209,7 +209,7 @@ assert_eq!(escape("line\\r\\nnext", &separators), r"line\\X0D\\\\X0A\\next");`}<
       </li>
     </ul>
     <p>
-      The truncation character (<code>#</code>, HL7 v2.7) is <em>not</em> encoded: it is structural
+      The truncation character (<code>#</code>, HL7® v2.7) is <em>not</em> encoded: it is structural
       only inside MSH-2, so a <code>#</code> in a value is just a <code>#</code>.
     </p>
   </div>

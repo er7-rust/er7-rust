@@ -55,7 +55,7 @@ assert_eq!(message.version().as_deref(), Some("2.5"));
 
 ## 2. Read a value by path
 
-An HL7 path names a position: segment, field, component, subcomponent.
+An HL7® path names a position: segment, field, component, subcomponent.
 
 ```rust
 assert_eq!(message.query("PID-5")?.as_deref(), Some("EVERYWOMAN^EVE^E"));
@@ -338,3 +338,9 @@ information, so the crate reads it as written.
 - [API surface](../api/index.md)
 - [FAQ](../faq/index.md)
 - [Runnable examples](../../examples/README.md)
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

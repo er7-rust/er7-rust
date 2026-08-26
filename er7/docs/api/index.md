@@ -115,7 +115,7 @@ Fields: `field`, `component`, `repetition`, `escape`, `subcomponent`: `char`;
 
 | Item | Returns | Purpose |
 | ---- | ------- | ------- |
-| `Separators::default()` | `Separators` | the HL7-recommended `\|^~\&` |
+| `Separators::default()` | `Separators` | the HL7®-recommended `\|^~\&` |
 | `from_header(&str)` | `Result<Separators, Error>` | read from an `MSH`/`FHS`/`BHS` line |
 | `validate()` | `Result<(), Error>` | reject an ambiguous set ([§3.3](../../spec/03-delimiters/index.md)) |
 | `is_delimiter(char)` | `bool` | does this character play a structural role |
@@ -175,3 +175,9 @@ See [§11](../../spec/11-error-handling/index.md).
 No dictionary, no validator, no transport, no dependencies. See
 [§1.3](../../spec/01-purpose-and-scope/index.md) for what that means and
 [§18.1](../../spec/18-open-questions-and-divergences/index.md) for why.
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

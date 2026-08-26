@@ -3,11 +3,12 @@
 //! Run with: `cargo run --example custom_delimiters`
 //!
 //! Nothing in this crate hardcodes `|^~\&`. Shows a message using a
-//! completely different set, the HL7 v2.7 truncation character, the
+//! completely different set, the HL7® v2.7 truncation character, the
 //! fallbacks for encoding characters a sender omits, and the one thing that
 //! is rejected: an ambiguous set.
 //!
 //! See spec §3.
+#![forbid(unsafe_code)]
 
 use er7::{Error, Separators};
 

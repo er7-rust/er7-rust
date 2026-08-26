@@ -488,7 +488,7 @@ impl Pass {
     }
 }
 
-/// The explicit HL7 null, as a leaf.
+/// The explicit HL7® null, as a leaf.
 fn null_subcomponent() -> Subcomponent {
     Subcomponent::new(NULL)
 }

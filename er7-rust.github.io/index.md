@@ -1,7 +1,7 @@
 # er7-rust.github.io
 
 The public site for the [`er7`](https://github.com/er7-rust/er7-rust) Rust
-crate family — parse, query, edit, and write HL7 v2 messages in the ER7
+crate family — parse, query, edit, and write HL7® v2 messages in the ER7
 pipe-hat encoding, and the subprojects built on it: `er7-redact` and
 `serde-er7`. Every subproject is documented here in full — tutorial, help,
 and examples — not merely linked to.
@@ -125,3 +125,9 @@ option. See [LICENSE.md](LICENSE.md).
 
 Lily Design System™ is a trademark of its authors, and is itself free open
 source. The stylesheet derived from it is used under those terms.
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

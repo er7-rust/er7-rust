@@ -1,4 +1,4 @@
-//! Read values out of a message by HL7 path.
+//! Read values out of a message by HL7® path.
 //!
 //! Run with: `cargo run --example query_by_path`
 //!
@@ -8,6 +8,7 @@
 //! all.
 //!
 //! See `docs/paths/index.md` and spec §8.
+#![forbid(unsafe_code)]
 
 fn main() -> Result<(), er7::Error> {
     let text = "MSH|^~\\&|LAB|ACME|EHR|CLINIC|20260815081500||ORU^R01|MSG00042|P|2.5\r\

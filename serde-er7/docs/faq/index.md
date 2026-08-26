@@ -59,7 +59,7 @@ means. The only "validation" it does is at the Serde layer: a JSON object
 missing `"name"` or `"segments"` is a deserialize error, because those keys
 are structurally required to build the wrapper type at all — not because
 this crate knows anything about what a well-formed `PID` segment contains.
-For the HL7 v2.5 dictionary layer, see `hl7-2-5-to-xml-using-rust` and
+For the HL7® v2.5 dictionary layer, see `hl7-2-5-to-xml-using-rust` and
 `hl7-2-5-to-json-using-rust`.
 
 ## Why does deserializing ignore fields it doesn't recognize?
@@ -86,3 +86,9 @@ Not yet — see
 for exactly what counts as a breaking change here (it includes the wire
 shape itself, not only the Rust API) and how that interacts with the
 pre-1.0 SemVer convention.
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

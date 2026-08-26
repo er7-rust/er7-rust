@@ -6,7 +6,7 @@ workspace `Cargo.toml` and one `Cargo.lock`.
 
 | Crate | What it does | Its own agent entry point |
 | ----- | ------------- | -------------------------- |
-| [`er7`](er7/) | Parse, query, edit, and write HL7 v2 messages in ER7, with zero dependencies | [`er7/AGENTS.md`](er7/AGENTS.md) |
+| [`er7`](er7/) | Parse, query, edit, and write HL7® v2 messages in ER7, with zero dependencies | [`er7/AGENTS.md`](er7/AGENTS.md) |
 | [`er7-redact`](er7-redact/) | Redact patient detail from an ER7 message without changing its shape | [`er7-redact/AGENTS.md`](er7-redact/AGENTS.md) |
 | [`serde-er7`](serde-er7/) | Serialize and deserialize ER7 message trees with Serde | [`serde-er7/AGENTS.md`](serde-er7/AGENTS.md) |
 
@@ -78,6 +78,31 @@ See [§1.2](spec/01-family-policy/index.md#12-the-four-checks) for what each
 of the four checks verifies and why they're the same across all three
 crates.
 
+## Trademarks
+
+`HL7` and `FHIR` are Health Level Seven International's word marks, used
+here descriptively under fair use. Three things follow, and a check
+enforces them:
+
+```sh
+bin/check-trademarks        # or: make check-trademarks
+```
+
+1. **The first use of a mark in prose on any page carries `®`** — every
+   Markdown file, every website route, every Rust source file's doc
+   comments, every crate `description`, and both `--help` strings.
+2. **Every page carries the disclaimer**, verbatim. For the website that is
+   the shared footer in `+layout.svelte`; for a crate it is the `//!`
+   documentation on `lib.rs`; for a Markdown file it is the trailer.
+3. **Sample messages, error strings, citation blocks, code identifiers, and
+   crates.io keywords are never marked.** A `®` in `MSH|^~\&|…` corrupts
+   the sample, and `no HL7 segments` is a diagnostic that gets grepped and
+   asserted, not prose that gets read.
+
+If you add a file that mentions a mark, run the check before you finish;
+the reasoning, and the definition of a "page", are
+[§4](spec/hl7-trademarks-fair-use/index.md).
+
 ## What is not here
 
 There is no root-level `src/`, no root-level rule-ID scheme, and no
@@ -85,3 +110,9 @@ root-level test suite — this workspace root exists to wire the three
 crates together and to say once what would otherwise be said three times.
 Behavioural rules, examples, tutorials, and release checklists all live in
 the crate they describe.
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

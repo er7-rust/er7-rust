@@ -74,7 +74,7 @@ impl Serialize for Component {
     ///
     /// This clones every subcomponent to borrow it as a [`Subcomponent`],
     /// which is the price of keeping one owning wrapper type per tree level
-    /// instead of a second, borrowing family — a fair trade for an HL7
+    /// instead of a second, borrowing family — a fair trade for an HL7®
     /// message, which is kilobytes, not gigabytes.
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where

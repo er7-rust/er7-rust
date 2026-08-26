@@ -35,7 +35,7 @@ and `Path` all expose their fields, which is deliberate — it lets callers
 build messages from literals ([§5.1](../05-value-tree/index.md)) — and it
 means the struct shapes are part of the contract.
 
-## 14.3 HL7 version compatibility
+## 14.3 HL7® version compatibility
 
 The crate targets the **ER7 encoding**, which is stable across HL7 v2.1
 through v2.9, rather than any single HL7 version. It therefore reads a
@@ -83,3 +83,9 @@ rather than in a patch.
 
 This is what makes a citation in a commit message from two years ago still
 resolve.
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

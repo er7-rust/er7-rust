@@ -34,11 +34,14 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
 
 ### In flight — land it first
 
-- [ ] **Commit the 86-file trademark-compliance sweep** (® on first prose
-      use, disclaimer in pages, doc-comments, manifests, CLI usage; anchor
-      fixes; site copy). Run `bin/check-trademarks` and the four checks
-      before committing; until it lands the working tree and the published
-      crates disagree about compliance posture.
+- [x] **Commit the trademark-compliance sweep** — landed 2026-08-26
+      (® on first prose use, disclaimer in pages, doc-comments, manifests,
+      CLI usage; anchor fixes; site copy; 104 modified files, plus the
+      `#![forbid(unsafe_code)]` posture and its family-policy section
+      that travelled with it). `bin/check-trademarks` and the four checks
+      all ran green immediately before the commit; the `# Trademarks`
+      rustdoc sections were moved to sit right after each crate's opening
+      summary, and the root `index.md` carries the notice near the top.
 
 ### Security and supply chain
 

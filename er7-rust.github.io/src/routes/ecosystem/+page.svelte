@@ -6,7 +6,7 @@
   <title>Ecosystem — er7</title>
   <meta
     name="description"
-    content="The crate family: er7 for the ER7 encoding, er7-redact and serde-er7 as tools on top of it, and hl7-2-5-to-xml and hl7-2-5-to-json for the HL7 v2.5 dictionary layer."
+    content="The crate family: er7 for the ER7 encoding, er7-redact and serde-er7 as tools on top of it, and hl7-2-5-to-xml and hl7-2-5-to-json for the HL7® v2.5 dictionary layer."
   />
 </svelte:head>
 

@@ -12,7 +12,7 @@ file with no setup, invoked via `cargo run --example <name>`.
 | [reject_by_default](reject_by_default.rs) | The other posture: reject every value, with `keep` rules accepting what a test needs. |
 | [pseudonyms_and_linkage](pseudonyms_and_linkage.rs) | Why an identifier becomes a pseudonym rather than a blank, what that buys, and what it costs. |
 | [read_the_report](read_the_report.rs) | The audit trail: one row per position changed, and no values in it. |
-| [redact_absent_empty_null](redact_absent_empty_null.rs) | The three states HL7 keeps apart, and why redaction leaves two of them alone. |
+| [redact_absent_empty_null](redact_absent_empty_null.rs) | The three states HL7® keeps apart, and why redaction leaves two of them alone. |
 
 ## Running
 
@@ -70,3 +70,9 @@ one before:
   illustrate
 - [`samples/`](../samples/) — the ER7 messages and the policy file the CLI
   examples use
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

@@ -2,7 +2,7 @@
 
 # §10 Glossary
 
-Terms specific to this document; for ER7/HL7 terms themselves (segment,
+Terms specific to this document; for ER7/HL7® terms themselves (segment,
 field, repetition, component, subcomponent, delimiter, escape sequence),
 see the `er7` spec's own glossary (its spec §19).
 
@@ -41,3 +41,9 @@ see the `er7` spec's own glossary (its spec §19).
 : A normative rule in this specification, numbered `S1`, `S2`, ... to
   distinguish it from an `er7` spec `R`-numbered rule when both are
   discussed together. See the [rule index](../index.md#rule-index).
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

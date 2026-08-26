@@ -5,7 +5,7 @@
 
 ## 1.1 Purpose
 
-Read, query, edit, and write HL7 v2 messages in the **ER7** encoding — the
+Read, query, edit, and write HL7® v2 messages in the **ER7** encoding — the
 pipe-hat, positional text encoding described in
 [§2](../02-er7-encoding/index.md) and defined by chapter 2 of every HL7 v2
 release, from 2.1 (1990) through 2.9.
@@ -121,3 +121,9 @@ the rest of the spec predictable.
    positional structure legible.
 5. **Performance.** Zero-copy where it is free (`Cow`, borrowed slices from
    `split_messages`), never at the cost of the four goals above.
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

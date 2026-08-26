@@ -71,6 +71,12 @@ statement: what this manifest promises a reviewer. The four checks run
 build, and `priority = -1` lets a single lint be re-set without turning the
 group off.
 
+**The crate root also carries `#![forbid(unsafe_code)]`**, as does every
+example. `forbid` rather than `deny`, so no `#[allow(unsafe_code)]` further
+down can reopen it: `unsafe` here is a compile error rather than a review
+comment. The workspace-level reasoning is
+[§1.2 of the family policy](../../../spec/01-family-policy/index.md).
+
 The lint that matters most here is `missing_errors_doc`: this crate's only
 fallible entry point is [`Message::parse`], and a caller needs to know that
 its `Err` is `er7`'s, unchanged, with nothing added

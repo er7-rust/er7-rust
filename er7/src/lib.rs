@@ -10,7 +10,7 @@
 //! •
 //! **[email](mailto:joel@joelparkerhenderson.com)**
 //!
-//! ER7 — the pipe-hat encoding that carries HL7 v2 messages between
+//! ER7 — the pipe-hat encoding that carries HL7® v2 messages between
 //! healthcare systems — parsed, queried, edited, and written back, with no
 //! dependencies.
 //!
@@ -20,7 +20,13 @@
 //! explicit and to keep it intact — text is stored exactly as it arrived,
 //! and decoded only when you ask for a value.
 //!
-//! Example:
+//! # Trademarks
+//!
+//! HL7®, and FHIR® are the registered trademarks of Health Level Seven
+//! International and their use of these trademarks does not constitute an
+//! endorsement by HL7.
+//!
+//! # Example
 //!
 //! ```
 //! # fn main() -> Result<(), er7::Error> {
@@ -88,7 +94,7 @@
 //! [paths](Path) (`docs/paths/`) and [escape sequences](escape)
 //! (`docs/escapes/`), an FAQ (`docs/faq/`), and runnable programs
 //! (`examples/`).
-
+#![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
 pub mod escape;

@@ -19,7 +19,7 @@ message, not a redacted one. Repeating the placeholder per component is
 uglier to read and correct to process, and this crate's second priority is
 structural fidelity ([§1.5](../01-purpose-and-scope/index.md)).
 
-`Action::Null` collapses, because that is what an HL7 null means
+`Action::Null` collapses, because that is what an HL7® null means
 ([§3.4](../03-actions/index.md)), and it is the documented exception rather
 than the rule.
 
@@ -146,3 +146,9 @@ wins" disagree exactly where a policy is already wrong, and the ordering in
 [§1.5](../01-purpose-and-scope/index.md) says which of the two to prefer
 when they do. Revisit if real policies turn out to need the carve-out more
 often than they need the guard.
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

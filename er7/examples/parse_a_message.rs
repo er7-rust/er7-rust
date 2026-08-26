@@ -7,6 +7,7 @@
 //! integration needs to route a message.
 //!
 //! See `docs/usage/index.md` §1 and spec §4.
+#![forbid(unsafe_code)]
 
 fn main() -> Result<(), er7::Error> {
     // A lab result. Segments end with a carriage return, which is what HL7

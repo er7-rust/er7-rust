@@ -7,6 +7,7 @@
 //! stream to render formatted text yourself.
 //!
 //! See `docs/escapes/index.md` and spec §6.
+#![forbid(unsafe_code)]
 
 use er7::Separators;
 use er7::escape::{Escape, decode_hex, escape, escapes, unescape};

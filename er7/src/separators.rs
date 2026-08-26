@@ -30,7 +30,7 @@ use std::fmt;
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Terminator {
-    /// A single carriage return, `\r` — the only terminator HL7 permits, and
+    /// A single carriage return, `\r` — the only terminator HL7® permits, and
     /// the default here.
     #[default]
     Cr,

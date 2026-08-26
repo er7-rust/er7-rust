@@ -1,4 +1,4 @@
-//! The `er7` command: read HL7 v2 messages in ER7 encoding and show what
+//! The `er7` command: read HL7® v2 messages in ER7 encoding and show what
 //! is in them.
 //!
 //! The default output is an outline — one line per value, labelled with the
@@ -14,6 +14,7 @@
 //! The input/output contract — options, outline format, exit codes — is
 //! specified by spec §12, and pinned by the `cli_*` tests in
 //! `tests/integration.rs`.
+#![forbid(unsafe_code)]
 
 use std::fmt::Write as _;
 use std::io::{Read, Write};
@@ -22,7 +23,7 @@ use std::process::ExitCode;
 use er7::{Message, RenderOptions, Subcomponent, Terminator};
 
 const USAGE: &str = "\
-Read HL7 v2 messages in the ER7 pipe-hat encoding.
+Read HL7® v2 messages in the ER7 pipe-hat encoding.
 
 Usage: er7 [OPTIONS] [FILE]
 
@@ -42,7 +43,11 @@ Options:
   -V, --version            Print version
 
 With neither --query nor --normalize, print an outline of every value in
-the input, labelled with the HL7 path that names it.";
+the input, labelled with the HL7 path that names it.
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.";
 
 /// What the command was asked to produce.
 enum Action {

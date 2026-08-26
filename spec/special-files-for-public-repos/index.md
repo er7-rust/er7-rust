@@ -10,6 +10,10 @@ Special files that use top-level markdown:
 - BENCHMARKS.md with any benchmarks, speed tests, optimizaiton profiles, etc.
 - INSTALL.md how to install and use any of the software
 - CONTRIBUTING.md how a person can contribute their time, or update code, or donate money
+- RFC.md request for comments: what the project wants to learn, what feedback helps, how to improve
+- SECURITY.md how to report a vulnerability, what is in scope, and what is honestly promised
+- GOVERNANCE.md who decides, how decisions are recorded, and how to become a maintainer
+- TRADEMARKS.md the trademark notice, and what the project does not claim
 - CODEOWNERS with joel@joelparkerhenderson.com
 - MAINTAINERS.md with Joel Prker Henderson (joel@joelparkerhenderson.com) as sole maintainer (use this as template: https://github.com/rubentalstra/FerroEHR/blob/develop/MAINTAINERS.md)
 - CHANGELOG.md with change log history summries

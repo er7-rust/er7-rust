@@ -22,7 +22,7 @@ const MASK: char = '*';
 ///
 /// Every variant except [`Action::Null`] rewrites leaf text and leaves the
 /// shape of the message alone (D1); `Null` collapses the position it names
-/// to the explicit HL7 null, because that is what a null means (D6, spec
+/// to the explicit HL7® null, because that is what a null means (D6, spec
 /// §3.4).
 ///
 /// Example:

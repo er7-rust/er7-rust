@@ -9,3 +9,4 @@
 //! cargo bench -p er7-bench
 //! cargo bench -p er7-bench -- --save-baseline before   # then compare
 //! ```
+#![forbid(unsafe_code)]

@@ -13,7 +13,7 @@ drives changes.
 | Field        | Value                                                                       |
 | ------------ | --------------------------------------------------------------------------- |
 | Crate        | `er7-redact`                                                                |
-| Purpose      | Remove patient detail from HL7 v2 ER7 messages without breaking the message. |
+| Purpose      | Remove patient detail from HL7® v2 ER7 messages without breaking the message. |
 | Layer        | A positional editor over `er7` — no validation, no transport, no undo.      |
 | Language     | Rust (edition 2024, MSRV 1.95)                                              |
 | License      | MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only           |
@@ -122,3 +122,9 @@ The last four are the **four checks**; all four are clean on `main` and
 must stay that way. A fuller walk-through lives in
 [`AGENTS/workflows.md`](AGENTS/workflows.md) and
 [`AGENTS/release.md`](AGENTS/release.md).
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

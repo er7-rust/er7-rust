@@ -16,13 +16,14 @@ export const links = {
 } as const;
 
 /** The crate version this site documents. */
-export const version = '0.1.1';
+export const version = '0.1.2';
 
 export type NavLink = { href: string; label: string };
 
 /** Main navigation, in reading order. */
 export const navLinks: NavLink[] = [
   { href: '/', label: 'Home' },
+  { href: '/install/', label: 'Install' },
   { href: '/format/', label: 'ER7 format' },
   { href: '/paths/', label: 'Paths' },
   { href: '/escapes/', label: 'Escapes' },
@@ -31,6 +32,8 @@ export const navLinks: NavLink[] = [
   { href: '/er7-redact/', label: 'er7-redact' },
   { href: '/serde-er7/', label: 'serde-er7' },
   { href: '/ecosystem/', label: 'Ecosystem' },
+  { href: '/comparison/', label: 'Comparison' },
+  { href: '/benchmarks/', label: 'Benchmarks' },
   { href: '/about/', label: 'About' }
 ];
 
@@ -48,7 +51,7 @@ export const crates: Crate[] = [
   {
     name: 'er7',
     description:
-      'The ER7 encoding: parse, query, edit, and write HL7 v2 messages, with a byte-for-byte round trip and no dependencies.',
+      'The ER7 encoding: parse, query, edit, and write HL7® v2 messages, with a byte-for-byte round trip and no dependencies.',
     repository: 'https://github.com/er7-rust/er7-rust/tree/main/er7',
     crate: 'https://crates.io/crates/er7',
     docs: 'https://docs.rs/er7/',

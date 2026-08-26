@@ -25,7 +25,7 @@
   <title>serde-er7 — Serde support for the ER7 message tree</title>
   <meta
     name="description"
-    content="Tutorial, help, and examples for serde-er7: Serialize and Deserialize implementations for every er7 type, so an HL7 v2 message tree can flow through JSON, YAML, or any Serde format."
+    content="Tutorial, help, and examples for serde-er7: Serialize and Deserialize implementations for every er7 type, so an HL7® v2 message tree can flow through JSON, YAML, or any Serde format."
   />
 </svelte:head>
 

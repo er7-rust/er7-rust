@@ -5,11 +5,11 @@
 
 Background on the format itself, independent of this crate. What the crate
 does with it starts at [§3](../03-delimiters/index.md). Sources are listed
-in [§2.8](#28-sources).
+in [§2.9](#29-sources).
 
 ## 2.1 What ER7 is
 
-**ER7** — "Encoding Rules 7" — is the original text encoding for HL7
+**ER7** — "Encoding Rules 7" — is the original text encoding for HL7®
 version 2 messages, and still the one nearly every production interface
 speaks. The nickname *pipe-hat* comes from its two most visible
 delimiters, `|` and `^`.
@@ -190,8 +190,8 @@ rewritten.
 Against it: it is positional, so it is brittle and unreadable without
 tooling; there is no schema in the message itself; and the same field
 number means different things in different versions. HL7 published an XML
-encoding in v2.3.1 and FHIR later, but neither displaced ER7 in the
-installed base.
+encoding in v2.3.1 and the HL7® FHIR® standard later, but neither
+displaced ER7 in the installed base.
 
 ## 2.9 Sources
 
@@ -204,3 +204,9 @@ installed base.
 - [InterSystems: HL7 escape sequences](https://docs.intersystems.com/latest/csp/docbook/DocBook.UI.Page.cls?KEY=EHL72_ESCAPE_SEQUENCES)
 - [ETLworks: HL7 2.x formats](https://support.etlworks.com/hc/en-us/articles/360014078373-HL7-2-x-Formats)
 - [hl7apy](https://crs4.github.io/hl7apy/) — a Python library, useful as a second reading of the same rules
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

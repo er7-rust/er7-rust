@@ -13,7 +13,7 @@ drives changes.
 | Field        | Value                                                                        |
 | ------------ | ---------------------------------------------------------------------------- |
 | Crate        | `er7`                                                                        |
-| Purpose      | Parse, query, edit, and write HL7 v2 messages in the ER7 pipe-hat encoding.  |
+| Purpose      | Parse, query, edit, and write HL7® v2 messages in the ER7 pipe-hat encoding.  |
 | Layer        | Encoding only — no dictionary, no validation, no transport.                  |
 | Language     | Rust (edition 2024, MSRV 1.95)                                               |
 | License      | MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only            |
@@ -123,3 +123,9 @@ The last four are the **four checks**; all four are clean on `main` and must
 stay that way. A fuller walk-through lives in
 [`AGENTS/workflows.md`](AGENTS/workflows.md) and
 [`AGENTS/release.md`](AGENTS/release.md).
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

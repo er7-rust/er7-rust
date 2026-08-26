@@ -1,6 +1,7 @@
 //! Redact a message with the built-in policy, and see what survived.
 //!
 //! Run with: `cargo run --example redact_a_message`
+#![forbid(unsafe_code)]
 
 use er7_redact::{Policy, Redactor};
 

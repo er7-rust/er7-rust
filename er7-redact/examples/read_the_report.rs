@@ -2,6 +2,7 @@
 //! ticket without a second thought.
 //!
 //! Run with: `cargo run --example read_the_report`
+#![forbid(unsafe_code)]
 
 use er7_redact::{Policy, Redactor};
 

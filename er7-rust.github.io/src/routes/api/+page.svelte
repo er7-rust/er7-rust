@@ -134,7 +134,7 @@ Subcomponent { raw: String }`;
   <h2 class="section-heading">Levels below <code>Message</code></h2>
   <div class="prose">
     <p>
-      Every level exposes 1-based accessors matching HL7&rsquo;s own numbering, each returning
+      Every level exposes 1-based accessors matching HL7®&rsquo;s own numbering, each returning
       <code>Option</code>, plus a <code>_mut</code> variant. Index <code>0</code> returns
       <code>None</code> rather than element 1.
     </p>

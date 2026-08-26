@@ -18,7 +18,7 @@ informational.
 | repetition | MSH-2 position 2 | `~` | separates repetitions within a field |
 | escape | MSH-2 position 3 | `\` | opens and closes an escape sequence |
 | subcomponent | MSH-2 position 4 | `&` | separates subcomponents within a component |
-| truncation | MSH-2 position 5 | `#` | marks a value the sender truncated; optional, HL7 v2.7 and later |
+| truncation | MSH-2 position 5 | `#` | marks a value the sender truncated; optional, HL7® v2.7 and later |
 
 `Separators::default()` is the recommended set with no truncation
 character. **[R1]** Nothing in the crate assumes it: every function that
@@ -90,3 +90,9 @@ happily as `MSH|^~\&|`.
 
 Parsing always accepts all three (R4); this type governs output only
 ([§7](../07-writing/index.md)).
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

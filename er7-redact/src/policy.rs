@@ -1,6 +1,6 @@
 //! Rules, policies, the four built-in policies, and the policy file format.
 //!
-//! A [`Rule`] is one HL7 path and one [`Action`]. A [`Policy`] is an
+//! A [`Rule`] is one HL7® path and one [`Action`]. A [`Policy`] is an
 //! ordered list of rules plus the two things it does by default: its
 //! [`Posture`] — accept or reject every leaf no rule named — and what it
 //! does with a payload that is not ER7 at all ([`Unrecognised`]).

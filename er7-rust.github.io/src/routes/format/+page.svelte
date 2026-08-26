@@ -23,7 +23,7 @@
   <title>The ER7 format — er7</title>
   <meta
     name="description"
-    content="What ER7 is: the pipe-hat text encoding for HL7 v2 messages. Hierarchy, delimiters, the explicit null, escape sequences, batch files, and why it persists."
+    content="What ER7 is: the pipe-hat text encoding for HL7® v2 messages. Hierarchy, delimiters, the explicit null, escape sequences, batch files, and why it persists."
   />
 </svelte:head>
 
@@ -277,8 +277,8 @@ FTS   file trailer`}</code></pre>
   </div>
   <div class="prose">
     <p>
-      HL7 published an XML encoding in v2.3.1 and FHIR later, but neither displaced ER7 in the
-      installed base.
+      HL7 published an XML encoding in v2.3.1 and the HL7® FHIR® standard later, but neither
+      displaced ER7 in the installed base.
     </p>
   </div>
 </section>

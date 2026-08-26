@@ -10,7 +10,7 @@
 •
 **[email](mailto:joel@joelparkerhenderson.com)**
 
-Remove patient detail from HL7 v2 messages in the **ER7** pipe-hat
+Remove patient detail from HL7® v2 messages in the **ER7** pipe-hat
 encoding — as a Rust library and a command-line tool — **without breaking
 the message**.
 
@@ -231,3 +231,9 @@ The whole family, and the boundary between the layers, is at
 
 MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only — see
 [LICENSE.md](LICENSE.md).
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

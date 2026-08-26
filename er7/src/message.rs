@@ -14,7 +14,7 @@ use crate::escape::unescape;
 use crate::{Error, Path, Separators};
 use std::borrow::Cow;
 
-/// The literal text HL7 uses for an explicit null: a value the sender is
+/// The literal text HL7® uses for an explicit null: a value the sender is
 /// deliberately clearing, as opposed to one they simply did not send.
 pub const NULL: &str = "\"\"";
 

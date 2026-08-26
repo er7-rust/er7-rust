@@ -72,7 +72,7 @@ matters — for a database write, it always does.
 
 ## 5.4 Accessors
 
-Every level exposes 1-based accessors matching HL7's own numbering, each
+Every level exposes 1-based accessors matching HL7®'s own numbering, each
 returning `Option`, plus a `_mut` variant:
 
 | Level | Accessor | Shortcut |
@@ -128,3 +128,9 @@ pid.fields[2] = ids;                          // repetitions stay repetitions
 The crate does not offer `push_field`- or `set_field`-style helpers; `Vec`
 already has them, and wrapping them would only add surface without adding
 meaning.
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

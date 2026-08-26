@@ -1,4 +1,4 @@
-//! The `er7-redact` command: remove patient detail from HL7 v2 messages
+//! The `er7-redact` command: remove patient detail from HL7® v2 messages
 //! in the ER7 encoding, and say what it removed.
 //!
 //! With no options it applies the curated policy of spec §5.1 and writes
@@ -12,6 +12,7 @@
 //!
 //! The input/output contract — options, formats, exit codes — is specified
 //! by spec §10, and pinned by the `cli_*` tests in `tests/integration.rs`.
+#![forbid(unsafe_code)]
 
 use std::fmt::Write as _;
 use std::io::{Read, Write};
@@ -21,7 +22,7 @@ use er7::{Message, RenderOptions, Terminator};
 use er7_redact::{Policy, Posture, Redactor, Report, Rule, Unrecognised};
 
 const USAGE: &str = "\
-Redact patient detail from HL7 v2 messages in the ER7 pipe-hat encoding.
+Redact patient detail from HL7® v2 messages in the ER7 pipe-hat encoding.
 
 Usage: er7-redact [OPTIONS] [FILE]
 
@@ -53,7 +54,11 @@ crate's spec section 5.1 is applied: the patient identifiers in PID, NK1,
 PV1, GT1, and IN1. It is a starting point, not a compliance certification.
 
 A payload that is not ER7 fails the run, unless a policy file says to pass
-it through or to mask it whole, or --reject-all masks it.";
+it through or to mask it whole, or --reject-all masks it.
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.";
 
 fn main() -> ExitCode {
     match run() {

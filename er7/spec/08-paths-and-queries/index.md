@@ -8,7 +8,7 @@ A worked tutorial is in [`docs/paths/index.md`](../../docs/paths/index.md).
 
 ## 8.1 Notation [R18]
 
-An HL7 path names one place in a message. The notation is a de-facto
+An HL7® path names one place in a message. The notation is a de-facto
 standard among interface engineers rather than part of HL7 itself, so this
 crate accepts the two spellings that are common in the field and writes the
 first.
@@ -99,3 +99,9 @@ Both reach the same data; they differ in what they optimize for.
 | --- | ---- |
 | paths (`query`) | the position is known at compile time as a string, or comes from configuration or a user; you want every match without writing a loop |
 | accessors (`segment`/`field`/`component`) | you need the node itself — to edit it ([§5.5](../05-value-tree/index.md)), to ask `is_null()`, or to avoid the intermediate `String` |
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

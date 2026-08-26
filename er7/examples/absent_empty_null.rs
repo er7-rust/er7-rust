@@ -7,6 +7,7 @@
 //! a value that was never sent erases one that was.
 //!
 //! See `docs/usage/index.md` §5 and spec §5.3.
+#![forbid(unsafe_code)]
 
 fn main() -> Result<(), er7::Error> {
     // PID-2 was sent empty, PID-3 was sent as the explicit null, and PID-9

@@ -25,8 +25,8 @@ er7-redact 0.2.0, per `CHANGELOG.md`). The root document set is nearly
 complete and unusually substantive — SECURITY.md documents checkable
 properties with the commands that check them, TRADEMARKS.md has a mark-by-mark
 table, and `bin/check-trademarks` enforces the fair-use rules mechanically.
-A large uncommitted sweep (86 files) is in flight, extending trademark
-compliance into crate doc-comments, manifests, and the site copy.
+The trademark-compliance sweep — 100+ files extending compliance into
+crate doc-comments, manifests, and the site copy — landed 2026-08-26.
 
 The honest part of the document set is that it names its own gaps —
 no CI, unsigned commits, no second security responder — rather than implying
@@ -49,8 +49,8 @@ posture. Open items for each are in `tasks.md`.
    repositories here: TRADEMARKS.md, a checker, and an in-flight sweep
    extending coverage to rustdoc and crate metadata. The checker now runs
    in CI (`.github/workflows/ci.yml`) as well as from `make
-   check-trademarks`. What remains: the sweep is uncommitted, and there is
-   no `LICENSES/` directory with the five full license texts the SPDX
+   check-trademarks`, and the sweep landed 2026-08-26. What remains: there
+   is no `LICENSES/` directory with the five full license texts the SPDX
    expression offers.
 
 3. **Security and supply chain.** SECURITY.md is the family's best (in-scope
@@ -102,8 +102,9 @@ posture. Open items for each are in `tasks.md`.
 
 ## Risks & watch items
 
-- The 86-file trademark sweep is uncommitted; until it lands, the working
-  tree and the published crates disagree about compliance posture.
+- The trademark sweep is committed, but the *published* crates predate it:
+  the compliance posture in crate doc-comments and manifests reaches
+  crates.io only with each crate's next release.
 - SECURITY.md's "checkable properties" now have a CI workflow behind them,
   but it has not yet had a hosted run; until one goes green they remain
   claims, not guarantees.

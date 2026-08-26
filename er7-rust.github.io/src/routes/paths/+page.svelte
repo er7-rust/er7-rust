@@ -39,7 +39,7 @@
 </script>
 
 <svelte:head>
-  <title>HL7 paths — er7</title>
+  <title>HL7® paths — er7</title>
   <meta
     name="description"
     content="The HL7 path notation used to name one place in a message: PID-5.1, OBX[2]-5, PID-13[2].1. Grammar, occurrence indices, and the four query methods."

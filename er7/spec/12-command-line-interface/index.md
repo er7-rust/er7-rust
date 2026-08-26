@@ -25,7 +25,7 @@ message late in a batch fails the run rather than producing half an output.
 
 | Option | Effect |
 |--------|--------|
-| `-q, --query <PATH>` | print the values at an HL7 path, one per line; may be repeated, and outputs appear in the order the options were given |
+| `-q, --query <PATH>` | print the values at an HL7® path, one per line; may be repeated, and outputs appear in the order the options were given |
 | `-n, --normalize` | rewrite the input as canonical ER7 ([§7.2](../07-writing/index.md)), with a trailing terminator on every message |
 | `-m, --message <N>` | use only the Nth message of the input, counting from 1 |
 | `-r, --raw` | show text as sent, without decoding escape sequences |
@@ -113,3 +113,9 @@ The CLI is covered by the same semantic-versioning promise as the library
 ([§14](../14-compatibility-and-versioning/index.md)): removing an option,
 changing an exit code, or changing the outline's label format is a breaking
 change. Adding an option is not.
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

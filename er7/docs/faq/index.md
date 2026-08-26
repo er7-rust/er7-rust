@@ -4,7 +4,7 @@
 
 ## What is ER7?
 
-The original text encoding for HL7 v2 messages: pipe-delimited, positional,
+The original text encoding for HL7® v2 messages: pipe-delimited, positional,
 compact. Also called *pipe-hat*, after `|` and `^`. It is defined in
 chapter 2 of every HL7 v2 release and is still what nearly every production
 healthcare interface speaks. The format itself is described in
@@ -188,3 +188,9 @@ redacted.
 If the answer turns out to be "this is deliberate", it will be recorded in
 [spec §18](../../spec/18-open-questions-and-divergences/index.md) so the
 next person finds the reasoning rather than re-asking.
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

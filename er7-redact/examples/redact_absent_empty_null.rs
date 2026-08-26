@@ -1,10 +1,11 @@
-//! How redaction treats the three states HL7 keeps apart: a value that was
+//! How redaction treats the three states HL7® keeps apart: a value that was
 //! never sent, one sent blank, and one the sender is clearing.
 //!
 //! Getting this wrong is a patient-safety bug rather than a privacy one,
 //! so it is worth seeing worked through.
 //!
 //! Run with: `cargo run --example redact_absent_empty_null`
+#![forbid(unsafe_code)]
 
 use er7_redact::{Action, Policy, Redactor};
 

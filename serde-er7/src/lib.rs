@@ -10,7 +10,7 @@
 //! •
 //! **[email](mailto:joel@joelparkerhenderson.com)**
 //!
-//! Serde support for [`er7`], the pipe-hat encoding that carries HL7 v2
+//! Serde support for [`er7`], the pipe-hat encoding that carries HL7® v2
 //! messages between healthcare systems.
 //!
 //! [`er7`] parses, queries, edits, and writes ER7 text, deliberately with
@@ -30,7 +30,13 @@
 //! below (a bare array for a field's repetitions, a bare string for a
 //! leaf) without help.
 //!
-//! Example:
+//! # Trademarks
+//!
+//! HL7®, and FHIR® are the registered trademarks of Health Level Seven
+//! International and their use of these trademarks does not constitute an
+//! endorsement by HL7.
+//!
+//! # Example
 //!
 //! ```
 //! # fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -92,7 +98,7 @@
 //! what each wrapper type must serialize as and why, following the same
 //! spec-driven process [`er7`] itself uses. A tutorial is in
 //! `docs/usage/index.md`, and runnable programs are in `examples/`.
-
+#![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
 mod component;

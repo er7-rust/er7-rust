@@ -5,6 +5,7 @@
 //! Run with: `cargo run --example inspect_a_segment_as_json`
 //!
 //! See `docs/usage/index.md` §3 for the full table of shapes.
+#![forbid(unsafe_code)]
 
 use serde_er7::Segment;
 

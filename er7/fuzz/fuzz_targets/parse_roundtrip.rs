@@ -9,7 +9,7 @@
 //!    yields the same text (R12, spec §5.2). The first render may normalize
 //!    — a lone `\n` terminator becomes `\r` — so the fixed point is checked
 //!    from the *second* pass on, not against the original input.
-
+#![forbid(unsafe_code)]
 #![no_main]
 
 use libfuzzer_sys::fuzz_target;

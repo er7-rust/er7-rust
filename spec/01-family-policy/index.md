@@ -9,7 +9,7 @@ section map); this file states the reasoning behind the pattern once.
 ## §1.1 Dependency minimalism
 
 Every crate in this family treats a dependency as an audit surface, not a
-convenience. This is healthcare-adjacent code — `er7` parses HL7 v2
+convenience. This is healthcare-adjacent code — `er7` parses HL7® v2
 messages, `er7-redact` strips patient identifiers from them, `serde-er7`
 carries them through JSON — and each crate is meant to sit low in a stack
 that a downstream integrator has to review, not just trust. A dependency is
@@ -44,6 +44,29 @@ Clippy's pedantic lints are on (`[lints.clippy] pedantic = "warn"`) and the
 checks run with `-D warnings`, so a pedantic finding fails the build like
 any other. Run them per-crate (`-p er7`, `-p er7-redact`, `-p serde-er7`)
 or across the whole workspace with `--workspace`.
+
+### No unsafe code, anywhere
+
+**Every crate root in this workspace carries `#![forbid(unsafe_code)]`** —
+the three libraries, both binaries, every example, the benchmark crate and
+its bench target, and each fuzz target.
+
+`forbid` rather than `deny` is the point. A `deny` can be turned off by an
+`#[allow(unsafe_code)]` on the next function; a `forbid` cannot be
+overridden anywhere below it, so the guarantee is a property of the build
+rather than a convention someone has to keep. Adding `unsafe` to any of
+these crates is a compile error, not a review comment.
+
+This costs nothing here. Nothing in an ER7 encoder needs to reach past the
+borrow checker: the whole workload is reading `&str`, walking delimiters,
+and building `String`s. If a future change ever seems to need `unsafe`, the
+right response is to doubt the change — and, if it survives that, to argue
+it into this section before removing the attribute from one crate root.
+
+The claim is load-bearing outside the workspace too: it is one of the
+checkable properties [`SECURITY.md`](../../SECURITY.md) publishes for a
+reviewer, alongside the dependency counts and the absence of build
+scripts.
 
 ## §1.3 Spec-driven development
 
@@ -120,3 +143,9 @@ Each crate still has its own git history, preserved via `git subtree` when
 the three were merged into this workspace, and its own release checklist
 in `AGENTS/release.md` — publishing one crate does not require publishing
 the others.
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

@@ -31,7 +31,7 @@ purpose (D6, [§3.4](../03-actions/index.md)).
 
 Written back to text and read again, a redacted message has the same
 segments and the same field numbering — always. Below the field, there is
-one unavoidable difference, and it is HL7's rather than this crate's:
+one unavoidable difference, and it is HL7®'s rather than this crate's:
 
 ```
 PID|1||9|X^Y          →   PID|1|||^          (PID-3 and PID-4 cleared)
@@ -112,3 +112,9 @@ Stated plainly, so nobody is surprised:
   positional can.
 - **Any way back.** There is no mapping table and no undo
   ([§1.3](../01-purpose-and-scope/index.md)).
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

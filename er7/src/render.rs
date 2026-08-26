@@ -43,7 +43,7 @@ enum Mode {
 /// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct RenderOptions {
-    /// What ends each segment. HL7 allows only a carriage return on the
+    /// What ends each segment. HL7® allows only a carriage return on the
     /// wire, which is the default; the other choices exist for messages
     /// kept in text files.
     pub terminator: crate::Terminator,

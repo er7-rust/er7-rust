@@ -1,10 +1,11 @@
 //! Go the other direction: start from JSON — the shape a web form or an API
-//! request might hand you — and produce ER7 text a legacy HL7 receiver can
+//! request might hand you — and produce ER7 text a legacy HL7® receiver can
 //! read.
 //!
 //! Run with: `cargo run --example build_message_from_json`
 //!
 //! See `docs/usage/index.md` §2.
+#![forbid(unsafe_code)]
 
 use serde_er7::Message;
 

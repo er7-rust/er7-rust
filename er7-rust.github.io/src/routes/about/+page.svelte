@@ -22,7 +22,7 @@
   <p class="hero-eyebrow">About</p>
   <h1>About er7</h1>
   <p class="hero-tagline">
-    A small, focused crate for one job: the ER7 encoding of HL7 v2 messages.
+    A small, focused crate for one job: the ER7 encoding of HL7® v2 messages.
   </p>
 </section>
 
@@ -33,8 +33,9 @@
       <tbody>
         <tr><th>Crate</th><td><code>er7</code> {version}</td></tr>
         <tr><th>Purpose</th><td>Parse, query, edit, and write HL7 v2 messages in ER7</td></tr>
+        <tr><th>Trademarks</th><td><a href="/trademarks/">HL7 is a mark of Health Level Seven International</a></td></tr>
         <tr><th>Layer</th><td>Encoding only — no dictionary, no validation, no transport</td></tr>
-        <tr><th>Language</th><td>Rust, edition 2024, MSRV 1.85</td></tr>
+        <tr><th>Language</th><td>Rust, edition 2024, MSRV 1.95 — current stable minus three</td></tr>
         <tr><th>Runtime dependencies</th><td>none, and that is a guarantee</td></tr>
         <tr><th>License</th><td>MIT, Apache-2.0, BSD-3-Clause, GPL-2.0-only, or GPL-3.0-only</td></tr>
         <tr><th>Source</th><td><a href="{links.repository}/tree/main/er7">github.com/er7-rust/er7-rust/tree/main/er7</a></td></tr>
@@ -75,7 +76,7 @@
       <span class="stat-label">numbered behavioural rules</span>
     </div>
     <div class="stat">
-      <span class="stat-value">126</span>
+      <span class="stat-value">127</span>
       <span class="stat-label">unit, integration, and doc tests</span>
     </div>
     <div class="stat">

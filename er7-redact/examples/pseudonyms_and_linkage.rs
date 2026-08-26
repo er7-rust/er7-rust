@@ -2,6 +2,7 @@
 //! buys, and what it costs.
 //!
 //! Run with: `cargo run --example pseudonyms_and_linkage`
+#![forbid(unsafe_code)]
 
 use er7_redact::{Action, Policy, Redactor, pseudonym};
 

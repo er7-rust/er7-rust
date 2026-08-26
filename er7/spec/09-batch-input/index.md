@@ -12,7 +12,7 @@ Implemented in `src/parse.rs`. Background in
 pub fn split_messages(text: &str) -> Vec<&str>
 ```
 
-Cuts input holding several messages, or a whole HL7 batch file, into the
+Cuts input holding several messages, or a whole HL7® batch file, into the
 individual messages.
 
 The returned slices **borrow from the input** and keep its original segment
@@ -67,3 +67,9 @@ with the number of `MSH` segments is not checked, because checking is out
 of scope (R24) and because the count would be reported through an error
 type this crate does not want to grow
 ([§11](../11-error-handling/index.md)).
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

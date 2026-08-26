@@ -30,7 +30,7 @@ assert_eq!(message.to_er7(), text);`;
 </script>
 
 <svelte:head>
-  <title>er7 — HL7 v2 messages in the ER7 pipe-hat encoding, in Rust</title>
+  <title>er7 — HL7® v2 messages in the ER7 pipe-hat encoding, in Rust</title>
   <meta
     name="description"
     content="A Rust crate and command-line tool to parse, query, edit, and write HL7 v2 messages in the ER7 pipe-hat encoding. Byte-for-byte round trip, zero dependencies."

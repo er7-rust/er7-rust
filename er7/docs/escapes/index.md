@@ -118,7 +118,7 @@ Two details worth knowing:
   a value would end the segment and truncate the message — the one
   corruption an ER7 writer must never commit.
 
-The truncation character (`#`, HL7 v2.7) is **not** encoded: it is
+The truncation character (`#`, HL7® v2.7) is **not** encoded: it is
 structural only inside MSH-2, so a `#` in a value is just a `#`.
 
 `unescape(escape(value)) == value` for every value. The converse does not
@@ -231,3 +231,9 @@ arrived, so a caller who knows the data type can override.
 
 Recorded as
 [spec §18.2](../../spec/18-open-questions-and-divergences/index.md).
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

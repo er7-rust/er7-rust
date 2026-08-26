@@ -10,7 +10,7 @@
 •
 **[email](mailto:joel@joelparkerhenderson.com)**
 
-Parse, query, edit, and write HL7 v2 messages in the **ER7** pipe-hat
+Parse, query, edit, and write HL7® v2 messages in the **ER7** pipe-hat
 encoding — as a Rust library and a command-line tool, with zero
 dependencies.
 
@@ -232,3 +232,9 @@ see
 Multi-licensed, so a downstream project can pick whichever fits: MIT,
 Apache-2.0, BSD-3-Clause, GPL-2.0-only, or GPL-3.0-only. See
 [LICENSE.md](LICENSE.md).
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

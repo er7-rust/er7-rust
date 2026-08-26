@@ -167,7 +167,7 @@ segment, since no curated list can know what is in one.
 
 ### `accept_all` and `reject_all` — the bare postures
 
-No rules, and no knowledge of HL7 at all. `accept_all` redacts nothing and
+No rules, and no knowledge of HL7® at all. `accept_all` redacts nothing and
 passes a payload it cannot parse through unchanged; `reject_all` redacts
 everything it can reach — the header included, so the message stops being
 routable — and masks such a payload whole.
@@ -201,3 +201,9 @@ recipients, and no library can make it for you.
   text
 - [`samples/de-identify.policy`](../../samples/de-identify.policy) — a
   policy file that exercises every action
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

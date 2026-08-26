@@ -80,7 +80,7 @@ that the decision was to keep not measuring and why.
 which is what longitudinal test data is for
 ([§14.4](../14-roadmap/index.md)).
 
-**Shape.** An action that parses an HL7 timestamp, adds a per-patient
+**Shape.** An action that parses an HL7® timestamp, adds a per-patient
 offset derived from the pseudonym key, and writes it back at the same
 precision it was given.
 
@@ -107,3 +107,9 @@ CLI flag to print it.
 **Done when.** Running the check against `samples/adt_a08.er7` with the
 default policy lists the free-text and quasi-identifier positions §5.4
 documents as deliberately untouched, and the CLI flag is specified in §10.
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

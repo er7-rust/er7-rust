@@ -4,7 +4,7 @@
 //!
 //! The input is split into a path and a message so one run exercises both
 //! sides at once.
-
+#![forbid(unsafe_code)]
 #![no_main]
 
 use libfuzzer_sys::fuzz_target;

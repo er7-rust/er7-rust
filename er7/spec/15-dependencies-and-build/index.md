@@ -14,7 +14,7 @@ feature, not an accident:
 
 - Healthcare integration code is audited, and every transitive dependency
   is another thing to audit and another supply-chain surface.
-- The crate is meant to sit at the bottom of a stack of HL7 crates
+- The crate is meant to sit at the bottom of a stack of HL7® crates
   ([§1.3](../01-purpose-and-scope/index.md)); a dependency here is a
   dependency for everything above it.
 - Nothing in ER7 needs one. The whole format is delimiters and escape
@@ -114,3 +114,16 @@ re-set without turning the group off.
 Where a pedantic lint is wrong for a particular line, the fix is an
 `#[allow]` carrying a `reason`, next to the code it excuses — not a hole in
 the group.
+
+**Every crate root also carries `#![forbid(unsafe_code)]`** — the library,
+the binary, every example, and each fuzz target. `forbid` rather than `deny`, so no
+`#[allow(unsafe_code)]` further down can reopen it: `unsafe` here is a
+compile error rather than a review comment. The workspace-level reasoning
+is [§1.2 of the family policy](../../../spec/01-family-policy/index.md).
+
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

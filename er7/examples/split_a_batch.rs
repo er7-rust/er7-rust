@@ -7,6 +7,7 @@
 //! going when one message in a batch is malformed.
 //!
 //! See `docs/usage/index.md` §9 and spec §9.
+#![forbid(unsafe_code)]
 
 fn main() -> Result<(), er7::Error> {
     // A batch file: a file header, a batch header, two messages, and the

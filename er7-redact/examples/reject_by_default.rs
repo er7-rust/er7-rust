@@ -6,6 +6,7 @@
 //! has to be "no" rather than "not that I listed".
 //!
 //! Run with: `cargo run --example reject_by_default`
+#![forbid(unsafe_code)]
 
 use er7_redact::{Action, Policy, Redactor};
 

@@ -64,7 +64,7 @@ separable. [T2](../15-open-tasks/index.md).
 
 Shifting every date in a message by a per-patient offset preserves
 intervals — the thing `first 4` destroys and the thing longitudinal
-analysis needs. It requires parsing HL7 timestamps, which is dictionary
+analysis needs. It requires parsing HL7® timestamps, which is dictionary
 knowledge of exactly the kind [§5.3](../05-built-in-policies/index.md) is
 careful about, and it needs the per-patient offset to come from somewhere.
 Worth doing, not worth guessing at. [T5](../15-open-tasks/index.md).
@@ -85,3 +85,9 @@ existing walk — rejecting by default already computes exactly this set.
 - **A validator.** `er7`'s R24 applies here too: this crate knows which
   positions to edit, not whether a message is correct.
 - **Transport.** Nothing reads a socket.
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

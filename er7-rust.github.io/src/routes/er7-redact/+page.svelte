@@ -34,7 +34,7 @@
     { name: 'reject_by_default', shows: 'The other posture: reject every value, with keep rules accepting what a test needs.' },
     { name: 'pseudonyms_and_linkage', shows: 'Why an identifier becomes a pseudonym rather than a blank, and what that costs.' },
     { name: 'read_the_report', shows: 'The audit trail: one row per position changed, and no values in it.' },
-    { name: 'redact_absent_empty_null', shows: 'The three states HL7 keeps apart, and why redaction leaves two of them alone.' }
+    { name: 'redact_absent_empty_null', shows: 'The three states HL7® keeps apart, and why redaction leaves two of them alone.' }
   ];
 </script>
 

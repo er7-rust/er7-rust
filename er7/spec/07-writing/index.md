@@ -45,7 +45,7 @@ impl Message {
 | `terminator` | `Terminator::Cr` | what ends each segment ([§3.5](../03-delimiters/index.md)) |
 | `trailing_terminator` | `false` | whether the last segment gets one too |
 
-`trailing_terminator` defaults to `false` even though HL7 terminates every
+`trailing_terminator` defaults to `false` even though HL7® terminates every
 segment including the last, because a trailing terminator surprises callers
 that compare or concatenate the result, and the transport — MLLP, or a file
 — already marks where the message ends. Set it to `true` for strict wire
@@ -102,3 +102,9 @@ Writing is a single pass, O(n) in the output length. `to_er7` on a
 `Message` allocates one `String`; the per-level `to_er7`/`to_text` methods
 allocate one each, so building a large document by concatenating them is
 better done by walking the tree once.
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

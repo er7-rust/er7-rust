@@ -10,9 +10,16 @@ SITE := er7-rust.github.io
 
 .PHONY: help
 help:
+	@echo 'check-trademarks  enforce the HL7 fair-use rules across the tree'
 	@echo 'publish     push the monorepo, then publish the site'
 	@echo 'site-dev    run the site locally at http://localhost:5173'
 	@echo 'site-check  type-check the site, as CI does'
+
+# Rules T1, T2, and T3 of spec/hl7-trademarks-fair-use/index.md, enforced
+# across every page in the tree. Run it with the four cargo checks.
+.PHONY: check-trademarks
+check-trademarks:
+	@bin/check-trademarks
 
 # The guards cover the two ways this goes wrong. A dirty tree means the
 # subtree split would publish something older than what is on disk, silently.

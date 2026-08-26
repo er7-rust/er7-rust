@@ -1,4 +1,4 @@
-//! HL7 paths: the short notation interface engineers use to name one place
+//! HL7® paths: the short notation interface engineers use to name one place
 //! in a message, such as `PID-5.1` or `OBX[2]-5.1.2`.
 //!
 //! The notation is a de-facto standard rather than part of HL7 itself, so
