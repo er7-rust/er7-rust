@@ -224,12 +224,17 @@ fn cli(args: &[&str], stdin: &str) -> (bool, String, String) {
         .stderr(Stdio::piped())
         .spawn()
         .expect("the command builds");
-    child
-        .stdin
-        .take()
-        .expect("stdin is piped")
-        .write_all(stdin.as_bytes())
-        .expect("writes to stdin");
+    let mut pipe = child.stdin.take().expect("stdin is piped");
+    // A run that fails while reading its arguments exits before it reads
+    // standard input at all, which closes this pipe under us. That is the
+    // command behaving correctly, not the test failing, so a broken pipe
+    // here is expected rather than fatal.
+    match pipe.write_all(stdin.as_bytes()) {
+        Ok(()) => {}
+        Err(e) if e.kind() == std::io::ErrorKind::BrokenPipe => {}
+        Err(e) => panic!("writes to stdin: {e}"),
+    }
+    drop(pipe); // the child needs the EOF before it will finish
     let output = child.wait_with_output().expect("the command finishes");
     (
         output.status.success(),

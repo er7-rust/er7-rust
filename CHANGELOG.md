@@ -15,6 +15,18 @@ raised minimum supported Rust version, which is always a breaking change
 and never lands in a patch
 ([`spec/rust-msrv-n-minus-3/index.md`](spec/rust-msrv-n-minus-3/index.md)).
 
+## Unreleased
+
+### Fixed
+
+- **A latent race in both CLI test helpers**, which CI caught on the 0.1.3
+  release commit while ten local runs had passed. A run that fails while
+  reading its arguments exits before it reads standard input at all, which
+  closes the pipe the test is still writing to; the helper treated that
+  `BrokenPipe` as fatal instead of as the command behaving correctly. Test
+  code only — `tests/` does not ship in any published crate, so no release
+  is needed.
+
 ## 2026-08-26 — `er7` 0.1.3, `serde-er7` 0.1.3, `er7-redact` 0.2.1
 
 Documentation, policy, and build posture. **No API changed**, no `Error`
