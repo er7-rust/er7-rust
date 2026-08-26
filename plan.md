@@ -64,10 +64,11 @@ posture. Open items for each are in `tasks.md`.
 
 4. **Privacy and patient data.** `er7-redact` is a PHI tool, and its claims
    are scoped correctly — "a starting point, not a compliance certification"
-   appears in the spec, SECURITY.md, and the CLI usage text. But the claims
-   are dispersed; there is no root `PHI.md` a privacy officer can read, and
-   no explicit HIPAA Safe Harbor 18-identifier coverage/non-coverage table,
-   which is the first thing a de-identification reviewer asks for.
+   appears in the spec, SECURITY.md, and the CLI usage text. As of
+   2026-08-26 the dispersed claims are consolidated in a root `PHI.md` a
+   privacy officer can read, including the explicit HIPAA Safe Harbor
+   18-identifier coverage/non-coverage table (with categories 12–18 and
+   free text honestly marked as uncovered).
 
 5. **Outreach.** The site (`er7-rust.github.io/`, in-repo) publishes
    trademarks, news, and comparison pages — but none of the governance

@@ -81,12 +81,15 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
 
 ### Privacy and patient data
 
-- [ ] **Add root `PHI.md`** consolidating the dispersed, correct claims into
-      one page a privacy officer can read, including an explicit HIPAA Safe
-      Harbor 18-identifier coverage/non-coverage table for `er7-redact`
-      (which identifiers the built-in policy addresses, which it structurally
-      cannot — free text above all, per
-      `er7-redact/spec/14-roadmap/index.md` §14.2).
+- [x] **Add root `PHI.md`** — done 2026-08-26: privacy-officer Q&A built
+      from the spec's own claims (§1.3's whole-data-set framing, D14's
+      "starting point, not a compliance certification", §7's FNV-1a
+      pseudonym caveats), with the 18-identifier Safe Harbor table drawn
+      row by row from `er7-redact/spec/05-built-in-policies/index.md`
+      §5.1/§5.4 — categories 12–18 honestly marked untouched, dates
+      marked materially incomplete, free text named as the structural
+      gap per §14.2, and the §164.514(c) derived-code problem with
+      pseudonyms stated.
 
 ### Outreach
 
