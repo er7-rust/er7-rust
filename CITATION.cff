@@ -1,0 +1,43 @@
+cff-version: 1.2.0
+title: >-
+  ER7 Rust: a Cargo workspace of Rust crates for HL7 v2 messages in the
+  ER7 pipe-hat encoding.
+message: >-
+  If you use this work and you want to cite it,
+  then you can use the metadata from this file.
+type: software
+authors:
+  - given-names: Joel Parker
+    family-names: Henderson
+    email: joel@joelparkerhenderson.com
+    affiliation: joelparkerhenderson.com
+    orcid: 'https://orcid.org/0009-0000-4681-282X'
+identifiers:
+  - type: url
+    value: 'https://github.com/er7-rust/er7-rust/'
+    description: >-
+      ER7 Rust: a Cargo workspace of Rust crates for HL7 v2 messages in the
+      ER7 pipe-hat encoding.
+  - type: url
+    value: 'https://er7-rust.github.io/'
+    description: The published documentation site for the ER7 Rust family.
+repository-code: 'https://github.com/er7-rust/er7-rust/'
+url: 'https://er7-rust.github.io/'
+abstract: >-
+  ER7 Rust is a Cargo workspace holding three independently versioned and
+  published Rust crates for working with HL7 v2 messages in the ER7
+  pipe-hat encoding: er7 parses, queries, edits, and writes ER7 messages
+  with zero runtime dependencies; er7-redact removes patient detail from a
+  message without changing its shape; and serde-er7 serializes and
+  deserializes ER7 message trees with Serde. Each crate is developed
+  spec-first, with every behavioural rule numbered in its own
+  specification and bound to the test that enforces it.
+keywords:
+  - HL7
+  - HL7 v2
+  - ER7
+  - health informatics
+  - interoperability
+  - de-identification
+  - Rust
+license: See license file
