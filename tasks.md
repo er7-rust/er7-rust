@@ -121,10 +121,14 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       no GitHub Sponsors, because CONTRIBUTING.md does not list one. Bank
       transfer is arranged by email and has no URL, which the file's
       comment records. YAML validated with `yaml.safe_load`.
-- [ ] Add the governance surface to the site: security, governance,
-      maintainers, RFC, and AI-statement routes in
-      `er7-rust.github.io/src/routes/` — the work exists; it is just
-      invisible off-repo.
+- [x] **Add the governance surface to the site** — done 2026-08-26: five
+      new routes in `er7-rust.github.io/src/routes/` (`/security/`,
+      `/governance/`, `/maintainers/`, `/rfc/`, `/ai-statement/`), each a
+      summary of its root document that names the root file as canonical
+      and links it, in the same hero/section/prose shape as the existing
+      routes; all five linked from the shared footer. `pnpm check` green
+      (308 files, 0 errors, 0 warnings); `bin/check-trademarks` green.
+      The pages go live on the next `make publish` of the site.
 - [ ] Write `help/outreach/index.md` at the workspace level (the other four
       family repositories each have one; this one has only per-crate
       `help/` directories), gated on CI and the conduct file landing first.

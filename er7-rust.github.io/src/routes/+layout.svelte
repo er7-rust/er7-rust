@@ -52,6 +52,11 @@
       <a href={links.docs}>API docs</a>
       <a href="/ecosystem/">Ecosystem</a>
       <a href="/news/">News</a>
+      <a href="/security/">Security</a>
+      <a href="/governance/">Governance</a>
+      <a href="/maintainers/">Maintainers</a>
+      <a href="/rfc/">RFC</a>
+      <a href="/ai-statement/">AI statement</a>
       <a href="/trademarks/">Trademarks</a>
       <a href="/about/">About</a>
     </div>
