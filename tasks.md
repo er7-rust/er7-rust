@@ -69,6 +69,10 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       site copy, which keeps its own), and the claim-accuracy clause
       adapted from the `fhir-rust` version ("One Addition Specific to
       This Project").
+- [ ] Decide whether to upgrade the root CODE_OF_CONDUCT.md from
+      Contributor Covenant 2.0 to 2.1 —
+      `spec/professionalization/index.md` rule 7 names 2.1, and the status
+      table there records the mismatch honestly until this is decided.
 
 ### Compliance — licensing and trademarks
 

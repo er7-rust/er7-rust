@@ -72,8 +72,8 @@ representative at an online or offline event.
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at coraline c/o
-idolhands dot com.
+reported to the maintainer responsible for enforcement at
+<joel@joelparkerhenderson.com> (see [`MAINTAINERS.md`](MAINTAINERS.md)).
 
 All complaints will be reviewed and investigated promptly and fairly.
 
