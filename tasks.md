@@ -79,9 +79,12 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
 
 ### Compliance — licensing and trademarks
 
-- [ ] Add `LICENSES/` with the full text of all five licenses in the SPDX
-      expression (REUSE convention; `fhir-rust/LICENSES/` is the model) —
-      license texts are currently URLs only.
+- [x] **Add `LICENSES/` with the full text of all five licenses** — done
+      2026-08-26: the five texts copied from `fhir-rust/LICENSES/` (REUSE
+      convention, one file per SPDX identifier), and `LICENSE.md`'s table
+      now links each local text ahead of the URL, with a note on why a URL
+      alone was not sufficient (MIT, Apache-2.0, and BSD-3-Clause require
+      the text to travel with the software).
 - [ ] Set `CITATION.cff`'s `license` field to the SPDX expression instead of
       "See license file", and add `version`/`date-released`; add the missing
       `CITATION.cff` to `serde-er7/`.

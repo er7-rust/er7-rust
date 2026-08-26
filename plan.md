@@ -49,9 +49,9 @@ posture. Open items for each are in `tasks.md`.
    repositories here: TRADEMARKS.md, a checker, and an in-flight sweep
    extending coverage to rustdoc and crate metadata. The checker now runs
    in CI (`.github/workflows/ci.yml`) as well as from `make
-   check-trademarks`, and the sweep landed 2026-08-26. What remains: there
-   is no `LICENSES/` directory with the five full license texts the SPDX
-   expression offers.
+   check-trademarks`, and the sweep landed 2026-08-26. The `LICENSES/`
+   directory with the five full license texts landed 2026-08-26 too
+   (REUSE convention, copied from `fhir-rust/LICENSES/`).
 
 3. **Security and supply chain.** SECURITY.md is the family's best (in-scope
    categories, documented non-vulnerabilities with spec citations, a
