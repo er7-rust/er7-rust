@@ -89,10 +89,11 @@ posture. Open items for each are in `tasks.md`.
 - **Free-text scanning in `er7-redact`** — its own roadmap
   (`er7-redact/spec/14-roadmap/index.md` §14.2) calls this "the largest real
   gap". A capability decision, not professionalization; it stays in the
-  crate's roadmap.
-- **CI hosting shape.** One root workflow covering the four checks, the
-  trademark checker, and fuzz smoke — or per-crate lanes. Default: one root
-  workflow; nothing here needs containers.
+  crate's roadmap, and [`RFC.md`](RFC.md) Q13 now asks operators the
+  question that would settle the design.
+- **CI hosting shape** — decided by doing, 2026-08-26: one root workflow
+  (`.github/workflows/ci.yml`, no containers), per-crate lanes declined.
+  Fuzz smoke is not in it yet; `tasks.md` tracks that separately.
 
 ## Non-goals (for now)
 
