@@ -58,8 +58,9 @@ posture. Open items for each are in `tasks.md`.
    disclosed leak path, a 90-day disclosure deadline). CI now exists
    (`.github/workflows/ci.yml`, 2026-08-26): the four checks in
    `spec/01-family-policy/index.md` §1.2, an MSRV build, and the trademark
-   checker — first hosted run still pending, and the fuzz targets are still
-   laptop-only. Plus unsigned commits and tags, no
+   checker — first hosted run still pending — and, since later the same
+   day, a fuzz smoke job (nightly, build plus a brief run of each
+   target). Plus unsigned commits and tags, no
    `cargo deny`/`cargo audit`, no SBOM.
 
 4. **Privacy and patient data.** `er7-redact` is a PHI tool, and its claims
@@ -94,7 +95,8 @@ posture. Open items for each are in `tasks.md`.
   question that would settle the design.
 - **CI hosting shape** — decided by doing, 2026-08-26: one root workflow
   (`.github/workflows/ci.yml`, no containers), per-crate lanes declined.
-  Fuzz smoke is not in it yet; `tasks.md` tracks that separately.
+  Fuzz smoke joined it later the same day (nightly toolchain, its own
+  job, since `er7/fuzz/` is its own workspace).
 
 ## Non-goals (for now)
 

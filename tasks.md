@@ -52,9 +52,14 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       AI_STATEMENT.md §7/§12 updated in the same change. YAML validated
       locally; the first hosted run has not yet happened, so no green
       badge is claimed. Fuzz smoke was deliberately left out (next item).
-- [ ] Add a fuzz smoke run to CI (the three targets under `er7/fuzz/`
-      need a nightly toolchain and `cargo-fuzz`; kept out of the first
-      workflow to keep it dependency-free).
+- [x] **Add a fuzz smoke run to CI** — done 2026-08-26: a `fuzz` job in
+      `.github/workflows/ci.yml` (nightly toolchain with the `rustfmt,
+      clippy` components named explicitly — the `snomed-rust` job broke
+      without them — then fmt, clippy, `cargo fuzz build`, and a 20-second
+      seed run of each of the three targets). Verified locally first:
+      fmt required reformatting `query_paths.rs` (done in the same
+      change), clippy was clean, and all three targets built and ran a
+      5-second smoke on nightly-aarch64-apple-darwin without findings.
 - [ ] Tag releases and sign commits/tags going forward; record the posture
       change in MAINTAINERS.md.
 - [ ] Add dependency auditing (`cargo deny`: advisories, licenses, bans,

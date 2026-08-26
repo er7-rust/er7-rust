@@ -21,7 +21,13 @@ fuzz_target!(|data: &[u8]| {
     // Whatever the path is, these must not panic, and `query` must agree
     // with the head of `query_all`.
     if let Ok(first) = message.query(path) {
-        let all = message.query_all(path).expect("query_all disagreed on path validity");
-        assert_eq!(first, all.into_iter().next(), "query is not the first of query_all");
+        let all = message
+            .query_all(path)
+            .expect("query_all disagreed on path validity");
+        assert_eq!(
+            first,
+            all.into_iter().next(),
+            "query is not the first of query_all"
+        );
     }
 });

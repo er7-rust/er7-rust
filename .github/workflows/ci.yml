@@ -49,6 +49,55 @@ jobs:
           toolchain: "1.95"
       - run: cargo check --workspace --all-targets
 
+  # The three fuzz targets under er7/fuzz/ — a build plus a brief smoke
+  # run over each, not a fuzzing campaign: it proves the targets still
+  # compile and run. er7/fuzz/ is deliberately its own workspace (its
+  # Cargo.toml explains why), so the jobs above never touch it.
+  #
+  # libfuzzer-sys needs nightly. rustfmt and clippy are named explicitly:
+  # dtolnay/rust-toolchain installs a minimal toolchain, and the fmt and
+  # clippy steps below run on nightly (the only toolchain this job
+  # installs) — without the components both fail with "'cargo-fmt' is not
+  # installed for the toolchain 'nightly'".
+  fuzz:
+    name: fuzz targets (build + smoke run)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: rustfmt, clippy
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.cargo/bin/cargo-fuzz
+            er7/fuzz/target
+          key: ${{ runner.os }}-cargo-fuzz-${{ hashFiles('er7/fuzz/Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-fuzz-
+      - run: cargo install cargo-fuzz --locked || true
+      - run: cargo fmt --all -- --check
+        working-directory: er7/fuzz
+      - run: cargo +nightly clippy --all-targets -- -D warnings
+        working-directory: er7/fuzz
+      - run: cargo +nightly fuzz build
+        working-directory: er7/fuzz
+      # corpus/ is generated and gitignored, so it does not exist in a
+      # fresh checkout; libFuzzer errors on a missing corpus directory
+      # rather than creating one.
+      - name: run each target briefly
+        working-directory: er7/fuzz
+        run: |
+          for target in $(cargo +nightly fuzz list); do
+            echo "::group::$target"
+            mkdir -p "corpus/$target"
+            cargo +nightly fuzz run "$target" "corpus/$target" -- \
+              -max_total_time=20 -rss_limit_mb=4096 -timeout=10
+            echo "::endgroup::"
+          done
+
   # Rules T1, T2, and T3 of spec/hl7-trademarks-fair-use/index.md,
   # across every page in the tree.
   trademarks:
