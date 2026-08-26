@@ -1,5 +1,7 @@
 cff-version: 1.2.0
-title: ER7 Redact: Remove patient detail from HL7 v2 messages in the ER7 pipe-hat encoding, without changing the shape of the message.
+title: >-
+  ER7 Redact: Remove patient detail from HL7 v2 messages in the ER7
+  pipe-hat encoding, without changing the shape of the message.
 message: >-
   If you use this work and you want to cite it,
   then you can use the metadata from this file.
@@ -13,8 +15,19 @@ authors:
 identifiers:
   - type: url
     value: 'https://github.com/er7-rust/er7-rust/tree/main/er7-redact/'
-    description: ER7 Redact: Remove patient detail from HL7 v2 messages in the ER7 pipe-hat encoding, without changing the shape of the message.
+    description: >-
+      ER7 Redact: Remove patient detail from HL7 v2 messages in the ER7
+      pipe-hat encoding, without changing the shape of the message.
 repository-code: 'https://github.com/er7-rust/er7-rust/tree/main/er7-redact/'
 abstract: >-
   ER7 Redact: Remove patient detail from HL7 v2 messages in the ER7 pipe-hat encoding, without changing the shape of the message.
-license: See license file
+# CFF's license field takes SPDX identifiers; the five below are this
+# crate's OR-choice, stated in full in LICENSE.md and the root LICENSES/.
+license:
+  - MIT
+  - Apache-2.0
+  - BSD-3-Clause
+  - GPL-2.0-only
+  - GPL-3.0-only
+version: 0.2.1
+date-released: '2026-08-26'

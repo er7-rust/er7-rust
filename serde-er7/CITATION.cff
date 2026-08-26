@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 title: >-
-  ER7 Rust: Parse, query, edit, and write HL7 v2 messages in the ER7
-  pipe-hat encoding, with zero dependencies.
+  Serde ER7: Serialize and deserialize er7 message trees with Serde, so a
+  message can flow through JSON, YAML, or any other Serde data format.
 message: >-
   If you use this work and you want to cite it,
   then you can use the metadata from this file.
@@ -14,14 +14,14 @@ authors:
     orcid: 'https://orcid.org/0009-0000-4681-282X'
 identifiers:
   - type: url
-    value: 'https://github.com/er7-rust/er7-rust/tree/main/er7/'
+    value: 'https://github.com/er7-rust/er7-rust/tree/main/serde-er7/'
     description: >-
-      ER7 Rust: Parse, query, edit, and write HL7 v2 messages in the ER7
-      pipe-hat encoding, with zero dependencies.
-repository-code: 'https://github.com/er7-rust/er7-rust/tree/main/er7/'
+      Serde ER7: Serialize and deserialize er7 message trees with Serde, so a
+      message can flow through JSON, YAML, or any other Serde data format.
+repository-code: 'https://github.com/er7-rust/er7-rust/tree/main/serde-er7/'
 abstract: >-
-  ER7 Rust: Parse, query, edit, and write HL7 v2 messages in the ER7
-  pipe-hat encoding, with zero dependencies.
+  Serde ER7: Serialize and deserialize er7 message trees with Serde, so a
+  message can flow through JSON, YAML, or any other Serde data format.
 # CFF's license field takes SPDX identifiers; the five below are this
 # crate's OR-choice, stated in full in LICENSE.md and the root LICENSES/.
 license:

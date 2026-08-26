@@ -82,7 +82,8 @@ posture. Open items for each are in `tasks.md`.
    converge on: the canonical special-files list (the local
    `spec/special-files-for-public-repos/index.md` omits four entries the
    `fhir-rust` version carries), and per-crate document parity (`serde-er7/`
-   lacks CITATION.cff and the conduct/contributing files its siblings have).
+   has a CITATION.cff as of 2026-08-26, but still lacks the
+   conduct/contributing files its siblings have).
 
 ## Open decisions (awaiting a call, not code)
 
