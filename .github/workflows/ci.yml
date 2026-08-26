@@ -13,6 +13,11 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Manual trigger, for when a push event is dropped — GitHub Actions'
+  # 2026-08-26 outage swallowed this workflow's would-be first hosted
+  # run, and without this there is no way to start one except another
+  # push.
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
