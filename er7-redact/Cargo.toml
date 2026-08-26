@@ -1,10 +1,10 @@
 [package]
 name = "er7-redact"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2024"
 rust-version = "1.95"
 authors = ["Joel Parker Henderson <joel@joelparkerhenderson.com>"]
-description = "Redact patient detail from HL7® v2 messages in the ER7 pipe-hat encoding, without changing the shape of the message"
+description = "Redact patient detail from HL7® v2 messages in the ER7 pipe-hat encoding, without changing the shape of the message. HL7®, and FHIR® are the registered trademarks of Health Level Seven International and their use of these trademarks does not constitute an endorsement by HL7. This project is an independent work."
 license = "MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only"
 repository = "https://github.com/er7-rust/er7-rust"
 homepage = "https://er7-rust.github.io/er7-redact/"

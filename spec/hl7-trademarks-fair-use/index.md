@@ -57,7 +57,7 @@ later:
 | A Markdown file | **Yes**, each file | GitHub renders each one as a page, and each is reachable on its own URL |
 | A website route under `er7-rust.github.io/src/routes/` | **Yes**, each route, for T1 | Literally a webpage. T2 is satisfied once, in the shared footer of `+layout.svelte`, which renders on every route |
 | A Rust source file's `//!` module documentation and `///` item documentation | **Yes**, per file, for T1 | Each becomes its own docs.rs page. T2 is satisfied once per crate, in the crate root's `//!` documentation, which every module page links back to |
-| A crate's `Cargo.toml` `description` | **Yes** | It is displayed on the crate's crates.io page and in `cargo search` |
+| A crate's `Cargo.toml` `description` | **Yes** | It is displayed on the crate's crates.io page and in `cargo search`. For a publishable crate, T2 requires the disclaimer in the description itself — crates.io has no shared footer to satisfy it elsewhere (enforced since 2026-08-26) |
 | A command-line tool's `--help` output | **Yes** | It is the tool's own page, and the first thing most users read |
 | A sample message, a policy file, a code block, a shell transcript | **No** | Data and commands, not prose. A `®` inside `MSH|^~\&|…` would corrupt the sample |
 | A citation block — the BibTeX entry on the website's about page, `CITATION.cff` | **No** | Text meant to be pasted into someone else's toolchain, where a `®` is a defect rather than a courtesy |
@@ -122,7 +122,9 @@ to use the `®` "as often as is practical", so an extra one is never the
 error.
 
 It reads every Markdown file, every website route, every Rust source file,
-every `Cargo.toml` description, and the two `--help` strings; it ignores
+every `Cargo.toml` description (where, for a publishable crate, it also
+requires the §4.1 disclaimer verbatim — see §4.3), and the two `--help`
+strings; it ignores
 fenced code blocks, inline code spans, link targets, citation blocks, and
 the surfaces §4.3 excludes. It knows that `&reg;` is `®` in a Svelte
 template, and that the `FHIR®` inside the disclaimer is not a reference to

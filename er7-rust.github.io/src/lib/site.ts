@@ -16,7 +16,7 @@ export const links = {
 } as const;
 
 /** The crate version this site documents. */
-export const version = '0.1.3';
+export const version = '0.1.4';
 
 export type NavLink = { href: string; label: string };
 

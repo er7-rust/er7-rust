@@ -1,7 +1,7 @@
 # `er7` crate specification
 
 **Status:** living document. Updated alongside every behavioural change.
-**Applies to:** `er7` 0.1.3. **Audience:** maintainers, AI agents,
+**Applies to:** `er7` 0.1.4. **Audience:** maintainers, AI agents,
 downstream integrators reading the crate's contract. **Companion docs:**
 [`AGENTS.md`](../AGENTS.md) for agent guidance, [`index.md`](../index.md)
 for the user-facing README, [`docs/api/index.md`](../docs/api/index.md) for

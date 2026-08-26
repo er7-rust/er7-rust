@@ -182,10 +182,29 @@ for path in walk(".rs"):
 
 # --- Cargo.toml descriptions, and the command-line help --------------------
 
+# A crate's description is a page (spec §4.3): crates.io displays it on the
+# crate's own page and in `cargo search`. For a publishable crate, T2
+# therefore requires the full disclaimer in the description itself — there
+# is no shared footer on crates.io to satisfy it once for everything.
+DISCLAIMER_SENTENCE = (
+    f"HL7{R}, and FHIR{R} are the registered trademarks of Health Level "
+    "Seven International and their use of these trademarks does not "
+    "constitute an endorsement by HL7."
+)
+
 for path in walk("Cargo.toml"):
-    match = re.search(r'(?m)^description = "(.*)"$', read(path))
-    if match:
-        check_marks(f"{path} [description]", match.group(1))
+    text = read(path)
+    match = re.search(r'(?m)^description = "(.*)"$', text)
+    if not match:
+        continue
+    check_marks(f"{path} [description]", match.group(1))
+    publishable = re.search(r"(?m)^publish = false", text) is None
+    if publishable and DISCLAIMER_SENTENCE not in match.group(1):
+        fail(
+            f"{path} [description]",
+            "T2",
+            "publishable crate description lacks the verbatim disclaimer",
+        )
 
 for path in ("er7/src/main.rs", "er7-redact/src/main.rs"):
     if not os.path.exists(path):

@@ -15,7 +15,23 @@ raised minimum supported Rust version, which is always a breaking change
 and never lands in a patch
 ([`spec/rust-msrv-n-minus-3/index.md`](spec/rust-msrv-n-minus-3/index.md)).
 
-## Unreleased
+## 2026-08-26 — `er7` 0.1.4, `serde-er7` 0.1.4, `er7-redact` 0.2.2
+
+Metadata only. **No API changed**, no `Error` variant was added, and no
+command-line option or outline label format moved, so all three are patch
+releases under
+[`er7` §14.2](er7/spec/14-compatibility-and-versioning/index.md).
+
+### Changed
+
+- **Every crate description now carries the verbatim HL7® trademark
+  disclaimer**, followed by "This project is an independent work." — the
+  three-part shape the family converged on, applied here by owner
+  directive. A crates.io page has no shared footer, so rule T2 of
+  [`spec/hl7-trademarks-fair-use/`](spec/hl7-trademarks-fair-use/index.md)
+  needs the disclaimer in the description itself; `bin/check-trademarks`
+  now enforces exactly that for every publishable crate (verified by
+  breaking one description and watching the check fail).
 
 ### Fixed
 
@@ -24,8 +40,8 @@ and never lands in a patch
   reading its arguments exits before it reads standard input at all, which
   closes the pipe the test is still writing to; the helper treated that
   `BrokenPipe` as fatal instead of as the command behaving correctly. Test
-  code only — `tests/` does not ship in any published crate, so no release
-  is needed.
+  code only — `tests/` does not ship in any published crate, so this rides
+  along rather than motivating the release.
 
 ## 2026-08-26 — `er7` 0.1.3, `serde-er7` 0.1.3, `er7-redact` 0.2.1
 
