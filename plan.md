@@ -81,9 +81,10 @@ posture. Open items for each are in `tasks.md`.
 6. **Audit and harmonization.** No findings register and no plan/tasks
    history — this file and `tasks.md` are the start. Family conventions to
    converge on: the canonical special-files list (re-synced with the
-   `fhir-rust` version 2026-08-26), and per-crate document parity (`serde-er7/`
-   has a CITATION.cff as of 2026-08-26, but still lacks the
-   conduct/contributing files its siblings have).
+   `fhir-rust` version 2026-08-26), and per-crate document parity (resolved
+   2026-08-26: `serde-er7/` has a CITATION.cff, and every crate README
+   records that the root conduct/contributing/security documents cover it —
+   one copy, so nothing drifts).
 
 ## Open decisions (awaiting a call, not code)
 

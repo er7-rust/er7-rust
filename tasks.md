@@ -140,9 +140,14 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       2026-08-26; the Covenant 2.0-vs-2.1 mismatch stated honestly). One
       local addition kept: TRADEMARKS.md, which the canonical list omits
       but this repository carries.
-- [ ] Bring `serde-er7/` and `er7-redact/` to per-crate document parity
-      (conduct/contributing pointers) or record the decision that root-level
-      files cover them.
+- [x] **Per-crate document parity** — resolved 2026-08-26 by recording
+      the decision the item offered: the root-level CONTRIBUTING.md,
+      CODE_OF_CONDUCT.md, and SECURITY.md cover all three crates, and
+      each crate's README now says so in a short "Contributing, conduct,
+      and security" section (absolute GitHub links, so the section
+      survives on crates.io). No copies were made — one copy cannot
+      drift, which is the same reasoning `er7/CONTRIBUTING.md` already
+      states; that file stays as the one existing pointer.
 
 ## Trademarks
 

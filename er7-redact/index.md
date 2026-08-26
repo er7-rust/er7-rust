@@ -227,6 +227,16 @@ The whole family, and the boundary between the layers, is at
 <https://er7-rust.github.io/ecosystem/>; this crate's own tutorial is at
 <https://er7-rust.github.io/er7-redact/>.
 
+## Contributing, conduct, and security
+
+The workspace-level documents at the repository root cover this crate,
+deliberately — one copy cannot drift:
+[CONTRIBUTING.md](https://github.com/er7-rust/er7-rust/blob/main/CONTRIBUTING.md)
+(including how to report a problem without pasting patient data),
+[CODE_OF_CONDUCT.md](https://github.com/er7-rust/er7-rust/blob/main/CODE_OF_CONDUCT.md),
+and
+[SECURITY.md](https://github.com/er7-rust/er7-rust/blob/main/SECURITY.md).
+
 ## License
 
 MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only — see

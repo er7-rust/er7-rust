@@ -227,6 +227,18 @@ Behavioural changes start in [`spec/`](spec/index.md), not in the code —
 see
 [`AGENTS/spec-driven-development.md`](AGENTS/spec-driven-development.md).
 
+## Contributing, conduct, and security
+
+The workspace-level documents at the repository root cover this crate,
+deliberately — one copy cannot drift:
+[CONTRIBUTING.md](https://github.com/er7-rust/er7-rust/blob/main/CONTRIBUTING.md)
+(including how to report a problem without pasting patient data),
+[CODE_OF_CONDUCT.md](https://github.com/er7-rust/er7-rust/blob/main/CODE_OF_CONDUCT.md),
+and
+[SECURITY.md](https://github.com/er7-rust/er7-rust/blob/main/SECURITY.md).
+This crate's own [CONTRIBUTING.md](CONTRIBUTING.md) is a pointer at the
+root one.
+
 ## License
 
 Multi-licensed, so a downstream project can pick whichever fits: MIT,
