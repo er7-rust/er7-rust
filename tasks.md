@@ -104,6 +104,22 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       row all corrected in the same change, narrowing "no signed commits"
       to the true, narrower gap rather than leaving the broader claim
       standing next to a contradicting local git config.
+
+      **Superseded the same day.** The maintainer generated a dedicated,
+      passphrase-protected code-signing key
+      (`SHA256:Ah1MPQNTLGuOy0JwLcU7LbnhSa7cRVqMaDggXwllRXc`) rather than
+      continuing to sign with the push-authentication key above, and asked
+      for it to be wired in. `user.signingkey` and `allowed_signers` now
+      point at it instead. The first signing attempt with it failed
+      exactly as expected — `error: Enter passphrase for ...`, because the
+      key is not loaded into an `ssh-agent` — which is recorded rather
+      than papered over: nothing here holds that passphrase, and signing
+      does not work again until the maintainer runs `ssh-add` himself.
+      GitHub registration is still blocked on the same `gh` OAuth scope as
+      before, now against this key's `.pub` file instead of the old one.
+      MAINTAINERS.md's publishing-identities table gained its own row for
+      this key, separate from the push-authentication one, in the same
+      change.
 - [x] **Add dependency auditing (`cargo deny`: advisories, licenses, bans,
       sources) on push plus a weekly cron** — done 2026-08-27: `deny.toml`
       at the root (found by cargo-deny from either workspace, since it

@@ -43,6 +43,7 @@ down is an inventory nobody can hand over.
 | A crates.io API token | `er7`, `er7-redact`, `serde-er7` | The maintainer, on his own machine | The crates.io owner list is the recovery surface, and it is the maintainer's account. |
 | An SSH key | Pushes to GitHub, and to the GitLab and Codeberg mirrors, which `origin` fans out to on one `git push` | The maintainer, on his own hardware | None; the key is not escrowed. A successor would use their own. |
 | The same SSH key, via `make publish` | <https://er7-rust.github.io> — pushed by `git subtree split` into the `er7-rust.github.io` repository, whose own workflow builds and deploys it | The maintainer | As above. Deliberately *not* a CI credential: a workflow doing this would need a token able to write another repository's workflow file, and GitHub refuses that. |
+| A separate, dedicated code-signing SSH key (`SHA256:Ah1MPQNTLGuOy0JwLcU7LbnhSa7cRVqMaDggXwllRXc`) | Signs every commit and tag made from 2026-08-27 onward | The maintainer, passphrase-protected — deliberately not the same key as push authentication above, so a compromise of one does not silently compromise the other | None; not escrowed. A successor generates their own and this table, `git config user.signingkey`, and the `allowed_signers` file all change together. |
 
 **The honest reading of that table:** every publishing identity terminates
 at one person's GitHub account or one person's hardware. There is no
@@ -52,19 +53,35 @@ no mitigation is available to a one-person project without a legal entity
 behind it.
 
 **Commits and tags are cryptographically signed as of 2026-08-27**, with
-the SSH key already listed in the publishing-identities table above —
+the dedicated code-signing key in the publishing-identities table above —
 `git config commit.gpgsign true` and `tag.gpgsign true`, `gpg.format ssh`,
-verified locally with `git log --show-signature` and `git tag -v` against
-an `allowed_signers` file naming the maintainer's key. **GitHub's
-"Verified" badge is not showing yet**, and that gap is disclosed rather
-than implied away: an SSH key must be registered with GitHub specifically
-as a *signing* key, separate from the same key's existing registration for
-push authentication, and doing that from this machine needs the
-`admin:ssh_signing_key` OAuth scope — an interactive grant the maintainer
-has to make himself, once, at
-<https://github.com/settings/ssh/new> (key type "Signing Key") or via
+`user.signingkey` pointed at that key's public half. It was generated
+2026-08-27 to replace an earlier configuration that briefly signed with
+the same key used for push authentication; keeping the two separate means
+a compromised push credential does not also forge history.
+
+The key is passphrase-protected and, as of this writing, not loaded into
+an `ssh-agent` on the maintainer's machine — the first signing attempt
+after generating it failed for exactly that reason
+(`error: Enter passphrase for ...`), which is the honest, checkable state
+rather than an assumed one. Before it can sign anything, the maintainer
+runs `ssh-add ~/.ssh/id.d/jph-code-signing=*=ssh-ed25519-with-passphrase`
+once per session (or configures the agent to retain it, e.g. via macOS
+Keychain with `ssh-add --apple-use-keychain`) and enters the passphrase
+himself; no automation holds that passphrase, and none should.
+
+Once unlocked, signing verifies locally against an `allowed_signers` file
+naming this key — `git log --show-signature` and `git tag -v` both report
+a good signature when tested on a scratch branch before this key touched
+real history. **GitHub's "Verified" badge is not showing yet**, and that
+gap is disclosed rather than implied away: an SSH key must be registered
+with GitHub specifically as a *signing* key, and doing that from this
+machine needs the `admin:ssh_signing_key` OAuth scope — an interactive
+grant the maintainer has to make himself, once, at
+<https://github.com/settings/ssh/new> (key type "Signing Key", pasting the
+`.pub` file's contents) or via
 `gh auth refresh -h github.com -s admin:ssh_signing_key` followed by
-`gh ssh-key add ~/.ssh/id_ed25519.pub --type signing`. A commit made
+`gh ssh-key add <path-to-the-pub-file> --type signing`. A commit made
 before that step signs and verifies locally but is not attributed by
 GitHub; one made after it is.
 
