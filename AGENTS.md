@@ -103,6 +103,14 @@ If you add a file that mentions a mark, run the check before you finish;
 the reasoning, and the definition of a "page", are
 [§4](spec/hl7-trademarks-fair-use/index.md).
 
+## Help
+
+Workspace-level operational checklists — things true of the repository as
+a whole, not of one crate — live in [`help/`](help/index.md). Currently:
+whether the prerequisites for promoting this project are met
+([`help/outreach/`](help/outreach/index.md)). Each crate has its own
+`help/` for crate-specific checklists.
+
 ## What is not here
 
 There is no root-level `src/`, no root-level rule-ID scheme, and no
