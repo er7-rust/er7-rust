@@ -115,11 +115,36 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       key is not loaded into an `ssh-agent` — which is recorded rather
       than papered over: nothing here holds that passphrase, and signing
       does not work again until the maintainer runs `ssh-add` himself.
-      GitHub registration is still blocked on the same `gh` OAuth scope as
-      before, now against this key's `.pub` file instead of the old one.
-      MAINTAINERS.md's publishing-identities table gained its own row for
-      this key, separate from the push-authentication one, in the same
-      change.
+      The maintainer unlocked the key himself (`ssh-add
+      --apple-use-keychain`, in his own terminal — the passphrase never
+      reached this agent) and registered its public half with GitHub as a
+      signing key at <https://github.com/settings/ssh/new>, both outside
+      this agent's reach by design. **GitHub's "Verified" badge is live
+      the same day**: `gh api repos/er7-rust/er7-rust/commits/258f778
+      --jq '.commit.verification'` returns `"verified": true, "reason":
+      "valid"`; the one earlier commit signed under the *previous* key
+      (`c8dc138`) correctly still reads `"unknown_key"`, since that key
+      was never registered and never claimed to be. MAINTAINERS.md's
+      publishing-identities table gained its own row for the new key,
+      separate from the push-authentication one, and its "What is not
+      here yet" list dropped the badge bullet entirely rather than
+      reword it, since the gap it named no longer exists. SECURITY.md,
+      `plan.md`, and `spec/professionalization/index.md` rule 3's status
+      row corrected to match in the same change.
+
+      One process note worth recording plainly: the first attempt at
+      this used `git commit --allow-empty` on a scratch branch to test
+      the newly-unlocked key, not realising the real staged edits to
+      MAINTAINERS.md and tasks.md were still staged and would ride along
+      into that "test" commit — `--allow-empty` permits a commit with no
+      diff, it does not make one empty. Deleting the scratch branch
+      afterward orphaned that commit along with the real edits. Recovered
+      cleanly because the commit object was still reachable by SHA
+      (`git cat-file -t <sha>` confirmed it, `git checkout <sha> --
+      MAINTAINERS.md tasks.md` restored the exact content) before it was
+      re-committed for real — nothing was lost, but the near-miss is
+      worth naming so the next scratch-branch test in this repository
+      commits to a path outside the working tree, or stashes first.
 - [x] **Add dependency auditing (`cargo deny`: advisories, licenses, bans,
       sources) on push plus a weekly cron** — done 2026-08-27: `deny.toml`
       at the root (found by cargo-deny from either workspace, since it

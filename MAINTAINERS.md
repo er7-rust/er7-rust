@@ -73,17 +73,20 @@ himself; no automation holds that passphrase, and none should.
 Once unlocked, signing verifies locally against an `allowed_signers` file
 naming this key — `git log --show-signature` and `git tag -v` both report
 a good signature when tested on a scratch branch before this key touched
-real history. **GitHub's "Verified" badge is not showing yet**, and that
-gap is disclosed rather than implied away: an SSH key must be registered
-with GitHub specifically as a *signing* key, and doing that from this
-machine needs the `admin:ssh_signing_key` OAuth scope — an interactive
-grant the maintainer has to make himself, once, at
-<https://github.com/settings/ssh/new> (key type "Signing Key", pasting the
-`.pub` file's contents) or via
-`gh auth refresh -h github.com -s admin:ssh_signing_key` followed by
-`gh ssh-key add <path-to-the-pub-file> --type signing`. A commit made
-before that step signs and verifies locally but is not attributed by
-GitHub; one made after it is.
+real history.
+
+**GitHub's "Verified" badge is live, as of commit `258f778`, 2026-08-27.**
+The maintainer registered the key's public half at
+<https://github.com/settings/ssh/new> as a "Signing Key" himself — that
+registration needs GitHub-account access no automation here has, so it was
+always his step to take, not a gap in the tooling. Confirmed by API
+(`gh api repos/er7-rust/er7-rust/commits/<sha> --jq
+'.commit.verification'`): `"verified": true, "reason": "valid"` on every
+commit made after registration, and still correctly `"unknown_key"` on the
+one commit made before it (`c8dc138`, signed under the *previous* signing
+key, which was never registered and never claimed to be) — the badge
+tracks the key that was actually current at signing time, not a blanket
+switch.
 
 ## What is not here yet
 
@@ -98,10 +101,6 @@ information for an evaluation:
   2026-08-26, all four jobs. One run is a proof the gate works, not yet a
   track record — before it, the checks ran on a laptop by one person
   before a release.
-- **No hosted "Verified" badge on signed commits or tags yet**, as above —
-  narrower than the flat "no signed commits" this line said before
-  2026-08-27, since signing itself is now on and verified locally; what is
-  still missing is one interactive step only the maintainer can take.
 - **No second security responder.** [`SECURITY.md`](SECURITY.md) is the
   policy, and it terminates at one email address —
   <joel@joelparkerhenderson.com>. Pretending otherwise would be worse than
