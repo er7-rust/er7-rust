@@ -1,0 +1,26 @@
+# Re-runs the same dependency audit as ci.yml's `deny` job, on a schedule
+# rather than a push — so a RUSTSEC advisory published against something
+# already sitting in Cargo.lock is caught in a week nobody pushes, not
+# just the next time someone does. Monday, matching dependabot.yml's
+# schedule, so both land the same day.
+#
+# deny.toml is the config for both jobs here (and for ci.yml's), and
+# governs advisories, licenses, bans, and sources.
+
+name: dependency audit
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # 06:00 UTC every Monday
+  workflow_dispatch:
+
+jobs:
+  deny:
+    name: cargo deny
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: EmbarkStudios/cargo-deny-action@v2
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          manifest-path: er7/fuzz/Cargo.toml

@@ -1,7 +1,11 @@
 # CI for the Rust workspace: the four checks every crate shares
 # (spec/01-family-policy/index.md §1.2), the MSRV floor
-# (spec/rust-msrv-n-minus-3/index.md), and the trademark fair-use rules
-# (spec/hl7-trademarks-fair-use/index.md, enforced by bin/check-trademarks).
+# (spec/rust-msrv-n-minus-3/index.md), the trademark fair-use rules
+# (spec/hl7-trademarks-fair-use/index.md, enforced by bin/check-trademarks),
+# and dependency auditing (deny.toml: advisories, licenses, bans, sources).
+# The same auditing check also runs on a weekly cron with no push required
+# — .github/workflows/audit.yml — so a newly-disclosed advisory against
+# something already in Cargo.lock is caught even in a quiet week.
 #
 # The site is not built here: it deploys from the er7-rust.github.io
 # repository this monorepo's er7-rust.github.io/ subdirectory is split
@@ -111,3 +115,17 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - run: bin/check-trademarks
+
+  # deny.toml governs advisories, licenses, bans, and sources — checked
+  # against both workspaces in this repository: the root one, and
+  # er7/fuzz's own [workspace] (its Cargo.toml explains why it is
+  # separate). cargo-deny finds deny.toml by walking up from either.
+  deny:
+    name: cargo deny
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: EmbarkStudios/cargo-deny-action@v2
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          manifest-path: er7/fuzz/Cargo.toml

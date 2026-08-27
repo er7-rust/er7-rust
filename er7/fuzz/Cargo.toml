@@ -3,6 +3,8 @@ name = "er7-fuzz"
 version = "0.0.0"
 edition = "2024"
 authors = ["Joel Parker Henderson <joel@joelparkerhenderson.com>"]
+description = "cargo-fuzz targets for the er7 crate; not published"
+license = "MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only"
 publish = false
 
 # Its own workspace, and deliberately not a member of the one above: the
@@ -16,7 +18,7 @@ cargo-fuzz = true
 
 [dependencies]
 libfuzzer-sys = "0.4"
-er7 = { path = ".." }
+er7 = { path = "..", version = "0" }
 
 [[bin]]
 name = "parse_roundtrip"

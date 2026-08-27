@@ -148,6 +148,7 @@ taken on trust:
 | **Library code performs no I/O at all** — no filesystem, no network, no process spawning, no environment reads, no logging, no telemetry | `grep -rn "std::fs\|std::net\|std::env\|std::process" er7/src er7-redact/src serde-er7/src` matches only `main.rs` |
 | **The command-line tools read only what you name** — a file argument or standard input — and write only to standard output or `-o` | `er7/src/main.rs`, `er7-redact/src/main.rs`. No configuration file is searched for and no environment variable is consulted. |
 | **Fuzzed on the untrusted-input surface** | `er7/fuzz/`: `parse_roundtrip`, `escape_roundtrip`, `query_paths` |
+| **Every dependency's license and every advisory against it is checked**, on push and again every Monday whether or not anything pushed | `deny.toml`; run `cargo deny check` from the root and from `er7/fuzz/`, or read the `deny` job in `.github/workflows/ci.yml` and `.github/workflows/audit.yml` |
 
 **The one thing worth knowing before you log an error.** Error values are
 deliberately narrow, and none of them carries a field value from a message

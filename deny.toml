@@ -1,0 +1,65 @@
+# Dependency auditing: advisories, licenses, bans, and sources. Runs as
+# `cargo deny check` from either workspace in this repository — the main
+# one at the root, and er7/fuzz's own [workspace], which cargo-deny finds
+# this file for by walking up past its directory. In CI:
+# .github/workflows/ci.yml's `deny` job, on push and a weekly cron, so a
+# newly-disclosed advisory is caught even on a week nobody pushes.
+#
+# The runtime dependency counts stay 0/1/2 (spec/01-family-policy/index.md
+# §1.1); everything this file governs is dev/build tooling — criterion,
+# serde_json, and er7/fuzz's libfuzzer-sys/arbitrary — reached only when
+# building from source. That still matters: a contributor's machine runs
+# this tree, and `cargo-deny` is itself one more thing to trust, which is
+# why this file stays short enough to read in one sitting rather than
+# carrying the full generated template.
+
+[graph]
+all-features = false
+no-default-features = false
+
+[advisories]
+# No ignores. A confirmed advisory against anything in this tree — even a
+# dev-only dependency like criterion — fails the check rather than being
+# silently accepted; see it, decide, then add the ignore with a reason if
+# that is still the right call.
+ignore = []
+
+[licenses]
+# The five licenses this workspace itself is published under (LICENSE.md),
+# plus what its dependency tree actually carries: unicode-ident's
+# Unicode-3.0, and NCSA from er7/fuzz's libfuzzer-sys. Nothing here is a
+# runtime dependency of a published crate — er7 has none — but the tree is
+# still compiled locally, so its license terms still apply to whoever
+# builds from source.
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "BSD-3-Clause",
+    "GPL-2.0-only",
+    "GPL-3.0-only",
+    "Unicode-3.0",
+    "NCSA",
+]
+confidence-threshold = 0.8
+
+[licenses.private]
+# er7-bench and er7-fuzz are publish = false, but both still carry the
+# workspace's own five-license expression in their manifest (matching every
+# published crate, so the claim is uniform rather than an exception) —
+# false here means that claim gets checked like any other, not skipped.
+ignore = false
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+workspace-default-features = "allow"
+external-default-features = "allow"
+
+[sources]
+# Only crates.io. A dependency reached through an unrecognised registry or
+# a git URL fails the check rather than warning, because that is exactly
+# the substitution a supply-chain audit exists to catch.
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []
