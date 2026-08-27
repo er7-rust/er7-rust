@@ -231,7 +231,10 @@ question:
   build, a fuzz smoke run, and the trademark checker on every push and
   pull request; its first hosted run went green 2026-08-26. One run
   proves the gate executes — it is not yet a history.
-- **No signed commits or tags**, and no key escrow.
+- **No hosted "Verified" badge on signed commits or tags yet, and no key
+  escrow.** Signing itself is on and verified locally as of 2026-08-27 —
+  see [`MAINTAINERS.md`](MAINTAINERS.md) for the exact commands and the
+  one interactive step still pending.
 - **No bug bounty, and no security budget.**
 - **No second responder.** One email address, one person.
 - **No third-party audit.** Nobody has reviewed this code but its author

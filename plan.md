@@ -66,7 +66,10 @@ posture. Open items for each are in `tasks.md`.
    advisories, licenses, bans, and sources for both workspaces (the root
    one and `er7/fuzz/`'s own), on every push via `ci.yml`'s `deny` job and
    again every Monday via `audit.yml` regardless of whether anything
-   pushed. Still open: unsigned commits and tags, no SBOM.
+   pushed. Also 2026-08-27: commit and tag signing is on and verified
+   locally (SSH signing, `gpg.format ssh`); GitHub's "Verified" badge is
+   the one piece still open, pending an interactive OAuth grant only the
+   maintainer can make — `MAINTAINERS.md` names the exact step. No SBOM.
 
 4. **Privacy and patient data.** `er7-redact` is a PHI tool, and its claims
    are scoped correctly — "a starting point, not a compliance certification"

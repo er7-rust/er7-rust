@@ -51,10 +51,22 @@ That is the residual risk, and it is stated rather than mitigated, because
 no mitigation is available to a one-person project without a legal entity
 behind it.
 
-**Commits and tags are not cryptographically signed.** Said plainly because
-a reviewer will check, and an absent signature discovered later reads worse
-than one disclosed here. Authorship rests on the GitHub account and the
-committer identity in the history.
+**Commits and tags are cryptographically signed as of 2026-08-27**, with
+the SSH key already listed in the publishing-identities table above —
+`git config commit.gpgsign true` and `tag.gpgsign true`, `gpg.format ssh`,
+verified locally with `git log --show-signature` and `git tag -v` against
+an `allowed_signers` file naming the maintainer's key. **GitHub's
+"Verified" badge is not showing yet**, and that gap is disclosed rather
+than implied away: an SSH key must be registered with GitHub specifically
+as a *signing* key, separate from the same key's existing registration for
+push authentication, and doing that from this machine needs the
+`admin:ssh_signing_key` OAuth scope — an interactive grant the maintainer
+has to make himself, once, at
+<https://github.com/settings/ssh/new> (key type "Signing Key") or via
+`gh auth refresh -h github.com -s admin:ssh_signing_key` followed by
+`gh ssh-key add ~/.ssh/id_ed25519.pub --type signing`. A commit made
+before that step signs and verifies locally but is not attributed by
+GitHub; one made after it is.
 
 ## What is not here yet
 
@@ -69,7 +81,10 @@ information for an evaluation:
   2026-08-26, all four jobs. One run is a proof the gate works, not yet a
   track record — before it, the checks ran on a laptop by one person
   before a release.
-- **No signed commits or tags**, as above.
+- **No hosted "Verified" badge on signed commits or tags yet**, as above —
+  narrower than the flat "no signed commits" this line said before
+  2026-08-27, since signing itself is now on and verified locally; what is
+  still missing is one interactive step only the maintainer can take.
 - **No second security responder.** [`SECURITY.md`](SECURITY.md) is the
   policy, and it terminates at one email address —
   <joel@joelparkerhenderson.com>. Pretending otherwise would be worse than

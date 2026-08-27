@@ -76,8 +76,34 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       opens security PRs only (the `fhir-rust` posture — its first hour
       with default limits opened 47 version-bump PRs). SECURITY.md
       records the correction in the same change.
-- [ ] Tag releases and sign commits/tags going forward; record the posture
-      change in MAINTAINERS.md.
+- [x] **Tag releases and sign commits/tags going forward; record the
+      posture change in MAINTAINERS.md** — tagging was already the
+      practice (`er7-v0.1.3`/`serde-er7-v0.1.3`/`er7-redact-v0.2.1`,
+      `er7-v0.1.4`/`serde-er7-v0.1.4`/`er7-redact-v0.2.2`, both release
+      rounds tagged at the time). Signing itself landed 2026-08-27: SSH
+      signing (`gpg.format ssh`), `commit.gpgsign`/`tag.gpgsign` both
+      true, set with the maintainer's own existing key rather than a key
+      generated on his behalf — asked first, since a signing identity is
+      not this agent's to choose. Verified end to end on a scratch branch
+      and tag before touching real history: `git log --show-signature`
+      and `git tag -v` both report "Good \"git\" signature" against an
+      `allowed_signers` file, then the branch and tag were deleted.
+      **One piece stays open, and is named rather than implied closed**:
+      GitHub's own "Verified" badge needs this key registered there
+      specifically as a *signing* key, separate from its existing
+      authentication registration, and that registration needs an
+      interactive `admin:ssh_signing_key` OAuth grant this agent's `gh`
+      session does not have and cannot request on the maintainer's
+      behalf. `MAINTAINERS.md` names the exact command
+      (`gh auth refresh -h github.com -s admin:ssh_signing_key` then
+      `gh ssh-key add`) or the manual alternative
+      (github.com/settings/ssh/new, key type "Signing Key"). Commits
+      before that step sign and verify locally but show as unverified on
+      GitHub; commits after it will not. MAINTAINERS.md, SECURITY.md,
+      `plan.md`, and `spec/professionalization/index.md` rule 3's status
+      row all corrected in the same change, narrowing "no signed commits"
+      to the true, narrower gap rather than leaving the broader claim
+      standing next to a contradicting local git config.
 - [x] **Add dependency auditing (`cargo deny`: advisories, licenses, bans,
       sources) on push plus a weekly cron** — done 2026-08-27: `deny.toml`
       at the root (found by cargo-deny from either workspace, since it
