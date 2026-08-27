@@ -117,6 +117,18 @@ an archaeology project.
 - Is accountable for every line in the repository regardless of what tool
   helped write it. See [`AI_STATEMENT.md`](AI_STATEMENT.md).
 
+## What to expect from an issue or pull request
+
+**Read within a week.** That is a target, not a contract — there is one
+maintainer, no team rotation, and no on-call. It is stated here instead of
+left unsaid, because "someone will look at this eventually" and "nobody
+knows when" read very differently to the person waiting. If a week passes
+with nothing, a polite ping is not rude; it is a reasonable check that the
+issue did not fall through.
+
+A vulnerability report has its own, tighter posture — see
+[`SECURITY.md`](SECURITY.md).
+
 ## Becoming a maintainer
 
 The route is defined, it is open, and the fuller version — including what
