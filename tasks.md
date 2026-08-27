@@ -304,6 +304,58 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       drift, which is the same reasoning `er7/CONTRIBUTING.md` already
       states; that file stays as the one existing pointer.
 
+### Audit: stale claims found by re-checking, not by assumption
+
+Three items closed 2026-08-27 by re-verifying earlier status rows against
+the live tree, per rule 2 of the professionalization spec ("every
+countable claim is re-verified when cited") rather than trusting a prior
+pass:
+
+- [x] **Correct `spec/professionalization/index.md` rules 2, 4, and 8** —
+      all three had been sitting at "Partly met" citing gaps that were
+      already closed elsewhere in this file. Rule 2 said the special-files
+      list was missing four entries from the canonical `fhir-rust` copy;
+      diffed line by line and found exactly one, a missing "2.1" on the
+      CODE_OF_CONDUCT.md entry — fixed in both files. Rule 4 said CI "has
+      not yet had a hosted run"; `gh run list` shows 13 runs, 12 green.
+      Rule 8 pointed at rules 2 and "per-crate document parity" as open,
+      both of which this file already shows closed. All three now read
+      **Met**.
+- [x] **Correct "exactly one green run" everywhere it was still claimed**
+      — MAINTAINERS.md, SECURITY.md, `plan.md`, and AI_STATEMENT.md all
+      said CI had a track record of one run, dated 2026-08-26. By
+      2026-08-27 that was 13 runs, 12 green, with the one failure
+      (`61eb30d`) already root-caused and fixed the same day it happened
+      (`574daaf`) — a real track record, not a stronger version of the
+      same claim. The bullet was removed outright from MAINTAINERS.md's
+      and SECURITY.md's "what is not here" lists (the gap it named no
+      longer exists) and replaced with a positive, evidence-cited row in
+      SECURITY.md's checkable-properties table. AI_STATEMENT.md's own
+      §13 names exactly this trigger — "a claim in this document stops
+      being true" — for an off-cycle revision, so §7 and §12 were
+      corrected and the document bumped 1.2.0 → 1.3.0 with an Annex A
+      entry, rather than edited silently.
+- [x] **Investigate the low-severity Dependabot alert flagged, but not
+      chased down, at the end of the previous session** — `cookie` in
+      `er7-rust.github.io`'s npm tree. Root cause, from Dependabot's own
+      job log rather than guessed: `cookie` is a transitive dependency of
+      `@sveltejs/kit`, which still declares `cookie: '^0.6.0'` even in its
+      latest published release (`2.70.3`, checked via `npm view
+      @sveltejs/kit@latest dependencies`) — upstream has not shipped a fix
+      yet, which is exactly why Dependabot's own three automatic-fix
+      attempts all failed with `security_update_not_possible` rather than
+      opening a PR. **Not fixed here.** Forcing `cookie` to `0.7.0+` via a
+      `pnpm.overrides` entry would run SvelteKit's server-side cookie
+      handling against a dependency version it was not tested with, to
+      close a hole that is very likely unreachable anyway: this site is
+      prerendered by `adapter-static` with no server at runtime
+      (`svelte.config.js` says so explicitly), so the vulnerable code path
+      — cookie name/path/domain validation in server-side request
+      handling — never executes in production. That trade is not this
+      agent's to make unilaterally; the alert is left open, and whether to
+      dismiss it (with this reasoning) or wait for an upstream fix is the
+      maintainer's call.
+
 ## Trademarks
 
 HL7®, and FHIR® are the registered trademarks of Health Level Seven

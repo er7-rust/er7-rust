@@ -122,9 +122,11 @@ posture. Open items for each are in `tasks.md`.
 - The trademark sweep is committed, but the *published* crates predate it:
   the compliance posture in crate doc-comments and manifests reaches
   crates.io only with each crate's next release.
-- SECURITY.md's "checkable properties" now have a CI workflow behind them,
-  and its first hosted run went green 2026-08-26 — a track record of one
-  run is still a short track record.
+- SECURITY.md's "checkable properties" now have a CI workflow behind them:
+  its first hosted run went green 2026-08-26, and as of 2026-08-27 it has
+  13 runs, 12 green, with the one failure root-caused and fixed the same
+  day. No longer a single-run proof of concept, though still a young
+  history by the standards of a mature project.
 - Pseudonyms in `er7-redact` are FNV-1a and documented as not a security
   primitive — any outreach that touches de-identification must repeat that
   framing, not soften it.

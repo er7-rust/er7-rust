@@ -149,6 +149,7 @@ taken on trust:
 | **The command-line tools read only what you name** — a file argument or standard input — and write only to standard output or `-o` | `er7/src/main.rs`, `er7-redact/src/main.rs`. No configuration file is searched for and no environment variable is consulted. |
 | **Fuzzed on the untrusted-input surface** | `er7/fuzz/`: `parse_roundtrip`, `escape_roundtrip`, `query_paths` |
 | **Every dependency's license and every advisory against it is checked**, on push and again every Monday whether or not anything pushed | `deny.toml`; run `cargo deny check` from the root and from `er7/fuzz/`, or read the `deny` job in `.github/workflows/ci.yml` and `.github/workflows/audit.yml` |
+| **CI has a real hosted track record, not a single proof-of-concept run** | `gh run list -R er7-rust/er7-rust`: 13 hosted runs of `.github/workflows/ci.yml` as of 2026-08-27, 12 green. The one failure (`61eb30d`) was a flaky CLI-test race — a run that fails while parsing its arguments exits before reading standard input, closing a pipe the test helper was still writing to — root-caused and fixed the same day (`574daaf`), not swept aside |
 
 **The one thing worth knowing before you log an error.** Error values are
 deliberately narrow, and none of them carries a field value from a message
@@ -226,11 +227,6 @@ a security review — and the same list appears in
 [`MAINTAINERS.md`](MAINTAINERS.md), where it belongs to the continuity
 question:
 
-- **A hosted-CI track record of exactly one green run.** A workflow
-  (`.github/workflows/ci.yml`, 2026-08-26) runs the four checks, an MSRV
-  build, a fuzz smoke run, and the trademark checker on every push and
-  pull request; its first hosted run went green 2026-08-26. One run
-  proves the gate executes — it is not yet a history.
 - **No key escrow for the code-signing key.** A successor generates their
   own. Commits and tags are signed and GitHub-verified as of 2026-08-27;
   see [`MAINTAINERS.md`](MAINTAINERS.md) for the key and the verification

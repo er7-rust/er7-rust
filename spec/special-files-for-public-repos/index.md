@@ -16,7 +16,7 @@ Special files that use top-level markdown:
 - AI_STATEMENT.md (use this as template: https://github.com/rubentalstra/FerroEHR/blob/develop/AI_STATEMENT.md)
 - GOVERNANCE.md how decisions are made, what binds them, how to disagree, how to become a maintainer
 - SECURITY.md how to report a vulnerability, what is in scope, response windows, known open issues
-- CODE_OF_CONDUCT.md Contributor Covenant, plus this project's claim-accuracy clause
+- CODE_OF_CONDUCT.md Contributor Covenant 2.1, plus this project's claim-accuracy clause
 - PHI.md what the software does and does not do with patient data, in plain language
 - RFC.md the open questions this project wants answered, and what feedback helps
 - TRADEMARKS.md the trademark notice, and what the project does not claim
@@ -25,8 +25,11 @@ Special files that use top-level markdown:
 
 This list is kept in step with the canonical version in the sibling
 `fhir-rust` repository (`spec/special-files-for-public-repos/index.md`
-there); re-synced 2026-08-26. One local addition: TRADEMARKS.md, which this
-repository carries as its own top-level file.
+there); re-synced 2026-08-26, re-diffed line by line 2026-08-27 and found
+one wording gap (this file's CODE_OF_CONDUCT.md entry did not name the
+Contributor Covenant version; fixed to match). One local addition:
+TRADEMARKS.md, which this repository carries as its own top-level file
+and the canonical copy does not.
 
 ## Status in this repository
 
