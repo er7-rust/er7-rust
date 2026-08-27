@@ -32,10 +32,10 @@ repository carries as its own top-level file.
 
 All of the above exist as of 2026-08-26. Two notes:
 
-- **The root CODE_OF_CONDUCT.md is Contributor Covenant 2.0, not 2.1.**
-  `spec/professionalization/index.md` rule 7 names 2.1; whether to upgrade
-  is an open decision recorded in `tasks.md`, and this note stays honest
-  about the mismatch until it is made.
+- **The root CODE_OF_CONDUCT.md is Contributor Covenant 2.1**, matching
+  what `spec/professionalization/index.md` rule 7 names, since 2026-08-27
+  — it was 2.0 until then; `tasks.md` records the change and the one
+  textual difference between the versions.
 - **The HL7® trademark rules in
   [`spec/hl7-trademarks-fair-use/`](../hl7-trademarks-fair-use/index.md)
   are met by all of these files as of the 2026-08-26 sweep.** They require

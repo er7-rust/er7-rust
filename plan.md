@@ -44,6 +44,8 @@ posture. Open items for each are in `tasks.md`.
    (2026-08-26): the code of conduct now lives at `/CODE_OF_CONDUCT.md`,
    where GitHub's community-health detection reads it, with a
    claim-accuracy clause added and the three linking documents repointed.
+   Upgraded to Contributor Covenant 2.1 (2026-08-27), matching what
+   `spec/professionalization/index.md` rule 7 has named all along.
 
 2. **Compliance — licensing and trademarks.** The strongest of the five
    repositories here: TRADEMARKS.md, a checker, and an in-flight sweep
@@ -60,8 +62,11 @@ posture. Open items for each are in `tasks.md`.
    `spec/01-family-policy/index.md` §1.2, an MSRV build, and the trademark
    checker — and, since later the same day, a fuzz smoke job (nightly,
    build plus a brief run of each target). The first hosted run went
-   green 2026-08-26, all four jobs. Still open: unsigned commits and
-   tags, no `cargo deny`/`cargo audit`, no SBOM.
+   green 2026-08-26, all four jobs. As of 2026-08-27, `cargo deny` covers
+   advisories, licenses, bans, and sources for both workspaces (the root
+   one and `er7/fuzz/`'s own), on every push via `ci.yml`'s `deny` job and
+   again every Monday via `audit.yml` regardless of whether anything
+   pushed. Still open: unsigned commits and tags, no SBOM.
 
 4. **Privacy and patient data.** `er7-redact` is a PHI tool, and its claims
    are scoped correctly — "a starting point, not a compliance certification"
@@ -77,7 +82,10 @@ posture. Open items for each are in `tasks.md`.
    AI-statement routes, each summarizing its root document and naming it
    as canonical (live on the next site publish). CONTRIBUTING.md's
    "Money" section's donation routes are surfaced by
-   `.github/FUNDING.yml` as of 2026-08-26.
+   `.github/FUNDING.yml` as of 2026-08-26. As of 2026-08-27, the rule 9
+   gate itself is closed: `help/outreach/index.md` checked every
+   prerequisite against the tree and found none unmet. No promotion has
+   started — that is a separate, deliberate decision, not a rule.
 
 6. **Audit and harmonization.** No findings register and no plan/tasks
    history — this file and `tasks.md` are the start. Family conventions to

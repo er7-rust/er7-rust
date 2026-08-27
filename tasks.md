@@ -78,11 +78,49 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       records the correction in the same change.
 - [ ] Tag releases and sign commits/tags going forward; record the posture
       change in MAINTAINERS.md.
-- [ ] Add dependency auditing (`cargo deny`: advisories, licenses, bans,
-      sources) on push plus a weekly cron — even with runtime dependency
-      counts of 0/1/2, the dev-dependency tree under `er7-bench` is 51
-      packages.
-- [ ] Add `.github/ISSUE_TEMPLATE/` and a stated issue-response expectation.
+- [x] **Add dependency auditing (`cargo deny`: advisories, licenses, bans,
+      sources) on push plus a weekly cron** — done 2026-08-27: `deny.toml`
+      at the root (found by cargo-deny from either workspace, since it
+      walks up), allow-listing exactly the licenses this dependency tree
+      carries — the workspace's own five, plus Unicode-3.0
+      (`unicode-ident`, reached through criterion's `serde_derive`) and
+      NCSA (`libfuzzer-sys`, in `er7/fuzz`'s separate workspace) — with
+      `sources.unknown-registry`/`unknown-git` set to `deny` rather than
+      the generated template's `warn`. `ci.yml` gained a `deny` job (two
+      `EmbarkStudios/cargo-deny-action@v2` steps, one per manifest) on the
+      existing push/PR trigger; a new `.github/workflows/audit.yml` reruns
+      the same check on a Monday cron plus `workflow_dispatch`, matching
+      `dependabot.yml`'s day. Along the way, fixed a real finding: the
+      fuzz workspace's `er7 = { path = ".." }` had no version bound, so
+      `bans.wildcards = "deny"` (raised from the template's `allow`) failed
+      it — every other workspace member already pins `version = "0"`
+      alongside its path dependency, and `er7/fuzz/Cargo.toml` now does
+      too. `er7/fuzz/Cargo.toml` also gained the same `description` and
+      five-license `license` field every other crate in the family
+      carries, which `licenses.private.ignore = false` now verifies
+      instead of skipping. All four categories pass, in both workspaces,
+      confirmed by running `cargo deny check` directly (not just planned
+      through CI) before committing. `plan.md` workstream 3 and
+      `SECURITY.md`'s checkable-properties table updated in the same
+      change; "no `cargo deny`/`cargo audit`" dropped from the still-open
+      list, SBOM stays open.
+- [x] **Add `.github/ISSUE_TEMPLATE/` and a stated issue-response
+      expectation** — done 2026-08-27: `bug_report.md` and
+      `wrong_claim.md`, plus `config.yml` routing security reports to
+      GitHub's private advisory form (verified enabled by
+      `gh api repos/er7-rust/er7-rust/private-vulnerability-reporting`
+      before linking it) and everything else to
+      [`MAINTAINERS.md`](MAINTAINERS.md). Adapted from the sibling
+      `hl7-rust` repository's three-file set rather than invented
+      independently, per rule 8's "sync from the repository that owns the
+      canonical copy" — trimmed for this repo's shape (three crates, no
+      transports, so the environment question drops the
+      transport-specific parenthetical `hl7-rust` carries). The response
+      expectation itself is new prose, not copied: a "What to expect from
+      an issue or pull request" section in `MAINTAINERS.md`, stating the
+      same one-week target `hl7-rust`'s `config.yml` already implied but
+      had not written down as prose anywhere in that repository either —
+      worth carrying back there.
 
 ### Governance
 
@@ -93,10 +131,21 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       site copy, which keeps its own), and the claim-accuracy clause
       adapted from the `fhir-rust` version ("One Addition Specific to
       This Project").
-- [ ] Decide whether to upgrade the root CODE_OF_CONDUCT.md from
-      Contributor Covenant 2.0 to 2.1 —
-      `spec/professionalization/index.md` rule 7 names 2.1, and the status
-      table there records the mismatch honestly until this is decided.
+- [x] **Upgrade the root CODE_OF_CONDUCT.md from Contributor Covenant 2.0
+      to 2.1** — done 2026-08-27, resolving the decision this item
+      previously deferred: `spec/professionalization/index.md` rule 7
+      names 2.1 as the family's own requirement, not an externally imposed
+      one, and nothing in this repository's history recorded 2.0 as a
+      deliberate choice — it was a plain gap, not a declined decision. The
+      official 2.1 text was fetched and diffed against 2.0 rather than
+      paraphrased from memory: the only substantive change is "caste,
+      color," added to the Pledge's list of protected characteristics;
+      everything else, including this project's own claim-accuracy clause
+      and the maintainer-email reporting path, is unchanged. The
+      Attribution section's version number and URL updated to match.
+      `spec/professionalization/index.md` rule 7's status row and
+      `spec/special-files-for-public-repos/index.md`'s note both updated
+      in the same change.
 
 ### Compliance — licensing and trademarks
 
@@ -145,9 +194,28 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       routes; all five linked from the shared footer. `pnpm check` green
       (308 files, 0 errors, 0 warnings); `bin/check-trademarks` green.
       The pages go live on the next `make publish` of the site.
-- [ ] Write `help/outreach/index.md` at the workspace level (the other four
-      family repositories each have one; this one has only per-crate
-      `help/` directories), gated on CI and the conduct file landing first.
+- [x] **Write `help/outreach/index.md` at the workspace level** — done
+      2026-08-27, now that CI and the conduct file (both closed
+      2026-08-26) had unblocked it: `help/index.md` and
+      `help/outreach/index.md`, matching the per-crate `help/` pattern
+      and the sibling `hl7-rust` repository's shape. Kept narrower than
+      `hl7-rust`'s version on purpose — this repository already has
+      `spec/promote/index.md` (the full channel research, written earlier
+      in this project's history), so the new file holds only the
+      prerequisite gate rule 9 actually asks for, and links out for
+      everything else rather than duplicating it. Nine prerequisites
+      checked against the tree that day (docs.rs 200 for all three crates
+      — caught and fixed a `curl` check that used the crate name instead
+      of the module name, which under-reported two of the three as 404;
+      `bin/check-trademarks`; the issue templates and `cargo deny` work
+      landed the same day). Verdict: every prerequisite met or not
+      applicable, including the trademark row, closed here without ever
+      needing the written-clearance step `hl7-rust` is still waiting on,
+      since no name in this workspace uses a word mark. `AGENTS.md` gained
+      a pointer to `help/`; `plan.md` workstream 5 and
+      `spec/professionalization/index.md` rule 9's status row updated in
+      the same change. No promotion has started — the gate opening is not
+      a decision to walk through it.
 
 ### Audit and harmonization
 

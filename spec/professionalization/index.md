@@ -58,19 +58,20 @@ and [`tasks.md`](../../tasks.md); this file holds the rules.
 
 ## Status in this repository
 
-Assessed 2026-08-26, by reading the tree rather than remembering it.
+Assessed 2026-08-26, updated 2026-08-27, by reading the tree rather than
+remembering it.
 
 | Rule | State | Evidence |
 | ---- | ----- | -------- |
 | 1 | **Met** | `plan.md` and `tasks.md` at the root, committed 2026-08-26; every `[x]` added since names its evidence in the line |
 | 2 | **Partly met** | The special files exist at the root (SECURITY.md, MAINTAINERS.md, GOVERNANCE.md, CONTRIBUTING.md, AI_STATEMENT.md, PHI.md, CODE_OF_CONDUCT.md, TRADEMARKS.md, RFC.md, CODEOWNERS, …). The local [`spec/special-files-for-public-repos/index.md`](../special-files-for-public-repos/index.md) is out of sync with the canonical `fhir-rust` copy (four entries missing) — tracked in `tasks.md` ("Re-sync") |
-| 3 | **Met as practice** | The "no CI" gap declared in MAINTAINERS.md, AI_STATEMENT.md §7/§12, SECURITY.md, and CONTRIBUTING.md was closed 2026-08-26 with all four declaring documents updated in the same change; the still-open declared gaps (unsigned commits, no `cargo deny`, no second responder) each have a `tasks.md` item |
+| 3 | **Met as practice** | The "no CI" gap declared in MAINTAINERS.md, AI_STATEMENT.md §7/§12, SECURITY.md, and CONTRIBUTING.md was closed 2026-08-26 with all four declaring documents updated in the same change; dependency auditing closed 2026-08-27 without ever having been declared as a gap in one of those three documents in the first place — `plan.md` tracked it instead, which this rule does not cover, and SECURITY.md's checkable-properties table gained the row rather than losing a declared one. The still-open declared gaps (unsigned commits, no second responder) each have a `tasks.md` item |
 | 4 | **Partly met** | [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) runs the four checks, an MSRV 1.95 build, and `bin/check-trademarks` on every push and pull request — but it has not yet had a hosted run, and the fuzz targets are not in it (`tasks.md` tracks both) |
 | 5 | **Met** | `bin/check-trademarks` passes across the tree (run 2026-08-26); the 100+-file sweep extending compliance into crate doc-comments, manifests, and site copy landed 2026-08-26 — what remains unpublished is only what waits for each crate's next crates.io release |
 | 6 | **Met** | [`PHI.md`](../../PHI.md), added 2026-08-26: privacy-officer Q&A, the Safe Harbor coverage/non-coverage table, no compliance claim anywhere in it |
-| 7 | **Met, one version behind** | [`CODE_OF_CONDUCT.md`](../../CODE_OF_CONDUCT.md) at the root since 2026-08-26 with the claim-accuracy clause and the maintainer's address as the reporting path — but it is Contributor Covenant **2.0**, not the 2.1 this rule names; `tasks.md` tracks the upgrade decision |
+| 7 | **Met** | [`CODE_OF_CONDUCT.md`](../../CODE_OF_CONDUCT.md) at the root since 2026-08-26 with the claim-accuracy clause and the maintainer's address as the reporting path; upgraded to Contributor Covenant **2.1** 2026-08-27 — the only substantive change between the two versions is "caste, color," added to the Pledge's protected-characteristics list, applied verbatim against the official 2.1 text rather than paraphrased |
 | 8 | **Partly met** | The rules, workstreams, and file set are shared with the family; the special-files list is out of sync (rule 2) and per-crate document parity is an open `tasks.md` item |
-| 9 | **Open, and unblocked** | `help/outreach/index.md` does not exist; [`spec/promote/`](../promote/index.md) holds the sequence but no prerequisite gate is written. Its stated blockers — CI and the root conduct file — both landed 2026-08-26, so the `tasks.md` item is now workable. No promotion has occurred |
+| 9 | **Met** | [`help/outreach/index.md`](../../help/outreach/index.md), added 2026-08-27: nine prerequisites checked against the tree that day, every one met or not applicable — the trademark row in particular, closed without ever needing the written-clearance step the sibling `hl7-rust` repository is still waiting on, since no name in this workspace uses a word mark. `spec/promote/` keeps the channel research; this file keeps only the gate. No promotion has occurred yet — the gate is open, not pulled |
 
 The related list of *which* files this all applies to is
 [`spec/special-files-for-public-repos/`](../special-files-for-public-repos/index.md);
