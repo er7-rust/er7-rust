@@ -52,6 +52,31 @@ That is the residual risk, and it is stated rather than mitigated, because
 no mitigation is available to a one-person project without a legal entity
 behind it.
 
+**Trusted Publishing would remove the crates.io API token row above** —
+OIDC-based, short-lived credentials issued per CI run instead of one
+long-lived token sitting on the maintainer's machine indefinitely. It is
+not adopted yet, and [`spec/trusted-publishing/index.md`](spec/trusted-publishing/index.md)
+states why plainly: the intent is to add it once it is production-ready
+across every forge this repository actually publishes to or mirrors on
+(GitHub, GitLab, Codeberg) and every destination it actually publishes to
+(crates.io today; npm if the site's own tooling ever needed it), not the
+moment crates.io alone supports it for one of those forges. Adopting it
+early for GitHub only would leave the token in place for the mirrors
+anyway, which is not the reduction it would look like.
+
+**A prerequisite that spec file does not yet name:** Trusted Publishing
+authenticates a *CI workflow run* to crates.io — it has no meaning for a
+human typing `cargo publish` at their own terminal, which is what
+"Cuts releases" below actually means today: one person, on his own
+machine. It is also what [`GOVERNANCE.md`](GOVERNANCE.md) states as a
+rule, not a habit: "a release is a decision, not an automation; no
+workflow publishes; one person runs `cargo publish`." Adopting Trusted
+Publishing as it exists today would mean moving the publish step into a
+CI job — a governance change, not a credential swap, and one this
+document is not pre-committing to just by naming the token as removable.
+That tension is not resolved here; it is named so the day this gets
+picked up, nobody has to rediscover it.
+
 **Commits and tags are cryptographically signed as of 2026-08-27**, with
 the dedicated code-signing key in the publishing-identities table above —
 `git config commit.gpgsign true` and `tag.gpgsign true`, `gpg.format ssh`,

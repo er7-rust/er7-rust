@@ -20,6 +20,28 @@ readers rather than for a repository, is at <https://er7-rust.github.io/news/>.
 | Rust | Current stable minus three releases; today 1.95 |
 | License | MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only |
 
+## 2026-08-28 — A stated intent to adopt Trusted Publishing, and a caveat it surfaced
+
+Every crate here still publishes with a long-lived crates.io API token on
+the maintainer's own machine, the way every crate in a small workspace
+like this one typically does. The intent to move to Trusted Publishing —
+short-lived, OIDC-issued credentials, no token sitting around between
+releases — is now recorded rather than left as an unstated someday:
+[`spec/trusted-publishing/index.md`](spec/trusted-publishing/index.md)
+says it plainly, gated on the mechanism being production-ready across
+every forge this repository publishes to or mirrors on, not just the
+first one that supports it.
+
+Propagating that intent into [`MAINTAINERS.md`](MAINTAINERS.md) and
+[`SECURITY.md`](SECURITY.md) surfaced something the original note did not
+name: Trusted Publishing authenticates a *CI workflow run*, and this
+project's own releases are run by a person, at a terminal, on purpose —
+[`GOVERNANCE.md`](GOVERNANCE.md) states that as a rule, not a habit.
+Adopting the mechanism as it exists today would mean moving the publish
+step into CI first, which is a governance change and not merely a
+credential upgrade. Recorded so the two decisions stay visibly separate
+rather than one quietly implying the other.
+
 ## 2026-08-28 — GitHub Sponsors is live; Open Collective is not, and says so
 
 GitHub Sponsors joined the donation routes in

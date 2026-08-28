@@ -231,6 +231,13 @@ question:
   own. Commits and tags are signed and GitHub-verified as of 2026-08-27;
   see [`MAINTAINERS.md`](MAINTAINERS.md) for the key and the verification
   evidence.
+- **No Trusted Publishing.** Every crate still publishes with a long-lived
+  crates.io API token sitting on the maintainer's own machine, not a
+  short-lived OIDC credential issued per CI run. The intent to adopt it is
+  recorded, not silently deferred — see
+  [`spec/trusted-publishing/index.md`](spec/trusted-publishing/index.md)
+  and [`MAINTAINERS.md`](MAINTAINERS.md) for why it waits on every forge
+  this repository publishes to, not just the first one that supports it.
 - **No bug bounty, and no security budget.**
 - **No second responder.** One email address, one person.
 - **No third-party audit.** Nobody has reviewed this code but its author
