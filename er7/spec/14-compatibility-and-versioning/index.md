@@ -66,9 +66,14 @@ supports at least current stable Rust minus three releases — stated in
 and shared with `er7-redact` and `serde-er7`. Edition 2024 sets a hard
 floor of 1.85, so the effective MSRV is `max(1.85, N-3)`; that floor
 stopped binding once stable reached 1.88. The value is pinned as
-`rust-version` in `Cargo.toml`, but no CI job yet builds against that exact
-toolchain — [T2](../17-open-tasks/index.md) tracks closing that gap. N-3 is
-a floor this crate promises to stay above, not a value chased release by
+`rust-version` in `Cargo.toml`, and CI builds and tests against that exact
+toolchain on every push (the `msrv` job in
+[`.github/workflows/ci.yml`](../../../.github/workflows/ci.yml), reading
+the version from this crate's own manifest rather than a second
+hard-coded copy — see
+[`spec/rust-msrv-n-minus-3/index.md`](../../../spec/rust-msrv-n-minus-3/index.md)
+§2.4). N-3 is a floor this crate promises to stay above, not a value
+chased release by
 release: the pin moves when the code genuinely needs something newer, and
 that bump is a breaking change, so it lands in a release allowed to break
 rather than in a patch.

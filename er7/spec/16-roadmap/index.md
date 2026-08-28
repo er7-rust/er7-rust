@@ -12,11 +12,17 @@ it ships. There is no separate `plan.md`.
 
 ## 16.1 Toward 0.2.0
 
+Priorities 1 and 2 shipped 2026-08-28 (fuzzing R6 through both `parse` and
+`parse_with`, and building/testing on the pinned MSRV toolchain with a
+manifest-read version) and are removed from this table along with the
+tasks they scheduled — see
+[§13.6](../13-testing-strategy/index.md) and
+[`spec/rust-msrv-n-minus-3/index.md`](../../../spec/rust-msrv-n-minus-3/index.md)
+§2.4 for the evidence.
+
 | Priority | Item | Task | Rationale |
 | -------- | ---- | ---- | --------- |
-| 1 | Prove panic-freedom by fuzzing the parser | [T1](../17-open-tasks/index.md) | R6 claims nothing below the header fails. Today that is argued from the code, not demonstrated. It is the single most load-bearing unproven claim in the spec. |
-| 2 | Check the pinned MSRV in CI | [T2](../17-open-tasks/index.md) | `rust-version = "1.95"` is pinned per the workspace N-3 policy, but no job builds on that toolchain, so the declared floor can drift from the real one silently. |
-| 3 | Streaming reader for large batch files | [T4](../17-open-tasks/index.md) | `split_messages` holds the whole input in memory. Batch files in production reach hundreds of megabytes. |
+| 1 | Streaming reader for large batch files | [T4](../17-open-tasks/index.md) | `split_messages` holds the whole input in memory. Batch files in production reach hundreds of megabytes. |
 
 ## 16.2 Toward 1.0.0
 
@@ -28,15 +34,27 @@ it ships. There is no separate `plan.md`.
    (task T5, shipped). Their converted output is byte-for-byte identical to
    what it was before the port, and their own test suites pass unchanged.
    See §16.3 below for what the port taught.
-2. **R6 is demonstrated, not argued** — §16.1 priority 1.
-3. **Every rule in [§1.4](../01-purpose-and-scope/index.md) has a test**,
-   with the sole documented exception of R24
-   ([§13.1](../13-testing-strategy/index.md)).
+2. ~~**R6 is demonstrated, not argued.**~~ **Met, 2026-08-28.**
+   `er7/fuzz/parse_with_total` and `er7/fuzz/parse_roundtrip` both fuzz the
+   below-the-header parsing logic R6 claims is total, and both ran clean —
+   see [§13.6](../13-testing-strategy/index.md) for the run counts and
+   durations.
+3. ~~**Every rule in [§1.4](../01-purpose-and-scope/index.md) has a
+   test**, with the sole documented exception of R24.~~ **Met.** This one
+   was true before condition 2 closed, not newly satisfied by it — the
+   [§13.1](../13-testing-strategy/index.md) coverage table already listed
+   every rule against a test, R24 already carried its documented
+   exception, and `every_rule_has_a_coverage_row` already enforced the
+   table by machine. Noted here rather than left unmarked once the other
+   two were checked off, since an accurate roadmap does not get to skip a
+   condition just because closing it took no new work.
 
-No breaking changes are planned for 1.0.0. Condition 1 surfaced one
-additive candidate ([T8](../17-open-tasks/index.md)) and no removals or
-renames, so if conditions 2 and 3 are met the API can be frozen as it
-stands.
+**All three conditions are now met, as of 2026-08-28.** No breaking
+changes are planned for 1.0.0 — condition 1 surfaced one additive
+candidate ([T8](../17-open-tasks/index.md)) and no removals or renames —
+so the API can be frozen as it stands. Cutting the release itself is the
+maintainer's decision, not a mechanical consequence of this table; this
+section states readiness, not intent.
 
 ## 16.3 What the T5 port established
 

@@ -40,3 +40,10 @@ path = "fuzz_targets/query_paths.rs"
 test = false
 doc = false
 bench = false
+
+[[bin]]
+name = "parse_with_total"
+path = "fuzz_targets/parse_with_total.rs"
+test = false
+doc = false
+bench = false

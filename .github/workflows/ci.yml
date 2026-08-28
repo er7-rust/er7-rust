@@ -76,11 +76,18 @@ jobs:
       - run: cargo test -p er7-bench
       - run: cargo clippy -p er7-bench --all-targets -- -D warnings
 
-  # The declared floor (rust-version = "1.95" in every publishable
-  # crate) actually builds, so the pin cannot silently drift from the
-  # real minimum — the gap spec/rust-msrv-n-minus-3/index.md §2.4 names.
+  # The declared floor (rust-version in every publishable crate's own
+  # Cargo.toml) actually builds and tests, so the pin cannot silently
+  # drift from the real minimum — closes er7 spec §17 task T2. The value
+  # is read from the manifest rather than hard-coded here, per that
+  # task's own "done when": a future MSRV bump only ever needs editing in
+  # one place. (The job's *display name* below stays a fixed string —
+  # GitHub Actions renders job names before any step runs, so it cannot
+  # reference a step's output; a stale label here is a readability papercut,
+  # not the silent-drift problem this job exists to close, since the
+  # toolchain it actually installs is never hard-coded.)
   msrv:
-    name: msrv 1.95
+    name: msrv (from er7/Cargo.toml)
     runs-on: ubuntu-latest
     steps:
       - name: free preinstalled runner bloat
@@ -92,10 +99,22 @@ jobs:
           docker image prune -af >/dev/null 2>&1 || true
           df -h /
       - uses: actions/checkout@v7
+      - name: read the pinned MSRV, and confirm all three crates agree
+        id: msrv
+        run: |
+          er7=$(grep -m1 '^rust-version' er7/Cargo.toml | grep -oE '[0-9]+\.[0-9]+')
+          redact=$(grep -m1 '^rust-version' er7-redact/Cargo.toml | grep -oE '[0-9]+\.[0-9]+')
+          serde=$(grep -m1 '^rust-version' serde-er7/Cargo.toml | grep -oE '[0-9]+\.[0-9]+')
+          if [ "$er7" != "$redact" ] || [ "$er7" != "$serde" ]; then
+            echo "::error::rust-version disagrees across crates: er7=$er7 er7-redact=$redact serde-er7=$serde"
+            exit 1
+          fi
+          echo "version=$er7" >> "$GITHUB_OUTPUT"
       - uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: "1.95"
+          toolchain: ${{ steps.msrv.outputs.version }}
       - run: cargo check --workspace --all-targets
+      - run: cargo test --workspace
 
   # The three fuzz targets under er7/fuzz/ — a build plus a brief smoke
   # run over each, not a fuzzing campaign: it proves the targets still

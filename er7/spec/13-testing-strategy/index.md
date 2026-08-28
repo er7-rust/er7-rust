@@ -106,12 +106,35 @@ patient data, and identifiers should be obviously fictional
 
 ## 13.5 What is not tested, and why
 
-- **Performance.** There are no benchmarks. The crate is a single-pass
-  parser over small inputs; a benchmark suite would cost more to maintain
-  than the guidance it gives. Recorded as [T3](../17-open-tasks/index.md).
-- **Fuzzing.** Parsing is total below the header (R6), so there is no
-  panic-freedom claim a fuzzer would falsify — but that claim is currently
-  argued rather than demonstrated. Recorded as
-  [T1](../17-open-tasks/index.md).
 - **The absence of features (R24).** No test can assert that a dictionary
-  is absent. This is enforced by review.
+  is absent. This is enforced by review, and always will be — it is not
+  a gap that closes with more test-writing.
+
+## 13.6 Fuzzing and benchmarks
+
+Both used to be recorded here as absent (T1 and T3 in
+[§17](../17-open-tasks/index.md), respectively); both are now in place,
+and this section is the citation each task's own "done when" asked for.
+
+**Fuzzing.** R6 claims parsing is total below the header — nothing there
+can panic, overflow the stack, or hang, whatever bytes arrive. `er7/fuzz/`
+carries `parse_roundtrip` (fuzzes `parse`, including the round-trip
+idempotence claim in R12) and `parse_with_total` (fuzzes `parse_with`
+directly, which is what actually reaches the below-the-header logic on
+most fuzzer-generated input — `parse` itself rejects anything without a
+recognisable `MSH`/`FHS`/`BHS` header before getting there at all). Both
+ran clean, no panics found, on 2026-08-28: `parse_roundtrip` completed
+52,355,877 executions in 120 seconds; `parse_with_total` completed
+2,487,369 in the same window. `escape_roundtrip` and `query_paths` fuzz
+adjacent properties (escape/unescape round-tripping, and `query` agreeing
+with the head of `query_all`) and are not R6 evidence specifically. The
+targets live in `er7/fuzz/`, its own workspace, so `er7` itself keeps R25.
+CI builds and briefly smoke-runs all four on every push
+(`.github/workflows/ci.yml`'s `fuzz` job); the durations above are a
+longer, one-off run, not what CI itself spends per push.
+
+**Benchmarks.** `er7-bench/benches/er7.rs`, a Criterion suite covering
+parse, render, escape, and query — deliberately outside the published
+crate, the same way the fuzz targets are, so `er7` keeps R25 even here.
+Method and current figures are [`BENCHMARKS.md`](../../../BENCHMARKS.md)
+at the workspace root; `cargo bench -p er7-bench` reproduces them.

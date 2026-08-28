@@ -18,49 +18,6 @@ priority order — [§16](../16-roadmap/index.md) is where priority lives.
 
 ---
 
-## T1 — Fuzz the parser to demonstrate R6
-
-**Scheduled:** [§16.1](../16-roadmap/index.md) priority 1.
-
-R6 claims nothing below the header can fail. The code supports that — every
-split is total, every index is `checked_sub` — but the claim is currently
-argued rather than demonstrated.
-
-Done when: a `cargo-fuzz` target feeds arbitrary bytes to `parse` and
-`parse_with` and runs clean for a documented duration; the result is cited
-in [§13.5](../13-testing-strategy/index.md); and the fuzz target lives
-outside the published crate so R25 still holds.
-
-## T2 — Check the pinned MSRV in CI
-
-**Scheduled:** [§16.1](../16-roadmap/index.md) priority 2.
-
-`rust-version = "1.95"` is now pinned in `Cargo.toml`, matching the
-workspace **N-3** policy
-([`spec/rust-msrv-n-minus-3/index.md`](../../../spec/rust-msrv-n-minus-3/index.md))
-and [§14.4](../14-compatibility-and-versioning/index.md). Pinning alone
-does not prove the crate still builds there: `rust-version` is a
-declaration Cargo checks against the *caller's* toolchain, not evidence
-that this code compiles on 1.95. Nothing yet stops a change from using a
-1.97 API and only failing for a downstream user.
-
-Done when: CI builds and tests the crate on the pinned toolchain
-(`rustup toolchain install 1.95 && cargo +1.95 test`) on every push, so the
-declared value is verified rather than asserted; and the same job exists
-for `er7-redact` and `serde-er7`, since the policy is workspace-wide. The
-rolling window means the pinned value changes as stable advances, so the
-job should read `rust-version` from the manifest rather than hard-coding a
-version.
-
-## T3 — Decide whether benchmarks earn their keep
-
-[§13.5](../13-testing-strategy/index.md) records that there are none. The
-crate is a single-pass parser, so the answer may well be "no" — but the
-decision should be written down rather than left as an absence.
-
-Done when: either a `benches/` directory exists with a documented baseline,
-or §13.5 states the decision and its reasoning and this task is deleted.
-
 ## T4 — Streaming reader for large batch files
 
 **Scheduled:** [§16.1](../16-roadmap/index.md) priority 3.

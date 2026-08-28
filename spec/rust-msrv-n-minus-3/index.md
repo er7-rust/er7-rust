@@ -58,16 +58,25 @@ the pin only has to move when the code actually needs something newer, or
 when the declared floor has fallen so far behind that nobody is testing it
 any more.
 
-## §2.4 The gap this policy still has
+## §2.4 The gap this policy used to have
 
 Until 2026-08-26 nothing in CI built against the pinned toolchain, so a
 declared floor could drift from the real one the moment a contributor used
 a newer feature — the failure mode described above, arriving by accident
-rather than by decision. The `msrv` job in
-[`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) now runs
-`cargo check --workspace --all-targets` on the pinned toolchain on every
-push and pull request; it has not yet had a hosted run, and it hard-codes
-the version and checks rather than tests, so
-[`er7` T2](../../er7/spec/17-open-tasks/index.md) stays open until the job
-runs `cargo test` on a manifest-read toolchain and has a green hosted run
-behind it.
+rather than by decision. Closed in two steps:
+
+- **2026-08-26.** The `msrv` job in
+  [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) started
+  running `cargo check --workspace --all-targets` on the pinned toolchain,
+  on every push and pull request.
+- **2026-08-28.** The job now also runs `cargo test --workspace` — a
+  check alone proves the code compiles, not that it behaves, and `er7`
+  T2's own "done when" asked for both. The toolchain version is read from
+  `er7/Cargo.toml`'s `rust-version` at run time rather than hard-coded in
+  the workflow, with a step that fails loudly if `er7`, `er7-redact`, and
+  `serde-er7` ever disagree on the value — closing this policy's own
+  possible failure mode (a silent per-crate drift) at the same time as
+  the original one.
+
+This closed [`er7` T2](../../er7/spec/17-open-tasks/index.md), deleted
+from that section's backlog in the same change.
