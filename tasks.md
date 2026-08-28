@@ -414,6 +414,40 @@ pass:
       each step — a `rm -rf` typo would previously not have been caught
       until it reached a hosted runner.
 
+- [x] **Implement `spec/free-open-source-funding/index.md`** — done
+      2026-08-28. Two of its five items were genuinely achievable; the
+      other three were checked, not assumed, and one turned out to
+      already be true.
+      - **GitHub Sponsors was already set up** — confirmed via GitHub's
+        GraphQL API (`hasSponsorsListing: true` for `joelparkerhenderson`)
+        before doing anything, rather than trusting that a
+        `github.com/sponsors/<user>` URL resolving to 200 meant a real
+        listing existed (it can return 200 either way). Surfaced it:
+        `.github/FUNDING.yml` gained `github: joelparkerhenderson`, and
+        `CONTRIBUTING.md`'s "Money" table gained the row.
+      - **Open Collective is genuinely not achievable here, and is not
+        pretended to be.** Checked against Open Collective's own GraphQL
+        API: an account exists at `joelparkerhenderson`, but as an
+        `INDIVIDUAL` — a personal contributor profile, not a fundable
+        project collective — and no collective exists at `er7-rust` at
+        all. Creating a real one needs the maintainer's own sign-in and a
+        fiscal-host choice, which is not a decision this agent makes on
+        his behalf. The sibling `fhir-rust` repository hit the identical
+        wall on the identical spec item and left a clear, honest write-up
+        of exactly this reasoning — read first, and the finding here
+        matches it rather than rediscovering it independently. Recorded
+        as a stated absence, not a silent one, in `CONTRIBUTING.md`,
+        `.github/FUNDING.yml`'s own comments, and `NEWS.md`.
+      - **`.github/FUNDING.yml`, `CONTRIBUTING.md`, and `NEWS.md`
+        updated to match**, per the spec's last three items.
+      - **One stale claim found and fixed along the way**: `CONTRIBUTING.md`
+        offered "funding the CI that MAINTAINERS.md currently lists as
+        missing" as an alternative to a donation — CI has not been
+        missing from that list since this session's earlier "exactly one
+        green run" correction. Swapped for the gap that is actually still
+        listed there (a second security responder), checked against the
+        live file rather than assumed unchanged.
+
 ## Trademarks
 
 HL7®, and FHIR® are the registered trademarks of Health Level Seven

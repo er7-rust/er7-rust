@@ -25,6 +25,7 @@ specific crate does.
 | [§3 Promotion](promote/index.md) | How the family reaches HL7® and Rust professionals: the channels, what each one's rules are, a ninety-day sequence, message templates, and the etiquette that keeps the project welcome in professional communities |
 | [§4 HL7® trademarks and fair use](hl7-trademarks-fair-use/index.md) | What HL7 International's fair-use terms require, what counts as a "page" in a repository, where the ® goes and where it deliberately does not, and the check that enforces it |
 | [§5 Professionalization](professionalization/index.md) | What "professional" means here and the nine rules that bind the maintainer to it — verified plans, accurate special files, self-declared gaps as promises, CI enforcing what documents claim, trademark discipline, plain-language patient-data answers, conduct, family harmonization, gated outreach — with a dated status table |
+| [§6 Free open source funding](free-open-source-funding/index.md) | The checklist behind `.github/FUNDING.yml` and `CONTRIBUTING.md`'s "Money" section — what got set up, and what was checked and found genuinely unavailable rather than skipped |
 
 ## What belongs here vs. in a crate's own spec
 

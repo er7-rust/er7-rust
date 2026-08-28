@@ -91,6 +91,12 @@ posture. Open items for each are in `tasks.md`.
    gate itself is closed: `help/outreach/index.md` checked every
    prerequisite against the tree and found none unmet. No promotion has
    started — that is a separate, deliberate decision, not a rule.
+   `spec/free-open-source-funding/index.md` closed 2026-08-28: GitHub
+   Sponsors was already live and is now surfaced in `FUNDING.yml` and
+   `CONTRIBUTING.md`; Open Collective was checked against its own API and
+   found genuinely unavailable without the maintainer's own sign-in,
+   matching what the sibling `fhir-rust` repository already found on the
+   same spec item — stated as an absence, not silently skipped.
 
 6. **Audit and harmonization.** No findings register and no plan/tasks
    history — this file and `tasks.md` are the start. Family conventions to

@@ -213,10 +213,25 @@ If you want to send something anyway:
 
 | Channel | Where |
 | ------- | ----- |
+| GitHub Sponsors | <https://github.com/sponsors/joelparkerhenderson> — verified live via GitHub's own API, one-off or recurring |
 | PayPal | <https://www.paypal.com/paypalme/joelparkerhenderson> |
 | Venmo | <https://www.venmo.com/joelparkerhenderson> |
 | Bank transfer | ACH or international wire; email <joel@joelparkerhenderson.com> for details |
 | Everything else | <https://linktr.ee/joelparkerhenderson> |
+
+All but the bank transfer are also declared in
+[`.github/FUNDING.yml`](.github/FUNDING.yml), which is what puts the
+"Sponsor" button on the repository page.
+
+**No Open Collective yet.** It was on the list; it is not set up. Checked
+against Open Collective's own API rather than assumed: an account exists
+at `joelparkerhenderson`, but as an `INDIVIDUAL` — a personal contributor
+profile, not a fundable project collective — and no collective exists at
+`er7-rust` at all. Creating a real one needs the maintainer's own sign-in
+and a fiscal-host choice (Open Source Collective is the usual one for a
+project like this), which is not something to do on someone else's
+behalf. If that changes, it gets a row here and in
+[`.github/FUNDING.yml`](.github/FUNDING.yml) the same day — not before.
 
 **What money does not buy**, said plainly so nobody is disappointed:
 
@@ -235,8 +250,9 @@ If you want to send something anyway:
 
 If your organisation depends on this in a clinical path and wants something
 stronger than goodwill, the useful conversation is not a donation — it is
-sponsoring a second maintainer, or funding the CI that
-[`MAINTAINERS.md`](MAINTAINERS.md) currently lists as missing. Email.
+sponsoring a second maintainer, which would also close the "no second
+security responder" gap [`MAINTAINERS.md`](MAINTAINERS.md) currently
+lists. Email.
 
 ## Licensing your contribution
 

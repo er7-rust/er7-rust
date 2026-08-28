@@ -3,8 +3,23 @@
 # not buy (not support, not a feature, not influence over the spec, not a
 # fix to the bus factor); nothing here changes that.
 #
-# The fourth route in CONTRIBUTING.md — bank transfer — is arranged by
-# email and has no URL, so it cannot appear in this file.
+# The bank-transfer route in CONTRIBUTING.md is arranged by email and has
+# no URL, so it cannot appear in this file.
+#
+# github: is GitHub Sponsors, confirmed live via the GraphQL API
+# (`hasSponsorsListing: true` for `joelparkerhenderson`) before this line
+# was added, not assumed — spec/free-open-source-funding/index.md § "Set
+# up GitHub Sponsors" was already true; this is the surfacing step.
+#
+# Open Collective is deliberately absent. `joelparkerhenderson` exists
+# there, but as an `INDIVIDUAL` account — a personal contributor profile,
+# not a fundable project collective — and no collective exists at
+# `er7-rust` at all, checked against Open Collective's own GraphQL API.
+# Creating a real one needs the maintainer's own sign-in and a
+# fiscal-host choice, which is not this file's or this agent's to make.
+# See CONTRIBUTING.md's "Money" section for the same finding stated in
+# prose, and NEWS.md for when it was checked.
+github: joelparkerhenderson
 custom:
   - "https://www.paypal.com/paypalme/joelparkerhenderson"
   - "https://www.venmo.com/joelparkerhenderson"

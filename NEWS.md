@@ -20,6 +20,23 @@ readers rather than for a repository, is at <https://er7-rust.github.io/news/>.
 | Rust | Current stable minus three releases; today 1.95 |
 | License | MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only |
 
+## 2026-08-28 — GitHub Sponsors is live; Open Collective is not, and says so
+
+GitHub Sponsors joined the donation routes in
+[`CONTRIBUTING.md`](CONTRIBUTING.md)'s "Money" section and
+[`.github/FUNDING.yml`](.github/FUNDING.yml): confirmed live via GitHub's
+own API (`hasSponsorsListing: true`), not assumed from the fact that a
+`/sponsors/` URL resolves.
+
+Open Collective did not join them, and that is a finding rather than an
+oversight. Checked against Open Collective's own API: an account exists
+at `joelparkerhenderson`, but as an `INDIVIDUAL` — a personal contributor
+profile, not something anyone could donate to *this project* through —
+and no collective exists at `er7-rust` at all. Setting one up needs the
+maintainer's own sign-in and a choice of fiscal host, which is not a
+decision this project's tooling makes on his behalf. If that changes,
+`CONTRIBUTING.md` and `.github/FUNDING.yml` get the row the same day.
+
 ## 2026-08-26 — `unsafe` is now a compile error
 
 Every crate root in the workspace carries `#![forbid(unsafe_code)]`: the
