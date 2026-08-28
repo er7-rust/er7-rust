@@ -356,6 +356,55 @@ pass:
       dismiss it (with this reasoning) or wait for an upstream fix is the
       maintainer's call.
 
+### Requested directly, outside `plan.md`'s workstreams
+
+- [x] **Free CI disk headroom: clean each crate's `target/` after
+      processing, and strip preinstalled runner bloat** — done 2026-08-28.
+      Two changes to `.github/workflows/ci.yml`:
+      1. **The `checks` job split into two phases with a `cargo clean`
+         between them.** `er7-bench`'s only dev-dependency is criterion,
+         which alone pulls in roughly 50 transitive crates that the three
+         published crates' own test/clippy/doc steps never touch. Measured
+         with a clean `target/` before each, not estimated: phase 1 alone
+         (the three published crates, all four checks) peaks at 226 MiB;
+         phase 2 alone (`er7-bench`, criterion and all) peaks at 215 MiB;
+         the old single-phase shape, run fresh with nothing scoped or
+         cleaned, peaked at 391 MiB — splitting roughly halves the job's
+         peak footprint rather than summing the two. A package-scoped
+         `cargo clean -p er7-bench` was tried first and rejected: measured
+         at only ~330 MiB freed of the ~1.8 GiB a long-lived local
+         `target/` had accumulated over this session's own work, because a
+         package-scoped clean does not walk into its exclusive dependency
+         tree — it leaves criterion's own compiled output sitting there.
+      2. **A "free preinstalled runner bloat" step**, first in the
+         `checks`, `msrv`, and `fuzz` jobs (not `trademarks` or `deny`,
+         neither of which compiles anything): removes the .NET SDK,
+         Android SDK, GHC, CodeQL, PowerShell, and cached Node modules the
+         standard `ubuntu-latest` image ships preinstalled and this
+         workflow never touches, plus pruning cached Docker images. Every
+         removal is `|| true`-guarded so a path that has moved in a future
+         runner-image update fails silently rather than breaking the job
+         — a real maintenance risk of hardcoding paths from an external
+         image, named rather than hidden. `df -h /` before and after, in
+         every job that runs it, so the effect is verifiable in the run
+         log rather than assumed to have worked.
+
+      Deliberately **not** a third-party disk-cleanup action
+      (`jlumbroso/free-disk-space` and similar exist and are well known):
+      the job is a dozen lines of `rm -rf` against well-documented paths,
+      and this workspace's own stated position on dependencies — an audit
+      surface, not a convenience — applies to CI tooling as much as to
+      published crates. Written inline, so the whole thing is readable in
+      `ci.yml` without trusting an external action's own supply chain.
+
+      Verified locally before trusting it on a hosted runner: both phases
+      of the `checks` split ran for real (`cargo test`/`clippy`/`rustdoc`
+      per phase, matching what the workflow now runs, not a paraphrase of
+      it), and every `run:` block in the file was checked with `bash -n`
+      via a small script that parses the workflow YAML and syntax-checks
+      each step — a `rm -rf` typo would previously not have been caught
+      until it reached a hosted runner.
+
 ## Trademarks
 
 HL7®, and FHIR® are the registered trademarks of Health Level Seven

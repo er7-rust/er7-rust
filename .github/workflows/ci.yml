@@ -30,20 +30,51 @@ jobs:
   # The four checks from spec/01-family-policy/index.md §1.2, verbatim.
   # `cargo rustdoc --lib` needs one package at a time, so the fourth
   # check runs once per library crate.
+  #
+  # Split into two phases with a `cargo clean` between them, deliberately:
+  # er7-bench's only dev-dependency is criterion, which alone pulls in
+  # roughly 50 transitive crates that the three published crates' own
+  # test/clippy/doc steps never touch. Measured 2026-08-27 with a clean
+  # target/ before each: phase 1 alone (the three published crates, all
+  # four checks) peaks at 226 MiB; phase 2 alone (er7-bench, criterion and
+  # all) peaks at 215 MiB; run together with nothing cleaned between them,
+  # the old single-phase shape this replaced peaked at 391 MiB. Splitting
+  # roughly halves the job's peak disk footprint rather than summing the
+  # two. (A package-scoped `cargo clean -p er7-bench` was tried first and
+  # rejected: it only frees that package's own output, not its exclusive
+  # dependency tree, so it does not touch criterion at all.) Nothing after
+  # phase 2 needs the disk back — the runner is discarded at the end of
+  # the job either way — so there is no cleanup step after phase 2.
   checks:
     name: the four checks
     runs-on: ubuntu-latest
     steps:
+      - name: free preinstalled runner bloat
+        run: |
+          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+            /opt/hostedtoolcache/CodeQL /usr/local/share/powershell \
+            /usr/local/lib/node_modules 2>/dev/null || true
+          docker image prune -af >/dev/null 2>&1 || true
+          df -h /
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy, rustfmt
-      - run: cargo test
-      - run: cargo clippy --all-targets -- -D warnings
+      # Phase 1: the three published crates. No criterion anywhere in this
+      # phase's dependency graph.
+      - run: cargo test -p er7 -p er7-redact -p serde-er7
+      - run: cargo clippy -p er7 -p er7-redact -p serde-er7 --all-targets -- -D warnings
       - run: cargo fmt --check
       - run: cargo rustdoc -p er7 --lib -- -W missing-docs
       - run: cargo rustdoc -p serde-er7 --lib -- -W missing-docs
       - run: cargo rustdoc -p er7-redact --lib -- -W missing-docs
+      - name: clean phase 1's target/ before building criterion
+        run: cargo clean
+      # Phase 2: er7-bench, isolated so its criterion-sized target/ never
+      # coexists on disk with phase 1's.
+      - run: cargo test -p er7-bench
+      - run: cargo clippy -p er7-bench --all-targets -- -D warnings
 
   # The declared floor (rust-version = "1.95" in every publishable
   # crate) actually builds, so the pin cannot silently drift from the
@@ -52,6 +83,14 @@ jobs:
     name: msrv 1.95
     runs-on: ubuntu-latest
     steps:
+      - name: free preinstalled runner bloat
+        run: |
+          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+            /opt/hostedtoolcache/CodeQL /usr/local/share/powershell \
+            /usr/local/lib/node_modules 2>/dev/null || true
+          docker image prune -af >/dev/null 2>&1 || true
+          df -h /
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@master
         with:
@@ -72,6 +111,14 @@ jobs:
     name: fuzz targets (build + smoke run)
     runs-on: ubuntu-latest
     steps:
+      - name: free preinstalled runner bloat
+        run: |
+          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+            /opt/hostedtoolcache/CodeQL /usr/local/share/powershell \
+            /usr/local/lib/node_modules 2>/dev/null || true
+          docker image prune -af >/dev/null 2>&1 || true
+          df -h /
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@nightly
         with:
@@ -108,7 +155,9 @@ jobs:
           done
 
   # Rules T1, T2, and T3 of spec/hl7-trademarks-fair-use/index.md,
-  # across every page in the tree.
+  # across every page in the tree. No Rust build here, so no disk-headroom
+  # step: the runner's default free space comfortably covers a checkout
+  # and a Python script.
   trademarks:
     name: trademarks
     runs-on: ubuntu-latest
@@ -120,6 +169,9 @@ jobs:
   # against both workspaces in this repository: the root one, and
   # er7/fuzz's own [workspace] (its Cargo.toml explains why it is
   # separate). cargo-deny finds deny.toml by walking up from either.
+  # No disk-headroom step here either: cargo-deny resolves the dependency
+  # graph and downloads the advisory database, it does not compile
+  # anything, and the default runner has ample room for that alone.
   deny:
     name: cargo deny
     runs-on: ubuntu-latest
