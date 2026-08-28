@@ -128,7 +128,39 @@ that was redacted will never notice.
   not a property of one message ([§5.5](../05-built-in-policies/index.md)).
   What is tested is that the named positions changed.
 - **Pseudonym collision behaviour.** FNV-1a's distribution is a property
-  of the construction, not of this crate. Recorded as
-  [T3](../15-open-tasks/index.md).
-- **Performance.** No benchmarks; one pass over a small message. Recorded
-  as [T4](../15-open-tasks/index.md).
+  of the construction, not of this crate, so a test asserting on it would
+  be testing someone else's code under a false name. This used to be
+  recorded as T3, on the premise that §7 claimed collisions were
+  negligible and needed a test to back that up — but §7 makes no such
+  claim and never did in its current form: [§7.2](../07-pseudonyms/index.md)
+  states plainly that the construction is "not collision-resistant against
+  an adversary," and [§7.3](../07-pseudonyms/index.md) goes further, warning
+  that an attacker can invert the whole mapping by brute force over a
+  realistic identifier space. T3's own fallback closure — "the claim in
+  §7 is weakened to what is actually demonstrated" — was already true by
+  the time anyone reread the task against the spec it cited, so the task
+  is deleted rather than carried forward against a claim that does not
+  exist.
+- **Nothing else.** Performance used to be listed here as untested
+  (recorded as T4); see [§11.7](#117-benchmarks) for why it no longer is.
+
+## 11.7 Benchmarks
+
+`er7-redact-bench/`, a workspace member that is **not published** —
+mirroring `er7-bench` one crate over, for the same reason: this crate
+carries exactly one runtime dependency (D16) and, until this crate
+existed, zero development ones, and Criterion's own tree stays out of
+that count.
+
+Measured 2026-08-28: redacting the standard reference `ADT^A08` example
+under the default policy costs about 17.6 µs; a batch of 50 costs about
+793.6 µs, or roughly 15.9 µs/message — consistent with the single-message
+figure, which is the sanity check that matters, since nothing in
+`Redactor::redact` shares state across messages. Rejecting by default
+costs about 9% more than accepting by default on this message, tracking
+the shape of the work: a reject-by-default policy walks and judges every
+leaf, not just the ones a rule names. Full figures, method, and the
+caveats that make them meaningful are in
+[`BENCHMARKS.md`](../../../BENCHMARKS.md) at the workspace root.
+
+This closes [T4](../15-open-tasks/index.md).

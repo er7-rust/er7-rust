@@ -1,9 +1,14 @@
 # Benchmarks
 
-Measured numbers for the operations that dominate any ER7 workload, plus
+Measured numbers for the operations that dominate an ER7 workload, plus
 the machine they came from and the caveats that make them meaningful.
+Covers both `er7` and `er7-redact`; `serde-er7` has none — it wraps
+`er7`'s own tree in Serde impls with no processing pass of its own to
+measure separately.
 
 The reader-friendly version is <https://er7-rust.github.io/benchmarks/>.
+
+## `er7`
 
 The benchmarks live in [`er7-bench/`](er7-bench/), a workspace member that
 is **not published**. It exists so that `er7` itself can keep both
@@ -11,7 +16,7 @@ is **not published**. It exists so that `er7` itself can keep both
 enforces — while Criterion lives one directory over, where it cannot reach
 the audit surface of the crate being measured.
 
-## Running them
+### Running them
 
 ```sh
 cargo bench -p er7-bench
@@ -26,7 +31,7 @@ cargo bench -p er7-bench -- parse
 
 Criterion writes an HTML report to `target/criterion/report/index.html`.
 
-## The inputs
+### The inputs
 
 Two synthetic messages — never real patient data, per
 [family policy §1.4](spec/01-family-policy/index.md) — chosen to bracket
@@ -41,14 +46,14 @@ The small message is the shape most interfaces move in bulk. The large one
 is the shape that decides whether a parser is fast enough for a day's
 traffic.
 
-## Results
+### Results
 
 Measured **2026-08-26**. Apple M4 Max, macOS 26.6.1, `rustc 1.98.0`,
 `aarch64-apple-darwin`, release profile. Criterion, 100 samples per
 benchmark; the figure is the median and the bracket is Criterion's
 confidence interval.
 
-### Parsing
+#### Parsing
 
 | Benchmark | Time | Throughput | Derived |
 | --------- | ---- | ---------- | ------- |
@@ -59,7 +64,7 @@ Parsing is the expensive half of a round trip, and throughput improves with
 message size: the large message parses at a higher rate per byte than the
 small one, because per-message fixed costs amortise away.
 
-### Writing
+#### Writing
 
 | Benchmark | Time | Derived |
 | --------- | ---- | ------- |
@@ -70,7 +75,7 @@ small one, because per-message fixed costs amortise away.
 Writing is roughly **12× cheaper than parsing** on the large message. That
 matters for the common integration shape: parse once, edit, write many.
 
-### Escape sequences
+#### Escape sequences
 
 | Benchmark | What it measures | Time |
 | --------- | ---------------- | ---- |
@@ -83,7 +88,7 @@ The plain case is the one to watch: escaping a value that needs no escaping
 costs about ten nanoseconds and does not allocate, which is what keeps
 whole-message writing cheap.
 
-### Queries
+#### Queries
 
 Against the 402-segment large message:
 
@@ -99,7 +104,7 @@ message, which is why `PID-3.4.2` against a 402-segment message costs about
 as much as against a 4-segment one. `query_all` necessarily walks
 everything: 7.23 µs for 200 matches is about 36 ns per match found.
 
-## Optimisation history
+### Optimisation history
 
 Changes made because a benchmark said so, rather than because the code
 looked slow:
@@ -108,7 +113,7 @@ looked slow:
 | ------ | ------ |
 | [`821a7dc`](https://github.com/er7-rust/er7-rust/commit/821a7dc) *Stop `query` walking the whole message to return one value* | `query/field` −85%, `query/subcomponent` −92%. Single-value lookup went from proportional to message length to effectively constant |
 
-## How to read these numbers, and how not to
+### How to read these numbers, and how not to
 
 1. **These are single-machine numbers on fast hardware.** An M4 Max is not
    an interface engine in a hospital data centre. Treat the ratios — write
@@ -127,7 +132,7 @@ looked slow:
    not an end-to-end interface benchmark; a real feed spends most of its
    time in I/O, TLS, and the receiving system.
 
-## Fuzzing
+### Fuzzing
 
 Performance work is only safe next to correctness work. The crate carries
 `cargo-fuzz` targets alongside these benchmarks:
@@ -136,6 +141,69 @@ Performance work is only safe next to correctness work. The crate carries
 cargo +nightly fuzz run parse_roundtrip -- -max_total_time=60
 ```
 
-Three targets: `parse_roundtrip`, `escape_roundtrip`, and `query_paths`.
-See [`er7/fuzz/`](er7/fuzz/) and
-[`er7/spec/13-testing-strategy/index.md`](er7/spec/13-testing-strategy/index.md).
+Four targets: `parse_roundtrip`, `parse_with_total`, `escape_roundtrip`,
+and `query_paths`. See [`er7/fuzz/`](er7/fuzz/) and
+[`er7/spec/13-testing-strategy/index.md`](er7/spec/13-testing-strategy/index.md)
+§13.6, which cites the actual run counts.
+
+## `er7-redact`
+
+The benchmarks live in
+[`er7-redact-bench/`](er7-redact-bench/), a workspace member that is
+**not published** — the same reasoning as `er7-bench`, one directory
+over: `er7-redact` carries exactly one runtime dependency and, until this
+crate existed, zero development ones too, and Criterion's own tree stays
+out of that count.
+
+### Running them
+
+```sh
+cargo bench -p er7-redact-bench
+
+# Record a baseline, change something, then compare against it.
+cargo bench -p er7-redact-bench -- --save-baseline before
+cargo bench -p er7-redact-bench -- --baseline before
+```
+
+### The inputs
+
+The HL7® v2 standard's own reference `ADT^A08` example — the same message
+every sample and doc-test in this crate already uses — and a batch of 50
+independently parsed copies of it, standing in for an export. Parsing
+happens once, outside the timed closure; what is measured is redaction
+alone.
+
+### Results
+
+Measured **2026-08-28**. Apple M4 Max, macOS 26.6.1, `rustc 1.98.0`,
+`aarch64-apple-darwin`, release profile. Criterion, 100 samples per
+benchmark.
+
+| Benchmark | Time | Derived |
+| --------- | ---- | ------- |
+| `redact/small` | 17.56 µs [17.50 – 17.62] | ≈ 57,000 messages/second |
+| `redact/batch_of_50` | 793.6 µs [791.0 – 796.4] | ≈ 15.9 µs/message — consistent with the single-message figure, as it should be: nothing in `Redactor::redact` shares state across messages |
+| `posture/accept_by_default` | 17.39 µs [17.33 – 17.46] | `Policy::patient_identifiers()` — only the leaves a rule names are visited |
+| `posture/reject_by_default` | 19.01 µs [18.97 – 19.05] | `Policy::all_but_the_header()` — every leaf in the message is visited and judged |
+
+Rejecting by default costs about **9% more** than accepting by default on
+this message, which tracks the shape of the work: a reject-by-default
+policy has to walk and judge every leaf, not just the ones a rule names.
+That gap will grow on a message with more untouched leaves than this
+eight-segment example carries, and shrink toward zero on one where nearly
+every leaf is named — this figure is one data point, not a general ratio.
+
+### How to read these numbers, and how not to
+
+The same four cautions as `er7`'s own results apply here without
+qualification — see above. One addition specific to this crate:
+**redaction cost is not de-identification cost.** Whether a message ends
+up de-identified is a property of the policy you write, not of how fast
+this crate applies it — see
+[`er7-redact` §5.5](er7-redact/spec/05-built-in-policies/index.md).
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

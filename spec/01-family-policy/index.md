@@ -48,8 +48,8 @@ or across the whole workspace with `--workspace`.
 ### No unsafe code, anywhere
 
 **Every crate root in this workspace carries `#![forbid(unsafe_code)]`** —
-the three libraries, both binaries, every example, the benchmark crate and
-its bench target, and each fuzz target.
+the three libraries, both binaries, every example, each benchmark crate
+and its bench target, and each fuzz target.
 
 `forbid` rather than `deny` is the point. A `deny` can be turned off by an
 `#[allow(unsafe_code)]` on the next function; a `forbid` cannot be

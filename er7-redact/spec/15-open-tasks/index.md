@@ -51,29 +51,6 @@ asked to write itself to a file, and §3 and §6 say what the boundary is.
 
 ---
 
-## T3 — Demonstrate the pseudonym distribution
-
-**Why.** [§7](../07-pseudonyms/index.md) asserts that collisions are
-negligible at the scale a redaction run works over. That is a property of
-FNV-1a rather than of this crate, and it is currently argued rather than
-shown ([§11.6](../11-testing-strategy/index.md)).
-
-**Done when.** A test hashes a large synthetic identifier space and
-asserts no collisions, or the claim in §7 is weakened to what is actually
-demonstrated.
-
----
-
-## T4 — Benchmarks
-
-**Why.** There is no measurement, only the argument that redaction is one
-pass over a small message ([§11.6](../11-testing-strategy/index.md)).
-
-**Done when.** A benchmark exists for a large batch file, or §11.6 records
-that the decision was to keep not measuring and why.
-
----
-
 ## T5 — Date shifting
 
 **Why.** `first 4` on a birth date destroys the interval between events,

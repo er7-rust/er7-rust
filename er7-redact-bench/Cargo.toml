@@ -1,0 +1,31 @@
+[package]
+name = "er7-redact-bench"
+version = "0.0.0"
+edition = "2024"
+authors = ["Joel Parker Henderson <joel@joelparkerhenderson.com>"]
+description = "Criterion benchmarks for the er7-redact crate; not published"
+license = "MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only"
+publish = false
+
+# Mirrors er7-bench's own reasoning exactly, one crate over: er7-redact
+# carries no dev-dependencies today (D16 fixes its one runtime dependency
+# at er7, and nothing in its own Cargo.toml adds Criterion's ~50-crate
+# tree on top of that). Keeping benchmarks in a separate, unpublished
+# workspace member means that stays true, the way er7 itself stays
+# dependency-free because er7-bench exists.
+[dependencies]
+er7 = { path = "../er7", version = "0" }
+er7-redact = { path = "../er7-redact", version = "0" }
+
+[dev-dependencies]
+criterion = { version = "0.5", default-features = false, features = ["cargo_bench_support"] }
+
+[lib]
+path = "src/lib.rs"
+
+[[bench]]
+name = "er7-redact"
+harness = false
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
