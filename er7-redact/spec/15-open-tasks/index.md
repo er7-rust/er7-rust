@@ -72,21 +72,6 @@ worked example.
 
 ---
 
-## T6 — A "what did I miss" check
-
-**Why.** A caller cannot currently tell what a policy does *not* cover
-([§14.5](../14-roadmap/index.md)).
-
-**Shape.** A function returning every position that carries text and is
-named by no rule — the set rejecting by default already computes — and a
-CLI flag to print it.
-
-**Done when.** Running the check against `samples/adt_a08.er7` with the
-default policy lists the free-text and quasi-identifier positions §5.4
-documents as deliberately untouched, and the CLI flag is specified in §10.
-
----
-
 HL7®, and FHIR® are the registered trademarks of Health Level Seven
 International and their use of these trademarks does not constitute an
 endorsement by HL7.

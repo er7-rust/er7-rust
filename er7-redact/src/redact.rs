@@ -277,6 +277,156 @@ impl Redactor {
 
         pass.report
     }
+
+    /// Every leaf that carries text and is named by no rule in this
+    /// policy — the inverse of redaction: not what changed, but what a
+    /// rule never looked at (D22, spec §2.9).
+    ///
+    /// Independent of the policy's posture: this reports what no *rule*
+    /// names, not what the policy will eventually do about it. Under an
+    /// accepting default this is the leak surface — what
+    /// [`redact`](Redactor::redact) will leave exactly as it arrived.
+    /// Under a rejecting default it is what the posture is about to blank
+    /// on the caller's behalf; reporting it here is not a defect.
+    ///
+    /// Takes `&Message`, not `&mut Message`, and never mutates it: the
+    /// positions a rule would name are computed against a disposable copy
+    /// and discarded, so calling this before, after, or instead of
+    /// [`redact`](Redactor::redact) sees the same message either way.
+    ///
+    /// A leaf **carries text** when it is neither empty nor the explicit
+    /// null (D3, D4) — the same test a rejecting posture already applies
+    /// before it acts. Paths are fully qualified and in message order,
+    /// the same convention [`Change::path`] uses.
+    ///
+    /// Example:
+    ///
+    /// ```
+    /// # fn main() -> Result<(), er7_redact::Error> {
+    /// use er7_redact::{Policy, Redactor};
+    ///
+    /// let message = er7::parse(
+    ///     "MSH|^~\\&|LAB\rPID|1||9||SMITH^JOHN\rNTE|1||spoke with the patient",
+    /// )?;
+    /// let redactor = Redactor::new(Policy::patient_identifiers());
+    ///
+    /// let gaps: Vec<String> = redactor
+    ///     .uncovered(&message)
+    ///     .iter()
+    ///     .map(std::string::ToString::to_string)
+    ///     .collect();
+    ///
+    /// // The default policy names PID-5 (patient name) and PID-3.1
+    /// // (patient ID) — neither is a gap.
+    /// assert!(!gaps.iter().any(|path| path.starts_with("PID[1]-5")));
+    /// assert!(!gaps.contains(&"PID[1]-3[1].1.1".to_string()));
+    ///
+    /// // It names no free text, and no set ID (spec §5.4) — both are gaps.
+    /// assert!(gaps.contains(&"NTE[1]-3[1].1.1".to_string()));
+    /// assert!(gaps.contains(&"PID[1]-1[1].1.1".to_string()));
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[must_use]
+    pub fn uncovered(&self, message: &Message) -> Vec<Path> {
+        let names: Vec<String> = message.segments.iter().map(|s| s.name.clone()).collect();
+        let mut counts: Vec<usize> = Vec::with_capacity(message.segments.len());
+        for (index, name) in names.iter().enumerate() {
+            counts.push(names[..index].iter().filter(|n| *n == name).count() + 1);
+        }
+        let covered = self.named_positions(message, &names, &counts);
+
+        let mut paths = Vec::new();
+        for (index, segment) in message.segments.iter().enumerate() {
+            let header = segment.is_header();
+            for field in 1..=segment.fields.len() {
+                // D5: the header's delimiter fields are never a gap —
+                // no rule can name them, and neither can this.
+                if header && field <= 2 {
+                    continue;
+                }
+                let Some(node) = segment.field(field) else {
+                    continue;
+                };
+                for repetition in 1..=node.repetitions.len() {
+                    let Some(node) = node.repetition(repetition) else {
+                        continue;
+                    };
+                    for component in 1..=node.components.len() {
+                        let Some(node) = node.component(component) else {
+                            continue;
+                        };
+                        for subcomponent in 1..=node.subcomponents.len() {
+                            let position = (index, field, repetition, component, subcomponent);
+                            if covered.contains(&position) {
+                                continue;
+                            }
+                            let Some(leaf) = node.subcomponent(subcomponent) else {
+                                continue;
+                            };
+                            if leaf.is_empty() || leaf.is_null() {
+                                continue;
+                            }
+                            paths.push(Path {
+                                segment: names[index].clone(),
+                                segment_occurrence: Some(counts[index]),
+                                field: Some(field),
+                                repetition: Some(repetition),
+                                component: Some(component),
+                                subcomponent: Some(subcomponent),
+                            });
+                        }
+                    }
+                }
+            }
+        }
+        paths
+    }
+
+    /// Every leaf position a rule in this policy would name in `message`,
+    /// computed without mutating it.
+    ///
+    /// Runs the same rule-matching walk [`Redactor::redact`] uses, on a
+    /// disposable clone — reusing tested, working mutation logic rather
+    /// than re-deriving "what a rule names" as a second, separately
+    /// maintained implementation that could quietly drift from the first.
+    /// The clone is discarded; only the set of positions it visited
+    /// survives.
+    fn named_positions(
+        &self,
+        message: &Message,
+        names: &[String],
+        counts: &[usize],
+    ) -> HashSet<Position> {
+        let mut throwaway = message.clone();
+        let mut pass = Pass {
+            key: self.key,
+            separators: throwaway.separators,
+            named: HashSet::new(),
+            report: Report::default(),
+        };
+        for rule in &self.policy.rules {
+            for index in 0..throwaway.segments.len() {
+                if names[index] != rule.path.segment {
+                    continue;
+                }
+                if rule
+                    .path
+                    .segment_occurrence
+                    .is_some_and(|wanted| wanted != counts[index])
+                {
+                    continue;
+                }
+                let at = At {
+                    name: &names[index],
+                    index,
+                    occurrence: counts[index],
+                };
+                pass.segment(&mut throwaway.segments[index], at, &rule.path, &rule.action);
+            }
+        }
+        pass.named
+    }
 }
 
 impl Default for Redactor {
@@ -836,5 +986,52 @@ mod tests {
         let mut message = er7::parse("MSH|^~\\&|LAB\rOBX|1|NM|A\rOBX|2|NM|B").unwrap();
         redact(policy(&["OBX[2]-3 replace X"]), &mut message);
         assert_eq!(message.query_all("OBX-3").unwrap(), vec!["A", "X"]);
+    }
+
+    #[test]
+    fn uncovered_lists_every_position_no_rule_names() {
+        // D22: the inverse of redaction — every leaf with text that no
+        // rule in the policy names, regardless of what the posture would
+        // eventually do about it (spec §2.9).
+        let mut message =
+            er7::parse("MSH|^~\\&|LAB\rPID|1||9||SMITH^JOHN\rNTE|1||free text").unwrap();
+        let redactor = Redactor::new(policy(&["PID-5 replace REDACTED"]));
+        let gaps: Vec<String> = redactor
+            .uncovered(&message)
+            .iter()
+            .map(std::string::ToString::to_string)
+            .collect();
+
+        // Named by the rule: not a gap.
+        assert!(!gaps.contains(&"PID[1]-5[1].1.1".to_string()));
+        assert!(!gaps.contains(&"PID[1]-5[1].2.1".to_string()));
+        // Named by nothing: a gap.
+        assert!(gaps.contains(&"PID[1]-1[1].1.1".to_string()));
+        assert!(gaps.contains(&"PID[1]-3[1].1.1".to_string()));
+        assert!(gaps.contains(&"NTE[1]-3[1].1.1".to_string()));
+
+        // Read-only: redact() still finds PID-5 to change afterward, so
+        // uncovered() did not consume or alter anything.
+        let report = redactor.redact(&mut message);
+        assert!(!report.is_empty());
+    }
+
+    #[test]
+    fn uncovered_ignores_empty_and_null_leaves() {
+        // D3, D4: an empty or null leaf is not a gap — a rule would find
+        // nothing to redact there either way (spec §2.9).
+        let message = er7::parse("MSH|^~\\&|LAB\rPID|1||\"\"").unwrap();
+        let redactor = Redactor::new(Policy::accept_all());
+        let gaps: Vec<String> = redactor
+            .uncovered(&message)
+            .iter()
+            .map(std::string::ToString::to_string)
+            .collect();
+
+        // PID-1 carries "1": a real gap under a policy naming nothing.
+        assert!(gaps.contains(&"PID[1]-1[1].1.1".to_string()));
+        // PID-2 is empty, and PID-3 is the explicit null: neither is one.
+        assert!(!gaps.contains(&"PID[1]-2[1].1.1".to_string()));
+        assert!(!gaps.contains(&"PID[1]-3[1].1.1".to_string()));
     }
 }

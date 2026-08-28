@@ -487,6 +487,31 @@ fn cli_writes_a_report_instead_of_the_message() {
 }
 
 #[test]
+fn cli_uncovered_lists_the_documented_gaps() {
+    // T6, done when: running the check against samples/adt_a08.er7 with
+    // the default policy lists the free-text and quasi-identifier
+    // positions spec §5.4 documents as deliberately untouched.
+    let (ok, stdout, _) = cli(&["--uncovered"], ADT);
+    assert!(ok);
+    // Set IDs (§5.4): named by no rule, in every segment that has one.
+    assert!(stdout.contains("PID[1]-1[1].1.1\n"), "{stdout}");
+    assert!(stdout.contains("NK1[1]-1[1].1.1\n"), "{stdout}");
+    assert!(stdout.contains("PV1[1]-1[1].1.1\n"), "{stdout}");
+    // Free text: AL1-5, the reaction description.
+    assert!(stdout.contains("AL1[1]-5[1].1.1\n"), "{stdout}");
+    // A Z segment: not in the built-in table at all.
+    assert!(stdout.contains("ZPD[1]-1[1].1.1\n"), "{stdout}");
+    // Positions the default policy does name are not gaps.
+    assert!(!stdout.contains("PID[1]-5"), "{stdout}");
+    assert!(!stdout.contains("PID[1]-3[1].1.1"), "{stdout}");
+    // One path per line, no second column: there is no action to show.
+    assert!(!stdout.contains("replace"), "{stdout}");
+    assert!(!stdout.contains("clear"), "{stdout}");
+    // A dry run: the message itself is not written.
+    assert!(!stdout.contains("MSH|"), "{stdout}");
+}
+
+#[test]
 fn cli_shows_the_policy_without_reading_input() {
     // No FILE, no stdin: `--show-policy` must not block (spec §10.3).
     let (ok, stdout, _) = cli(&["--show-policy"], "");
@@ -609,7 +634,7 @@ fn every_rule_has_a_coverage_row() {
     let declared = rule_ids(include_str!("../spec/01-purpose-and-scope/index.md"));
     let covered = rule_ids(include_str!("../spec/11-testing-strategy/index.md"));
 
-    assert_eq!(declared.len(), 21, "§1.4 should index D1–D21");
+    assert_eq!(declared.len(), 22, "§1.4 should index D1–D22");
     let missing: Vec<&String> = declared.iter().filter(|d| !covered.contains(d)).collect();
     assert!(missing.is_empty(), "no row in §11.1 for {missing:?}");
     let orphan: Vec<&String> = covered.iter().filter(|d| !declared.contains(d)).collect();

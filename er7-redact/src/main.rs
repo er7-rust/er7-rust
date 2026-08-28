@@ -3,7 +3,8 @@
 //!
 //! With no options it applies the curated policy of spec §5.1 and writes
 //! the redacted messages. `--report` says what would change and writes
-//! nothing else; `--show-policy` writes the policy itself, which is how a
+//! nothing else; `--uncovered` says what no rule named and writes nothing
+//! else either; `--show-policy` writes the policy itself, which is how a
 //! caller turns the built-in default into a file to edit.
 //!
 //! This binary adds no behaviour of its own: everything it writes is the
@@ -18,7 +19,7 @@ use std::fmt::Write as _;
 use std::io::{Read, Write};
 use std::process::ExitCode;
 
-use er7::{Message, RenderOptions, Terminator};
+use er7::{Message, Path, RenderOptions, Terminator};
 use er7_redact::{Policy, Posture, Redactor, Report, Rule, Unrecognised};
 
 const USAGE: &str = "\
@@ -45,6 +46,8 @@ Options:
   -t, --terminator <KIND>  Segment terminator to write: cr (default), lf, crlf
   -o, --output <FILE>      Write to FILE instead of standard output
       --report             Write what would change, and not the message
+      --uncovered          Write the positions no rule names, and not the
+                           message
       --show-policy        Write the policy that would be applied, and exit
   -h, --help               Print help
   -V, --version            Print version
@@ -95,6 +98,7 @@ fn run() -> Result<(), Exit> {
     let mut accept_all = false;
     let mut key: u64 = 0;
     let mut report_only = false;
+    let mut uncovered_only = false;
     let mut show_policy = false;
     let mut which: Option<usize> = None;
     let mut terminator = Terminator::Cr;
@@ -127,6 +131,7 @@ fn run() -> Result<(), Exit> {
             "--reject-all" => start = Some(Start::RejectAll),
             "--all-but-the-header" => start = Some(Start::AllButTheHeader),
             "--report" => report_only = true,
+            "--uncovered" => uncovered_only = true,
             "--show-policy" => show_policy = true,
             "-p" | "--policy" => policies.push(value("--policy")?),
             "-r" | "--rule" => rules.push(value("--rule")?),
@@ -181,7 +186,11 @@ fn run() -> Result<(), Exit> {
         terminator,
         trailing_terminator: true,
     };
-    let rendered = if report_only {
+    // --uncovered wins if both are given, the same tolerant precedence
+    // the starting-posture flags already use: whichever is checked first.
+    let rendered = if uncovered_only {
+        uncovered_report(&payloads, redactor.policy())
+    } else if report_only {
         report(&payloads, redactor.policy())
     } else {
         payloads
@@ -219,8 +228,14 @@ fn redact_payloads(redactor: &Redactor, sources: &[&str]) -> Result<Vec<Payload>
     for (index, source) in sources.iter().enumerate() {
         match er7::parse(source) {
             Ok(mut message) => {
+                // Computed before redact() mutates the message, so a
+                // rejecting posture blanking a position first can never
+                // make it look covered (spec §2.9): --uncovered would
+                // otherwise report fewer gaps than a caller who checked
+                // before running the redaction that answered them.
+                let uncovered = redactor.uncovered(&message);
                 let report = redactor.redact(&mut message);
-                payloads.push(Payload::Message(Box::new(message), report));
+                payloads.push(Payload::Message(Box::new(message), report, uncovered));
             }
             // D21: what a payload that is not ER7 gets is the policy's to
             // say, and only refusing it fails the run (spec §2.8).
@@ -251,8 +266,10 @@ enum Start {
 
 /// One payload of the input, after the policy has had its say.
 enum Payload {
-    /// It parsed: the redacted message, and what changed in it.
-    Message(Box<Message>, Report),
+    /// It parsed: the redacted message, what changed in it, and the
+    /// positions no rule named, computed before redaction changed
+    /// anything (spec §2.9).
+    Message(Box<Message>, Report, Vec<Path>),
     /// It did not parse and the policy did not refuse it: the text to
     /// write in its place (spec §2.8).
     Unrecognised(String),
@@ -263,7 +280,7 @@ impl Payload {
     /// starts on its own segment.
     fn to_er7_with(&self, options: RenderOptions) -> String {
         match self {
-            Payload::Message(message, _) => message.to_er7_with(options),
+            Payload::Message(message, ..) => message.to_er7_with(options),
             Payload::Unrecognised(text) => {
                 let mut text = text.clone();
                 // A passed-through payload usually carries its own line
@@ -374,7 +391,7 @@ fn report(payloads: &[Payload], policy: &Policy) -> String {
             let _ = writeln!(out, "# message {}", index + 1);
         }
         let report = match payload {
-            Payload::Message(_, report) => report,
+            Payload::Message(_, report, _) => report,
             // A payload with no positions in it has no rows to write. It
             // gets a comment instead, which no reader can mistake for a
             // change (spec §10.3).
@@ -398,6 +415,37 @@ fn report(payloads: &[Payload], policy: &Policy) -> String {
         for change in &report.changes {
             let path = change.path.to_string();
             let _ = writeln!(out, "{path:<width$}  {}", change.action);
+        }
+    }
+    out
+}
+
+/// List every position no rule names, one per line (spec §10.3, §2.9).
+fn uncovered_report(payloads: &[Payload], policy: &Policy) -> String {
+    let mut out = String::new();
+    for (index, payload) in payloads.iter().enumerate() {
+        if index > 0 {
+            out.push('\n');
+        }
+        if payloads.len() > 1 {
+            let _ = writeln!(out, "# message {}", index + 1);
+        }
+        let gaps = match payload {
+            Payload::Message(_, _, gaps) => gaps,
+            // Same reasoning as `report`: nothing parsed, so there are no
+            // positions to name, and a comment says so instead.
+            Payload::Unrecognised(_) => {
+                let what = match &policy.unrecognised {
+                    Unrecognised::Pass => "passed through".to_string(),
+                    Unrecognised::Apply(action) => action.to_string(),
+                    Unrecognised::Refuse => unreachable!("a refused payload failed the run"),
+                };
+                let _ = writeln!(out, "# message {}: unrecognised payload, {what}", index + 1);
+                continue;
+            }
+        };
+        for path in gaps {
+            let _ = writeln!(out, "{path}");
         }
     }
     out

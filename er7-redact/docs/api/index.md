@@ -27,6 +27,7 @@ The only thing that edits a message.
 | `new` | `fn new(policy: Policy) -> Redactor` | pseudonym key defaults to `0` |
 | `with_key` | `fn with_key(self, key: u64) -> Redactor` | builder |
 | `redact` | `fn redact(&self, message: &mut er7::Message) -> Report` | edits in place; cannot fail |
+| `uncovered` | `fn uncovered(&self, message: &er7::Message) -> Vec<er7::Path>` | every leaf with text that no rule names; read-only |
 | `unrecognised` | `fn unrecognised(&self, payload: &str) -> Option<String>` | what to write for a payload that is not ER7; `None` means the policy refuses it |
 | `policy` | `fn policy(&self) -> &Policy` | |
 | `key` | `fn key(&self) -> u64` | |

@@ -56,7 +56,7 @@ A message this crate has redacted is **a message with less in it**, which
 is progress, and is not the same thing as a safe one. See
 [§5.5](../05-built-in-policies/index.md) for how to think about the gap.
 
-## 1.4 Rule index (D1–D21)
+## 1.4 Rule index (D1–D22)
 
 Every behavioural rule the crate guarantees, with a stable ID. Prose,
 tests, code comments, and commit messages cite these. **IDs are never
@@ -86,8 +86,9 @@ test that enforces it.
 | D19 | A reject rule beats an accept rule for the same leaf, whichever order they are in. | [§2.4](../02-redaction-model/index.md) |
 | D20 | Appending one policy to another never weakens what it does by default. | [§2.6](../02-redaction-model/index.md) |
 | D21 | A payload that is not ER7 is refused, passed through, or acted on whole, as the policy says. | [§2.8](../02-redaction-model/index.md) |
+| D22 | `uncovered` reports every leaf that carries text and is named by no rule, independent of the policy's posture. | [§2.9](../02-redaction-model/index.md) |
 
-The next rule ID is **D22**.
+The next rule ID is **D23**.
 
 ## 1.5 Design priorities, in order
 

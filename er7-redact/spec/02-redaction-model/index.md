@@ -255,6 +255,51 @@ same leak `Mask` always has ([§5.5](../05-built-in-policies/index.md)),
 applied to a bigger value: use `clear` or `replace` where the size of what
 was dropped is itself worth hiding.
 
+## 2.9 What no rule names [D22]
+
+`Redactor::uncovered` reports every leaf that carries text and is named by
+no rule in the policy — the inverse of redaction: not what changed, but
+what a rule never looked at.
+
+```rust
+pub fn uncovered(&self, message: &er7::Message) -> Vec<er7::Path>
+```
+
+It takes `&Message`, not `&mut Message` — a caller does not need to redact
+anything, or even intend to, just to ask the question. Paths are fully
+qualified and in message order, the same convention
+[`Change::path`](../08-report/index.md) uses, so a row is a valid
+`er7 --query` argument.
+
+**Independent of posture.** This reports what no *rule* names, not what
+the policy will eventually do to it. Under an accepting default
+([§2.6](#26-the-two-postures-d9)), an uncovered position is left exactly
+as it arrived when the message is redacted — this is the leak surface, and
+what [§14.5](../14-roadmap/index.md) built this to show. Under a
+rejecting default, an uncovered position is what the posture is about to
+blank on the caller's behalf; reporting it there is not a defect, it is
+telling the caller what the posture is silently doing.
+
+**A leaf carries text** when it is neither empty nor the explicit null
+(D3, D4) — matching exactly the test [§2.6](#26-the-two-postures-d9)'s
+rejecting posture already applies before it acts. An empty or null leaf is
+not a gap, because a rule would find nothing to redact there either way.
+
+**Never mutates, and never sees redaction's own edits.** `uncovered`
+computes which positions a rule would name by running the same matching
+[§2.2](#22-what-a-rule-names) and [§2.3](#23-what-a-rule-reaches) logic
+`redact` uses, against a disposable copy of the message, and discards the
+copy. The positions it reports, and whether each one carries text, are
+read from the message the caller passed in — untouched, whatever order
+`uncovered` and `redact` are called in.
+
+The default policy's own uncovered set is exactly the table in
+[§5.4](../05-built-in-policies/index.md): free text, the sensitive but
+non-identifying `PID` fields, organisational `MSH` fields, `Z` segments,
+and set IDs. Running `uncovered` against a message under
+`Policy::patient_identifiers()` reproduces that table from the code,
+rather than asking a reader to trust that the two still agree.
+
 ---
 
 HL7®, and FHIR® are the registered trademarks of Health Level Seven

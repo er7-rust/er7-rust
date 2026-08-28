@@ -35,6 +35,7 @@ is.
 | `-t, --terminator <KIND>` | segment terminator to write: `cr` (default), `lf`, `crlf` |
 | `-o, --output <FILE>` | write to `FILE` instead of standard output |
 | `--report` | write the report ([§8](../08-report/index.md)) instead of the redacted message |
+| `--uncovered` | write the positions no rule names ([§2.9](../02-redaction-model/index.md#29-what-no-rule-names-d22)) instead of the redacted message |
 | `--show-policy` | write the policy that would be applied, and exit |
 | `-h, --help` | print usage |
 | `-V, --version` | print the version |
@@ -134,6 +135,31 @@ row and cannot be mistaken for one:
 **`--report` does not write the redacted message.** It is a dry run: it
 says what would change, and changes nothing on disk. To get both, run the
 command twice, or redirect them separately.
+
+`--uncovered` writes the positions
+[§2.9](../02-redaction-model/index.md#29-what-no-rule-names-d22) reports —
+every leaf that carries text and is named by no rule — one path per line,
+no second column, since there is no action to show:
+
+```
+NTE[1]-3[1].1.1
+OBX[1]-5[1].1.1
+PID[1]-8[1].1.1
+```
+
+The same `# message N` heading and blank-line separation apply when the
+input holds more than one message, and the same comment line stands in
+for a payload that was not ER7 and that the policy did not refuse, since
+it has no positions either way:
+
+```
+# message 2: unrecognised payload, mask *
+```
+
+Like `--report`, **`--uncovered` does not write the redacted message**, is
+independent of the policy's posture, and reports on the input as given —
+running it against a message already redacted by an earlier pass shows
+what that pass's rules left alone, not what a fresh run would leak.
 
 `--show-policy` writes the policy in the canonical form of
 [§6.5](../06-policy-file-format/index.md) and exits without reading any

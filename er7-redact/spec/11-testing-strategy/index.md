@@ -35,6 +35,7 @@ enforces it. A rule with no test is a bug in this table.
 | D19 | `reject_beats_accept_for_the_same_field`, `reject_segment_beats_a_narrower_accept` | `src/redact.rs` |
 | D20 | `appending_never_weakens_the_defaults` | `src/policy.rs` |
 | D21 | `an_unrecognised_payload_follows_the_policy`, `cli_masks_an_unrecognised_payload` | `src/redact.rs`, `tests/integration.rs` |
+| D22 | `uncovered_lists_every_position_no_rule_names`, `uncovered_ignores_empty_and_null_leaves`, `cli_uncovered_lists_the_documented_gaps` | `src/redact.rs`, `tests/integration.rs` |
 
 Further tests carry no single rule, because they assert the whole-message
 properties every rule exists to produce, or a contract that is a table
