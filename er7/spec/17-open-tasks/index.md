@@ -33,17 +33,6 @@ the borrowed-slice guarantee.
 Open sub-question: whether the streaming form can keep zero-copy slices at
 all, or must yield `String`. That answer decides the API shape.
 
-## T7 — Convenience for building a message from scratch
-
-[§5.5](../05-value-tree/index.md) says structural edits go through the
-public `Vec` fields, which is honest but verbose: constructing an `ACK` by
-hand is a dozen nested literals.
-
-Done when: either a builder or a small set of constructors exists and §5.5
-documents it, or §5.5 argues that `Vec` is enough and this task is deleted.
-Whichever way it goes, `examples/` should show the recommended way to build
-an `ACK`, since that is the case every integration hits.
-
 ## T8 — Add a per-segment value lookup
 
 Raised by the [T5](../16-roadmap/index.md) port, which shipped in 0.1.0.

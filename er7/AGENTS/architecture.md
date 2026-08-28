@@ -119,4 +119,4 @@ resolves. The rendered surface is in
 | segment/field dictionaries | a layer above | [§18.1](../spec/18-open-questions-and-divergences/index.md) |
 | message-structure grammars | a layer above | same |
 | MLLP framing | a transport crate | [§9.4](../spec/09-batch-input/index.md) |
-| a `Builder` for messages | the public `Vec` fields | [§5.5](../spec/05-value-tree/index.md), and [T7](../spec/17-open-tasks/index.md) is open on it |
+| a `Builder` for messages | the public `Vec` fields, or `parse_with` for known text | [§5.5](../spec/05-value-tree/index.md) |

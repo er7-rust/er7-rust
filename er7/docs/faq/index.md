@@ -141,9 +141,13 @@ worked example in [docs/escapes](../escapes/index.md).
 
 ## Can I build a message from scratch?
 
-Yes — every field of every type is `pub`, so struct literals work. There is
-no builder API today; whether one would earn its keep is tracked as
-[T7](../../spec/17-open-tasks/index.md).
+Yes, two ways. If you can already write the content as ER7 — the usual
+case, since an ACK is mostly values the inbound message already carries —
+`er7::parse_with` turns that text into segments; parsing is the builder.
+For a value that is not text yet, every field of every type is `pub`, so
+struct literals work directly. There is no separate builder API, and
+[§5.5](../../spec/05-value-tree/index.md) says why not.
+`examples/build_a_message.rs` works a full ACK both ways.
 
 ## Does it do MLLP?
 

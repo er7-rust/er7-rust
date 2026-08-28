@@ -10,6 +10,7 @@ no setup, invoked via `cargo run --example <name>`.
 | [parse_a_message](parse_a_message.rs) | The two entry points, a message's own delimiters, and the five MSH routing accessors. |
 | [query_by_path](query_by_path.rs) | The four query methods, occurrence indices, and the two behaviours that surprise people. |
 | [edit_a_value](edit_a_value.rs) | Editing through `set`, why assigning `raw` is riskier, structural edits, and writing back out. |
+| [build_a_message](build_a_message.rs) | Building an ACK from scratch: `parse_with` as the builder for known text, `Vec` fields for what is not text yet. |
 | [escape_sequences](escape_sequences.rs) | What decodes, what is kept literal, and rendering formatted text from the token stream. |
 | [split_a_batch](split_a_batch.rs) | A full `FHS`/`BHS`/`BTS`/`FTS` envelope, borrowed slices, and carrying on past a bad message. |
 | [custom_delimiters](custom_delimiters.rs) | A message using `#*!?@`, the v2.7 truncation character, and what gets rejected. |
@@ -26,8 +27,8 @@ cargo build --examples
 cargo run --example parse_a_message
 
 # Run them all.
-for e in parse_a_message query_by_path edit_a_value escape_sequences \
-         split_a_batch custom_delimiters absent_empty_null; do
+for e in parse_a_message query_by_path edit_a_value build_a_message \
+         escape_sequences split_a_batch custom_delimiters absent_empty_null; do
     echo "== $e"; cargo run --quiet --example "$e";
 done
 ```
@@ -42,8 +43,9 @@ one before:
 3. **absent_empty_null** — the distinction that matters most clinically.
 4. **escape_sequences** — how values carry delimiters.
 5. **edit_a_value** — how to change a message safely.
-6. **split_a_batch** — how to handle more than one message.
-7. **custom_delimiters** — why none of the above assumed `|^~\&`.
+6. **build_a_message** — how to write one that never existed as text at all.
+7. **split_a_batch** — how to handle more than one message.
+8. **custom_delimiters** — why none of the above assumed `|^~\&`.
 
 ## Guarantees
 

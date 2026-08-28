@@ -129,6 +129,19 @@ The crate does not offer `push_field`- or `set_field`-style helpers; `Vec`
 already has them, and wrapping them would only add surface without adding
 meaning.
 
+**Building a message that never existed as text is not a different
+problem.** There is no `Message::builder()`, and in practice a message
+built from nothing is rare: an ACK, the case that comes up most, is mostly
+values the inbound message already carries — sending and receiving
+application swap places, the control ID being acknowledged is copied — so
+by the time it is written it is known text with a few values spliced in.
+`er7::parse_with` turns that text into segments, which makes parsing the
+builder for anything expressible as ER7; a field assembled from pieces
+that are not text yet, rather than a string, still goes through the same
+`Vec` fields above. `examples/build_a_message.rs` works a full ACK both
+ways side by side. Two tools cover every case seen so far; a third would
+only be a worse way to spell one of them.
+
 ---
 
 HL7®, and FHIR® are the registered trademarks of Health Level Seven
