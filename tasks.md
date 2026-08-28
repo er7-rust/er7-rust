@@ -387,7 +387,16 @@ pass:
          — a real maintenance risk of hardcoding paths from an external
          image, named rather than hidden. `df -h /` before and after, in
          every job that runs it, so the effect is verifiable in the run
-         log rather than assumed to have worked.
+         log rather than assumed to have worked — and on this change's own
+         first hosted run (`33149419145`, `ba0e1e2`, all five jobs green),
+         it was: **87G available before, 109G after, in all three jobs**
+         that run it — roughly 21 GiB of headroom this workflow was never
+         using, freed before a single line of this workspace's own code
+         gets checked out. That number is larger than the few hundred
+         megabytes the `target/`-splitting change above recovers; the
+         runner-bloat step is the one doing most of the actual work here,
+         and this file says so rather than letting the more interesting
+         engineering (the phase split) read as the bigger win.
 
       Deliberately **not** a third-party disk-cleanup action
       (`jlumbroso/free-disk-space` and similar exist and are well known):
