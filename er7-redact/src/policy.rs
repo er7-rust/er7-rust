@@ -116,11 +116,16 @@ const UNRECOGNISED: &str = "unrecognised";
 /// field, and a policy file that fails over one letter helps nobody.
 const UNRECOGNIZED: &str = "unrecognized";
 
+/// The first word that turns the known-values sweep on or off (D23, spec
+/// §2.10).
+const KNOWN_VALUES: &str = "known-values";
+
 /// The path that set the fallback before 0.2, kept only to be refused with
 /// a sentence naming its replacement (spec §6.3).
 const REMOVED_FALLBACK: &str = "*";
 
-/// The column the default lines pad their first word to.
+/// The column the default lines pad their first word to. `KNOWN_VALUES` is
+/// the same length as `UNRECOGNISED`, so one width serves both.
 const DEFAULT_WIDTH: usize = UNRECOGNISED.len();
 
 /// What a policy does with every leaf that no rule named (D9, spec §2.6).
@@ -296,6 +301,17 @@ fn normalise_unrecognised(unrecognised: Unrecognised) -> Unrecognised {
     }
 }
 
+/// Read `on` or `off` for the `known-values` line (D23, spec §6.3).
+fn parse_known_values(argument: &str) -> Result<bool, Error> {
+    match argument.to_ascii_lowercase().as_str() {
+        "on" => Ok(true),
+        "off" => Ok(false),
+        _ => Err(Error::BadPolicy(format!(
+            "{KNOWN_VALUES:?} wants \"on\" or \"off\""
+        ))),
+    }
+}
+
 /// An ordered list of rules, plus what to do with everything they do not
 /// name.
 ///
@@ -350,6 +366,9 @@ pub struct Policy {
     pub posture: Posture,
     /// What a payload that is not ER7 gets.
     pub unrecognised: Unrecognised,
+    /// Whether a value found at a named position is redacted wherever
+    /// else it appears (D23, spec §2.10). Defaults to `true`.
+    pub search_known_values: bool,
 }
 
 // `Default` is deliberately not implemented, and neither is a `new`. Both
@@ -395,6 +414,7 @@ impl Policy {
             rules: Vec::new(),
             posture: Posture::Accept,
             unrecognised: Unrecognised::Pass,
+            search_known_values: true,
         }
     }
 
@@ -433,6 +453,7 @@ impl Policy {
             rules: Vec::new(),
             posture: Posture::Reject(Action::redacted()),
             unrecognised: Unrecognised::Apply(Action::Mask('*')),
+            search_known_values: true,
         }
     }
 
@@ -544,6 +565,7 @@ impl Policy {
             rules,
             posture: Posture::Accept,
             unrecognised: Unrecognised::Refuse,
+            search_known_values: true,
         }
     }
 
@@ -624,6 +646,19 @@ impl Policy {
     #[must_use]
     pub fn on_unrecognised(mut self, unrecognised: Unrecognised) -> Policy {
         self.unrecognised = normalise_unrecognised(unrecognised);
+        self
+    }
+
+    /// Set whether a value found at a named position is redacted wherever
+    /// else it appears (D23, spec §2.10).
+    ///
+    /// Every built-in policy defaults to `true`. There is no normalising
+    /// to do here — unlike [`Policy::posture`] and
+    /// [`Policy::on_unrecognised`], a plain `bool` has no contradictory
+    /// spelling to collapse.
+    #[must_use]
+    pub fn search_known_values(mut self, search_known_values: bool) -> Policy {
+        self.search_known_values = search_known_values;
         self
     }
 
@@ -712,6 +747,10 @@ impl Policy {
                     policy.unrecognised = Unrecognised::parse(argument).map_err(at)?;
                     continue;
                 }
+                KNOWN_VALUES => {
+                    policy.search_known_values = parse_known_values(argument).map_err(at)?;
+                    continue;
+                }
                 REMOVED_FALLBACK => {
                     // Refused rather than read as a synonym: `*` never
                     // said which of the two postures it meant (spec §6.3).
@@ -783,6 +822,10 @@ impl Policy {
             self.posture = other.posture;
         }
         self.unrecognised = other.unrecognised;
+        // Only ever turns on, for the same reason the posture can only
+        // get stricter (D20, spec §2.6): a file of extra rules that says
+        // nothing about it is not a decision to turn the sweep off.
+        self.search_known_values |= other.search_known_values;
     }
 
     /// True when the policy would redact nothing at all: no rules, and it
@@ -798,9 +841,9 @@ impl Policy {
 
 impl fmt::Display for Policy {
     /// The canonical policy file (spec §6.5): one rule per line, paths
-    /// padded to a common width, then the two default lines — always
-    /// both, whatever they say, so that a reader never has to know which
-    /// default was the quiet one.
+    /// padded to a common width, then the three default lines — always
+    /// all three, whatever they say, so that a reader never has to know
+    /// which default was the quiet one.
     ///
     /// Example:
     ///
@@ -819,6 +862,7 @@ impl fmt::Display for Policy {
     ///
     /// reject        clear
     /// unrecognised  pass
+    /// known-values  on
     /// ");
     ///
     /// // And it reads back as the same policy.
@@ -841,7 +885,13 @@ impl fmt::Display for Policy {
             writeln!(f)?;
         }
         writeln!(f, "{}", self.posture)?;
-        writeln!(f, "{UNRECOGNISED:<DEFAULT_WIDTH$}  {}", self.unrecognised)
+        writeln!(f, "{UNRECOGNISED:<DEFAULT_WIDTH$}  {}", self.unrecognised)?;
+        let known_values = if self.search_known_values {
+            "on"
+        } else {
+            "off"
+        };
+        writeln!(f, "{KNOWN_VALUES:<DEFAULT_WIDTH$}  {known_values}")
     }
 }
 
@@ -874,6 +924,7 @@ mod tests {
             Policy::accept_all()
                 .posture(Posture::Reject(Action::Null))
                 .on_unrecognised(Unrecognised::Apply(Action::First(4))),
+            Policy::accept_all().search_known_values(false),
         ] {
             assert_eq!(Policy::parse(&policy.to_string()).unwrap(), policy);
         }
@@ -1080,5 +1131,52 @@ mod tests {
         // And relaxing one is done deliberately, which is the only way.
         let relaxed = Policy::all_but_the_header().posture(Posture::Accept);
         assert_eq!(relaxed.posture, Posture::Accept);
+    }
+
+    #[test]
+    fn known_values_line_parses_and_displays() {
+        // D23, spec §6.3: on by default, on every built-in, and a file
+        // that never mentions it gets the same default.
+        for policy in [
+            Policy::accept_all(),
+            Policy::reject_all(),
+            Policy::patient_identifiers(),
+            Policy::all_but_the_header(),
+        ] {
+            assert!(policy.search_known_values, "{policy:?}");
+        }
+        assert!(Policy::parse("PID-5 clear").unwrap().search_known_values);
+
+        let off = Policy::parse("PID-5 clear\nknown-values off").unwrap();
+        assert!(!off.search_known_values);
+        assert!(off.to_string().ends_with("known-values  off\n"));
+
+        let on = Policy::parse("PID-5 clear\nKNOWN-VALUES ON").unwrap();
+        assert!(on.search_known_values);
+
+        // A second line replaces the first, like the other two defaults.
+        let last = Policy::parse("known-values off\nknown-values on").unwrap();
+        assert!(last.search_known_values);
+
+        let error = Policy::parse("known-values sideways").unwrap_err();
+        assert_eq!(
+            error.to_string(),
+            "policy line 1: \"known-values sideways\": \"known-values\" wants \"on\" or \"off\""
+        );
+    }
+
+    #[test]
+    fn appending_only_turns_known_values_on() {
+        // Symmetric with D20's posture rule: appending can only turn the
+        // sweep on, never off, so a checked-in "known-values off" cannot
+        // be silently defeated by a --rule the caller adds at the command
+        // line, and cannot silently switch it off either.
+        let mut off = Policy::accept_all().search_known_values(false);
+        off.append(Policy::parse("PID-5 clear").unwrap());
+        assert!(off.search_known_values, "appending must not stay off");
+
+        let mut off = Policy::accept_all().search_known_values(false);
+        off.append(Policy::accept_all().search_known_values(false));
+        assert!(!off.search_known_values, "off appended to off stays off");
     }
 }

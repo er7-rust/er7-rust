@@ -12,9 +12,10 @@ read is a breaking change
 
 ## 6.1 Shape
 
-One rule per line: a path, whitespace, an action. Three reserved first
-words — `accept`, `reject`, and `unrecognised` — set what the policy does
-by default instead of naming a position ([§6.3](#63-the-default-lines)).
+One rule per line: a path, whitespace, an action. Four reserved first
+words — `accept`, `reject`, `unrecognised`, and `known-values` — set what
+the policy does by default instead of naming a position
+([§6.3](#63-the-default-lines)).
 
 ```
 # de-identify.policy — for messages from the LAB interface
@@ -65,10 +66,11 @@ the same action); replacement text is taken as written.
 
 ## 6.3 The default lines
 
-Three first words are reserved. Each sets one of the policy's defaults
+Four first words are reserved. Each sets one of the policy's defaults
 ([§2.6](../02-redaction-model/index.md),
-[§2.8](../02-redaction-model/index.md)) rather than adding a rule, and each
-may appear anywhere in the file:
+[§2.8](../02-redaction-model/index.md),
+[§2.10](../02-redaction-model/index.md)) rather than adding a rule, and
+each may appear anywhere in the file:
 
 | Written | Means |
 | ------- | ----- |
@@ -78,21 +80,31 @@ may appear anywhere in the file:
 | `unrecognised refuse` | a payload that is not ER7 fails the run |
 | `unrecognised pass` | a payload that is not ER7 is written out unchanged |
 | `unrecognised ACTION` | a payload that is not ER7 has `ACTION` applied to it whole |
+| `known-values on` | a value found at a named position is redacted wherever else it appears (D23) — the default |
+| `known-values off` | positional rules and the posture are the whole of what this policy does |
 
 ```
 MSH  keep
 
 reject        replace REDACTED
 unrecognised  mask *
+known-values  off
 ```
 
 The reserved words are matched **case-insensitively**, like action names,
 and `unrecognized` is accepted for `unrecognised`. Segment names are three
-characters, so none of the three can collide with a path.
+characters, so none of the four can collide with a path.
 
 A second `accept` or `reject` line replaces the first, and so does a
-second `unrecognised` line: a policy has one of each, and silently keeping
-the earlier one would hide an editing mistake.
+second `unrecognised` or `known-values` line: a policy has one of each,
+and silently keeping the earlier one would hide an editing mistake.
+
+A file that never mentions `known-values` gets `on` — the same "state it
+or get the safer answer" the other two defaults already use. Turning it
+off is always explicit, in the file or with
+`Policy::search_known_values(false)`, and appending a policy can only turn
+it on, never off, for the same reason a posture can only get stricter
+(D20, [§2.6](../02-redaction-model/index.md)).
 
 `reject keep` is legal and means `accept`, and so does `unrecognised keep`
 for `unrecognised pass` — rejecting a leaf by leaving it alone is not
@@ -142,7 +154,7 @@ prevent — so it is caught at load time instead
 `Policy` implements `Display`, and its output re-parses to an equal
 policy. The canonical form is one rule per line, with the paths padded to a
 common width and at least two spaces before the action; then a blank line;
-then the two default lines, always both, whatever they say:
+then the three default lines, always all three, whatever they say:
 
 ```
 PID-3  pseudonym
@@ -150,12 +162,14 @@ PID-5  replace REDACTED
 
 reject        replace REDACTED
 unrecognised  refuse
+known-values  on
 ```
 
 The defaults are written out **even when they are the quiet ones**. A
-policy file that ends `accept` / `unrecognised refuse` is longer than one
-that ends nowhere, and it is the difference between a reader knowing what
-happens to everything the file does not name and a reader assuming it.
+policy file that ends `accept` / `unrecognised refuse` / `known-values on`
+is longer than one that ends nowhere, and it is the difference between a
+reader knowing what happens to everything the file does not name and a
+reader assuming it.
 
 This is what the CLI's `--show-policy` prints
 ([§10](../10-command-line-interface/index.md)), and it is how a caller

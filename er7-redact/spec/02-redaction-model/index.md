@@ -300,6 +300,82 @@ and set IDs. Running `uncovered` against a message under
 `Policy::patient_identifiers()` reproduces that table from the code,
 rather than asking a reader to trust that the two still agree.
 
+## 2.10 Known values, wherever they appear [D23]
+
+A positional policy has a structural blind spot: a patient name removed
+from `PID-5` is still in the `NTE-3` that says "spoke with Mrs Everywoman
+about the result" ([§14.2](../14-roadmap/index.md)). This is the second
+pass that closes it, and it is on by default.
+
+**What counts as a known value.** Every leaf a rule named, whose action
+was not `keep`, and that carried text (D3, D4) — its **decoded** value,
+before the rule's own action changed it. A rule's action is reused
+exactly as found; `keep` never contributes one, because a `keep`'d
+position is a declaration that the value there is not identifying at all
+([§2.4](#24-rules-apply-in-order-d7-and-a-reject-beats-an-accept-d19)).
+Collecting happens against the message as it arrived, so a `first 4` on
+`PID-7` still contributes the full, undoctored date of birth as a known
+value, not the four characters the rule kept.
+
+Values shorter than three characters are never collected: a one- or
+two-character value — a middle initial, a sex code — would match
+constantly across ordinary clinical text, and the crate would spend its
+credibility on it.
+
+**Where the sweep looks.** Every leaf that carries text and that no rule
+or posture already touched — the same set [`uncovered`](#29-what-no-rule-names-d22)
+reports, computed the same way. A leaf a `keep` rule named is exempt from
+the sweep for the same reason it is exempt from the posture: `keep` is
+this policy's word for "not identifying," and the sweep does not
+second-guess it.
+
+**What a match does.** Case-insensitively, and only as a **whole word** —
+bounded by a non-alphanumeric character or the edge of the leaf, so a
+surname `Wood` matches standalone `Wood` and not the `Wood` inside
+`Woodward`. Where a leaf's decoded text contains a known value, the
+**whole leaf** gets that value's own action — the same one the named
+position used, not a separate setting. This is the same granularity every
+other action in the crate already works at
+([§2.3](#23-what-a-rule-reaches)): nothing in this crate splices text out
+of the middle of a value, so `NTE-3` loses the whole sentence, not just
+the name inside it. A leaf that matches more than one known value takes
+the action of whichever was collected first — rule order, then message
+order, the same order [`Change`](../08-report/index.md) rows already
+follow.
+
+**One surprising consequence, written down rather than hidden:** when the
+reused action is `pseudonym`, the swept leaf is hashed as its own whole
+value, not as the matched substring. `PID-5`'s `SMITH` and `NTE-3`'s
+"spoke with Mrs Smith about the result" do **not** get the same
+pseudonym — the second input is the whole sentence, not the name inside
+it. `Pseudonym`'s stability guarantee (D12) is about one value under one
+key, not about text a sweep happened to find it inside.
+
+**On by default, and a `Policy` field.** `Policy::search_known_values`
+(`bool`) controls it, defaulting to `true` on every built-in policy and
+every policy a file does not mention it in — the same "state it or get
+the safer answer" convention [§2.8](#28-a-payload-that-is-not-er7-d21)
+already uses for an unrecognised payload. `Policy::search_known_values`
+is also the builder method that sets it. Appending one policy to another
+can only turn it on, never off (D20's own logic extended to a third
+field): `self.search_known_values || other.search_known_values`. The
+policy file's `known-values` line
+([§6.3](../06-policy-file-format/index.md)) is the only way to turn it
+off for a whole policy.
+
+**Reported like anything else.** A leaf the sweep redacts gets an
+ordinary [`Change`](../08-report/index.md) row: its path, and the action
+that ran. Nothing distinguishes a swept row from a named one, because the
+report already carries no values (D13) — there is nothing about "how this
+position was found" left to leak.
+
+**Independent of, and invisible to, [`uncovered`](#29-what-no-rule-names-d22).**
+`uncovered` reports what no *rule* names; the sweep redacts by *value*,
+which `uncovered` has no way to anticipate — it would have to run the
+sweep itself to know. A leaf the sweep will catch still appears in
+`uncovered`'s output, and that is not a defect: `uncovered` is answering
+"did a rule look here," and for that leaf the honest answer is still no.
+
 ---
 
 HL7®, and FHIR® are the registered trademarks of Health Level Seven

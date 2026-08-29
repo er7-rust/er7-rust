@@ -37,8 +37,8 @@ one that misses an identifier, because the damage is invisible until
 somebody trusts the numbers.
 
 The narrower version — remove values the policy *already found* wherever
-else they appear — has none of these problems and is
-[T1](../15-open-tasks/index.md).
+else they appear — has none of these problems, and is shipped: D23,
+[§2.10](../02-redaction-model/index.md).
 
 ## 16.3 Declined: a cryptographic pseudonym, for now
 
@@ -146,6 +146,28 @@ wins" disagree exactly where a policy is already wrong, and the ordering in
 [§1.5](../01-purpose-and-scope/index.md) says which of the two to prefer
 when they do. Revisit if real policies turn out to need the carve-out more
 often than they need the guard.
+
+## 16.10 Open: a swept `pseudonym` hashes the whole leaf it lands on
+
+D23's sweep ([§2.10](../02-redaction-model/index.md)) reuses the named
+position's own action, whole-leaf, on whatever leaf it finds a known
+value in. For every action except `pseudonym` this is harmless: `replace`
+writes the same text everywhere, `clear` empties everywhere. `pseudonym`
+is different, because what it hashes is *its own leaf's value*, not the
+value that made the sweep fire. `PID-5`'s `SMITH` and an `NTE-3` reading
+"spoke with Mrs Smith" produce two different pseudonyms, because the
+second input to the hash is the whole sentence, not the name inside it —
+`Pseudonym`'s stability guarantee (D12) was never a promise about text a
+sweep happened to find a match inside.
+
+The alternative — hash only the matched substring, and splice it back
+into the leaf — is the same "surgical, not whole-leaf" shape declined for
+every other action in [§2.3](../02-redaction-model/index.md) and D23
+itself, for the same reason: it needs new text-splicing logic, and it
+stops being true for `first`/`last`, which have no meaning applied to a
+substring in the middle of a sentence. Left as it is, and written down,
+so nobody reads two different pseudonyms for the same value and concludes
+the crate has a bug rather than a documented boundary.
 
 ---
 

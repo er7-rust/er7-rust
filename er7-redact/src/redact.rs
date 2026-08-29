@@ -241,6 +241,7 @@ impl Redactor {
             separators: message.separators,
             named: HashSet::new(),
             report: Report::default(),
+            known: Vec::new(),
         };
 
         for rule in &self.policy.rules {
@@ -272,6 +273,22 @@ impl Redactor {
                     occurrence: counts[index],
                 };
                 pass.reject_the_rest(&mut message.segments[index], at, action);
+            }
+        }
+
+        // D23, spec §2.10: a value found at a named position, redacted
+        // wherever else it appears. After the rules and the posture, so
+        // it only ever adds rows to a report those two have already
+        // finished writing, and reports the same way, so no reader has
+        // to treat a swept row differently from a named one.
+        if self.policy.search_known_values {
+            for index in 0..message.segments.len() {
+                let at = At {
+                    name: &names[index],
+                    index,
+                    occurrence: counts[index],
+                };
+                pass.sweep_known_values(&mut message.segments[index], at);
             }
         }
 
@@ -404,6 +421,7 @@ impl Redactor {
             separators: throwaway.separators,
             named: HashSet::new(),
             report: Report::default(),
+            known: Vec::new(),
         };
         for rule in &self.policy.rules {
             for index in 0..throwaway.segments.len() {
@@ -456,6 +474,10 @@ struct Pass {
     /// is not narrowed by the posture (spec §2.4, §2.6).
     named: HashSet<Position>,
     report: Report,
+    /// Every value a rule found at a named position, lowercase, paired
+    /// with that rule's own action — first occurrence wins on a repeat.
+    /// A `Keep` rule contributes none (D23, spec §2.10).
+    known: Vec<(String, Action)>,
 }
 
 impl Pass {
@@ -479,6 +501,7 @@ impl Pass {
             };
             if action == &Action::Null && path.repetition.is_none() && path.component.is_none() {
                 if !field.is_null() {
+                    self.learn_field(field, action);
                     *field = null_field();
                     self.record(at, number, 1, 1, 1, action);
                 }
@@ -494,6 +517,7 @@ impl Pass {
                 };
                 if action == &Action::Null && path.component.is_none() {
                     if !node.is_null() {
+                        self.learn_repetition(node, action);
                         *node = null_repetition();
                         self.record(at, number, repetition, 1, 1, action);
                     }
@@ -523,6 +547,7 @@ impl Pass {
             };
             if action == &Action::Null && path.subcomponent.is_none() {
                 if !component.is_null() {
+                    self.learn_component(component, action);
                     *component = null_component();
                     self.record(at, field, index, number, 1, action);
                 }
@@ -538,6 +563,7 @@ impl Pass {
                 };
                 let position = (at.index, field, index, number, subcomponent);
                 self.named.insert(position);
+                self.learn(leaf, action);
                 if self.leaf(leaf, action) {
                     self.record(at, field, index, number, subcomponent, action);
                 }
@@ -614,6 +640,108 @@ impl Pass {
         true
     }
 
+    /// Collect one leaf's decoded value as a known value, before its own
+    /// rule's action changes it (D23, spec §2.10).
+    ///
+    /// `Keep` contributes nothing — a `keep`'d position is a declaration
+    /// that the value there is not identifying, and the sweep does not
+    /// second-guess it. Neither does an empty or null leaf (D3, D4): a
+    /// rule found nothing there to begin with. A repeat of a value
+    /// already known keeps the action that was collected first, matching
+    /// the order [`Change`] rows already follow.
+    fn learn(&mut self, leaf: &Subcomponent, action: &Action) {
+        if action == &Action::Keep || leaf.is_empty() || leaf.is_null() {
+            return;
+        }
+        let value = leaf.value(&self.separators).to_lowercase();
+        if value.chars().count() < MIN_KNOWN_VALUE_LENGTH {
+            return;
+        }
+        if !self.known.iter().any(|(known, _)| *known == value) {
+            self.known.push((value, action.clone()));
+        }
+    }
+
+    /// [`Pass::learn`] over every leaf below a component.
+    fn learn_component(&mut self, component: &Component, action: &Action) {
+        for leaf in &component.subcomponents {
+            self.learn(leaf, action);
+        }
+    }
+
+    /// [`Pass::learn`] over every leaf below a repetition.
+    fn learn_repetition(&mut self, repetition: &Repetition, action: &Action) {
+        for component in &repetition.components {
+            self.learn_component(component, action);
+        }
+    }
+
+    /// [`Pass::learn`] over every leaf below a field.
+    fn learn_field(&mut self, field: &Field, action: &Action) {
+        for repetition in &field.repetitions {
+            self.learn_repetition(repetition, action);
+        }
+    }
+
+    /// Redact a known value wherever it appears in one segment that no
+    /// rule or posture already touched (D23, spec §2.10).
+    ///
+    /// Walks exactly the leaves [`Redactor::uncovered`] would report — a
+    /// leaf already in `named` is skipped, whichever rule or `keep` put it
+    /// there — and, where a leaf's decoded text contains a known value as
+    /// a whole word, case-insensitively, applies that value's own action
+    /// to the **whole leaf**, through the same [`Pass::leaf`] every other
+    /// action in this crate already goes through.
+    fn sweep_known_values(&mut self, segment: &mut Segment, at: At) {
+        if self.known.is_empty() {
+            return;
+        }
+        let header = segment.is_header();
+        for field in 1..=segment.fields.len() {
+            // D5 again: the sweep reaches no further than a rule does.
+            if header && field <= 2 {
+                continue;
+            }
+            let Some(node) = segment.field_mut(field) else {
+                continue;
+            };
+            for repetition in 1..=node.repetitions.len() {
+                let Some(node) = node.repetition_mut(repetition) else {
+                    continue;
+                };
+                for component in 1..=node.components.len() {
+                    let Some(node) = node.component_mut(component) else {
+                        continue;
+                    };
+                    for subcomponent in 1..=node.subcomponents.len() {
+                        let position = (at.index, field, repetition, component, subcomponent);
+                        if self.named.contains(&position) {
+                            continue;
+                        }
+                        let Some(leaf) = node.subcomponent_mut(subcomponent) else {
+                            continue;
+                        };
+                        if leaf.is_empty() || leaf.is_null() {
+                            continue;
+                        }
+                        let value = leaf.value(&self.separators).to_lowercase();
+                        let found = self
+                            .known
+                            .iter()
+                            .find(|(known, _)| contains_whole_word(&value, known))
+                            .map(|(_, action)| action.clone());
+                        let Some(action) = found else {
+                            continue;
+                        };
+                        if self.leaf(leaf, &action) {
+                            self.record(at, field, repetition, component, subcomponent, &action);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     /// Add a row to the report, with the path fully qualified (spec §8.3).
     fn record(
         &mut self,
@@ -662,6 +790,30 @@ fn null_field() -> Field {
     Field {
         repetitions: vec![null_repetition()],
     }
+}
+
+/// A value shorter than this is never collected or searched for by the
+/// known-values sweep (D23, spec §2.10) — a middle initial or a sex code
+/// would otherwise match constantly across ordinary clinical text.
+const MIN_KNOWN_VALUE_LENGTH: usize = 3;
+
+/// True when `needle` — already lowercase — appears in `haystack` — also
+/// already lowercase — as a whole word: bounded by a non-alphanumeric
+/// character, or the edge of the text, on both sides (D23, spec §2.10).
+///
+/// A surname `wood` matches standalone `wood` but not the `wood` inside
+/// `woodward`, whichever side of the match the extra letters are on.
+fn contains_whole_word(haystack: &str, needle: &str) -> bool {
+    for (start, _) in haystack.match_indices(needle) {
+        let end = start + needle.len();
+        let before = haystack[..start].chars().next_back();
+        let after = haystack[end..].chars().next();
+        if before.is_none_or(|c| !c.is_alphanumeric()) && after.is_none_or(|c| !c.is_alphanumeric())
+        {
+            return true;
+        }
+    }
+    false
 }
 
 #[cfg(test)]
@@ -1033,5 +1185,113 @@ mod tests {
         // PID-2 is empty, and PID-3 is the explicit null: neither is one.
         assert!(!gaps.contains(&"PID[1]-2[1].1.1".to_string()));
         assert!(!gaps.contains(&"PID[1]-3[1].1.1".to_string()));
+    }
+
+    #[test]
+    fn known_values_are_redacted_wherever_they_appear() {
+        // T1's own done-when: a message where the name appears in both
+        // PID-5 and NTE-3 comes back with neither, and the report names
+        // both positions (D23, spec §2.10).
+        let mut message = er7::parse(
+            "MSH|^~\\&|LAB\rPID|1||9||SMITH^JOHN\rNTE|1||spoke with SMITH about the results",
+        )
+        .unwrap();
+        let report = redact(policy(&["PID-5 replace REDACTED"]), &mut message);
+
+        assert!(!message.to_er7().contains("SMITH"), "{}", message.to_er7());
+        let paths: Vec<String> = report.changes.iter().map(|c| c.path.to_string()).collect();
+        assert!(paths.contains(&"PID[1]-5[1].1.1".to_string()), "{paths:?}");
+        assert!(paths.contains(&"NTE[1]-3[1].1.1".to_string()), "{paths:?}");
+    }
+
+    #[test]
+    fn known_values_matching_is_case_insensitive() {
+        let mut message = er7::parse(
+            "MSH|^~\\&|LAB\rPID|1||9||SMITH^JOHN\rNTE|1||spoke with mrs smith about the results",
+        )
+        .unwrap();
+        redact(policy(&["PID-5 replace REDACTED"]), &mut message);
+        let out = message.to_er7().to_lowercase();
+        assert!(!out.contains("smith"), "{out}");
+    }
+
+    #[test]
+    fn known_values_matching_is_whole_word_only() {
+        // A surname `Wood` must not match the `Wood` inside `Woodward`
+        // (spec §2.10).
+        let mut message = er7::parse(
+            "MSH|^~\\&|LAB\rPID|1||9||WOOD^JANE\rNTE|1||seen by Dr Woodward this morning",
+        )
+        .unwrap();
+        redact(policy(&["PID-5 replace REDACTED"]), &mut message);
+        assert!(
+            message.to_er7().contains("Woodward"),
+            "{}",
+            message.to_er7()
+        );
+    }
+
+    #[test]
+    fn known_values_below_the_minimum_length_are_ignored() {
+        // A value shorter than three characters is never collected, so it
+        // cannot blank an ordinary word that merely contains it.
+        let mut message = er7::parse(
+            "MSH|^~\\&|LAB\rPID|1||9||JO^Q\rNTE|1||discussed the joint with the patient",
+        )
+        .unwrap();
+        redact(policy(&["PID-5 replace REDACTED"]), &mut message);
+        assert!(message.to_er7().contains("joint"), "{}", message.to_er7());
+    }
+
+    #[test]
+    fn keep_never_becomes_a_known_value() {
+        // `keep` accepts a position; it does not offer its value as
+        // something to hunt for elsewhere (D23, spec §2.10).
+        let mut message = er7::parse(
+            "MSH|^~\\&|LAB\rPID|1||9||SMITH^JOHN\rNTE|1||spoke with SMITH about the results",
+        )
+        .unwrap();
+        redact(policy(&["PID-5 keep"]), &mut message);
+        assert!(
+            message
+                .to_er7()
+                .contains("spoke with SMITH about the results"),
+            "{}",
+            message.to_er7()
+        );
+    }
+
+    #[test]
+    fn known_values_from_a_null_collapsed_field_are_still_learned() {
+        // A field-level `null` collapses PID-5 to `""` through the
+        // shortcut in `Pass::segment`, before the subcomponent loop ever
+        // runs — the sweep must still have learned "SMITH" from it.
+        let mut message = er7::parse(
+            "MSH|^~\\&|LAB\rPID|1||9||SMITH^JOHN\rNTE|1||spoke with SMITH about the results",
+        )
+        .unwrap();
+        let report = redact(policy(&["PID-5 null"]), &mut message);
+
+        assert!(!message.to_er7().contains("SMITH"), "{}", message.to_er7());
+        let paths: Vec<String> = report.changes.iter().map(|c| c.path.to_string()).collect();
+        assert!(paths.iter().any(|p| p.starts_with("NTE[1]-3")), "{paths:?}");
+    }
+
+    #[test]
+    fn search_known_values_off_disables_the_sweep() {
+        let mut message = er7::parse(
+            "MSH|^~\\&|LAB\rPID|1||9||SMITH^JOHN\rNTE|1||spoke with SMITH about the results",
+        )
+        .unwrap();
+        let mut off = policy(&["PID-5 replace REDACTED"]);
+        off.search_known_values = false;
+        redact(off, &mut message);
+        assert!(
+            message
+                .to_er7()
+                .contains("spoke with SMITH about the results"),
+            "{}",
+            message.to_er7()
+        );
     }
 }

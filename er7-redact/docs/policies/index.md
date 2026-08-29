@@ -26,8 +26,9 @@ NTE-3    clear
 - `#` starts a comment, on its own line or after a rule. It also ends an
   action's argument, so replacement text cannot contain a `#`.
 - Rules apply **in order**, and order is significant.
-- Three reserved first words — `accept`, `reject`, and `unrecognised` —
-  set what the policy does by default rather than naming a position.
+- Four reserved first words — `accept`, `reject`, `unrecognised`, and
+  `known-values` — set what the policy does by default rather than naming
+  a position.
 
 ## The actions
 
@@ -69,6 +70,7 @@ PID-7  first 4
 
 accept
 unrecognised  refuse
+known-values  on
 ```
 
 **Reject by default** — redact everything, and `keep` becomes the
@@ -82,6 +84,7 @@ OBX-5  keep
 
 reject        replace REDACTED
 unrecognised  mask *
+known-values  on
 ```
 
 The posture always runs last, wherever its line appears in the file. A
@@ -126,6 +129,31 @@ instead:
 Only the first payload of an input can be unrecognised: messages are split
 at their headers, so junk after a message arrives as a segment of it.
 
+### Values found elsewhere
+
+A patient name removed from `PID-5` is often still sitting in `NTE-3`:
+"spoke with Mrs Everywoman about the result." Every policy also sweeps for
+this, on by default: a value a rule found at a named position is redacted
+wherever else it turns up, case-insensitively and only as a whole word (so
+a surname `Wood` does not catch the `Wood` inside `Woodward`). Values
+shorter than three characters are skipped, and a `keep`'d position never
+contributes a value — `keep` already says "not identifying."
+
+The match takes the **whole leaf**, with the same action the named
+position used — `NTE-3` loses the whole sentence, not just the name
+inside it, the same way every other action in this crate already works on
+a whole value rather than part of one.
+
+```
+known-values off
+```
+
+turns it off for a policy that should only ever redact by position. It is
+the fourth default line, always written by `--show-policy`, on the same
+"say so even when you mean the quiet answer" logic the other three
+follow. The normative text is D23,
+[spec §2.10](../../spec/02-redaction-model/index.md).
+
 ## The built-in policies
 
 ### `patient_identifiers` — the default
@@ -159,6 +187,7 @@ MSH  keep
 
 reject        replace REDACTED
 unrecognised  refuse
+known-values  on
 ```
 
 Everything below the header becomes `REDACTED`. Add `keep` rules for what
@@ -178,13 +207,20 @@ the one rule that keeps a message usable.
 
 ## What the default deliberately leaves alone
 
-| Position | Why |
-| -------- | --- |
-| `NTE-3`, `OBX-5`, other free text | identifiers hide there constantly, and redacting them wholesale destroys the clinical content that makes a message worth sharing. Name them explicitly, or reject by default |
-| `PID-8`, `PID-10`, `PID-15`–`PID-17`, `PID-22` | sensitive, but not identifiers, and usually the point of the test. Quasi-identifiers in combination: in a small population, redact them too |
-| `MSH-3`–`MSH-6` | organisational rather than personal, and often what makes a message reproducible |
-| `Z` segments | local, so no position means anything a list could know |
-| set IDs (`PID-1`, `OBX-1`) | ordinal numbers, not data |
+None of this is *named* by the default policy, and that has not changed —
+but "not named" and "untouched" stopped being the same thing once the
+known-values sweep shipped. Free text and `Z` segments are reachable when
+they happen to repeat a value the policy found at a named position; the
+rest are not, because their own values are not the kind a named position
+also holds.
+
+| Position | Why not named | Reachable by value? |
+| -------- | -------------- | -------------------- |
+| `NTE-3`, `OBX-5`, other free text | identifiers hide there constantly, and no positional rule can find them | yes, if the value repeats one from a named position — see above |
+| `PID-8`, `PID-10`, `PID-15`–`PID-17`, `PID-22` | sensitive, but not identifiers, and usually the point of the test. Quasi-identifiers in combination: in a small population, redact them too | only by coincidence |
+| `MSH-3`–`MSH-6` | organisational rather than personal, and often what makes a message reproducible | only by coincidence |
+| `Z` segments | local, so no position means anything a list could know | yes, same as free text |
+| set IDs (`PID-1`, `OBX-1`) | ordinal numbers, not data | no — too short to ever pass the minimum length |
 
 ## The honest summary
 

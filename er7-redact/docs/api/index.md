@@ -40,6 +40,7 @@ The only thing that edits a message.
 | `rules` | `Vec<Rule>` | public; applied in order |
 | `posture` | `Posture` | public; what every leaf no rule named gets |
 | `unrecognised` | `Unrecognised` | public; what a payload that is not ER7 gets |
+| `search_known_values` | `bool` | public; sweep for a value found at a named position wherever else it appears (D23, [spec §2.10](../../spec/02-redaction-model/index.md)); defaults to `true` |
 | `accept_all` | `fn accept_all() -> Policy` | no rules; accepts, and passes an unrecognised payload |
 | `reject_all` | `fn reject_all() -> Policy` | no rules; `replace REDACTED` over everything, masks an unrecognised payload |
 | `patient_identifiers` | `fn patient_identifiers() -> Policy` | the curated table, [spec §5.1](../../spec/05-built-in-policies/index.md); accepts, refuses |
@@ -47,10 +48,11 @@ The only thing that edits a message.
 | `with` | `fn with(self, path: &str, action: Action) -> Result<Policy, Error>` | builder |
 | `posture` | `fn posture(self, posture: Posture) -> Policy` | `Reject(Keep)` normalises to `Accept` |
 | `on_unrecognised` | `fn on_unrecognised(self, u: Unrecognised) -> Policy` | `Apply(Keep)` and `Apply(Null)` normalise to `Pass` |
-| `parse` | `fn parse(text: &str) -> Result<Policy, Error>` | the file format; a file that says nothing accepts and **refuses** |
-| `append` | `fn append(&mut self, other: Policy)` | rules in order; the stricter posture (D20); the appended disposition |
+| `search_known_values` | `fn search_known_values(self, search: bool) -> Policy` | builder for the field above |
+| `parse` | `fn parse(text: &str) -> Result<Policy, Error>` | the file format; a file that says nothing accepts, **refuses**, and searches known values |
+| `append` | `fn append(&mut self, other: Policy)` | rules in order; the stricter posture (D20); the appended disposition; `search_known_values` only turns on |
 | `is_empty` | `fn is_empty(&self) -> bool` | no rules, and accepts by default |
-| `Display` | | the canonical policy file, both defaults stated; re-parses to an equal policy |
+| `Display` | | the canonical policy file, all three defaults stated; re-parses to an equal policy |
 
 There is deliberately **no** `Policy::new` and no `Default`: a policy
 cannot exist without saying which posture it takes.

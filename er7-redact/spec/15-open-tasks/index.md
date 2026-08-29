@@ -10,31 +10,6 @@ archive — and name the `T<n>` in the commit message.
 
 ---
 
-## T1 — Redact known values wherever they appear
-
-**Why.** A patient name removed from `PID-5` is still in the `NTE-3` that
-says "spoke with Mrs Everywoman about the result". This is the single
-biggest gap in a positional redactor ([§14.2](../14-roadmap/index.md),
-[§5.4](../05-built-in-policies/index.md)).
-
-**Shape.** A second pass. Collect the decoded values the policy found at
-its named positions, then search every other leaf for those strings and
-apply an action where one is found. No patterns, so no false positives on
-clinical text; the crate only removes strings it already knows are
-identifiers.
-
-**Open questions.** Case sensitivity. Substring versus whole-word (a
-surname `Wood` inside `Woodward`). Minimum length, so a one-character
-initial does not blank the message. Whether the action is the same one the
-position's rule used, or a separate setting.
-
-**Done when.** A message where the name appears in both `PID-5` and
-`NTE-3` comes back with neither, the report names both positions, a
-clinical word that merely resembles an identifier is untouched, and §5.4
-is rewritten to describe what is now covered.
-
----
-
 ## T2 — A caller-supplied action
 
 **Why.** `Action` is closed, so a real MAC

@@ -17,6 +17,13 @@ saying which posture is meant.
 | [`patient_identifiers()`](#51-policypatient_identifiers) | accept | the curated table below | refuse |
 | [`all_but_the_header()`](#52-policyall_but_the_header) | reject `replace REDACTED` | `MSH keep` | refuse |
 
+All four also search for a known value wherever else it appears
+([§2.10](../02-redaction-model/index.md)) — `search_known_values` defaults
+to on, and none of the four turns it off. `accept_all()` and a rejecting
+posture both make it moot in practice: the first has no rules to collect
+a known value from, and the second has already redacted everywhere the
+sweep would look.
+
 The first two are the bare postures, and carry no knowledge of HL7® at all.
 The last two are **curated**: somebody wrote down a list. **Both are a
 starting point, not a compliance certification [D14]** — read
@@ -42,8 +49,13 @@ positions; a redaction crate can afford neither surprise, so a caller
 names the policy they mean.
 
 It **accepts by default**: a position this table does not name is left as
-it is. That is the whole of its risk, and [§5.4](#54-what-the-default-policy-deliberately-does-not-touch)
-is the list of what that means in practice.
+it is, unless it happens to repeat a value the table *did* find elsewhere
+— `search_known_values` is on by default on every built-in policy, this
+one included ([§2.10](../02-redaction-model/index.md)). That reach is by
+**value**, not position, so it is not something to rely on for any
+identifier that never turns up at a named position in the first place.
+[§5.4](#54-what-the-default-policy-deliberately-does-not-touch) is the
+list of what accepting by default still means in practice.
 
 ### PID — patient identification
 
@@ -167,15 +179,32 @@ the capability it exists to add. The table is:
   that a caller can extend, edit, or ignore;
 - **not authoritative** — see below.
 
-## 5.4 What the default policy deliberately does not touch
+## 5.4 What the default policy does not name — and what still reaches it
 
-| Position | Why not |
-| -------- | ------- |
-| `NTE-3`, `OBX-5` and other free text | identifiers hide in free text constantly, and no positional rule can find them. Redacting them wholesale would destroy the clinical content that makes a test message useful. Redact these explicitly, or reject by default ([§5.2](#52-policyall_but_the_header)) |
-| `PID-8` (sex), `PID-10` (race), `PID-15` (language), `PID-16` (marital status), `PID-17` (religion), `PID-22` (ethnic group) | sensitive, but not identifiers, and the values a clinical test is usually about. They are also quasi-identifiers in combination: in a small population, redact them too |
-| `MSH-3` to `MSH-6` (sending and receiving application and facility) | organisational, not personal — and a facility name is often what makes the message reproducible. It is also, in a small enough system, a quasi-identifier |
-| `Z` segments | local extensions, so no position means anything the crate could know. Rejecting by default is the answer here |
-| `PID-1`, `OBX-1` and other set IDs | ordinal numbers, not data |
+No position below is a rule's target, and none of that changed. What
+changed is that a positional gap is no longer the same thing as an
+untouched one: since [§2.10](../02-redaction-model/index.md) shipped, a
+value the table *did* find at a named position is redacted wherever else
+it repeats, `NTE-3` included. That reach is by exact, repeated **value**
+— it catches `SMITH` in a note because `PID-5` already said `SMITH`
+elsewhere in the same message. It does not catch an identifier that never
+appears anywhere the table names, which is most of what free text still
+carries: a phone number typed into a note, a relative's name that is
+nowhere in `PID` or `NK1`, a diagnosis. The row below is honest about
+that difference now.
+
+| Position | Why not named | Still reachable by value? |
+| -------- | -------------- | -------------------------- |
+| `NTE-3`, `OBX-5` and other free text | identifiers hide in free text constantly, and no positional rule can find them | yes — a value repeated from a named position is caught ([§2.10](../02-redaction-model/index.md)); anything else in the note is not |
+| `PID-8` (sex), `PID-10` (race), `PID-15` (language), `PID-16` (marital status), `PID-17` (religion), `PID-22` (ethnic group) | sensitive, but not identifiers, and the values a clinical test is usually about. They are also quasi-identifiers in combination: in a small population, redact them too | only by coincidence — these are short codes, not the kind of text a named position also holds |
+| `MSH-3` to `MSH-6` (sending and receiving application and facility) | organisational, not personal — and a facility name is often what makes the message reproducible. It is also, in a small enough system, a quasi-identifier | only by coincidence |
+| `Z` segments | local extensions, so no position means anything the crate could know. Rejecting by default is the answer here | yes, on the same terms as free text — a `Z` segment is still a leaf the sweep can reach |
+| `PID-1`, `OBX-1` and other set IDs | ordinal numbers, not data | no — too short to ever pass the three-character minimum ([§2.10](../02-redaction-model/index.md)) |
+
+Redact free text explicitly where a policy needs more than the sweep
+gives it, or reject by default ([§5.2](#52-policyall_but_the_header)),
+which is the only posture that does not depend on a value having shown up
+somewhere else first.
 
 ## 5.5 What these policies do not do [D14]
 

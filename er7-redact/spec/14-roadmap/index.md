@@ -28,27 +28,27 @@ What it cost: `Policy::new`, `Policy::fallback`, `Policy::everything`, the
 name rather than left to fail quietly, because the one outcome worth ruling
 out is a policy that still runs and has changed posture.
 
-## 14.2 Next — free-text scanning
+## 14.2 Shipped — free-text scanning
 
 The largest real gap ([§5.4](../05-built-in-policies/index.md)). A name in
 `NTE-3` survives every positional policy, and everybody who has redacted a
 message by hand has found one there.
 
-The design question is what the crate is allowed to know. Two candidates:
-
-- **Redact-what-you-know**: take the values already found at identifier
-  positions and remove those strings wherever else they appear in the
-  message. No pattern matching, no false positives on clinical text, and
-  it composes with the existing model — the values come from the same
-  policy. It misses anything not present in a named position.
-- **Pattern matching**: recognise the shape of a phone number, an SSN, a
-  date. Catches more, invents a dependency or a hand-rolled matcher, and
-  false-positives on lab values, which is worse than it sounds because it
-  destroys the clinical content.
-
-The first is the one to build; it is [T1](../15-open-tasks/index.md). The
-second is declined for now
+The design question was what the crate is allowed to know, and the
+redact-what-you-know answer was the one to build: take the values already
+found at named positions and remove those strings wherever else they
+appear, whole-word and case-insensitively. No pattern matching, no false
+positives on clinical text, and it composes with the existing model — the
+values come from the same policy, and misses anything not present in a
+named position to begin with. Pattern matching — recognising the *shape*
+of a phone number, an SSN, a date — remains declined
 ([§16.2](../16-open-questions-and-declined-decisions/index.md)).
+
+Shipped 2026-08-29 as `Policy::search_known_values` (on by default) and
+the sweep it drives (D23, [§2.10](../02-redaction-model/index.md)),
+reusing `uncovered`'s own notion of "a leaf no rule or posture already
+touched" rather than a third way of walking the tree. Closed
+[T1](../15-open-tasks/index.md).
 
 ## 14.3 Next — a caller-supplied action
 

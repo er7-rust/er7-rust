@@ -36,6 +36,7 @@ enforces it. A rule with no test is a bug in this table.
 | D20 | `appending_never_weakens_the_defaults` | `src/policy.rs` |
 | D21 | `an_unrecognised_payload_follows_the_policy`, `cli_masks_an_unrecognised_payload` | `src/redact.rs`, `tests/integration.rs` |
 | D22 | `uncovered_lists_every_position_no_rule_names`, `uncovered_ignores_empty_and_null_leaves`, `cli_uncovered_lists_the_documented_gaps` | `src/redact.rs`, `tests/integration.rs` |
+| D23 | `known_values_are_redacted_wherever_they_appear`, `known_values_matching_is_case_insensitive`, `known_values_matching_is_whole_word_only`, `known_values_below_the_minimum_length_are_ignored`, `keep_never_becomes_a_known_value`, `known_values_from_a_null_collapsed_field_are_still_learned`, `search_known_values_off_disables_the_sweep`, `known_values_line_parses_and_displays`, `appending_only_turns_known_values_on`, `cli_known_values_default_policy_catches_a_repeated_name` | `src/redact.rs`, `src/policy.rs`, `tests/integration.rs` |
 
 Further tests carry no single rule, because they assert the whole-message
 properties every rule exists to produce, or a contract that is a table

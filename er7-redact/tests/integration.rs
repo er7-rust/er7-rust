@@ -357,6 +357,20 @@ fn cli_redacts_stdin_with_the_built_in_policy() {
 }
 
 #[test]
+fn cli_known_values_default_policy_catches_a_repeated_name() {
+    // T1, at the CLI level: the built-in policy's own patient name,
+    // repeated in free text the policy does not name, does not survive
+    // either (D23, spec §2.10) — on by default, no flag needed.
+    let text = "MSH|^~\\&|LAB|ACME|EHR|CLINIC|20260815081500||ADT^A08|MSG00042|P|2.5\r\
+                PID|1||444333222^^^ACME^MR||EVERYWOMAN^EVE||19610615|F\r\
+                NTE|1||spoke with EVERYWOMAN about the results";
+    let (ok, stdout, _) = cli(&[], text);
+    assert!(ok);
+    assert!(!stdout.contains("EVERYWOMAN"), "{stdout}");
+    assert!(er7::parse(&stdout).is_ok());
+}
+
+#[test]
 fn cli_takes_rules_instead_of_the_built_in_policy() {
     // Spec §10.2: naming rules replaces the default rather than adding to
     // it, so what runs can be predicted from the arguments.
@@ -517,10 +531,10 @@ fn cli_shows_the_policy_without_reading_input() {
     let (ok, stdout, _) = cli(&["--show-policy"], "");
     assert!(ok);
     assert!(stdout.starts_with("PID-2.1   pseudonym\n"), "{stdout}");
-    // Both defaults are stated, so a reader never has to know which one
-    // was the quiet one (spec §6.5).
+    // All three defaults are stated, so a reader never has to know which
+    // one was the quiet one (spec §6.5).
     assert!(
-        stdout.ends_with("\naccept\nunrecognised  refuse\n"),
+        stdout.ends_with("\naccept\nunrecognised  refuse\nknown-values  on\n"),
         "{stdout}"
     );
     // What it writes is a policy file that reads back.
@@ -531,7 +545,10 @@ fn cli_shows_the_policy_without_reading_input() {
     assert!(ok);
     assert_eq!(
         stdout,
-        "MSH  keep\n\nreject        replace REDACTED\nunrecognised  refuse\n"
+        "MSH  keep\n\n\
+         reject        replace REDACTED\n\
+         unrecognised  refuse\n\
+         known-values  on\n"
     );
 }
 
@@ -634,7 +651,7 @@ fn every_rule_has_a_coverage_row() {
     let declared = rule_ids(include_str!("../spec/01-purpose-and-scope/index.md"));
     let covered = rule_ids(include_str!("../spec/11-testing-strategy/index.md"));
 
-    assert_eq!(declared.len(), 22, "§1.4 should index D1–D22");
+    assert_eq!(declared.len(), 23, "§1.4 should index D1–D23");
     let missing: Vec<&String> = declared.iter().filter(|d| !covered.contains(d)).collect();
     assert!(missing.is_empty(), "no row in §11.1 for {missing:?}");
     let orphan: Vec<&String> = covered.iter().filter(|d| !declared.contains(d)).collect();
