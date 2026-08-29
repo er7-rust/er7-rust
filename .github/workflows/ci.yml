@@ -1,6 +1,6 @@
 # CI for the Rust workspace: the four checks every crate shares
 # (spec/01-family-policy/index.md §1.2), the MSRV floor
-# (spec/rust-msrv-n-minus-3/index.md), the trademark fair-use rules
+# (spec/rust-msrv-n-minus-2/index.md), the trademark fair-use rules
 # (spec/hl7-trademarks-fair-use/index.md, enforced by bin/check-trademarks),
 # and dependency auditing (deny.toml: advisories, licenses, bans, sources).
 # The same auditing check also runs on a weekly cron with no push required

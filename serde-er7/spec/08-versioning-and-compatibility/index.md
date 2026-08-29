@@ -53,18 +53,18 @@ terms of `er7`'s types, so a break there is a break here too.
 | Item | Value |
 | ---- | ----- |
 | Edition | 2024 |
-| MSRV | 1.95 — current stable minus three releases |
+| MSRV | 1.96 — current stable minus two releases |
 | `no_std` | not supported; the wrapper types own `er7`'s `String`-bearing tree |
 
-The MSRV comes from the workspace-wide **N-3** policy — this family
-supports at least current stable Rust minus three releases — stated once in
-[`spec/rust-msrv-n-minus-3/index.md`](../../../spec/rust-msrv-n-minus-3/index.md)
+The MSRV comes from the workspace-wide **N-2** policy — this family
+supports at least current stable Rust minus two releases — stated once in
+[`spec/rust-msrv-n-minus-2/index.md`](../../../spec/rust-msrv-n-minus-2/index.md)
 and pinned as `rust-version` in `Cargo.toml`. Edition 2024's own 1.85 floor
 is below that and no longer binds.
 
 Two floors constrain this crate that do not constrain `er7`: `serde`'s own
 MSRV, and `er7`'s. This crate's floor is the highest of the three. If
-`serde` ever declares an MSRV above `N-3`, that becomes the real floor and
+`serde` ever declares an MSRV above `N-2`, that becomes the real floor and
 this section says so explicitly rather than leaving the manifest to imply
 it. Raising the MSRV is a breaking change, so it lands in a release allowed
 to break — under the pre-1.0 convention of §8.1, a minor bump.

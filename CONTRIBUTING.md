@@ -113,7 +113,7 @@ cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
 cargo fmt --check
 cargo rustdoc -p er7 --lib -- -W missing-docs
-cargo +1.95 check --workspace --all-targets   # the MSRV floor
+cargo +1.96 check --workspace --all-targets   # the MSRV floor
 bin/check-trademarks                           # or: make check-trademarks
 ```
 
@@ -122,9 +122,9 @@ the trademark checker on every push and pull request — but run them on
 your machine first; the workflow is new and has not yet had a hosted run,
 as [`MAINTAINERS.md`](MAINTAINERS.md) discloses.
 
-The MSRV floor is current stable minus three releases, so the exact
+The MSRV floor is current stable minus two releases, so the exact
 toolchain in that fifth line moves; the rule is
-[§2](spec/rust-msrv-n-minus-3/index.md).
+[§2](spec/rust-msrv-n-minus-2/index.md).
 
 ## Conventions a reviewer will otherwise ask about
 

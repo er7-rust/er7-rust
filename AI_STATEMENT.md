@@ -127,7 +127,7 @@ cargo test --workspace                            # unit, integration, and doc t
 cargo clippy --workspace --all-targets -- -D warnings   # pedantic lints, denied
 cargo fmt --check                                 # formatting
 cargo rustdoc -p er7 --lib -- -W missing-docs     # every public item documented
-cargo +1.95 check --workspace --all-targets       # the MSRV floor
+cargo +1.96 check --workspace --all-targets       # the MSRV floor
 ```
 
 - **Spec authority.** Each crate's `spec/index.md` is the single source of
@@ -303,7 +303,7 @@ answered, and never silently absorbed.
 **Normative for this project** — the documents that bind the practice
 described here: [`LICENSE.md`](LICENSE.md);
 [`spec/01-family-policy/index.md`](spec/01-family-policy/index.md);
-[`spec/rust-msrv-n-minus-3/index.md`](spec/rust-msrv-n-minus-3/index.md);
+[`spec/rust-msrv-n-minus-2/index.md`](spec/rust-msrv-n-minus-2/index.md);
 each crate's own `spec/index.md`; the workspace and per-crate `AGENTS.md`;
 [`CONTRIBUTING.md`](CONTRIBUTING.md);
 [`MAINTAINERS.md`](MAINTAINERS.md).

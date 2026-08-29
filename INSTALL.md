@@ -120,13 +120,13 @@ Mirrors of the repository are on
 
 | | |
 |---|---|
-| Rust | Current stable minus three releases. Today that is **1.95**. |
+| Rust | Current stable minus two releases. Today that is **1.96**. |
 | Edition | 2024, which needs 1.85 — no longer the binding constraint. |
 | Platform | Anything Rust targets. No platform-specific code, no C dependency, no build script. |
 | Network | None, at build time or run time. |
 
 The Rust floor is a rolling window, and the policy behind it is
-[`spec/rust-msrv-n-minus-3/index.md`](spec/rust-msrv-n-minus-3/index.md).
+[`spec/rust-msrv-n-minus-2/index.md`](spec/rust-msrv-n-minus-2/index.md).
 It exists because healthcare toolchains are approved on a cycle measured in
 quarters, so a library demanding the compiler released this month is a
 library that cannot be adopted.
@@ -134,7 +134,7 @@ library that cannot be adopted.
 Check a build against the floor with:
 
 ```sh
-cargo +1.95 check --workspace --all-targets
+cargo +1.96 check --workspace --all-targets
 ```
 
 If you do not have Rust: <https://rustup.rs>.

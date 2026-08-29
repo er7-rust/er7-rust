@@ -13,7 +13,7 @@ Every crate follows [Semantic Versioning](https://semver.org/). While a
 crate is `0.x`, a minor bump is the one allowed to break — including a
 raised minimum supported Rust version, which is always a breaking change
 and never lands in a patch
-([`spec/rust-msrv-n-minus-3/index.md`](spec/rust-msrv-n-minus-3/index.md)).
+([`spec/rust-msrv-n-minus-2/index.md`](spec/rust-msrv-n-minus-2/index.md)).
 
 ## 2026-08-26 — `er7` 0.1.4, `serde-er7` 0.1.4, `er7-redact` 0.2.2
 

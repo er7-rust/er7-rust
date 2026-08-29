@@ -169,16 +169,16 @@ the family. If it buys nothing in practice, that is worth knowing before
 
 ### Q8. Is the minimum Rust version window right?
 
-Current stable minus three releases — roughly six months. Chosen because
+Current stable minus two releases — roughly three months. Chosen because
 hospital toolchains are approved on a cycle measured in quarters.
 
-**What we want to know:** is six months enough for your organisation? Would
-twelve change whether you could adopt this?
+**What we want to know:** is three months enough for your organisation?
+Would six change whether you could adopt this?
 
 **What an answer changes:** the window is a policy, not a technical limit,
 and it is the kind of thing that is set once by guesswork and never
 revisited unless somebody says something. Spec:
-[§2](spec/rust-msrv-n-minus-3/index.md).
+[§2](spec/rust-msrv-n-minus-2/index.md).
 
 ### Q9. Are five licences useful, or just confusing?
 

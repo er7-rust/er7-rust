@@ -17,8 +17,8 @@ Priorities 1 and 2 shipped 2026-08-28 (fuzzing R6 through both `parse` and
 manifest-read version) and are removed from this table along with the
 tasks they scheduled — see
 [§13.6](../13-testing-strategy/index.md) and
-[`spec/rust-msrv-n-minus-3/index.md`](../../../spec/rust-msrv-n-minus-3/index.md)
-§2.4 for the evidence.
+[`spec/rust-msrv-n-minus-2/index.md`](../../../spec/rust-msrv-n-minus-2/index.md)
+for the evidence.
 
 | Priority | Item | Task | Rationale |
 | -------- | ---- | ---- | --------- |

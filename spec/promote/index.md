@@ -60,7 +60,7 @@ travel:
 | **Byte-for-byte round-trip** | A, B | "What went in comes back out" is the property an interface engineer actually needs and rarely gets |
 | **Spec-driven development, rules bound to tests** | C, D | The `spec/` tree, the rule IDs, and the coverage table are the credibility argument |
 | **Five-licence choice** (`MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only`) | D | Removes a procurement conversation before it starts |
-| **MSRV of stable minus three** | A, B | Speaks directly to organisations on quarterly toolchain approvals |
+| **MSRV of stable minus two** | A, B | Speaks directly to organisations on quarterly toolchain approvals |
 
 Assets that support these live in the repository root and should be kept
 current before any push: [`NEWS.md`](../../NEWS.md) (announcements and

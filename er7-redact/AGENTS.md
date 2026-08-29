@@ -15,7 +15,7 @@ drives changes.
 | Crate        | `er7-redact`                                                                |
 | Purpose      | Remove patient detail from HL7® v2 ER7 messages without breaking the message. |
 | Layer        | A positional editor over `er7` — no validation, no transport, no undo.      |
-| Language     | Rust (edition 2024, MSRV 1.95)                                              |
+| Language     | Rust (edition 2024, MSRV 1.96)                                              |
 | License      | MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only           |
 | Runtime deps | exactly one: [`er7`](https://crates.io/crates/er7) (D16)                     |
 | Workspace    | one of three members in this repository — see [`../AGENTS.md`](../AGENTS.md) |

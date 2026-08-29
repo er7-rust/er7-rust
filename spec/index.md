@@ -21,7 +21,7 @@ specific crate does.
 | Section | Covers |
 | ------- | ------ |
 | [§1 Family policy](01-family-policy/index.md) | Dependency minimalism, the four build checks, the spec-driven-development discipline itself, the synthetic-data safety rule, and how workspace path dependencies relate to published version requirements |
-| [§2 Rust MSRV: N-3](rust-msrv-n-minus-3/index.md) | The shared minimum supported Rust version — current stable minus three releases — why the window is that wide, and what an MSRV bump implies for a release |
+| [§2 Rust MSRV: N-2](rust-msrv-n-minus-2/index.md) | The shared minimum supported Rust version — current stable minus two releases — why the window is that wide, and what an MSRV bump implies for a release |
 | [§3 Promotion](promote/index.md) | How the family reaches HL7® and Rust professionals: the channels, what each one's rules are, a ninety-day sequence, message templates, and the etiquette that keeps the project welcome in professional communities |
 | [§4 HL7® trademarks and fair use](hl7-trademarks-fair-use/index.md) | What HL7 International's fair-use terms require, what counts as a "page" in a repository, where the ® goes and where it deliberately does not, and the check that enforces it |
 | [§5 Professionalization](professionalization/index.md) | What "professional" means here and the nine rules that bind the maintainer to it — verified plans, accurate special files, self-declared gaps as promises, CI enforcing what documents claim, trademark discipline, plain-language patient-data answers, conduct, family harmonization, gated outreach — with a dated status table |

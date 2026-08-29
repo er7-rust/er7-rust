@@ -94,7 +94,7 @@ The same path for everyone, maintainer included:
    cargo clippy --workspace --all-targets -- -D warnings
    cargo fmt --check
    cargo rustdoc -p er7 --lib -- -W missing-docs
-   cargo +1.95 check --workspace --all-targets
+   cargo +1.96 check --workspace --all-targets
    bin/check-trademarks
    ```
 
@@ -155,7 +155,7 @@ independently — there is no workspace version — and every crate follows
 | Rule | Effect |
 | ---- | ------ |
 | While a crate is `0.x`, the minor bump is the one allowed to break | A `0.1.2 → 0.2.0` may change an API; a patch never does |
-| Raising the minimum Rust version is a breaking change | It never lands in a patch ([§2](spec/rust-msrv-n-minus-3/index.md)) |
+| Raising the minimum Rust version is a breaking change | It never lands in a patch ([§2](spec/rust-msrv-n-minus-2/index.md)) |
 | A release is a decision, not an automation | No workflow publishes; one person runs `cargo publish` |
 | Yanking is reserved for genuinely dangerous versions | See [`SECURITY.md`](SECURITY.md) |
 

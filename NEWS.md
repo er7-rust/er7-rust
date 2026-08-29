@@ -17,7 +17,7 @@ readers rather than for a repository, is at <https://er7-rust.github.io/news/>.
 | Maintainers | One — [`MAINTAINERS.md`](MAINTAINERS.md) states the bus factor plainly |
 | Scope | The ER7 pipe-hat *encoding*: parse, query, edit, write, redact, and Serde. Not validation, not a typed segment model, not a transport, not the HL7® FHIR® standard |
 | Runtime dependencies | `er7` zero, `er7-redact` one, `serde-er7` two |
-| Rust | Current stable minus three releases; today 1.95 |
+| Rust | Current stable minus two releases; today 1.96 |
 | License | MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only |
 
 ## 2026-08-28 — A stated intent to adopt Trusted Publishing, and a caveat it surfaced
@@ -281,7 +281,7 @@ design decision in the project, all of which is written down in the specs.
   report itself is safe to paste into a ticket.
 - **Five licenses at the user's option**, chosen so that a proprietary
   vendor and a public-sector project can both adopt it without asking.
-- **A minimum supported Rust version of current stable minus three**,
+- **A minimum supported Rust version of current stable minus two**,
   chosen because hospital toolchains are approved on a cycle measured in
   quarters.
 - **Benchmarks and their method are published**, on a named machine, with

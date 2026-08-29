@@ -56,24 +56,24 @@ Anything that *would* require knowing the version is out of scope by R24.
 | Item | Value |
 | ---- | ----- |
 | Edition | 2024 |
-| Minimum supported Rust version | 1.95 — current stable minus three releases |
+| Minimum supported Rust version | 1.96 — current stable minus two releases |
 | Target support | any target with `std`; no platform-specific code |
 | `no_std` | not supported — the crate uses `String` and `Vec` throughout |
 
-The MSRV comes from the workspace-wide **N-3** policy — this family
-supports at least current stable Rust minus three releases — stated in
-[`spec/rust-msrv-n-minus-3/index.md`](../../../spec/rust-msrv-n-minus-3/index.md)
+The MSRV comes from the workspace-wide **N-2** policy — this family
+supports at least current stable Rust minus two releases — stated in
+[`spec/rust-msrv-n-minus-2/index.md`](../../../spec/rust-msrv-n-minus-2/index.md)
 and shared with `er7-redact` and `serde-er7`. Edition 2024 sets a hard
-floor of 1.85, so the effective MSRV is `max(1.85, N-3)`; that floor
-stopped binding once stable reached 1.88. The value is pinned as
+floor of 1.85, so the effective MSRV is `max(1.85, N-2)`; that floor
+stopped binding once stable reached 1.87. The value is pinned as
 `rust-version` in `Cargo.toml`, and CI builds and tests against that exact
 toolchain on every push (the `msrv` job in
 [`.github/workflows/ci.yml`](../../../.github/workflows/ci.yml), reading
 the version from this crate's own manifest rather than a second
 hard-coded copy — see
-[`spec/rust-msrv-n-minus-3/index.md`](../../../spec/rust-msrv-n-minus-3/index.md)
-§2.4). N-3 is a floor this crate promises to stay above, not a value
-chased release by
+[`spec/rust-msrv-n-minus-2/index.md`](../../../spec/rust-msrv-n-minus-2/index.md)).
+N-2 is a floor this crate promises to stay above, not a value chased
+release by
 release: the pin moves when the code genuinely needs something newer, and
 that bump is a breaking change, so it lands in a release allowed to break
 rather than in a patch.
