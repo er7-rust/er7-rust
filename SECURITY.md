@@ -31,7 +31,9 @@ of unverified claim this project tries not to make. Enabled the same day,
 and verifiable from the repository's settings: dependency alerts,
 automated security fixes (Dependabot security PRs only —
 `.github/dependabot.yml` keeps routine version bumps off, mirroring the
-sibling repositories' security-only posture), and secret scanning.
+sibling repositories' security-only posture), and secret scanning — the
+policy behind that posture is
+[`spec/dependabot/index.md`](spec/dependabot/index.md).
 
 A useful report contains:
 

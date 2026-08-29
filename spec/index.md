@@ -27,6 +27,7 @@ specific crate does.
 | [§5 Professionalization](professionalization/index.md) | What "professional" means here and the nine rules that bind the maintainer to it — verified plans, accurate special files, self-declared gaps as promises, CI enforcing what documents claim, trademark discipline, plain-language patient-data answers, conduct, family harmonization, gated outreach — with a dated status table |
 | [§6 Free open source funding](free-open-source-funding/index.md) | The checklist behind `.github/FUNDING.yml` and `CONTRIBUTING.md`'s "Money" section — what got set up, and what was checked and found genuinely unavailable rather than skipped |
 | [§7 Trusted Publishing](trusted-publishing/index.md) | The stated intent to adopt OIDC-based publishing once it is production-ready everywhere this project publishes — and the governance prerequisite that intent does not yet name |
+| [§8 Dependabot](dependabot/index.md) | Repository-level security updates, and the `.github/dependabot.yml` manifests behind scheduled alerts — with a deliberate `open-pull-requests-limit: 0` so version updates stay a security posture, not a treadmill |
 
 ## What belongs here vs. in a crate's own spec
 
