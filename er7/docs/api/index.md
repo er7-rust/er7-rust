@@ -65,6 +65,7 @@ Also `impl Display for Message`, equivalent to `to_er7()`.
 | ------ | ------- |
 | `field(usize)` / `field_mut(usize)` | `Option<&Field>` / `Option<&mut Field>` |
 | `component(usize, usize)` | `Option<&Component>` — field, then component, first repetition |
+| `first_value(usize, usize, &Separators)` | `Option<String>` — decoded, first subcomponent, empty treated as absent (R26) |
 | `is_header()` | `bool` — `MSH`, `FHS`, or `BHS` |
 | `to_er7(&Separators)` / `to_text(&Separators)` | `String` |
 

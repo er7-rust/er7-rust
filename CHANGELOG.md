@@ -15,6 +15,23 @@ raised minimum supported Rust version, which is always a breaking change
 and never lands in a patch
 ([`spec/rust-msrv-n-minus-2/index.md`](spec/rust-msrv-n-minus-2/index.md)).
 
+## 2026-08-29 — `er7` 0.2.1
+
+Patch: purely additive, no existing signature changed.
+
+### Added
+
+- **`Segment::first_value(field, component, &separators) -> Option<String>`
+  (R26).** The decoded text of one field's first repetition and
+  subcomponent, treating an empty result as absent — the same three things
+  `Message::query` does, scoped to a segment already in hand rather than
+  searched for by path. Raised by the `hl7-2-5-to-xml-using-rust` and
+  `hl7-2-5-to-json-using-rust` port (T5, shipped in 0.1.0): both wrote the
+  identical eight-line helper to read `OBX-2` while iterating a message's
+  own `OBX` segments, evidence [`er7` §10.2](er7/spec/10-msh-conveniences/index.md)
+  asks for before adding a convenience. [`er7` §5.4](er7/spec/05-value-tree/index.md).
+  Closes T8.
+
 ## 2026-08-29 — `er7` 0.2.0, `serde-er7` 0.2.0, `er7-redact` 0.3.0
 
 All three minor releases, for the same reason: the workspace MSRV moved,

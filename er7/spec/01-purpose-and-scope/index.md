@@ -67,7 +67,7 @@ not use, and every optional dependency here would be an audit surface for
 everyone ([§15.3](../15-dependencies-and-build/index.md)). The family is
 presented together at <https://er7-rust.github.io/ecosystem/>.
 
-## 1.4 Rule index (R1–R25)
+## 1.4 Rule index (R1–R26)
 
 Every behavioural rule the crate guarantees, with a stable ID. Prose,
 tests, code comments, and commit messages cite these. **IDs are never
@@ -101,8 +101,9 @@ test that enforces it.
 | R23 | Exactly four error variants exist, arising from exactly two situations. | [§11](../11-error-handling/index.md) |
 | R24 | No dictionary, no validation, no transport. | [§1.3](index.md) |
 | R25 | Zero runtime dependencies. | [§15](../15-dependencies-and-build/index.md) |
+| R26 | `Segment::first_value` decodes the first repetition and subcomponent of a field, treating an empty result as absent. | [§5.4](../05-value-tree/index.md) |
 
-The next rule ID is **R26**.
+The next rule ID is **R27**.
 
 ## 1.5 Design priorities, in order
 

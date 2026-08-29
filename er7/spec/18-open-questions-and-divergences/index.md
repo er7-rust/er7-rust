@@ -110,8 +110,10 @@ intended division: they convert to XML and JSON, where leading whitespace
 is noise, so they can afford to trim; this crate guarantees a byte-for-byte
 round trip (R16), so it cannot. Two callers writing the same six lines is
 acceptable where two callers writing the same eight-line *value lookup*
-([T8](../17-open-tasks/index.md)) is not, because the trimming encodes a
-policy the callers own and the lookup encodes one this crate owns.
+was not, because the trimming encodes a policy the callers own and the
+lookup encoded one this crate owns — which is why the lookup, and not the
+trimming, became `Segment::first_value` (R26,
+[§5.4](../05-value-tree/index.md)).
 
 ## 18.6 Open question: should `to_text` exist at every level?
 

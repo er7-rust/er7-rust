@@ -78,10 +78,19 @@ returning `Option`, plus a `_mut` variant:
 | Level | Accessor | Shortcut |
 | ----- | -------- | -------- |
 | `Message` | `segment(name)`, `segment_at(name, occurrence)`, `segments_named(name)`, `header()` | |
-| `Segment` | `field(n)` | `component(field, component)` |
+| `Segment` | `field(n)` | `component(field, component)`, `first_value(field, component, &separators)` |
 | `Field` | `repetition(n)` | `component(n)` — first repetition |
 | `Repetition` | `component(n)` | |
 | `Component` | `subcomponent(n)` | |
+
+**`Segment::first_value` [R26]** goes one step further than `component`: it
+also takes the first subcomponent, decodes it, and treats an empty result
+as absent — the same three things `Message::query` does, scoped to a
+segment already in hand rather than searched for by path. It exists
+because a caller iterating a message's own segments (reading `OBX-2` while
+walking every `OBX`, say) would otherwise re-derive this exact four-call
+chain itself; two independent callers writing the identical helper is the
+evidence that motivated adding it.
 
 `Segment::is_header()` reports whether this segment declares delimiters
 (`MSH`, `FHS`, `BHS`), which is what §4.4.2 and §7.1 key on.

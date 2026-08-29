@@ -500,6 +500,53 @@ impl Segment {
         self.field(field)?.component(component)
     }
 
+    /// The decoded text of `field.component` (first repetition, first
+    /// subcomponent), treating an empty result as absent (R26).
+    ///
+    /// The scoped sibling of [`Message::query`]: a query searches the whole
+    /// message for the first matching segment, and this is the same lookup
+    /// when the segment is already in hand — reading `OBX-2` while iterating
+    /// a message's `OBX` segments, for instance, without a path parse or a
+    /// second walk from the top for each one.
+    ///
+    /// Example:
+    ///
+    /// ```
+    /// # fn main() -> Result<(), er7::Error> {
+    /// let message = er7::parse("MSH|^~\\&|LAB\rOBX|1|NM|2093-3^Cholesterol^LN||187")?;
+    /// let obx = message.segment("OBX").unwrap();
+    /// let separators = &message.separators;
+    ///
+    /// assert_eq!(obx.first_value(2, 1, separators).as_deref(), Some("NM"));
+    /// assert_eq!(obx.first_value(3, 2, separators).as_deref(), Some("Cholesterol"));
+    ///
+    /// // A field the segment does not carry, and one sent empty, read the same.
+    /// assert_eq!(obx.first_value(99, 1, separators), None);
+    /// assert_eq!(
+    ///     er7::parse("MSH|^~\\&|LAB\rOBX|1||||")?
+    ///         .segment("OBX")
+    ///         .unwrap()
+    ///         .first_value(4, 1, &Default::default()),
+    ///     None,
+    /// );
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[must_use]
+    pub fn first_value(
+        &self,
+        field: usize,
+        component: usize,
+        separators: &Separators,
+    ) -> Option<String> {
+        let text = self
+            .component(field, component)?
+            .subcomponent(1)?
+            .value(separators)
+            .into_owned();
+        (!text.is_empty()).then_some(text)
+    }
+
     /// True when this segment declares the message's delimiters, i.e. it is
     /// an `MSH` header or one of the `FHS`/`BHS` batch headers. Fields 1
     /// and 2 of such a segment are the delimiters themselves and are never
@@ -1110,6 +1157,36 @@ mod tests {
         // A versioned MSH-12 reports only its first component.
         let versioned = parse("MSH|^~\\&|LAB|||||||||2.5.1^AUS^2.5.1").unwrap();
         assert_eq!(versioned.version().as_deref(), Some("2.5.1"));
+    }
+
+    #[test]
+    fn first_value_reads_a_leaf_scoped_to_one_segment() {
+        // R26: the same lookup Message::query does, but on a segment
+        // already in hand, decoded, with empty and null both absent.
+        let message = message();
+        let separators = &message.separators;
+        let results = message.segment("OBX").unwrap();
+        let comment = message.segments_named("OBX").nth(1).unwrap();
+
+        assert_eq!(results.first_value(2, 1, separators).as_deref(), Some("NM"));
+        assert_eq!(
+            results.first_value(3, 2, separators).as_deref(),
+            Some("Cholesterol")
+        );
+        // OBX-4 was sent empty, and OBX-99 was not sent at all: both absent.
+        assert_eq!(results.first_value(4, 1, separators), None);
+        assert_eq!(results.first_value(99, 1, separators), None);
+        // The second OBX's fifth field is the explicit null, which decodes
+        // to empty and so reads as absent here too.
+        assert_eq!(comment.first_value(5, 1, separators), None);
+
+        // Decodes, rather than reading raw text.
+        let escaped = parse("MSH|^~\\&|LAB\rOBX|1|ST|X^Note^L||Smith \\T\\ Jones").unwrap();
+        let obx = escaped.segment("OBX").unwrap();
+        assert_eq!(
+            obx.first_value(5, 1, &escaped.separators).as_deref(),
+            Some("Smith & Jones")
+        );
     }
 
     #[test]

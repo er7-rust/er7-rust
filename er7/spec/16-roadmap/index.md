@@ -51,10 +51,11 @@ for the evidence.
 
 **All three conditions are now met, as of 2026-08-28.** No breaking
 changes are planned for 1.0.0 — condition 1 surfaced one additive
-candidate ([T8](../17-open-tasks/index.md)) and no removals or renames —
-so the API can be frozen as it stands. Cutting the release itself is the
-maintainer's decision, not a mechanical consequence of this table; this
-section states readiness, not intent.
+candidate, `Segment::first_value` (R26, [§5.4](../05-value-tree/index.md)),
+shipped 2026-08-29 — and no removals or renames, so the API can be frozen
+as it stands. Cutting the release itself is the maintainer's decision, not
+a mechanical consequence of this table; this section states readiness,
+not intent.
 
 ## 16.3 What the T5 port established
 
@@ -71,8 +72,9 @@ Recorded here because it is the evidence behind the 1.0.0 decision.
 
 **Friction, recorded rather than patched:**
 
-- A per-segment value lookup was written twice, identically —
-  [T8](../17-open-tasks/index.md).
+- A per-segment value lookup was written twice, identically — closed
+  2026-08-29 as `Segment::first_value` (R26,
+  [§5.4](../05-value-tree/index.md)).
 - Both crates had to add a `normalize` step to keep their own documented
   trimming, because this crate deliberately trims nothing —
   [§18.5](../18-open-questions-and-divergences/index.md), now with two real
