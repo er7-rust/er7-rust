@@ -141,7 +141,7 @@ checksum = "252afb9ae5eaa683babdc6a068b3f5726eb19e05070c731f9b2a23a7c3e8ed34"
 
 [[package]]
 name = "er7"
-version = "0.1.4"
+version = "0.2.0"
 
 [[package]]
 name = "er7-bench"
@@ -153,7 +153,7 @@ dependencies = [
 
 [[package]]
 name = "er7-redact"
-version = "0.2.2"
+version = "0.3.0"
 dependencies = [
  "er7",
 ]
@@ -311,7 +311,7 @@ dependencies = [
 
 [[package]]
 name = "serde-er7"
-version = "0.1.4"
+version = "0.2.0"
 dependencies = [
  "er7",
  "serde",

@@ -20,6 +20,34 @@ readers rather than for a repository, is at <https://er7-rust.github.io/news/>.
 | Rust | Current stable minus two releases; today 1.96 |
 | License | MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only |
 
+## 2026-08-29 — `er7-redact` now catches a repeated identifier wherever it appears
+
+Three releases today: `er7` 0.2.0, `serde-er7` 0.2.0, `er7-redact` 0.3.0.
+
+The headline is `er7-redact`'s: a patient name removed from `PID-5` is
+often still sitting in a free-text note — "spoke with Mrs Everywoman about
+the result" — because no positional rule can see it there. Every policy
+now sweeps for that, on by default. It collects the values a rule found at
+the positions it named, then redacts those same values wherever else they
+turn up, case-insensitively and only as a whole word, so a surname `Wood`
+does not catch the `Wood` inside `Woodward`. Turn it off with `known-values
+off` in a policy file, if a policy should only ever redact by position.
+Read the reasoning in [`docs/policies/`](er7-redact/docs/policies/index.md).
+
+Also in this release: `er7-redact` gained a `--uncovered` flag — the
+positions no rule names, the same set a rejecting posture already
+computes to decide what to blank, now printable on its own — and `er7`
+gained a worked example of building a message from scratch without a
+builder API, because `parse_with` already is one for anything expressible
+as text.
+
+And underneath all three: the workspace's minimum supported Rust version
+policy itself moved from current-stable-minus-three to
+current-stable-minus-two — a narrower, more current window — so the floor
+moved from 1.95 to 1.96.
+
+Full detail, dated and versioned, is in [`CHANGELOG.md`](CHANGELOG.md).
+
 ## 2026-08-28 — A stated intent to adopt Trusted Publishing, and a caveat it surfaced
 
 Every crate here still publishes with a long-lived crates.io API token on

@@ -15,6 +15,52 @@ raised minimum supported Rust version, which is always a breaking change
 and never lands in a patch
 ([`spec/rust-msrv-n-minus-2/index.md`](spec/rust-msrv-n-minus-2/index.md)).
 
+## 2026-08-29 — `er7` 0.2.0, `serde-er7` 0.2.0, `er7-redact` 0.3.0
+
+All three minor releases, for the same reason: the workspace MSRV moved,
+which never lands in a patch. `er7-redact` carries two more breaking
+changes of its own on top of that.
+
+### Changed
+
+- **Breaking, all three crates: the MSRV moved from N-3 to N-2 — 1.95 to
+  1.96.** `rust-version` bumped in each `Cargo.toml`; nothing else in the
+  workspace's own CI needed to change, since the `msrv` job already reads
+  the pinned value from `er7/Cargo.toml` at run time and cross-checks the
+  other two crates agree, rather than carrying a second hard-coded copy.
+  Verified against the real `1.96` toolchain, not just declared:
+  `cargo +1.96 check --workspace --all-targets` and
+  `cargo +1.96 test --workspace` both clean.
+  [`spec/rust-msrv-n-minus-2/index.md`](spec/rust-msrv-n-minus-2/index.md).
+- **Breaking, `er7-redact` only: a value found at a named position is now
+  redacted wherever else it appears, by default.** `Policy` gained a new
+  public field, `search_known_values` (defaults to `true`), which breaks
+  a struct literal built from `Policy`'s old field set — the same trap
+  every other all-`pub`-fields struct in this family carries. More than
+  the field: `Redactor::redact` on an existing policy can now change a
+  leaf it left alone before, wherever that leaf repeats a value already
+  found at a named position, case-insensitively and only as a whole word.
+  The policy file format gained a fourth reserved word, `known-values
+  on`/`known-values off`, to turn it off for a policy that should only
+  ever redact by position. D23,
+  [`er7-redact` §2.10](er7-redact/spec/02-redaction-model/index.md).
+  Closes T1.
+
+### Added
+
+- **`er7-redact`: `Redactor::uncovered`, and the CLI's `--uncovered`
+  flag.** Reports every leaf that carries text and is named by no rule —
+  the set a rejecting posture already computes internally to decide what
+  to blank, now exposed on its own, and independent of the policy's
+  posture. Additive; does not change what an existing caller's `redact`
+  does. D22, [`er7-redact` §2.9](er7-redact/spec/02-redaction-model/index.md).
+  Closes T6.
+- **`er7`: `examples/build_a_message.rs`**, showing why there is still no
+  builder API — `parse_with` is the builder for anything already
+  expressible as ER7 text, which an ACK almost always is. Documentation
+  only; no API surface changed.
+  [`er7` §5.5](er7/spec/05-value-tree/index.md). Closes T7.
+
 ## 2026-08-26 — `er7` 0.1.4, `serde-er7` 0.1.4, `er7-redact` 0.2.2
 
 Metadata only. **No API changed**, no `Error` variant was added, and no
