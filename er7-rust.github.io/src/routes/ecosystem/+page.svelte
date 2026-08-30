@@ -220,8 +220,8 @@ PID[1]-5[1].2.1  replace REDACTED`}</code></pre>
     </ul>
     <p>
       If an AI coding agent is writing that layer, point it at
-      <a href="/agent-skill/">the packaged agent skill</a> first — it teaches these rules, and
-      which crate to reach for, before the agent has to rediscover them from a bug report.
+      <a href="/agent-skill/"><code>er7-skill</code></a> first — it teaches these rules, and which
+      crate to reach for, before the agent has to rediscover them from a bug report.
     </p>
   </div>
 </section>

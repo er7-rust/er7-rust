@@ -51,7 +51,7 @@
       <a href={links.crate}>Crate</a>
       <a href={links.docs}>API docs</a>
       <a href="/ecosystem/">Ecosystem</a>
-      <a href="/agent-skill/">Agent skill</a>
+      <a href="/agent-skill/">Agent skills</a>
       <a href="/news/">News</a>
       <a href="/security/">Security</a>
       <a href="/governance/">Governance</a>

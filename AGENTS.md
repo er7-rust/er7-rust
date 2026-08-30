@@ -14,7 +14,7 @@ workspace `Cargo.toml` and one `Cargo.lock`.
 (`{ path = "../er7", version = "0" }`), so a change to `er7` in this
 workspace is picked up by its siblings immediately, without publishing.
 
-Two directories here are **not** crates:
+Three directories here are **not** crates:
 
 - [`er7-rust.github.io/`](er7-rust.github.io/) holds the source of
   <https://er7-rust.github.io/>, the site that documents all three. It was
@@ -29,9 +29,15 @@ Two directories here are **not** crates:
   dependency — which crate to reach for, the rules that are easy to get
   wrong (the byte-for-byte round trip, absent/empty/null), and worked
   recipes. It is a distributable artefact for a downstream project's own
-  `.claude/skills/`, not guidance for changing this workspace itself —
-  that is what the rest of this file, and each crate's own `AGENTS.md`,
-  are for.
+  `.claude/skills/`, not guidance for changing this workspace itself.
+- [`er7-rust-maintainer-skill/`](er7-rust-maintainer-skill/) holds the
+  companion `SKILL.md` for the *other* direction: an agent packaging of
+  this very file and each crate's `AGENTS.md`, for a downstream fork or
+  another repository's tooling that wants this workspace's spec-driven
+  workflow, the four checks, and the safety rules as a loadable skill
+  rather than a set of files to go read. This file and each crate's own
+  `AGENTS.md` remain the canonical source; the skill is a pointer-shaped
+  index onto them, not a second copy.
 
 ## Where to work
 

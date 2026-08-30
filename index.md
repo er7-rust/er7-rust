@@ -28,13 +28,17 @@ for agent guidance on the workspace as a whole.
 The whole family, and the boundary between the layers, is documented at
 <https://er7-rust.github.io/ecosystem/>.
 
-[`er7-skill/`](er7-skill/) is a packaged
-[Claude Code Skill](https://code.claude.com/docs/en/skills)
-teaching an AI coding agent how to use these crates correctly — which
-crate to reach for, the round-trip and absent/empty/null rules that are
-easy to get wrong, and worked recipes for parsing, editing, batch input,
-and redaction. Drop it into a project's own `.claude/skills/` to use it
-there.
+Two packaged [Claude Code Skills](https://code.claude.com/docs/en/skills)
+ship alongside the crates, for the two different audiences that read this
+repository: [`er7-skill/`](er7-skill/) teaches an AI coding agent how to
+*use* these crates correctly in some other project — ER7 concepts and
+terminology, which crate to reach for, the round-trip and
+absent/empty/null rules that are easy to get wrong, and worked recipes for
+parsing, editing, batch input, and redaction. [`er7-rust-maintainer-skill/`](er7-rust-maintainer-skill/)
+teaches an agent how to *change* this repository itself — spec-driven
+development, the four checks, and the safety rules, packaged from this
+repository's own `AGENTS.md` files rather than duplicating them. Drop
+either into a project's own `.claude/skills/` to use it there.
 
 ## Install
 
