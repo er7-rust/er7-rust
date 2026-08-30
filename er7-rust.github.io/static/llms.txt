@@ -1,0 +1,60 @@
+# er7
+
+> Parse, query, edit, write, and redact HL7® v2 messages in the ER7 pipe-hat encoding — three independently-versioned Rust crates, from zero runtime dependencies at the bottom of the stack.
+
+er7-rust is a Cargo workspace of three crates for HL7 v2 integration work
+in Rust. `er7` is the ER7 encoding itself: parse, query, edit, write, and
+split batch input, with a byte-for-byte round trip and zero dependencies.
+`er7-redact` removes patient detail from a message without changing its
+shape, by a policy of HL7 paths and actions. `serde-er7` gives every `er7`
+type a Serialize/Deserialize implementation. None of the three include a
+data-type dictionary, message-structure grammars, or validation — that is
+a deliberate layer above, built by the sibling `hl7-rust` project.
+
+Absent, empty, and explicit null are three different facts a field can
+carry, and collapsing them is the most common way integration code
+corrupts a clinical record — read the ER7 format page before writing code
+against any of these crates.
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.
+
+## Docs
+
+- [Home](https://er7-rust.github.io/): A Rust crate and command-line tool to parse, query, edit, and write HL7 v2 messages in the ER7 pipe-hat encoding. Byte-for-byte round trip, zero dependencies.
+- [Install](https://er7-rust.github.io/install/): Install er7, er7-redact, and serde-er7: the command-line tools, the libraries, building from source, the requirements, and how to verify the install.
+- [ER7 format](https://er7-rust.github.io/format/): What ER7 is: the pipe-hat text encoding for HL7 v2 messages. Hierarchy, delimiters, the explicit null, escape sequences, batch files, and why it persists.
+- [Paths](https://er7-rust.github.io/paths/): The HL7 path notation used to name one place in a message: PID-5.1, OBX[2]-5, PID-13[2].1. Grammar, occurrence indices, and the four query methods.
+- [Escapes](https://er7-rust.github.io/escapes/): How an ER7 value carries characters that would otherwise be read as structure — and which sequences this crate deliberately leaves alone.
+- [Command line](https://er7-rust.github.io/cli/): The er7 command-line tool: outline every value with its HL7 path, query by path, or rewrite a message as canonical ER7.
+- [API](https://er7-rust.github.io/api/): The complete public API of the er7 crate: entry points, the six-level value tree, accessors, configuration, escape sequences, and errors.
+- [er7-redact](https://er7-rust.github.io/er7-redact/): Tutorial, help, and examples for er7-redact: redact HL7 v2 messages in the ER7 encoding with a policy of paths and actions, stable pseudonyms, and a report of every position changed.
+- [serde-er7](https://er7-rust.github.io/serde-er7/): Tutorial, help, and examples for serde-er7: Serialize and Deserialize implementations for every er7 type, so an HL7 v2 message tree can flow through JSON, YAML, or any Serde format.
+- [Ecosystem](https://er7-rust.github.io/ecosystem/): The crate family: er7 for the ER7 encoding, er7-redact and serde-er7 as tools on top of it, and hl7-2-from-er7-into-xml and hl7-2-from-er7-into-json for the HL7 v2.5 dictionary layer.
+- [Comparison](https://er7-rust.github.io/comparison/): How er7 compares to interface engines, HAPI and the mature libraries, the other Rust HL7 crates, and hand-rolled pipe splitting — including when to choose one of those instead.
+- [Benchmarks](https://er7-rust.github.io/benchmarks/): Measured figures for parsing, writing, escaping, and querying HL7 v2 messages in ER7 — with the machine, the toolchain, the confidence intervals, and how not to read them.
+- [About](https://er7-rust.github.io/about/): About the er7 crate: who maintains it, how it is licensed, how to contribute, and how it is built and documented.
+
+## Project
+
+- [Agent skills](https://er7-rust.github.io/agent-skill/): Two packaged Claude Code Skills for the er7-rust crate family: er7-skill for using er7, er7-redact, and serde-er7 correctly, and er7-rust-maintainer-skill for changing this repository itself.
+- [Security](https://er7-rust.github.io/security/): The security policy for the ER7 Rust crates: how to report a vulnerability, what is in scope, what is honestly promised, and what the project does not have.
+- [Governance](https://er7-rust.github.io/governance/): How decisions about the ER7 Rust crates get made and recorded: one maintainer, a canonical specification, recorded declines, and forking as legitimate continuity.
+- [Maintainers](https://er7-rust.github.io/maintainers/): The maintainer roster for the ER7 Rust crates, the stated bus factor of one, and what happens if the person who can ship a fix is unavailable.
+- [RFC](https://er7-rust.github.io/rfc/): The specific feedback the ER7 Rust project is asking for: fourteen open questions, each recorded in a specification section, each with a decision a good answer would change.
+- [AI statement](https://er7-rust.github.io/ai-statement/): How AI tools are used to develop the ER7 Rust crates: what they touch, who is accountable, which controls bound the work, and the limitations that survive all of it.
+- [Trademarks](https://er7-rust.github.io/trademarks/): The trademark notice for the ER7 Rust crate family: whose marks these are, how they are used here under fair use, and what this project does not claim.
+- [News](https://er7-rust.github.io/news/): Announcements, project status, where updates appear, and press contacts for the ER7 Rust crate family.
+
+## Source
+
+- [GitHub repository](https://github.com/er7-rust/er7-rust): Source for all three crates: specifications (one file per section, the single source of truth for behaviour), examples, and tests.
+- [er7 on crates.io](https://crates.io/crates/er7): The published crate; API reference at <https://docs.rs/er7/>.
+- [er7-redact on crates.io](https://crates.io/crates/er7-redact): The published crate; API reference at <https://docs.rs/er7-redact/>.
+- [serde-er7 on crates.io](https://crates.io/crates/serde-er7): The published crate; API reference at <https://docs.rs/serde-er7/>.
+
+## Optional
+
+- [hl7-2-from-er7-into-xml](https://crates.io/crates/hl7-2-from-er7-into-xml): The HL7 v2.5 dictionary layer, rendered as XML — a sibling crate in the separate `hl7-rust` repository, built on top of `er7`.
+- [hl7-2-from-er7-into-json](https://crates.io/crates/hl7-2-from-er7-into-json): The same v2.5 tables and structures, rendered as JSON instead.

@@ -49,8 +49,32 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://er7-rust.github.io/agent-skill/</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://er7-rust.github.io/news/</loc>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://er7-rust.github.io/security/</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://er7-rust.github.io/governance/</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://er7-rust.github.io/maintainers/</loc>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://er7-rust.github.io/rfc/</loc>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://er7-rust.github.io/ai-statement/</loc>
+    <priority>0.5</priority>
   </url>
   <url>
     <loc>https://er7-rust.github.io/trademarks/</loc>
