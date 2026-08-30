@@ -23,17 +23,26 @@ without crawling the whole thing.
 
 ## Where the two files live
 
-`er7-rust.github.io/static/llms.txt` and `.../static/llms.json`, not the
-workspace root. `static/` is the one directory SvelteKit's
+`er7-rust.github.io/static/llms.txt` and `.../static/llms.json` are the
+canonical files: `static/` is the one directory SvelteKit's
 `adapter-static` copies to the built site verbatim
 (`svelte.config.js`), which is exactly where `robots.txt` and
 `sitemap.xml` already live and exactly what makes a well-known path like
 `/llms.txt` actually fetchable at the published URL — the whole point of
-the convention. Putting a copy at the workspace root instead would be a
-second file for the same content to drift out of, for no reader that can
-reach it: this repository's own `AGENTS.md`/`spec/` documents already
-serve an agent working *in* the repository, and `llms.txt` is for a
-reader of the *published site*.
+the convention.
+
+`er7-rust.github.io/llms.txt` and `.../llms.json` — at that subproject's
+own root, alongside its `index.md` and `AGENTS.md` — are symlinks to the
+`static/` copies, the same convention every `README.md` in this workspace
+already uses to point at its `index.md`: one file, a second path to it,
+so a reader browsing the site's own repository root sees the same map a
+crawler fetches from the live URL, with nothing to drift between them.
+
+Neither file lives at the **workspace** root (`er7-rust/er7-rust/`
+itself): this repository's own `AGENTS.md`/`spec/` documents already
+serve an agent working *in* the workspace, and `llms.txt` is for a reader
+of the *published site*, which is `er7-rust.github.io/`'s concern, not
+the monorepo's.
 
 ## What is curated, and in what order
 

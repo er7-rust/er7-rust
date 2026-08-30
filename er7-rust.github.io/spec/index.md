@@ -89,11 +89,42 @@ Consequences:
 | `/serde-er7/` | Why a wrapper crate, the wire shape per level, the round trip, `Deref` ergonomics | `serde-er7` §1–§6 |
 | `/ecosystem/` | The encoding/dictionary split, the crate family and the two kinds of layer, building your own | `er7` §1.3, §18.1 |
 | `/about/` | Metadata, spec-driven development, patient safety, contributing, license, citation | `er7` §14, §15 |
+| `/install/` | Installing the command-line tools and libraries for all three crates, building from source, verifying the install | workspace `INSTALL.md` |
+| `/comparison/` | How `er7` compares to interface engines, HAPI, other Rust HL7 crates, and hand-rolled parsing, and when to choose one of those instead | workspace `COMPARISONS.md` |
+| `/benchmarks/` | Measured parsing, writing, escaping, and querying figures: machine, toolchain, confidence intervals, and how not to read them | workspace `BENCHMARKS.md` |
 
 The first six rows are `er7`'s own documentation; `er7` is the one
 subproject whose material is spread over several routes, because it is the
 one every other page assumes. Every other subproject gets one route, shaped
-by §3.3.
+by §3.3. The last three rows are workspace-level content with no single
+owning crate, added after `/about/` covered a version of "install" that a
+dedicated route later superseded (§3.1.1 covers what §3.1 does not: the
+governance and outreach routes that trace to a root document rather than
+a crate spec at all).
+
+#### 3.1.1 Governance, outreach, and agent-facing routes
+
+Not subproject documentation, and not traced to a crate spec section —
+each of these instead summarizes one workspace-root document, states
+that document as canonical, and stops (§1's four audiences do not
+include a compliance reader or an AI agent, but these routes serve them
+anyway, the same way the workspace root already carries `SECURITY.md`
+etc. alongside the crates' own docs).
+
+| Route | Covers | Traces to |
+| ----- | ------ | --------- |
+| `/agent-skill/` | The two packaged Claude Code Skills this repository ships | workspace `er7-skill/SKILL.md`, `er7-rust-maintainer-skill/SKILL.md` |
+| `/news/` | Announcements, project status, press contacts | workspace `NEWS.md` |
+| `/security/` | Vulnerability reporting, what is in scope, what is promised | workspace `SECURITY.md` |
+| `/governance/` | Who decides, and what constrains them | workspace `GOVERNANCE.md` |
+| `/maintainers/` | The maintainer roster, the stated bus factor | workspace `MAINTAINERS.md` |
+| `/rfc/` | The specific feedback the project is asking for | workspace `RFC.md` |
+| `/ai-statement/` | How AI tools are used to develop these crates | workspace `AI_STATEMENT.md` |
+| `/trademarks/` | The trademark notice and fair-use posture | workspace `TRADEMARKS.md` |
+
+Each of these pages already states, in its own prose, that the linked
+root document is canonical and this page is a summary — that sentence is
+the mechanism keeping this table honest, not a second thing to check.
 
 ### 3.2 Out of scope
 

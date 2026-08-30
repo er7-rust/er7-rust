@@ -42,6 +42,7 @@ clean.
 | Route | What it covers |
 | ----- | -------------- |
 | `/` | What ER7 is, the problem it poses, and what the crate does about it |
+| `/install/` | Installing all three crates and both binaries, building from source, verifying the install |
 | `/format/` | The ER7 format itself: hierarchy, delimiters, the explicit null, batch files |
 | `/paths/` | HL7 path notation — `PID-5.1`, `OBX[2]-5`, `PID-13[2].1` |
 | `/escapes/` | Escape sequences: the full table, what decodes, what stays literal |
@@ -50,7 +51,22 @@ clean.
 | `/er7-redact/` | The `er7-redact` subproject: tutorial, help, examples |
 | `/serde-er7/` | The `serde-er7` subproject: tutorial, help, examples |
 | `/ecosystem/` | The crate family, and the two kinds of layer built on the encoding |
+| `/comparison/` | How `er7` compares to interface engines, HAPI, other Rust HL7 crates, and hand-rolled parsing |
+| `/benchmarks/` | Measured parsing, writing, escaping, and querying figures, with method and caveats |
 | `/about/` | Licensing, citation, contributing, patient-safety constraints |
+
+Not `er7` subproject documentation, but real routes all the same:
+
+| Route | What it covers |
+| ----- | -------------- |
+| `/agent-skill/` | The two packaged Claude Code Skills this repository ships, `er7-skill` and `er7-rust-maintainer-skill` |
+| `/news/` | Announcements, project status, and press contacts |
+| `/security/` | How to report a vulnerability, and what is honestly promised |
+| `/governance/` | Who decides, and what constrains them |
+| `/maintainers/` | The maintainer roster and the stated bus factor |
+| `/rfc/` | The specific feedback the project is asking for |
+| `/ai-statement/` | How AI tools are used to develop these crates |
+| `/trademarks/` | The trademark notice and fair-use posture |
 
 Every route is prerendered. `trailingSlash: 'always'` means a path
 resolves to its own directory index, which is what GitHub Pages serves
