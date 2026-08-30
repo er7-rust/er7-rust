@@ -33,7 +33,7 @@ directly, and every Serde-compatible sink or source works unmodified.
 
 - **A dictionary.** This crate does not know what any segment, field, or
   code table means — same as `er7`. See the sibling crates
-  `hl7-2-5-to-xml-using-rust` and `hl7-2-5-to-json-using-rust` for that
+  `hl7-2-from-er7-into-xml` and `hl7-2-from-er7-into-json` for that
   layer.
 - **A format.** This crate never mentions JSON, YAML, or any other format
   in its own runtime dependencies or public API. See

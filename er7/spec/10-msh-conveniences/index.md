@@ -49,7 +49,7 @@ set of trigger events sharing a structure differs between v2.3 and v2.5,
 and getting it wrong routes a message to the wrong handler.
 
 That mapping belongs in the dictionary layer above. The sibling crate
-[`hl7-2-5-to-xml-using-rust`](https://github.com/joelparkerhenderson/hl7-2-5-to-xml-using-rust)
+[`hl7-2-from-er7-into-xml`](https://github.com/hl7-rust/hl7-rust/tree/main/hl7-2-from-er7-into-xml)
 implements it for v2.5 specifically, and its `root_name` function is the
 model to follow.
 

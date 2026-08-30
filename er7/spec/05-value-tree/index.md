@@ -25,7 +25,7 @@ as well as parsed. `Message`, and every type below it, derives `Debug`,
 
 The type is named `Repetition`, not `Repeat`, because "repetition
 separator" is the standard's own term and this crate defines the vocabulary
-its callers use. (The sibling crate `hl7-2-5-to-xml-using-rust` calls it
+its callers use. (The sibling crate `hl7-2-from-er7-into-xml` calls it
 `Repeat`; see [§18.3](../18-open-questions-and-divergences/index.md).)
 
 ## 5.2 Text lives only at the leaf [R9]

@@ -17,7 +17,7 @@ Implemented in `src/parse.rs`. Produces the value tree of
 - **Nothing else is trimmed.** A value that really ended in a space keeps
   it, because the crate cannot know whether that space is data. This is a
   deliberate divergence from the sibling crate
-  `hl7-2-5-to-xml-using-rust`, which trims; there, fidelity is not a goal,
+  `hl7-2-from-er7-into-xml`, which trims; there, fidelity is not a goal,
   and here it is (see [§1.5](../01-purpose-and-scope/index.md) priority 1).
 
 The scan is done at the byte level, which is safe because `\r` and `\n`

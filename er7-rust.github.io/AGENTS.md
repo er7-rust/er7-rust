@@ -24,7 +24,7 @@ See [`index.md`](index.md) for the human-oriented overview, and
 
 **This site is derived, not normative.** Every crate repository holds the
 source of truth for its own behaviour, in its `spec/` directory, with
-numbered rules and a test for each — `R1`–`R25` for `er7`, `D1`–`D18` for
+numbered rules and a test for each — `R1`–`R26` for `er7`, `D1`–`D24` for
 `er7-redact`, `S1`–`S12` for `serde-er7`. These pages explain and
 illustrate those specs; they do not define anything.
 

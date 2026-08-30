@@ -40,7 +40,7 @@ The discipline:
 
 | § | Section | File |
 | - | ------- | ---- |
-| 1 | Purpose and scope, and the rule index (D1–D18) | [01-purpose-and-scope/index.md](01-purpose-and-scope/index.md) |
+| 1 | Purpose and scope, and the rule index (D1–D24) | [01-purpose-and-scope/index.md](01-purpose-and-scope/index.md) |
 | 2 | The redaction model | [02-redaction-model/index.md](02-redaction-model/index.md) |
 | 3 | Actions | [03-actions/index.md](03-actions/index.md) |
 | 4 | What redaction preserves | [04-what-redaction-preserves/index.md](04-what-redaction-preserves/index.md) |
@@ -59,7 +59,7 @@ The discipline:
 | 17 | Glossary | [17-glossary/index.md](17-glossary/index.md) |
 
 Section numbers are stable: prose, code comments, tests, and commit
-messages cite `§N.x`, and the behavioural rule index (D1–D18) lives in
+messages cite `§N.x`, and the behavioural rule index (D1–D24) lives in
 [01-purpose-and-scope/index.md](01-purpose-and-scope/index.md) §1.4. The
 `D` prefix ("de-identification") distinguishes these rules from the `er7`
 spec's `R`-numbered rules and `serde-er7`'s `S`-numbered ones when several

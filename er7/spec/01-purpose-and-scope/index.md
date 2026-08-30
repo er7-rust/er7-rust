@@ -53,7 +53,7 @@ than repeat it.
 | ----- | ---- | ---------- |
 | [`er7-redact`](https://crates.io/crates/er7-redact) | removing patient detail from a message without changing its shape: a policy of HL7 paths and actions, stable pseudonyms, an audit report | `er7` |
 | [`serde-er7`](https://crates.io/crates/serde-er7) | `Serialize`/`Deserialize` for every type in the tree, so a message can flow through any Serde format | `er7`, `serde` |
-| [`hl7-2-5-to-xml`](https://crates.io/crates/hl7-2-5-to-xml), [`hl7-2-5-to-json`](https://crates.io/crates/hl7-2-5-to-json) | the HL7 v2.5 dictionary — data types, message structures, and a renderer | `er7` |
+| [`hl7-2-from-er7-into-xml`](https://crates.io/crates/hl7-2-from-er7-into-xml), [`hl7-2-from-er7-into-json`](https://crates.io/crates/hl7-2-from-er7-into-json) | the HL7 v2.5 dictionary — data types, message structures, and a renderer | `er7` |
 
 The first two are maintained alongside this crate as sibling members of
 the same Cargo workspace, in the same repository; the dictionary crates

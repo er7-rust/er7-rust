@@ -35,7 +35,7 @@
         <tr><th>Purpose</th><td>Parse, query, edit, and write HL7 v2 messages in ER7</td></tr>
         <tr><th>Trademarks</th><td><a href="/trademarks/">HL7 is a mark of Health Level Seven International</a></td></tr>
         <tr><th>Layer</th><td>Encoding only — no dictionary, no validation, no transport</td></tr>
-        <tr><th>Language</th><td>Rust, edition 2024, MSRV 1.95 — current stable minus three</td></tr>
+        <tr><th>Language</th><td>Rust, edition 2024, MSRV 1.96 — current stable minus two</td></tr>
         <tr><th>Runtime dependencies</th><td>none, and that is a guarantee</td></tr>
         <tr><th>License</th><td>MIT, Apache-2.0, BSD-3-Clause, GPL-2.0-only, or GPL-3.0-only</td></tr>
         <tr><th>Source</th><td><a href="{links.repository}/tree/main/er7">github.com/er7-rust/er7-rust/tree/main/er7</a></td></tr>
@@ -57,7 +57,7 @@
       and the code disagree, the spec is right and the code is a bug.
     </p>
     <p>
-      Every guarantee carries a stable rule ID (<code>R1</code>&ndash;<code>R25</code>), and a
+      Every guarantee carries a stable rule ID (<code>R1</code>&ndash;<code>R26</code>), and a
       coverage table maps each rule to the test that enforces it &mdash; and the table itself is
       checked by <code>cargo test</code>, so a rule added without a test, or a section file added
       without an index entry, fails the build rather than waiting for a careful reader. Every crate
@@ -72,15 +72,15 @@
       <span class="stat-label">specification sections</span>
     </div>
     <div class="stat">
-      <span class="stat-value">25</span>
+      <span class="stat-value">26</span>
       <span class="stat-label">numbered behavioural rules</span>
     </div>
     <div class="stat">
-      <span class="stat-value">127</span>
+      <span class="stat-value">129</span>
       <span class="stat-label">unit, integration, and doc tests</span>
     </div>
     <div class="stat">
-      <span class="stat-value">7</span>
+      <span class="stat-value">8</span>
       <span class="stat-label">runnable examples</span>
     </div>
   </div>

@@ -6,7 +6,7 @@
   <title>Ecosystem — er7</title>
   <meta
     name="description"
-    content="The crate family: er7 for the ER7 encoding, er7-redact and serde-er7 as tools on top of it, and hl7-2-5-to-xml and hl7-2-5-to-json for the HL7® v2.5 dictionary layer."
+    content="The crate family: er7 for the ER7 encoding, er7-redact and serde-er7 as tools on top of it, and hl7-2-from-er7-into-xml and hl7-2-from-er7-into-json for the HL7® v2.5 dictionary layer."
   />
 </svelte:head>
 
@@ -43,8 +43,8 @@
   </div>
 
   <pre><code>{`  ┌──────────────────────────────────┐  ┌──────────────────────────────────┐
-  │  er7-redact       serde-er7      │  │  hl7-2-5-to-xml                  │
-  │  policies, actions, pseudonyms;  │  │  hl7-2-5-to-json                 │
+  │  er7-redact       serde-er7      │  │  hl7-2-from-er7-into-xml         │
+  │  policies, actions, pseudonyms;  │  │  hl7-2-from-er7-into-json        │
   │  Serde impls for the value tree  │  │  v2.5 types, structures, render  │
   └──────────────────────────────────┘  └──────────────────────────────────┘
      Tools — any HL7 version              HL7 v2.5 dictionary
@@ -156,12 +156,12 @@ PID[1]-5[1].2.1  replace REDACTED`}</code></pre>
     <p>
       Positions, not names: field, repetition, component, subcomponent, nested in that order, with
       <code>PID-2</code> an empty array because it was sent empty. Compare it with the
-      <code>hl7-2-5-to-json</code> output below — same message, same format, and the difference
+      <code>hl7-2-from-er7-into-json</code> output below — same message, same format, and the difference
       between them is exactly the dictionary.
     </p>
   </div>
 
-  <h3><code>hl7-2-5-to-xml</code> — what does it mean, as v2.xml?</h3>
+  <h3><code>hl7-2-from-er7-into-xml</code> — what does it mean, as v2.xml?</h3>
   <pre><code>{`<PID>
   <PID.1>1</PID.1>
   <PID.3>
@@ -181,7 +181,7 @@ PID[1]-5[1].2.1  replace REDACTED`}</code></pre>
     </p>
   </div>
 
-  <h3><code>hl7-2-5-to-json</code> — the same, as JSON</h3>
+  <h3><code>hl7-2-from-er7-into-json</code> — the same, as JSON</h3>
   <pre><code>{`"PID": {
   "PID.1": "1",
   "PID.3": { "CX.1": "241900" },

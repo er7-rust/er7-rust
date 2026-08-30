@@ -158,7 +158,9 @@ unrecognised  refuse
 | **Keeps absent, empty, and null apart** | An empty field stays empty — writing `REDACTED` into it would invent a value. An explicit `""` stays null — overwriting it would turn "clear this" into a value. |
 | **Never creates a position** | A rule for a field the message does not carry does nothing, rather than padding the segment out to reach it. |
 | **Cannot corrupt the message** | Replacement text goes in escaped, so a `\|` in a placeholder can never split a field. |
-| **Eight actions** | `keep`, `clear`, `null`, `replace`, `mask`, `first`, `last`, `pseudonym`. |
+| **Eight built-in actions, plus a caller-supplied ninth** | `keep`, `clear`, `null`, `replace`, `mask`, `first`, `last`, `pseudonym` — or `Action::custom` for a real MAC, a lookup table, or a date shift. |
+| **Catches a known value wherever it repeats** | A value found at a named position is redacted everywhere else it appears too — case-insensitively, whole-word — on by default, so a name in an `NTE-3` comment does not survive just because no rule named that position. |
+| **Finds what a policy is missing** | `--uncovered` (or `Redactor::uncovered`) lists every leaf a rule never named, so you can check a policy against a real message before trusting it. |
 | **Stable pseudonyms** | The same identifier maps the same way in every message redacted with the same key, so a redacted export is still joinable. |
 | **Reports what it did** | One row per position changed, fully qualified, with no values in it. |
 | **One dependency** | [`er7`](https://crates.io/crates/er7), which has none of its own. |
@@ -172,9 +174,11 @@ This is a **positional editor, not a compliance tool**.
   hold — made by a person who is accountable for it.
 - It does not know which positions *your* senders use. Run
   `er7 message.er7` and read what is actually in there.
-- It does not find an identifier written into free text. A name in an
-  `NTE-3` comment survives every positional policy; name that position, or
-  reject by default.
+- It does not find an identifier written into free text **unless that
+  exact value already turned up at a named position** — the known-values
+  sweep catches a repeat, not a first mention. A name that appears in an
+  `NTE-3` comment and nowhere else still survives every positional policy;
+  name that position explicitly, or reject by default.
 - `pseudonym` is **not** cryptographic. It is a keyed hash that preserves
   equality on purpose, and anyone with the key can invert it. Use it inside
   your own trust boundary; for data leaving it, `clear` or `replace`.
@@ -219,8 +223,8 @@ commit a real one. See [`AGENTS/safety.md`](AGENTS/safety.md).
   this one.
 - [`serde-er7`](https://github.com/er7-rust/er7-rust/tree/main/serde-er7) —
   Serde support for the same value tree.
-- [`hl7-2-5-to-xml`](https://crates.io/crates/hl7-2-5-to-xml) and
-  [`hl7-2-5-to-json`](https://crates.io/crates/hl7-2-5-to-json) — the HL7
+- [`hl7-2-from-er7-into-xml`](https://crates.io/crates/hl7-2-from-er7-into-xml) and
+  [`hl7-2-from-er7-into-json`](https://crates.io/crates/hl7-2-from-er7-into-json) — the HL7
   v2.5 dictionary layer.
 
 The whole family, and the boundary between the layers, is at

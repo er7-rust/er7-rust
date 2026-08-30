@@ -123,7 +123,7 @@ cargo rustdoc -p er7 --lib -- -W missing-docs`}</code></pre>
   <div class="table-wrap">
     <table class="table">
       <tbody>
-        <tr><th>Rust</th><td>Current stable minus three releases. Today that is <strong>1.95</strong>.</td></tr>
+        <tr><th>Rust</th><td>Current stable minus two releases. Today that is <strong>1.96</strong>.</td></tr>
         <tr><th>Edition</th><td>2024, which needs 1.85 — no longer the binding constraint</td></tr>
         <tr><th>Platform</th><td>Anything Rust targets. No platform-specific code, no C dependency, no build script.</td></tr>
         <tr><th>Network</th><td>None, at build time or run time</td></tr>
@@ -135,7 +135,7 @@ cargo rustdoc -p er7 --lib -- -W missing-docs`}</code></pre>
       The Rust floor is a rolling window. It is that wide because healthcare toolchains are approved
       on a cycle measured in quarters, so a library demanding the compiler released this month is a
       library that cannot be adopted. Check a build against the floor with
-      <code>cargo +1.95 check --workspace --all-targets</code>. If you do not have Rust:
+      <code>cargo +1.96 check --workspace --all-targets</code>. If you do not have Rust:
       <a href="https://rustup.rs">rustup.rs</a>.
     </p>
   </div>

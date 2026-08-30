@@ -27,8 +27,8 @@ everyone or shipping all of them to everyone. Keeping the encoding separate
 lets a dictionary crate choose its own version, and lets a user who only
 needs to route or audit messages pay for nothing.
 
-**Settled by the T5 port.** `hl7-2-5-to-xml-using-rust` and
-`hl7-2-5-to-json-using-rust` now both depend on `er7` and keep only their
+**Settled by the T5 port.** `hl7-2-from-er7-into-xml` and
+`hl7-2-from-er7-into-json` now both depend on `er7` and keep only their
 v2.5 dictionary — data-type tables, message-structure grammars, renderer.
 Each dropped an identical 350-line copy of the encoding layer, and their
 converted output did not change by a byte. The boundary is in the right
@@ -59,7 +59,7 @@ can call `unescape` selectively.
 
 ## 18.3 `Repetition`, where the sibling crate says `Repeat`
 
-**Divergence from `hl7-2-5-to-xml-using-rust`,** whose equivalent type is
+**Divergence from `hl7-2-from-er7-into-xml`,** whose equivalent type is
 `Repeat`.
 
 **Why:** "repetition separator" is the standard's own term
@@ -87,7 +87,7 @@ with `query`. None is known.
 
 ## 18.5 Trimming: fidelity versus tidiness
 
-**Divergence from `hl7-2-5-to-xml-using-rust`,** which trims whitespace
+**Divergence from `hl7-2-from-er7-into-xml`,** which trims whitespace
 from every segment line. This crate trims nothing but blank lines
 ([§4.1](../04-parsing/index.md) R4).
 

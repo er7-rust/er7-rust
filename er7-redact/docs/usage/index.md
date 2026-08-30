@@ -82,8 +82,10 @@ The paths are `er7`'s, so everything that notation does works here: `OBX-5`
 covers every `OBX` in the message, `PID-13[2]` names one repetition, and
 `PID-5.1` reaches one component.
 
-The [eight actions](../../spec/03-actions/index.md) are `keep`, `clear`,
-`null`, `replace`, `mask`, `first`, `last`, and `pseudonym`.
+The [eight built-in actions](../../spec/03-actions/index.md) are `keep`,
+`clear`, `null`, `replace`, `mask`, `first`, `last`, and `pseudonym`. A
+ninth, [`Action::custom`](../../spec/03-actions/index.md#38-a-caller-supplied-action-d24),
+runs your own function instead, for whatever the eight cannot express.
 
 ## 4. Starting from the built-in
 

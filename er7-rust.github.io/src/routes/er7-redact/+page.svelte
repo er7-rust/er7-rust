@@ -11,7 +11,8 @@
     { written: 'mask *', becomes: '*********', use: 'a value whose length is wanted and whose content is not' },
     { written: 'first 4', becomes: 'PATI', use: 'a birth date reduced to its year' },
     { written: 'last 4', becomes: '1234', use: 'an account number reduced to the digits a human matches on' },
-    { written: 'pseudonym', becomes: '73f419a72093eda0', use: 'an identifier that must stay linkable across messages' }
+    { written: 'pseudonym', becomes: '73f419a72093eda0', use: 'an identifier that must stay linkable across messages' },
+    { written: '(Rust only)', becomes: 'whatever your function returns', use: 'a real MAC, a lookup table, or a date shift — Action::custom, with no policy-file spelling' }
   ];
 
   const options = [
@@ -25,6 +26,7 @@
     { flag: '-t, --terminator <KIND>', effect: 'Segment terminator to write: cr (default), lf, crlf' },
     { flag: '-o, --output <FILE>', effect: 'Write to FILE instead of standard output' },
     { flag: '--report', effect: 'Write what would change, and not the message' },
+    { flag: '--uncovered', effect: 'Write the positions no rule names, instead of the redacted message' },
     { flag: '--show-policy', effect: 'Write the policy that would be applied, and exit' }
   ];
 
@@ -34,7 +36,8 @@
     { name: 'reject_by_default', shows: 'The other posture: reject every value, with keep rules accepting what a test needs.' },
     { name: 'pseudonyms_and_linkage', shows: 'Why an identifier becomes a pseudonym rather than a blank, and what that costs.' },
     { name: 'read_the_report', shows: 'The audit trail: one row per position changed, and no values in it.' },
-    { name: 'redact_absent_empty_null', shows: 'The three states HL7® keeps apart, and why redaction leaves two of them alone.' }
+    { name: 'redact_absent_empty_null', shows: 'The three states HL7® keeps apart, and why redaction leaves two of them alone.' },
+    { name: 'date_shift_with_a_custom_action', shows: 'A per-patient date shift built entirely on Action::custom — why there is no built-in ninth action for it.' }
   ];
 </script>
 
@@ -232,7 +235,7 @@ er7-redact --policy de-identify.policy message.er7`}</code></pre>
     Reference
   </h2>
 
-  <h3>The eight actions</h3>
+  <h3>The nine actions</h3>
   <div class="table-wrap">
     <table class="table">
       <thead>
@@ -272,14 +275,21 @@ PID-11   clear
 NTE-3    clear              # free text, where identifiers hide
 
 accept                      # ...or "reject ACTION" for the other posture
-unrecognised  refuse        # a payload that is not ER7 fails the run`}</code></pre>
+unrecognised  refuse        # a payload that is not ER7 fails the run
+known-values on             # sweep every repeat of a value already redacted`}</code></pre>
   <div class="prose">
     <p>
       One rule per line: a path, whitespace, an action. Blank lines are ignored, <code>#</code>
-      starts a comment, and rules apply <strong>in order</strong>. Three reserved first words —
-      <code>accept</code>, <code>reject</code>, and <code>unrecognised</code> — set what the policy
-      does by default rather than naming a position, and a policy written back out states all of
-      them, so a reader never has to infer which default was the quiet one.
+      starts a comment, and rules apply <strong>in order</strong>. Four reserved first words —
+      <code>accept</code>, <code>reject</code>, <code>unrecognised</code>, and
+      <code>known-values</code> — set what the policy does by default rather than naming a
+      position, and a policy written back out states all of them, so a reader never has to infer
+      which default was the quiet one.
+    </p>
+    <p>
+      <code>known-values on</code> (the default) sweeps every position for a value already
+      redacted at a named position elsewhere in the same message, case-insensitively and on whole
+      words; <code>known-values off</code> turns that sweep off, so only the rules themselves act.
     </p>
     <p>
       <code>reject ACTION</code> turns the policy from &ldquo;redact these&rdquo; into &ldquo;redact
@@ -342,7 +352,7 @@ unrecognised  refuse        # a payload that is not ER7 fails the run`}</code></
   <h2 class="section-heading">Examples</h2>
   <div class="prose">
     <p>
-      Six runnable programs in the crate's <a href={`${crate.repository}/examples`}
+      Seven runnable programs in the crate's <a href={`${crate.repository}/examples`}
         ><code>examples/</code></a
       > directory. Each asserts its own results, so a clean exit means it passed.
     </p>
@@ -386,8 +396,11 @@ unrecognised  refuse        # a payload that is not ER7 fails the run`}</code></
         including the built-in one.
       </li>
       <li>
-        It does not find an identifier written into free text. A name in an <code>NTE-3</code>
-        comment survives every positional policy; name that position, or reject by default.
+        It does not find an identifier written into free text <strong>unless that exact value
+        already turned up at a named position</strong> — the known-values sweep catches a repeat,
+        not a first mention. A name that appears in an <code>NTE-3</code> comment and nowhere else
+        still survives every positional policy; name that position explicitly, or reject by
+        default.
       </li>
       <li>There is no way back: no mapping table, no key escrow, no undo.</li>
     </ul>

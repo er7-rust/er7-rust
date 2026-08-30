@@ -121,6 +121,6 @@ pub use terminator::Terminator;
 
 // Re-exported so a caller can name `er7::Message`, `er7::Error`, and the
 // rest without adding their own dependency on `er7` — the same convenience
-// `hl7-2-5-to-xml-using-rust` and `hl7-2-5-to-json-using-rust` extend for
+// `hl7-2-from-er7-into-xml` and `hl7-2-from-er7-into-json` extend for
 // the crates they build on top of.
 pub use er7;

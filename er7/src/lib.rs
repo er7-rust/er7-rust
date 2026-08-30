@@ -78,7 +78,7 @@
 //! |-------|------|
 //! | [`er7-redact`](https://crates.io/crates/er7-redact) | redaction: remove patient detail without changing the shape of the message |
 //! | [`serde-er7`](https://crates.io/crates/serde-er7) | Serde support for every type in this tree |
-//! | [`hl7-2-5-to-xml`](https://crates.io/crates/hl7-2-5-to-xml), [`hl7-2-5-to-json`](https://crates.io/crates/hl7-2-5-to-json) | the HL7 v2.5 dictionary |
+//! | [`hl7-2-from-er7-into-xml`](https://crates.io/crates/hl7-2-from-er7-into-xml), [`hl7-2-from-er7-into-json`](https://crates.io/crates/hl7-2-from-er7-into-json) | the HL7 v2.5 dictionary |
 //!
 //! `spec/01-purpose-and-scope/index.md` §1.3.1 is the source of truth for that
 //! list, and <https://er7-rust.github.io/ecosystem/> presents it.

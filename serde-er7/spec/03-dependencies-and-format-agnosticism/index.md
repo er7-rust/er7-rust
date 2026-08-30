@@ -47,7 +47,7 @@ it keeps the choice visible at the call site.
 ## 3.4 The `er7` re-export
 
 `serde-er7` re-exports the whole `er7` crate as `serde_er7::er7`, mirroring
-the convenience `hl7-2-5-to-xml-using-rust` and `hl7-2-5-to-json-using-rust`
+the convenience `hl7-2-from-er7-into-xml` and `hl7-2-from-er7-into-json`
 extend for the crates they build on. This lets a caller depend on
 `serde-er7` alone and still name `er7::Message`, `er7::Error`, and the rest
 without a second, separately-versioned dependency on `er7` in their own

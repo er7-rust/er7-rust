@@ -37,7 +37,7 @@ specific crate does.
 | "What the four checks are and why they run" | Rule IDs for behaviour those checks enforce |
 | "What spec-driven development means, generically" | This crate's own section map and rule index |
 | "Never commit real patient data" | Crate-specific safety consequences (e.g. what a redaction crate must never do with a report) |
-| "The MSRV is current stable minus three" | The `rust-version` value that crate's `Cargo.toml` actually declares |
+| "The MSRV is current stable minus two" | The `rust-version` value that crate's `Cargo.toml` actually declares |
 
 If you are about to write something that is true of one crate but not
 necessarily the other two, it belongs in that crate's own `spec/`, not

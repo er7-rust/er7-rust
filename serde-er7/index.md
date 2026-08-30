@@ -103,9 +103,9 @@ not pick a wire format for you: that choice — `serde_json`, `serde_yaml`,
 anything else — is the caller's, every time.
 
 For the HL7 v2.5 dictionary layer, see the sibling crates
-[`hl7-2-5-to-xml-using-rust`](https://github.com/hl7-rust/hl7-2-5-to-xml-using-rust)
+[`hl7-2-from-er7-into-xml`](https://github.com/hl7-rust/hl7-rust/tree/main/hl7-2-from-er7-into-xml)
 and
-[`hl7-2-5-to-json-using-rust`](https://github.com/hl7-rust/hl7-2-5-to-json-using-rust).
+[`hl7-2-from-er7-into-json`](https://github.com/hl7-rust/hl7-rust/tree/main/hl7-2-from-er7-into-json).
 
 ## Documentation
 
@@ -130,7 +130,7 @@ is at <https://er7-rust.github.io/serde-er7/>.
 | [`er7`](https://crates.io/crates/er7) | the encoding itself: parse, query, edit, and write ER7, with zero dependencies |
 | **`serde-er7`** | this crate: Serde support for every type in that tree |
 | [`er7-redact`](https://crates.io/crates/er7-redact) | redaction: remove patient detail without changing the shape of the message |
-| [`hl7-2-5-to-xml`](https://crates.io/crates/hl7-2-5-to-xml) / [`hl7-2-5-to-json`](https://crates.io/crates/hl7-2-5-to-json) | the HL7 v2.5 dictionary: data types, message structures, and a renderer |
+| [`hl7-2-from-er7-into-xml`](https://crates.io/crates/hl7-2-from-er7-into-xml) / [`hl7-2-from-er7-into-json`](https://crates.io/crates/hl7-2-from-er7-into-json) | the HL7 v2.5 dictionary: data types, message structures, and a renderer |
 
 The boundary between them is `er7`'s own spec §1.3.1, and they are
 presented together at <https://er7-rust.github.io/ecosystem/>.

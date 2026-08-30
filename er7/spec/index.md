@@ -34,7 +34,7 @@ The discipline:
 
 | § | Section | File |
 | - | ------- | ---- |
-| 1 | Purpose and scope, and the rule index (R1–R25) | [01-purpose-and-scope/index.md](01-purpose-and-scope/index.md) |
+| 1 | Purpose and scope, and the rule index (R1–R26) | [01-purpose-and-scope/index.md](01-purpose-and-scope/index.md) |
 | 2 | The ER7 encoding (domain background) | [02-er7-encoding/index.md](02-er7-encoding/index.md) |
 | 3 | Delimiters | [03-delimiters/index.md](03-delimiters/index.md) |
 | 4 | Parsing | [04-parsing/index.md](04-parsing/index.md) |
@@ -55,7 +55,7 @@ The discipline:
 | 19 | Glossary | [19-glossary/index.md](19-glossary/index.md) |
 
 Section numbers are stable: prose, code comments, tests, and commit
-messages cite `§N.x`, and the behavioural rule index (R1–R25) lives in
+messages cite `§N.x`, and the behavioural rule index (R1–R26) lives in
 [01-purpose-and-scope/index.md](01-purpose-and-scope/index.md) §1.4.
 
 ## Where each rule is implemented

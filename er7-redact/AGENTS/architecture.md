@@ -6,7 +6,8 @@
 
 ```
 src/lib.rs         crate docs, `Error`, re-exports
-src/action.rs      spec §3  — the eight actions, and applying one to a value
+src/action.rs      spec §3  — the eight built-in actions, the
+                   caller-supplied ninth, and applying one to a value
 src/policy.rs      spec §5, §6 — `Rule`, `Policy`, the built-ins, the file format
 src/pseudonym.rs   spec §7  — the keyed hash
 src/redact.rs      spec §2, §4, §8 — `Redactor`, the walk, `Report`

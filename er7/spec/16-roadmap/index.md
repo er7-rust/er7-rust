@@ -29,7 +29,7 @@ for the evidence.
 1.0.0 is reached when three conditions hold:
 
 1. ~~**The API has been exercised by a second crate.**~~ **Met.**
-   `hl7-2-5-to-xml-using-rust` and `hl7-2-5-to-json-using-rust` both had
+   `hl7-2-from-er7-into-xml` and `hl7-2-from-er7-into-json` both had
    their own copy of an encoding layer; both now depend on `er7` instead
    (task T5, shipped). Their converted output is byte-for-byte identical to
    what it was before the port, and their own test suites pass unchanged.

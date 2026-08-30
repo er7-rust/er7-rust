@@ -43,7 +43,7 @@
     {
       id: 'Q8',
       title: 'Is the minimum Rust version window right?',
-      detail: 'Current stable minus three — roughly six months. Is that enough for your organisation?'
+      detail: 'Current stable minus two — roughly three months. Is that enough for your organisation?'
     },
     {
       id: 'Q9',

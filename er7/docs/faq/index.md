@@ -33,8 +33,8 @@ nothing. The reasoning in full is
 The layers above this one ship as their own crates —
 [`er7-redact`](https://crates.io/crates/er7-redact) for redaction,
 [`serde-er7`](https://crates.io/crates/serde-er7) for Serde support,
-[`hl7-2-5-to-xml`](https://crates.io/crates/hl7-2-5-to-xml) and
-[`hl7-2-5-to-json`](https://crates.io/crates/hl7-2-5-to-json) for the HL7
+[`hl7-2-from-er7-into-xml`](https://crates.io/crates/hl7-2-from-er7-into-xml) and
+[`hl7-2-from-er7-into-json`](https://crates.io/crates/hl7-2-from-er7-into-json) for the HL7
 v2.5 dictionary. The full list is
 [spec §1.3.1](../../spec/01-purpose-and-scope/index.md).
 

@@ -16,7 +16,7 @@ export const links = {
 } as const;
 
 /** The crate version this site documents. */
-export const version = '0.1.4';
+export const version = '0.2.1';
 
 export type NavLink = { href: string; label: string };
 
@@ -76,21 +76,21 @@ export const crates: Crate[] = [
     layer: 'Tool'
   },
   {
-    name: 'hl7-2-5-to-xml',
+    name: 'hl7-2-from-er7-into-xml',
     description:
       'Converts HL7 v2.5 messages to the official v2.xml representation, using the v2.5 data-type tables and message-structure grammars.',
-    repository: 'https://github.com/joelparkerhenderson/hl7-2-5-to-xml-using-rust',
-    crate: 'https://crates.io/crates/hl7-2-5-to-xml',
-    docs: 'https://docs.rs/hl7-2-5-to-xml/',
+    repository: 'https://github.com/hl7-rust/hl7-rust/tree/main/hl7-2-from-er7-into-xml',
+    crate: 'https://crates.io/crates/hl7-2-from-er7-into-xml',
+    docs: 'https://docs.rs/hl7-2-from-er7-into-xml/',
     layer: 'HL7 v2.5 dictionary'
   },
   {
-    name: 'hl7-2-5-to-json',
+    name: 'hl7-2-from-er7-into-json',
     description:
       'The JSON sibling: the same v2.5 tables and grammars, rendered as idiomatic JSON instead of XML.',
-    repository: 'https://github.com/joelparkerhenderson/hl7-2-5-to-json-using-rust',
-    crate: 'https://crates.io/crates/hl7-2-5-to-json',
-    docs: 'https://docs.rs/hl7-2-5-to-json/',
+    repository: 'https://github.com/hl7-rust/hl7-rust/tree/main/hl7-2-from-er7-into-json',
+    crate: 'https://crates.io/crates/hl7-2-from-er7-into-json',
+    docs: 'https://docs.rs/hl7-2-from-er7-into-json/',
     layer: 'HL7 v2.5 dictionary'
   }
 ];

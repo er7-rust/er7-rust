@@ -187,7 +187,7 @@ a caller pays only for what they use.
 | ----- | ---- |
 | [`er7-redact`](https://crates.io/crates/er7-redact) | redaction: remove patient detail without changing the shape of the message |
 | [`serde-er7`](https://crates.io/crates/serde-er7) | Serde support, so a message tree can travel as JSON, YAML, or any other format |
-| [`hl7-2-5-to-xml`](https://crates.io/crates/hl7-2-5-to-xml) / [`hl7-2-5-to-json`](https://crates.io/crates/hl7-2-5-to-json) | the HL7 v2.5 dictionary: data types, message structures, and a renderer |
+| [`hl7-2-from-er7-into-xml`](https://crates.io/crates/hl7-2-from-er7-into-xml) / [`hl7-2-from-er7-into-json`](https://crates.io/crates/hl7-2-from-er7-into-json) | the HL7 v2.5 dictionary: data types, message structures, and a renderer |
 
 All four are presented together at
 <https://er7-rust.github.io/ecosystem/>, and the boundary between them is

@@ -9,7 +9,7 @@ clinical cost.
 
 Method: **specification-driven development.** Behavior lives in per-crate
 `spec/` directories before it is implemented; cross-cutting policy lives in
-the workspace `spec/` (family policy, trademark fair use, MSRV N−3). Per-crate
+the workspace `spec/` (family policy, trademark fair use, MSRV N−2). Per-crate
 roadmaps and open tasks stay where they are
 (`er7/spec/16-roadmap/`, `er7/spec/17-open-tasks/`,
 `er7-redact/spec/14-roadmap/`, `15-open-tasks/`,
@@ -108,11 +108,10 @@ posture. Open items for each are in `tasks.md`.
 
 ## Open decisions (awaiting a call, not code)
 
-- **Free-text scanning in `er7-redact`** — its own roadmap
-  (`er7-redact/spec/14-roadmap/index.md` §14.2) calls this "the largest real
-  gap". A capability decision, not professionalization; it stays in the
-  crate's roadmap, and [`RFC.md`](RFC.md) Q13 now asks operators the
-  question that would settle the design.
+- ~~**Free-text scanning in `er7-redact`**~~ **Shipped 2026-08-29**, as
+  `Policy::search_known_values` (D23) — a value found at a named position
+  is now redacted wherever else it appears, on by default. No longer open;
+  see `er7-redact/spec/14-roadmap/index.md` §14.2 and closed task T1.
 - **CI hosting shape** — decided by doing, 2026-08-26: one root workflow
   (`.github/workflows/ci.yml`, no containers), per-crate lanes declined.
   Fuzz smoke joined it later the same day (nightly toolchain, its own
