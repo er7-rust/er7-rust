@@ -1,0 +1,72 @@
+# er7-rust
+
+> A Cargo workspace of three independently-versioned Rust crates for HL7® v2 integration in the ER7 pipe-hat encoding — er7 (the encoding itself, zero dependencies), er7-redact (removes patient detail without changing shape), and serde-er7 (Serde support for the value tree).
+
+This file curates the workspace's own files, with repo-relative links —
+`AGENTS.md`, `spec/index.md`, and the like — that resolve only inside a
+clone or checkout of this repository, not as URLs. For the same content
+addressed by absolute URL, so it resolves from anywhere, see the
+published site's own map at <https://er7-rust.github.io/llms.txt>.
+
+None of the three crates include a data-type dictionary, message-structure
+grammars, or validation — that is a deliberate layer above, built by the
+sibling `hl7-rust` project. Absent, empty, and explicit null are three
+different facts a field can carry, and collapsing them is the most common
+way integration code corrupts a clinical record — read `er7/index.md`
+before writing code against any of these crates.
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.
+
+## Start here
+
+- [AGENTS.md](AGENTS.md): The workspace-root agent entry point — the three-crate layout, the non-crate directories, and where workspace-level policy lives.
+- [index.md](index.md): The workspace README — install, building, the project-document map, license.
+- [spec/index.md](spec/index.md): The workspace-level specification: what is genuinely shared across all three crates, and what belongs in a crate's own spec instead.
+- [plan.md](plan.md): The professionalization workstreams and where the workspace stands.
+- [tasks.md](tasks.md): The verified-done execution checklist for workspace-level work.
+
+## Crates
+
+- [er7/index.md](er7/index.md): Parse, query, edit, and write HL7 v2 messages in the ER7 pipe-hat encoding, with zero dependencies.
+- [er7/AGENTS.md](er7/AGENTS.md): Agent entry point for er7 — the rules that bind every change, and the documentation map.
+- [er7/spec/index.md](er7/spec/index.md): er7's own specification: the rule index (R1-R27), roadmap, and open tasks.
+- [er7-redact/index.md](er7-redact/index.md): Redact patient detail from an ER7 message without changing its shape.
+- [er7-redact/AGENTS.md](er7-redact/AGENTS.md): Agent entry point for er7-redact.
+- [er7-redact/spec/index.md](er7-redact/spec/index.md): er7-redact's own specification: policies, actions, pseudonyms, the rule index (D1-D24).
+- [serde-er7/index.md](serde-er7/index.md): Serialize and deserialize ER7 message trees with Serde.
+- [serde-er7/AGENTS.md](serde-er7/AGENTS.md): Agent entry point for serde-er7.
+- [serde-er7/spec/index.md](serde-er7/spec/index.md): serde-er7's own specification: the wire shape per level, the rule index (S1-S12).
+
+## Agent skills
+
+- [er7-skill/SKILL.md](er7-skill/SKILL.md): A packaged Claude Code Skill teaching an AI coding agent how to use these crates as a dependency — concepts, terminology, which crate to reach for, and worked recipes.
+- [er7-rust-maintainer-skill/SKILL.md](er7-rust-maintainer-skill/SKILL.md): The companion skill for changing this repository itself — spec-driven development, the four checks, the safety rules.
+
+## Project documents
+
+- [SECURITY.md](SECURITY.md): How to report a vulnerability, what is in scope, what is honestly promised.
+- [GOVERNANCE.md](GOVERNANCE.md): Who decides, and what constrains them.
+- [MAINTAINERS.md](MAINTAINERS.md): The maintainer roster and the stated bus factor.
+- [CONTRIBUTING.md](CONTRIBUTING.md): How to help with time, code, or money.
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md): The community standard, Contributor Covenant 2.1.
+- [RFC.md](RFC.md): The specific feedback this project is asking for.
+- [AI_STATEMENT.md](AI_STATEMENT.md): How AI tools are used to develop these crates, and what oversight bounds the work.
+- [PHI.md](PHI.md): A privacy officer's Q&A on what er7-redact does and does not cover.
+- [TRADEMARKS.md](TRADEMARKS.md): The mark-by-mark trademark notice and fair-use posture.
+- [COMPARISONS.md](COMPARISONS.md): How this compares to interface engines, HAPI, and other Rust HL7 crates.
+- [BENCHMARKS.md](BENCHMARKS.md): Measured figures for parsing, writing, escaping, and querying.
+- [INSTALL.md](INSTALL.md): Installing all three crates and both binaries, building from source.
+- [CHANGELOG.md](CHANGELOG.md): What changed, dated and versioned, across all three crates.
+- [NEWS.md](NEWS.md): Announcements, project status, press contacts.
+- [LICENSE.md](LICENSE.md): The five licenses this workspace is offered under.
+- [CITATION.cff](CITATION.cff): How to cite this project.
+
+## Site
+
+- [er7-rust.github.io/index.md](er7-rust.github.io/index.md): The published site's own README — how it is built, its routes, and how content is edited.
+
+## Optional
+
+- [https://github.com/hl7-rust/hl7-rust](https://github.com/hl7-rust/hl7-rust): The sibling repository holding the HL7 v2.5 dictionary layer built on top of er7 — a different repository, not this one.

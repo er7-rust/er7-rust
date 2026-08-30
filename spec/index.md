@@ -29,7 +29,7 @@ specific crate does.
 | [§7 Trusted Publishing](trusted-publishing/index.md) | The stated intent to adopt OIDC-based publishing once it is production-ready everywhere this project publishes — and the governance prerequisite that intent does not yet name |
 | [§8 Dependabot](dependabot/index.md) | Repository-level security updates, and the `.github/dependabot.yml` manifests behind scheduled alerts — with a deliberate `open-pull-requests-limit: 0` so version updates stay a security posture, not a treadmill |
 | [§9 Serial comma](serial-comma/index.md) | English-language prose in this workspace uses the serial (Oxford) comma |
-| [§10 `llms.json` and `llms.txt`](llms-json-and-llms-txt/index.md) | The curated, machine-readable maps of the site's own content published at its root, for a language model to read without crawling the whole site |
+| [§10 `llms.json` and `llms.txt`](llms-json-and-llms-txt/index.md) | Curated, machine-readable maps for a language model to read without crawling: repo-relative at the workspace root, absolute-URL at the published site's own root |
 | [§11 Agent skills](agent-skills/index.md) | The two packaged Claude Code Skills published as top-level folders, one per audience — `er7-skill` for using the crates, `er7-rust-maintainer-skill` for changing this repository — and why they are two, not one |
 
 ## What belongs here vs. in a crate's own spec

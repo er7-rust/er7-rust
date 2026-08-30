@@ -1,0 +1,75 @@
+{
+  "name": "er7-rust",
+  "summary": "A Cargo workspace of three independently-versioned Rust crates for HL7® v2 integration in the ER7 pipe-hat encoding — er7 (the encoding itself, zero dependencies), er7-redact (removes patient detail without changing shape), and serde-er7 (Serde support for the value tree).",
+  "context": [
+    "This file curates the workspace's own files, with repo-relative links — `AGENTS.md`, `spec/index.md`, and the like — that resolve only inside a clone or checkout of this repository, not as URLs. For the same content addressed by absolute URL, so it resolves from anywhere, see the published site's own map at https://er7-rust.github.io/llms.json.",
+    "None of the three crates include a data-type dictionary, message-structure grammars, or validation — that is a deliberate layer above, built by the sibling `hl7-rust` project. Absent, empty, and explicit null are three different facts a field can carry, and collapsing them is the most common way integration code corrupts a clinical record — read `er7/index.md` before writing code against any of these crates."
+  ],
+  "trademark_notice": "HL7®, and FHIR® are the registered trademarks of Health Level Seven International and their use of these trademarks does not constitute an endorsement by HL7.",
+  "sections": [
+    {
+      "title": "Start here",
+      "links": [
+        { "title": "AGENTS.md", "url": "AGENTS.md", "description": "The workspace-root agent entry point — the three-crate layout, the non-crate directories, and where workspace-level policy lives." },
+        { "title": "index.md", "url": "index.md", "description": "The workspace README — install, building, the project-document map, license." },
+        { "title": "spec/index.md", "url": "spec/index.md", "description": "The workspace-level specification: what is genuinely shared across all three crates, and what belongs in a crate's own spec instead." },
+        { "title": "plan.md", "url": "plan.md", "description": "The professionalization workstreams and where the workspace stands." },
+        { "title": "tasks.md", "url": "tasks.md", "description": "The verified-done execution checklist for workspace-level work." }
+      ]
+    },
+    {
+      "title": "Crates",
+      "links": [
+        { "title": "er7/index.md", "url": "er7/index.md", "description": "Parse, query, edit, and write HL7 v2 messages in the ER7 pipe-hat encoding, with zero dependencies." },
+        { "title": "er7/AGENTS.md", "url": "er7/AGENTS.md", "description": "Agent entry point for er7 — the rules that bind every change, and the documentation map." },
+        { "title": "er7/spec/index.md", "url": "er7/spec/index.md", "description": "er7's own specification: the rule index (R1-R27), roadmap, and open tasks." },
+        { "title": "er7-redact/index.md", "url": "er7-redact/index.md", "description": "Redact patient detail from an ER7 message without changing its shape." },
+        { "title": "er7-redact/AGENTS.md", "url": "er7-redact/AGENTS.md", "description": "Agent entry point for er7-redact." },
+        { "title": "er7-redact/spec/index.md", "url": "er7-redact/spec/index.md", "description": "er7-redact's own specification: policies, actions, pseudonyms, the rule index (D1-D24)." },
+        { "title": "serde-er7/index.md", "url": "serde-er7/index.md", "description": "Serialize and deserialize ER7 message trees with Serde." },
+        { "title": "serde-er7/AGENTS.md", "url": "serde-er7/AGENTS.md", "description": "Agent entry point for serde-er7." },
+        { "title": "serde-er7/spec/index.md", "url": "serde-er7/spec/index.md", "description": "serde-er7's own specification: the wire shape per level, the rule index (S1-S12)." }
+      ]
+    },
+    {
+      "title": "Agent skills",
+      "links": [
+        { "title": "er7-skill/SKILL.md", "url": "er7-skill/SKILL.md", "description": "A packaged Claude Code Skill teaching an AI coding agent how to use these crates as a dependency — concepts, terminology, which crate to reach for, and worked recipes." },
+        { "title": "er7-rust-maintainer-skill/SKILL.md", "url": "er7-rust-maintainer-skill/SKILL.md", "description": "The companion skill for changing this repository itself — spec-driven development, the four checks, the safety rules." }
+      ]
+    },
+    {
+      "title": "Project documents",
+      "links": [
+        { "title": "SECURITY.md", "url": "SECURITY.md", "description": "How to report a vulnerability, what is in scope, what is honestly promised." },
+        { "title": "GOVERNANCE.md", "url": "GOVERNANCE.md", "description": "Who decides, and what constrains them." },
+        { "title": "MAINTAINERS.md", "url": "MAINTAINERS.md", "description": "The maintainer roster and the stated bus factor." },
+        { "title": "CONTRIBUTING.md", "url": "CONTRIBUTING.md", "description": "How to help with time, code, or money." },
+        { "title": "CODE_OF_CONDUCT.md", "url": "CODE_OF_CONDUCT.md", "description": "The community standard, Contributor Covenant 2.1." },
+        { "title": "RFC.md", "url": "RFC.md", "description": "The specific feedback this project is asking for." },
+        { "title": "AI_STATEMENT.md", "url": "AI_STATEMENT.md", "description": "How AI tools are used to develop these crates, and what oversight bounds the work." },
+        { "title": "PHI.md", "url": "PHI.md", "description": "A privacy officer's Q&A on what er7-redact does and does not cover." },
+        { "title": "TRADEMARKS.md", "url": "TRADEMARKS.md", "description": "The mark-by-mark trademark notice and fair-use posture." },
+        { "title": "COMPARISONS.md", "url": "COMPARISONS.md", "description": "How this compares to interface engines, HAPI, and other Rust HL7 crates." },
+        { "title": "BENCHMARKS.md", "url": "BENCHMARKS.md", "description": "Measured figures for parsing, writing, escaping, and querying." },
+        { "title": "INSTALL.md", "url": "INSTALL.md", "description": "Installing all three crates and both binaries, building from source." },
+        { "title": "CHANGELOG.md", "url": "CHANGELOG.md", "description": "What changed, dated and versioned, across all three crates." },
+        { "title": "NEWS.md", "url": "NEWS.md", "description": "Announcements, project status, press contacts." },
+        { "title": "LICENSE.md", "url": "LICENSE.md", "description": "The five licenses this workspace is offered under." },
+        { "title": "CITATION.cff", "url": "CITATION.cff", "description": "How to cite this project." }
+      ]
+    },
+    {
+      "title": "Site",
+      "links": [
+        { "title": "er7-rust.github.io/index.md", "url": "er7-rust.github.io/index.md", "description": "The published site's own README — how it is built, its routes, and how content is edited." }
+      ]
+    },
+    {
+      "title": "Optional",
+      "links": [
+        { "title": "hl7-rust", "url": "https://github.com/hl7-rust/hl7-rust", "description": "The sibling repository holding the HL7 v2.5 dictionary layer built on top of er7 — a different repository, not this one." }
+      ]
+    }
+  ]
+}
