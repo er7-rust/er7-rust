@@ -191,7 +191,7 @@ progress, and is not the same thing as a safe one.
 
 | Where | What |
 | ----- | ---- |
-| [`spec/`](spec/index.md) | the normative specification — one file per section, rules `D1`–`D18` |
+| [`spec/`](spec/index.md) | the normative specification — one file per section, rules `D1`–`D24` |
 | [`docs/usage/`](docs/usage/index.md) | the walk-through |
 | [`docs/policies/`](docs/policies/index.md) | the policy format, the actions, the built-in tables |
 | [`docs/api/`](docs/api/index.md) | every public item |
