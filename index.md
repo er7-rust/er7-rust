@@ -28,6 +28,14 @@ for agent guidance on the workspace as a whole.
 The whole family, and the boundary between the layers, is documented at
 <https://er7-rust.github.io/ecosystem/>.
 
+[`er7-skill/`](er7-skill/) is a packaged
+[Claude Code Skill](https://code.claude.com/docs/en/skills)
+teaching an AI coding agent how to use these crates correctly — which
+crate to reach for, the round-trip and absent/empty/null rules that are
+easy to get wrong, and worked recipes for parsing, editing, batch input,
+and redaction. Drop it into a project's own `.claude/skills/` to use it
+there.
+
 ## Install
 
 ```sh

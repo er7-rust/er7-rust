@@ -14,14 +14,24 @@ workspace `Cargo.toml` and one `Cargo.lock`.
 (`{ path = "../er7", version = "0" }`), so a change to `er7` in this
 workspace is picked up by its siblings immediately, without publishing.
 
-One directory here is **not** a crate:
-[`er7-rust.github.io/`](er7-rust.github.io/) holds the source of
-<https://er7-rust.github.io/>, the site that documents all three. It was a
-separate repository until its history was merged into this one, so a change
-to a crate's public surface and the page that teaches it can now land
-together — and a page that still teaches a removed API is a broken change,
-not a follow-up. See
-[`er7-rust.github.io/AGENTS.md`](er7-rust.github.io/AGENTS.md).
+Two directories here are **not** crates:
+
+- [`er7-rust.github.io/`](er7-rust.github.io/) holds the source of
+  <https://er7-rust.github.io/>, the site that documents all three. It was
+  a separate repository until its history was merged into this one, so a
+  change to a crate's public surface and the page that teaches it can now
+  land together — and a page that still teaches a removed API is a broken
+  change, not a follow-up. See
+  [`er7-rust.github.io/AGENTS.md`](er7-rust.github.io/AGENTS.md).
+- [`er7-skill/`](er7-skill/) holds `SKILL.md`, a packaged
+  [Claude Code Skill](https://code.claude.com/docs/en/skills)
+  that teaches an AI coding agent how to *use* these crates as a
+  dependency — which crate to reach for, the rules that are easy to get
+  wrong (the byte-for-byte round trip, absent/empty/null), and worked
+  recipes. It is a distributable artefact for a downstream project's own
+  `.claude/skills/`, not guidance for changing this workspace itself —
+  that is what the rest of this file, and each crate's own `AGENTS.md`,
+  are for.
 
 ## Where to work
 

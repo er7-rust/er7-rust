@@ -218,5 +218,10 @@ PID[1]-5[1].2.1  replace REDACTED`}</code></pre>
         decoded on demand, at the point it becomes output.
       </li>
     </ul>
+    <p>
+      If an AI coding agent is writing that layer, point it at
+      <a href="/agent-skill/">the packaged agent skill</a> first — it teaches these rules, and
+      which crate to reach for, before the agent has to rediscover them from a bug report.
+    </p>
   </div>
 </section>
