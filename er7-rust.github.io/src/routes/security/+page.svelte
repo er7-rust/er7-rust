@@ -94,7 +94,7 @@
         filesystem, no network, no process spawning, no environment reads, no telemetry.
       </li>
       <li>
-        <strong>Fuzzed on the untrusted-input surface</strong> &mdash; three targets under
+        <strong>Fuzzed on the untrusted-input surface</strong> &mdash; four targets under
         <code>er7/fuzz/</code>, smoke-run in CI.
       </li>
     </ul>

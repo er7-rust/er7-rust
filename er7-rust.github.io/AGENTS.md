@@ -24,7 +24,7 @@ See [`index.md`](index.md) for the human-oriented overview, and
 
 **This site is derived, not normative.** Every crate repository holds the
 source of truth for its own behaviour, in its `spec/` directory, with
-numbered rules and a test for each — `R1`–`R26` for `er7`, `D1`–`D24` for
+numbered rules and a test for each — `R1`–`R27` for `er7`, `D1`–`D24` for
 `er7-redact`, `S1`–`S12` for `serde-er7`. These pages explain and
 illustrate those specs; they do not define anything.
 
@@ -123,7 +123,13 @@ Four edits, all required:
 
 1. `src/routes/<name>/+page.svelte` — the page, with a `<svelte:head>`
    holding a `<title>` and a `<meta name="description">`.
-2. `src/lib/site.ts` — a `navLinks` entry.
+2. A link in `+layout.svelte`: a `navLinks` entry in `src/lib/site.ts` for
+   a main-navigation page, or a hard-coded link in the footer's own link
+   list for a governance/outreach/agent-facing page that does not belong
+   in the main nav (the pattern every route under §3.1.1 of
+   [`spec/index.md`](spec/index.md) already follows — `security`,
+   `governance`, `maintainers`, `rfc`, `ai-statement`, `trademarks`,
+   `news`, `agent-skill`).
 3. `static/sitemap.xml` — a `<url>` entry.
 4. `index.md` and `spec/index.md` — a row in the routes table.
 
@@ -161,8 +167,8 @@ dates, facility names, and identifier formats.
 
 - **A component library.** This site consumes Lily; it does not implement
   or ship components.
-- **A markdown pipeline, a CMS, or a blog.** Eight hand-written pages do
-  not need one.
+- **A markdown pipeline, a CMS, or a blog.** Twenty-one hand-written pages
+  do not need one.
 - **Client-side search, analytics, or any third-party script.** The site
   ships no tracking and makes no third-party requests.
 - **Duplicating the rustdoc.** `/api/` is a map with links to

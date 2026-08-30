@@ -52,12 +52,11 @@
     <p>Named rather than quietly omitted, because absence is itself information:</p>
     <ul>
       <li>
-        <strong>A hosted-CI track record of exactly one green run.</strong> The workflow runs the
-        four checks, an MSRV build, a fuzz smoke run, and the trademark checker on every push;
-        its first hosted run went green on 2026-08-26. One run proves the gate works &mdash; it is
-        not yet a history.
+        <strong>No signing key escrow, and no second holder for it.</strong> Commits and tags are
+        cryptographically signed, and GitHub&rsquo;s &ldquo;Verified&rdquo; badge is live &mdash;
+        but the signing key sits with one person, on one machine, the same single point of failure
+        the bus-factor callout above already names.
       </li>
-      <li><strong>No signed commits or tags</strong>, and no key escrow.</li>
       <li>
         <strong>No second security responder.</strong> The security policy terminates at one email
         address, which is why it tells a reporter to disclose publicly after ninety days whether or

@@ -72,8 +72,10 @@ read it.
 cargo run --example parse_a_message
 cargo run --example query_by_path
 cargo run --example edit_a_value
+cargo run --example build_a_message
 cargo run --example escape_sequences
 cargo run --example split_a_batch
+cargo run --example stream_a_batch
 cargo run --example custom_delimiters
 cargo run --example absent_empty_null
 ```

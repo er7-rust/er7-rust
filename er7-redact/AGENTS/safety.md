@@ -37,7 +37,7 @@ error messages, and in conversation with a user:
   compliant". Say which positions were changed;
 - do not describe `pseudonym` as secure, hashed-and-therefore-safe, or
   irreversible. It is FNV-1a with a `u64` key
-  ([spec §7.3](../spec/07-pseudonyms/index.md));
+  ([spec §7.2](../spec/07-pseudonyms/index.md));
 - do not let a built-in policy imply completeness. It is a list somebody
   wrote down.
 

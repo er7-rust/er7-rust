@@ -19,6 +19,7 @@ AGENTS/               Topical agent guides (this file is one)
 spec/                 Canonical specification, one file per section
 docs/                 Long-form documentation: api, usage, escapes, paths, faq
 examples/             Runnable programs, one concept each
+fuzz/                 Its own Cargo workspace (nightly + libfuzzer-sys); never touches the published crate's build
 help/releasing/       Release checklist
 samples/              Example ER7 messages, used by docs and tests
 src/                  The crate

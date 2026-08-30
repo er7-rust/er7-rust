@@ -4,7 +4,8 @@
   const entries = [
     { item: 'er7::parse', sig: 'fn(&str) -> Result<Message, Error>', note: 'needs an MSH/FHS/BHS header' },
     { item: 'er7::parse_with', sig: 'fn(&str, Separators) -> Message', note: 'headerless fragment; cannot fail' },
-    { item: 'er7::split_messages', sig: 'fn(&str) -> Vec<&str>', note: 'batch input; slices borrow' }
+    { item: 'er7::split_messages', sig: 'fn(&str) -> Vec<&str>', note: 'batch input; slices borrow' },
+    { item: 'er7::read_messages', sig: 'fn<R: BufRead>(R) -> MessageReader<R>', note: 'streamed one message at a time, without holding the whole input' }
   ];
 
   const messageMethods = [
@@ -143,7 +144,8 @@ Subcomponent { raw: String }`;
     <dt>Segment</dt>
     <dd>
       <code>field(n)</code>, <code>field_mut(n)</code>, <code>component(field, component)</code>,
-      <code>is_header()</code>, <code>to_er7(&amp;seps)</code>, <code>to_text(&amp;seps)</code>
+      <code>first_value(field, component, &amp;seps)</code>, <code>is_header()</code>,
+      <code>to_er7(&amp;seps)</code>, <code>to_text(&amp;seps)</code>
     </dd>
     <dt>Field</dt>
     <dd>

@@ -57,7 +57,7 @@
       and the code disagree, the spec is right and the code is a bug.
     </p>
     <p>
-      Every guarantee carries a stable rule ID (<code>R1</code>&ndash;<code>R26</code>), and a
+      Every guarantee carries a stable rule ID (<code>R1</code>&ndash;<code>R27</code>), and a
       coverage table maps each rule to the test that enforces it &mdash; and the table itself is
       checked by <code>cargo test</code>, so a rule added without a test, or a section file added
       without an index entry, fails the build rather than waiting for a careful reader. Every crate
@@ -72,15 +72,15 @@
       <span class="stat-label">specification sections</span>
     </div>
     <div class="stat">
-      <span class="stat-value">26</span>
+      <span class="stat-value">27</span>
       <span class="stat-label">numbered behavioural rules</span>
     </div>
     <div class="stat">
-      <span class="stat-value">129</span>
+      <span class="stat-value">134</span>
       <span class="stat-label">unit, integration, and doc tests</span>
     </div>
     <div class="stat">
-      <span class="stat-value">8</span>
+      <span class="stat-value">9</span>
       <span class="stat-label">runnable examples</span>
     </div>
   </div>

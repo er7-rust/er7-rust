@@ -111,13 +111,6 @@ over `# fn main() -> Result<(), er7::Error>` for any doctest that calls
   citing the spec: `// See spec/04-round-trip-guarantee/index.md §4.2.` A
   reader can then find the reasoning rather than re-deriving it.
 
-## Lints
-
-- `cargo clippy --all-targets -- -D warnings` must be clean. `--all-targets`
-  covers `examples/` and `tests/` too.
-- Do not silence clippy with `#[allow(…)]` without a comment on the same
-  item explaining why.
-
 ## Tests
 
 Test conventions live in [`testing.md`](testing.md).

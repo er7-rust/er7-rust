@@ -109,14 +109,15 @@ If you have just been spawned with no prior context, do this in order:
 
 ```sh
 cargo build                              # Build
-cargo test                               # Unit + integration + doc tests
 cargo test -- --nocapture                # Show println!() output
 cargo doc --no-deps --open               # Build and open rustdoc
 cargo run -- samples/oru_r01.er7         # Run the CLI on a sample
 cargo run --example parse_a_message      # Run an example
-cargo clippy --all-targets -- -D warnings  # Lint
-cargo fmt                                # Format
-cargo rustdoc --lib -- -W missing-docs   # Confirm every public item is documented
+
+cargo test                                 # 1. Unit + integration + doc tests
+cargo clippy --all-targets -- -D warnings  # 2. Lint
+cargo fmt --check                          # 3. Format check
+cargo rustdoc --lib -- -W missing-docs     # 4. Confirm every public item is documented
 ```
 
 The last four are the **four checks**; all four are clean on `main` and must

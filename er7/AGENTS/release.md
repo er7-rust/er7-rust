@@ -73,8 +73,10 @@ cargo publish
 ## Checking what ships
 
 `cargo package --list` should show `src/`, `Cargo.toml`, `README.md`,
-`LICENSE.md`, and nothing surprising. `samples/` ships because the
-integration tests `include_str!` them; `target/` never does.
+`LICENSE.md`, and nothing surprising — matching `Cargo.toml`'s own
+`include` list, which also ships `spec/**`, `examples/**`, `samples/**`,
+and `index.md`. `samples/` ships because the integration tests
+`include_str!` them; `target/` never does.
 
 The published crate must build with **no network and no dependencies**
 (R25). `cargo publish --dry-run` verifies that.

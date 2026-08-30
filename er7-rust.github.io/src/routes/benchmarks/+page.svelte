@@ -242,8 +242,8 @@ cargo bench -p er7-bench -- parse`}</code></pre>
     <p>
       Performance work is only safe next to correctness work. The crate carries
       <code>cargo-fuzz</code> targets alongside these benchmarks — <code>parse_roundtrip</code>,
-      <code>escape_roundtrip</code>, and <code>query_paths</code> — and each asserts a property the
-      specification states rather than merely checking for panics.
+      <code>parse_with_total</code>, <code>escape_roundtrip</code>, and <code>query_paths</code> —
+      and each asserts a property the specification states rather than merely checking for panics.
     </p>
   </div>
   <pre><code>{`cargo +nightly fuzz run parse_roundtrip -- -max_total_time=60`}</code></pre>

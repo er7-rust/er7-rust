@@ -113,7 +113,7 @@ assert_eq!(message.to_er7(), text);`;
       <span class="stat-label">levels, from message to subcomponent</span>
     </div>
     <div class="stat">
-      <span class="stat-value">25</span>
+      <span class="stat-value">27</span>
       <span class="stat-label">numbered rules, each with a test</span>
     </div>
     <div class="stat">

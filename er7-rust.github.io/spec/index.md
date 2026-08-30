@@ -51,7 +51,7 @@ test:
 
 | Crate | Spec | Rules |
 | ----- | ---- | ----- |
-| `er7` | 19 sections | `R1`–`R26` |
+| `er7` | 19 sections | `R1`–`R27` |
 | `er7-redact` | 17 sections | `D1`–`D24` |
 | `serde-er7` | 10 sections | `S1`–`S12` |
 
