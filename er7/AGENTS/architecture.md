@@ -37,7 +37,7 @@ belong in the crate.
 | `src/separators.rs` | `Separators`, `Terminator`; reading and validating a delimiter set | [§3](../spec/03-delimiters/index.md) |
 | `src/escape.rs` | `Escape`, `escapes`, `unescape`, `escape`, `decode_hex` | [§6](../spec/06-escape-sequences/index.md) |
 | `src/message.rs` | the value tree, accessors, absent/empty/null, queries, MSH conveniences | [§5](../spec/05-value-tree/index.md), [§8](../spec/08-paths-and-queries/index.md), [§10](../spec/10-msh-conveniences/index.md) |
-| `src/parse.rs` | `parse`, `parse_with`, `split_messages` | [§4](../spec/04-parsing/index.md), [§9](../spec/09-batch-input/index.md) |
+| `src/parse.rs` | `parse`, `parse_with`, `split_messages`, `read_messages`, `MessageReader` | [§4](../spec/04-parsing/index.md), [§9](../spec/09-batch-input/index.md) |
 | `src/render.rs` | `to_er7`/`to_text` at every level, `RenderOptions` | [§7](../spec/07-writing/index.md) |
 | `src/path.rs` | `Path` and its notation | [§8.1](../spec/08-paths-and-queries/index.md) |
 | `src/main.rs` | the CLI | [§12](../spec/12-command-line-interface/index.md) |
@@ -101,7 +101,7 @@ Re-exported at the crate root:
 | `Separators`, `Terminator`, `RenderOptions` | configuration |
 | `Path` | path notation |
 | `Error` | errors |
-| `parse`, `parse_with`, `split_messages` | entry points |
+| `parse`, `parse_with`, `split_messages`, `read_messages`, `MessageReader` | entry points |
 
 Reachable through their modules: `er7::escape::{escapes, Escape, Escapes,
 unescape, escape, decode_hex}` and `er7::message::NULL`.

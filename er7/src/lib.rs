@@ -53,7 +53,8 @@
 //! | [`Message`], [`Segment`], [`Field`], [`Repetition`], [`Component`], [`Subcomponent`] | the six-level value tree |
 //! | [`Message::query`], [`Message::query_all`] | read values by HL7 [`Path`], e.g. `PID-5.1` or `OBX[2]-5` |
 //! | [`Message::to_er7`], [`Segment::to_text`] and siblings | write the tree back out, as sent or decoded |
-//! | [`split_messages`] | cut a batch file or concatenated messages into individual ones |
+//! | [`split_messages`] | cut a batch file or concatenated messages into individual ones, borrowing from the input |
+//! | [`read_messages`] | the same, streamed one at a time from a [`std::io::BufRead`] without holding the whole input in memory |
 //! | [`escape::unescape`], [`escape::escape`], [`escape::escapes`] | the escape-sequence vocabulary |
 //! | [`Separators`] | the delimiter set, read from each message's own header rather than assumed |
 //!
@@ -105,7 +106,7 @@ pub mod render;
 pub mod separators;
 
 pub use crate::message::{Component, Field, Message, Repetition, Segment, Subcomponent};
-pub use crate::parse::{parse, parse_with, split_messages};
+pub use crate::parse::{MessageReader, parse, parse_with, read_messages, split_messages};
 pub use crate::path::Path;
 pub use crate::render::RenderOptions;
 pub use crate::separators::{Separators, Terminator};

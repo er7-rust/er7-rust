@@ -14,15 +14,13 @@ it ships. There is no separate `plan.md`.
 
 Priorities 1 and 2 shipped 2026-08-28 (fuzzing R6 through both `parse` and
 `parse_with`, and building/testing on the pinned MSRV toolchain with a
-manifest-read version) and are removed from this table along with the
-tasks they scheduled — see
-[§13.6](../13-testing-strategy/index.md) and
-[`spec/rust-msrv-n-minus-2/index.md`](../../../spec/rust-msrv-n-minus-2/index.md)
-for the evidence.
+manifest-read version), and priority 3 shipped 2026-08-30 (`read_messages`,
+R27), removed from this table along with the tasks they scheduled — see
+[§13.6](../13-testing-strategy/index.md),
+[`spec/rust-msrv-n-minus-2/index.md`](../../../spec/rust-msrv-n-minus-2/index.md),
+and [§9.5](../09-batch-input/index.md) for the evidence.
 
-| Priority | Item | Task | Rationale |
-| -------- | ---- | ---- | --------- |
-| 1 | Streaming reader for large batch files | [T4](../17-open-tasks/index.md) | `split_messages` holds the whole input in memory. Batch files in production reach hundreds of megabytes. |
+This table is empty; nothing is currently scheduled.
 
 ## 16.2 Toward 1.0.0
 

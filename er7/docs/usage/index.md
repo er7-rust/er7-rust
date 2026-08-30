@@ -278,6 +278,33 @@ for (index, source) in er7::split_messages(batch).iter().enumerate() {
 }
 ```
 
+`split_messages` needs the whole file in one `String` first. For a batch
+file too large to hold in memory, `read_messages` reads from anything
+that implements `std::io::BufRead` and yields one message at a time,
+bounded by the message currently being assembled rather than by the size
+of the input:
+
+```rust
+use std::io::BufReader;
+use std::fs::File;
+
+let reader = BufReader::new(File::open("batch.er7")?);
+for source in er7::read_messages(reader) {
+    let text = source?; // an I/O or UTF-8 failure
+    match er7::parse(&text) {
+        Ok(message) => println!("{:?}", message.control_id()),
+        Err(e) => eprintln!("skipping malformed message: {e}"),
+    }
+}
+```
+
+The trade-off: `split_messages` borrows `&str` slices of the input, so
+cutting a batch costs nothing beyond a `Vec` of spans; `read_messages`
+copies each message into an owned `String`, because nothing in a
+`BufRead`'s internal buffer survives past the next read. Pick
+`split_messages` when the whole file is already in memory, and
+`read_messages` when it should not be.
+
 ## 10. Unusual delimiters
 
 Everything above works on a message that chose different delimiters,

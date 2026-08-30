@@ -40,6 +40,7 @@ enforces it. A rule with no test is a bug in this table.
 | R24 | *by review* — enforced by [`AGENTS/safety.md`](../../AGENTS/safety.md), not by a test; there is no way to assert the absence of a feature | — |
 | R25 | `the_crate_has_no_runtime_dependencies` | `tests/integration.rs` |
 | R26 | `first_value_reads_a_leaf_scoped_to_one_segment` | `src/message.rs` |
+| R27 | `reads_messages_one_at_a_time_from_a_bufread`, `read_messages_matches_split_messages_on_every_batch_shape` | `src/parse.rs` |
 
 The table is **checked by `cargo test`**, not only by review:
 `every_rule_has_a_coverage_row` in `tests/integration.rs` reads this file

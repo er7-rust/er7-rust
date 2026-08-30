@@ -7,6 +7,8 @@
 //!
 //! Specified by spec §4 (parsing) and §9 (batch input).
 
+use std::io::{self, BufRead};
+
 use crate::message::is_header_name;
 use crate::{Component, Error, Field, Message, Repetition, Segment, Separators, Subcomponent};
 
@@ -172,6 +174,163 @@ pub fn split_messages(text: &str) -> Vec<&str> {
 /// True for a batch envelope segment.
 fn is_batch_envelope(line: &str) -> bool {
     BATCH_ENVELOPE.contains(&segment_name(line))
+}
+
+/// Read messages one at a time from `reader`, without holding the whole
+/// input in memory — the streaming counterpart to [`split_messages`] for a
+/// batch file too large to load as one `String` (R27, spec §9.5).
+///
+/// Applies the same rules as `split_messages`: a line named `MSH` starts a
+/// new message, `FHS`/`BHS`/`BTS`/`FTS` end the message in progress and
+/// start none, and the first surviving line starts a message whatever it
+/// is. Unlike `split_messages`, each message comes back as an owned
+/// `String` rather than a borrowed slice, because nothing here holds onto
+/// the original bytes to slice — see [`MessageReader`] for why that
+/// trade-off is unavoidable.
+///
+/// Example:
+///
+/// ```
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// use std::io::Cursor;
+///
+/// let batch = "FHS|^~\\&|SENDER\rMSH|^~\\&|A\rMSA|AA|1\rMSH|^~\\&|B\rMSA|AA|2\rFTS|2";
+/// let mut messages = er7::read_messages(Cursor::new(batch));
+/// assert_eq!(messages.next().transpose()?.as_deref(), Some("MSH|^~\\&|A\rMSA|AA|1"));
+/// assert_eq!(messages.next().transpose()?.as_deref(), Some("MSH|^~\\&|B\rMSA|AA|2"));
+/// assert!(messages.next().is_none());
+/// # Ok(())
+/// # }
+/// ```
+#[must_use]
+pub fn read_messages<R: BufRead>(reader: R) -> MessageReader<R> {
+    MessageReader::new(reader)
+}
+
+/// Iterator returned by [`read_messages`]; see its documentation.
+///
+/// `Item = std::io::Result<String>`. An `Err` ends the iteration for
+/// good — the next call to `next()` returns `None` rather than trying to
+/// resume, because an I/O failure or a line that is not valid UTF-8 leaves
+/// no reliable place to pick back up. A message that was only partly read
+/// when the error happened is discarded, not returned.
+pub struct MessageReader<R> {
+    reader: R,
+    /// A line already read from `reader` that starts the *next* message,
+    /// buffered because reading it was what revealed the current message
+    /// had ended. Always `None` or an `MSH` line.
+    pending: Option<String>,
+    /// Whether the next line read is the first of the whole stream, so a
+    /// leading byte-order mark is stripped exactly once (spec §9.1).
+    first_line: bool,
+    /// Set once an `Err` has been returned, so the iterator stays fused
+    /// rather than trying to read from a reader left in an unknown state.
+    failed: bool,
+}
+
+impl<R: BufRead> MessageReader<R> {
+    /// Wrap `reader`; see [`read_messages`].
+    #[must_use]
+    pub fn new(reader: R) -> Self {
+        Self {
+            reader,
+            pending: None,
+            first_line: true,
+            failed: false,
+        }
+    }
+
+    /// The next non-blank segment line, terminator stripped, or `Ok(None)`
+    /// at end of input. Blank lines are dropped exactly as in
+    /// [`segment_lines`], and the leading byte-order mark, if any, is
+    /// stripped once from the very first line ever read.
+    fn next_line(&mut self) -> io::Result<Option<String>> {
+        loop {
+            let mut raw = Vec::new();
+            if !read_raw_line(&mut self.reader, &mut raw)? {
+                return Ok(None);
+            }
+            let mut line = String::from_utf8(raw)
+                .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
+            if self.first_line {
+                self.first_line = false;
+                if let Some(stripped) = line.strip_prefix('\u{feff}') {
+                    line = stripped.to_string();
+                }
+            }
+            if line.trim().is_empty() {
+                continue;
+            }
+            return Ok(Some(line));
+        }
+    }
+}
+
+impl<R: BufRead> Iterator for MessageReader<R> {
+    type Item = io::Result<String>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.failed {
+            return None;
+        }
+        let mut current: Option<String> = None;
+        loop {
+            let line = match self.pending.take() {
+                Some(line) => Ok(Some(line)),
+                None => self.next_line(),
+            };
+            let line = match line {
+                Ok(Some(line)) => line,
+                Ok(None) => return current.map(Ok),
+                Err(e) => {
+                    self.failed = true;
+                    return Some(Err(e));
+                }
+            };
+            match current.take() {
+                // An envelope segment ends whatever came before it and
+                // starts nothing, so the next MSH opens a fresh message.
+                Some(finished) if is_batch_envelope(&line) => return Some(Ok(finished)),
+                None if is_batch_envelope(&line) => {}
+                // Start a message at each MSH, and at the first segment of
+                // the input even when it is not an MSH — `parse` rejects
+                // that one on its own, which is a better report than
+                // silently dropping it here (spec §9.3).
+                Some(finished) if segment_name(&line) == "MSH" => {
+                    self.pending = Some(line);
+                    return Some(Ok(finished));
+                }
+                None => current = Some(line),
+                Some(mut acc) => {
+                    acc.push('\r');
+                    acc.push_str(&line);
+                    current = Some(acc);
+                }
+            }
+        }
+    }
+}
+
+/// Read bytes from `reader` up to and including the next `\r` or `\n`
+/// (dropped), appending everything before it to `buf`. Returns `false` only
+/// at genuine end of input — nothing read and no terminator found — so the
+/// final line of a file with no trailing terminator still comes back as
+/// `true` once.
+fn read_raw_line<R: BufRead>(reader: &mut R, buf: &mut Vec<u8>) -> io::Result<bool> {
+    loop {
+        let available = reader.fill_buf()?;
+        if available.is_empty() {
+            return Ok(!buf.is_empty());
+        }
+        if let Some(pos) = available.iter().position(|&b| b == b'\r' || b == b'\n') {
+            buf.extend_from_slice(&available[..pos]);
+            reader.consume(pos + 1);
+            return Ok(true);
+        }
+        let len = available.len();
+        buf.extend_from_slice(available);
+        reader.consume(len);
+    }
 }
 
 /// Remove a leading byte-order mark, which text editors add to files and
@@ -427,5 +586,96 @@ mod tests {
     fn does_not_mistake_a_local_segment_for_an_envelope() {
         let text = "MSH|^~\\&|A\rBTSX|1";
         assert_eq!(split_messages(text), vec![text]);
+    }
+
+    #[test]
+    fn reads_messages_one_at_a_time_from_a_bufread() {
+        use std::io::Cursor;
+
+        let batch = "FHS|^~\\&|F\rBHS|^~\\&|B\r\
+                     MSH|^~\\&|A\rMSA|AA|1\r\
+                     MSH|^~\\&|B\rMSA|AA|2\r\
+                     BTS|2\rFTS|1";
+        let mut messages = read_messages(Cursor::new(batch));
+        assert_eq!(messages.next().unwrap().unwrap(), "MSH|^~\\&|A\rMSA|AA|1");
+        assert_eq!(messages.next().unwrap().unwrap(), "MSH|^~\\&|B\rMSA|AA|2");
+        assert!(messages.next().is_none());
+        // Exhausted stays exhausted, rather than trying the underlying
+        // reader again.
+        assert!(messages.next().is_none());
+    }
+
+    #[test]
+    fn read_messages_matches_split_messages_on_every_batch_shape() {
+        use std::io::Cursor;
+
+        // R27: same rules as R21, so the same batch shapes other tests in
+        // this file already exercise for `split_messages` must parse to the
+        // same trees here — modulo which byte sits between segments, which
+        // `parse` never sees since it is a terminator either way.
+        let batches = [
+            "FHS|^~\\&|F\rBHS|^~\\&|B\rMSH|^~\\&|A\rMSA|AA|1\rMSH|^~\\&|B\rMSA|AA|2\rBTS|2\rFTS|1",
+            "MSH|^~\\&|A\rMSH|^~\\&|B\n",
+            "PID|1\rMSH|^~\\&|A",
+            "MSH|^~\\&|A\rBTSX|1",
+            "MSH|^~\\&|A\nPID|1\r\nOBX|1\rMSH|^~\\&|B\r\nPID|2",
+            "MSH|^~\\&|A\rPID|1",
+            "\u{feff}MSH|^~\\&|A\rPID|1",
+        ];
+
+        for batch in batches {
+            let expected: Vec<Result<Message, Error>> =
+                split_messages(batch).into_iter().map(parse).collect();
+            let actual: Vec<Result<Message, Error>> = read_messages(Cursor::new(batch))
+                .map(|source| parse(&source.expect("no I/O error over an in-memory buffer")))
+                .collect();
+            assert_eq!(actual, expected, "for {batch:?}");
+        }
+    }
+
+    #[test]
+    fn an_io_error_ends_the_iteration_for_good() {
+        use std::io::{BufReader, Read};
+
+        /// A `Read` that yields real bytes once, then fails forever —
+        /// standing in for a socket that drops mid-message.
+        struct FailAfter {
+            data: Vec<u8>,
+            pos: usize,
+        }
+        impl Read for FailAfter {
+            fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+                if self.pos >= self.data.len() {
+                    return Err(io::Error::other("boom"));
+                }
+                let n = buf.len().min(self.data.len() - self.pos);
+                buf[..n].copy_from_slice(&self.data[self.pos..self.pos + n]);
+                self.pos += n;
+                Ok(n)
+            }
+        }
+
+        let reader = BufReader::new(FailAfter {
+            data: b"MSH|^~\\&|A\r".to_vec(),
+            pos: 0,
+        });
+        let mut messages = read_messages(reader);
+        assert!(messages.next().unwrap().is_err());
+        assert!(messages.next().is_none());
+    }
+
+    #[test]
+    fn invalid_utf8_is_reported_as_an_io_error() {
+        use std::io::Cursor;
+
+        let mut bytes = b"MSH|^~\\&|A\r".to_vec();
+        bytes.push(0xFF); // not a valid UTF-8 sequence on its own
+        bytes.push(b'\r');
+        let mut messages = read_messages(Cursor::new(bytes));
+        match messages.next() {
+            Some(Err(e)) => assert_eq!(e.kind(), io::ErrorKind::InvalidData),
+            other => panic!("expected an InvalidData error, got {other:?}"),
+        }
+        assert!(messages.next().is_none());
     }
 }

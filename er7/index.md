@@ -160,7 +160,9 @@ There is a runnable program for each of these in
   explicit `""` means *clear this value*, and losing that distinction
   corrupts patient records.
 - **Batch files**: `FHS`/`BHS`/`BTS`/`FTS` envelopes are recognized and
-  messages come out one at a time, as borrowed slices of the input.
+  messages come out one at a time, as borrowed slices of the input
+  (`split_messages`) or streamed from a `BufRead` without holding the
+  whole file in memory (`read_messages`).
 - **Nothing fails except a missing header**: unknown segments, local `Z`
   segments, ragged field counts, and stray positions are data, not errors.
 

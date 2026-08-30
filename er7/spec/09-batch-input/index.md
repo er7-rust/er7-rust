@@ -68,6 +68,75 @@ of scope (R24) and because the count would be reported through an error
 type this crate does not want to grow
 ([§11](../11-error-handling/index.md)).
 
+The same two points hold for `read_messages` ([§9.5](#95-streaming-input-read_messages)) as well: neither reads
+from a socket nor validates a batch count.
+
+## 9.5 Streaming input: `read_messages` [R27]
+
+```rust
+pub fn read_messages<R: BufRead>(reader: R) -> MessageReader<R>
+```
+
+`split_messages` needs the whole input in one `&str` before it can cut
+anything. A production batch file can reach hundreds of megabytes, and a
+caller who only wants to process each message in turn should not have to
+hold the whole file in memory to do it ([T4](../17-open-tasks/index.md),
+before it closed).
+
+`read_messages` reads from anything that implements `std::io::BufRead` —
+a file, a socket, standard input — and returns `MessageReader<R>`, which
+implements `Iterator<Item = std::io::Result<String>>`. Each item is one
+message's ER7 text. Memory use is bounded by the message currently being
+assembled, not by the size of the input.
+
+```rust
+# fn main() -> Result<(), Box<dyn std::error::Error>> {
+use std::io::Cursor;
+
+let batch = "FHS|^~\\&|SENDER\rMSH|^~\\&|A\rMSA|AA|1\rMSH|^~\\&|B\rMSA|AA|2\rFTS|2";
+for source in er7::read_messages(Cursor::new(batch)) {
+    let message = er7::parse(&source?)?;
+    println!("{:?}", message.control_id());
+}
+# Ok(())
+# }
+```
+
+**[R27]** Same batch rules as `split_messages` (R21): a line named `MSH`
+starts a new message; `FHS`, `BHS`, `BTS`, `FTS` end the message in
+progress and start none; the first surviving line starts a message
+whatever it is ([§9.3](#93-why-a-headerless-first-line-still-starts-a-message)); a leading byte-order mark is stripped once, at the very
+start of the stream. Blank lines are dropped, exactly as in
+[§4.1](../04-parsing/index.md).
+
+An `Err` item ends the iteration for good: the next call to `next()`
+returns `None` rather than trying to resume, because an I/O failure or a
+line that is not valid UTF-8 leaves no reliable place to pick back up. A
+message that was only partly read when the error happened is discarded,
+not returned.
+
+### 9.5.1 Why the returned text is owned, not borrowed
+
+`split_messages` borrows: it returns `&str` slices of the caller's own
+buffer, which costs nothing beyond a `Vec` of spans — possible only because
+the whole input already sits in one contiguous `&str`.
+
+A `BufRead` offers no such thing. Its internal buffer is refilled and
+overwritten as bytes are consumed, so nothing borrowed from it survives
+past the next read. `read_messages` rejoins each message's segments into an
+owned `String`, with `\r` (`Terminator::Cr`, [§7](../07-writing/index.md)'s
+own default) between them — never the original terminator bytes, since
+nothing here keeps the original text around to copy them from. Parsing the
+result gives back the same tree `split_messages` plus `parse` would have
+produced; only the terminator character between segments can differ, never
+a segment, a field, or a decoded value.
+
+This closes the open sub-question T4 was scheduled with: the streaming
+form yields `String`, not a zero-copy slice, and `split_messages` remains
+the borrowing, whole-input-in-memory form for a caller who already has one.
+Choosing between them is choosing between memory and a copy — not a choice
+this crate can make for every caller, which is why both exist.
+
 ---
 
 HL7®, and FHIR® are the registered trademarks of Health Level Seven

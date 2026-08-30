@@ -16,6 +16,11 @@ map, not a contract.
 | `er7::parse` | `fn(&str) -> Result<Message, Error>` | needs an `MSH`/`FHS`/`BHS` header ([§4.2](../../spec/04-parsing/index.md)) |
 | `er7::parse_with` | `fn(&str, Separators) -> Message` | for a headerless fragment; cannot fail |
 | `er7::split_messages` | `fn(&str) -> Vec<&str>` | batch or concatenated input; slices borrow ([§9](../../spec/09-batch-input/index.md)) |
+| `er7::read_messages` | `fn<R: BufRead>(R) -> MessageReader<R>` | the streaming counterpart: reads one message at a time without holding the whole input ([§9.5](../../spec/09-batch-input/index.md)) |
+
+`MessageReader<R>` implements `Iterator<Item = std::io::Result<String>>`;
+each item is owned, not borrowed — see [§9.5.1](../../spec/09-batch-input/index.md)
+for why that differs from `split_messages`.
 
 `er7::parse` names both a module and a function. That is legal — they live
 in different namespaces — so `er7::parse(text)` calls the function and
