@@ -4,8 +4,9 @@
 # full coverage, while keeping routine version-update PRs off.
 #
 # Two cargo entries: the root workspace (er7, er7-redact, serde-er7,
-# er7-bench — one lockfile), and er7/fuzz/, which is deliberately its own
-# workspace so that libfuzzer-sys never appears in er7's tree.
+# er7-bench, er7-redact-bench — one lockfile), and er7/fuzz/, which is
+# deliberately its own workspace so that libfuzzer-sys never appears in
+# er7's tree.
 #
 # `open-pull-requests-limit: 0` on the cargo entries, deliberately —
 # mirroring the sibling fhir-rust repository's security-only posture:

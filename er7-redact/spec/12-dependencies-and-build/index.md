@@ -27,9 +27,9 @@ Specifically not depended on:
 
 | Not used | Why not | Instead |
 | -------- | ------- | ------- |
-| a serialization crate | policies are a line format ([§6](../06-policy-file-format/index.md)), read in about forty lines | hand-rolled parser |
+| a serialization crate | policies are a line format ([§6](../06-policy-file-format/index.md)), read in about sixty-five lines (grew from about forty as D22 and D23 each added a reserved word) | hand-rolled parser |
 | a crypto crate | the honest position on pseudonyms is [§7.3](../07-pseudonyms/index.md), not a stronger primitive with the same key handling | FNV-1a, documented as non-cryptographic |
-| a CLI argument crate | the CLI has eleven options and no subcommands | hand-rolled loop, as in `er7` |
+| a CLI argument crate | the CLI has twelve options and no subcommands (corrected to twelve, from eleven, once `--uncovered` (D22) landed — counted directly from [§10.1](../10-command-line-interface/index.md)'s table, `-h`/`-V` excluded) | hand-rolled loop, as in `er7` |
 | a regex crate | policies name positions, not patterns ([§16.2](../16-open-questions-and-declined-decisions/index.md)) | — |
 
 Adding a dependency requires the user to ask for it, and a note in

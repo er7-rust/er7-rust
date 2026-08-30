@@ -116,7 +116,7 @@ Each of these is written down in a specification section, with reasoning:
 - **A pseudonym is not cryptographically strong.** `Pseudonym` uses FNV-1a
   with a `u64` key. It is a stable stand-in so that redacted messages still
   join, and it is explicitly not a security primitive
-  ([§7.3](er7-redact/spec/07-pseudonyms/index.md)). Reversing one is
+  ([§7.2](er7-redact/spec/07-pseudonyms/index.md)). Reversing one is
   expected, not a finding. The reasoning, including why a stronger hash was
   declined, is
   [§16.3](er7-redact/spec/16-open-questions-and-declined-decisions/index.md).
@@ -149,9 +149,9 @@ taken on trust:
 | **No build scripts.** Nothing runs at compile time | There is no `build.rs` in any crate |
 | **Library code performs no I/O at all** — no filesystem, no network, no process spawning, no environment reads, no logging, no telemetry | `grep -rn "std::fs\|std::net\|std::env\|std::process" er7/src er7-redact/src serde-er7/src` matches only `main.rs` |
 | **The command-line tools read only what you name** — a file argument or standard input — and write only to standard output or `-o` | `er7/src/main.rs`, `er7-redact/src/main.rs`. No configuration file is searched for and no environment variable is consulted. |
-| **Fuzzed on the untrusted-input surface** | `er7/fuzz/`: `parse_roundtrip`, `escape_roundtrip`, `query_paths` |
+| **Fuzzed on the untrusted-input surface** | `er7/fuzz/`: `parse_roundtrip`, `parse_with_total`, `escape_roundtrip`, `query_paths` — four targets |
 | **Every dependency's license and every advisory against it is checked**, on push and again every Monday whether or not anything pushed | `deny.toml`; run `cargo deny check` from the root and from `er7/fuzz/`, or read the `deny` job in `.github/workflows/ci.yml` and `.github/workflows/audit.yml` |
-| **CI has a real hosted track record, not a single proof-of-concept run** | `gh run list -R er7-rust/er7-rust`: 13 hosted runs of `.github/workflows/ci.yml` as of 2026-08-27, 12 green. The one failure (`61eb30d`) was a flaky CLI-test race — a run that fails while parsing its arguments exits before reading standard input, closing a pipe the test helper was still writing to — root-caused and fixed the same day (`574daaf`), not swept aside |
+| **CI has a real hosted track record, not a single proof-of-concept run** | `gh run list -R er7-rust/er7-rust --workflow=ci.yml --limit 200 --json conclusion`: 34 hosted runs of `.github/workflows/ci.yml` as of 2026-08-30, 33 green. The one failure (`61eb30d`) was a flaky CLI-test race — a run that fails while parsing its arguments exits before reading standard input, closing a pipe the test helper was still writing to — root-caused and fixed the same day (`574daaf`), not swept aside |
 
 **The one thing worth knowing before you log an error.** Error values are
 deliberately narrow, and none of them carries a field value from a message

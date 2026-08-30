@@ -139,6 +139,16 @@ somebody got wrong, and redacting it is the direction that fails safely.
 leaves the message unroutable; it is rarely what you want on a message,
 and is the posture to reach for when nothing about the input is trusted.
 
+Either way, `--uncovered` (or `Redactor::uncovered` in Rust,
+[spec §2.9](../../spec/02-redaction-model/index.md)) answers the question
+this section is really asking: it lists every leaf a rule never named, so
+you can check a policy against a real message before trusting it, instead
+of trusting the list on faith.
+
+```sh
+er7-redact --uncovered message.er7
+```
+
 ## 6. Keeping the message joinable
 
 Clearing an identifier destroys the message as test data: nothing ties the
@@ -180,9 +190,14 @@ before sharing the message.
 
 ## 8. What this does not do
 
-- It does not find an identifier in free text. `NTE-3` saying "spoke with
-  Mrs Everywoman" survives every positional policy, and the only current
-  answers are naming that position or rejecting by default.
+- It does not find an identifier written into free text **on first
+  mention**. `search_known_values` (on by default,
+  [spec §2.10](../../spec/02-redaction-model/index.md)) redacts a value
+  found at a named position wherever else it repeats, so `NTE-3` saying
+  "spoke with Mrs Everywoman" is caught once `EVERYWOMAN` has shown up
+  somewhere named — but a name that appears **only** in free text still
+  survives every positional policy, and the only current answers are
+  naming that position or rejecting by default.
 - It does not tell you the result is de-identified. That is a judgement
   about a whole data set, made by a person who is accountable for it.
 - It does not go back. There is no mapping table and no undo.

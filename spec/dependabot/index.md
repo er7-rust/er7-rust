@@ -20,8 +20,9 @@ reports `enabled: true`.
 
 **`.github/dependabot.yml`** registers the manifests those security
 updates cover — the root workspace (`er7`, `er7-redact`, `serde-er7`,
-`er7-bench`, one lockfile) and `er7/fuzz/`, deliberately its own
-workspace so `libfuzzer-sys` never touches `er7`'s tree — plus the
+`er7-bench`, `er7-redact-bench` — the last added 2026-08-28, one
+lockfile) and `er7/fuzz/`, deliberately its own workspace so
+`libfuzzer-sys` never touches `er7`'s tree — plus the
 `github-actions` ecosystem, each on a weekly schedule. The two `cargo`
 entries carry `open-pull-requests-limit: 0`, deliberately: this checklist
 only asked for updates to be *enabled*, not for routine version-bump PRs

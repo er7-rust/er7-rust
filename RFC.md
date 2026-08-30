@@ -235,26 +235,6 @@ skip?
 cost with no benefit, and it is the kind of thing a maintainer cannot judge
 from inside.
 
-### Q13. Would "redact what you know" catch what you actually find in free text?
-
-The largest real gap in `er7-redact` is free text: a name in `NTE-3` or
-`OBX-5` survives every positional rule. The design on the table is
-**redact-what-you-know** — take the values found at identifier positions
-and remove those strings wherever else they appear in the message. No
-pattern matching (that was declined: it false-positives on lab values),
-so it misses anything not present at a named position.
-
-**What we want to know:** when you have found an identifier in free text
-by hand, was it a value that also appeared in `PID` or another named
-position — or something else entirely (a nickname, a relative, a phone
-number never sent structurally)? The answer decides whether
-redact-what-you-know closes most of the gap or a sliver of it.
-
-**What an answer changes:** whether that design gets built as specified,
-gets built with additions, or is not worth its cost. Spec:
-[`er7-redact` §14.2](er7-redact/spec/14-roadmap/index.md), tracked as
-[T1](er7-redact/spec/15-open-tasks/index.md).
-
 ### Q14. What does a defensible Safe Harbor statement need from a tool like this?
 
 [`PHI.md`](PHI.md) now maps the default policy against the eighteen HIPAA
@@ -335,11 +315,11 @@ A decision being recorded does not make it right. It makes it arguable.
 
 | | |
 |---|---|
-| Version | 1.1.0 |
+| Version | 1.2.0 |
 | Opened | 2026-08-26 |
-| Revised | 2026-08-26 — Q13 and Q14 added, out of the free-text decision in [`plan.md`](plan.md) and the Safe Harbor accounting in [`PHI.md`](PHI.md). Question numbers are stable and never reused. |
+| Revised | 2026-08-30 — Q13 removed: `Policy::search_known_values` (D23) shipped 2026-08-29 as `er7-redact` 0.3.0, closing [T1](er7-redact/spec/15-open-tasks/index.md) before outside feedback answered the question, not because of it — recorded here rather than left standing as if still open. [`NEWS.md`](NEWS.md)'s 2026-08-29 entry covers the shipped feature. Question numbers are stable and never reused, so Q13 is retired, not reassigned. |
 | Closes | It does not. Questions are removed as they are answered, and added as they arise. |
-| Answered so far | Nothing yet. This file is new. |
+| Answered so far | Nothing by outside feedback yet; Q13 was overtaken by the maintainer's own decision to ship before an answer arrived. |
 
 When a question here gets a real answer, it moves out of this file and into
 the spec section it changed, and [`NEWS.md`](NEWS.md) says so.

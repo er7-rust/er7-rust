@@ -58,7 +58,7 @@ and R25 exists to stop exactly that. Task T6 closed on this basis.
 | Field | Value |
 | ----- | ----- |
 | name | `er7` |
-| version | `0.1.1` |
+| version | `0.2.1` |
 | edition | `2024` |
 | rust-version | `1.96` (the N-2 MSRV — see [§14.4](../14-compatibility-and-versioning/index.md)) |
 | license | `MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only` |

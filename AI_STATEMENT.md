@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| Version | 1.3.0 |
-| Effective date | 2026-08-27 |
+| Version | 1.4.0 |
+| Effective date | 2026-08-30 |
 | Status | Active |
 | Author and owner | Joel Parker Henderson, maintainer |
 | Canonical location | `AI_STATEMENT.md` at the workspace root |
@@ -157,11 +157,12 @@ cargo +1.96 check --workspace --all-targets       # the MSRV floor
 What these controls do **not** prove is §12. A workflow
 ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs these gates
 on every push and pull request; its first hosted run went green
-2026-08-26, and as of 2026-08-27 it has run 13 times, 12 green — a real
-track record now, not a single proof-of-concept run. The one failure
-(`61eb30d`) was a flaky CLI-test race, root-caused and fixed the same day
-(`574daaf`), not swept aside. [`MAINTAINERS.md`](MAINTAINERS.md) says the
-same thing.
+2026-08-26, and as of 2026-08-30 it has run 34 times, 33 green
+(`gh run list -R er7-rust/er7-rust --workflow=ci.yml --limit 200 --json
+conclusion`) — a real, growing track record, not a single proof-of-concept
+run. The one failure (`61eb30d`) was a flaky CLI-test race, root-caused and
+fixed the same day (`574daaf`), not swept aside. [`MAINTAINERS.md`](MAINTAINERS.md)
+says the same thing.
 
 ## 8. Licensing and provenance of AI output
 
@@ -249,7 +250,7 @@ This section exists because a disclosure without one is marketing.
   upward, and it is still a boundary.
 - **The machine enforcement of the gates has a young but real history.** A
   CI workflow exists as of 2026-08-26 (`.github/workflows/ci.yml`); as of
-  2026-08-27 it has 13 hosted runs, 12 green, and the one failure was
+  2026-08-30 it has 34 hosted runs, 33 green, and the one failure was
   root-caused and fixed the same day it happened rather than ignored. A
   gate that depends on one person remembering to run it is weaker than
   one a robot refuses to skip; this project now has the stronger kind,
@@ -322,6 +323,7 @@ FerroEHR project, whose AI statement is the structural model for this one.
 | 1.1.0 | 2026-08-26 | §7 and §12 updated: a CI workflow now exists (`.github/workflows/ci.yml`); its first hosted run is still pending. |
 | 1.2.0 | 2026-08-26 | §7 and §12 updated again: the first hosted run went green (all four jobs, including the fuzz smoke run added the same day). |
 | 1.3.0 | 2026-08-27 | §7 and §12 updated a third time: a claim in this document stopped being true, per §13's own trigger — "one run proves the gate executes" had become 13 runs, 12 green, and the document still said one. Corrected to the real figure, with the one failure named and its fix cited rather than omitted. |
+| 1.4.0 | 2026-08-30 | §7 and §12 updated a fourth time, same §13 trigger: "13 runs, 12 green" had become 34 runs, 33 green (`gh run list -R er7-rust/er7-rust --workflow=ci.yml --limit 200 --json conclusion`), and the document still said 13. Corrected; the one failure and its same-day fix are still named rather than dropped now that the run count has grown past it. |
 
 ## Annex B. Machine-readable summary
 
@@ -330,8 +332,8 @@ is authoritative where the two could ever disagree.
 
 ```yaml
 ai-statement:
-  version: 1.3.0
-  last-updated: 2026-08-27
+  version: 1.4.0
+  last-updated: 2026-08-30
   vocabulary: w3c-ai-content-disclosure
   disclosure-default: ai-generated
   tools:

@@ -47,6 +47,29 @@ Henderson. https://er7-rust.github.io`;
 </section>
 
 <section class="section">
+  <h2 class="section-heading-eyebrow">2026-08-29 · er7 0.2.0, 0.2.1 · serde-er7 0.2.0 · er7-redact 0.3.0</h2>
+  <h2 class="section-heading">The floor moved to 1.96, and known values now get caught wherever they repeat</h2>
+  <div class="prose">
+    <p>
+      All three crates raised the minimum supported Rust version from current stable minus three to
+      minus two — 1.95 to 1.96 — which never lands in a patch, so all three took a minor release.
+      <code>er7-redact</code> carried one more breaking change of its own:
+      <code>Policy</code> gained a public <code>search_known_values</code> field, defaulting to
+      <code>true</code>, so a value redacted at one named position is now also redacted wherever
+      else it repeats in the same message, case-insensitively and only as a whole word — a policy
+      file turns it off with <code>known-values off</code>.
+    </p>
+    <p>
+      Additive alongside it: <code>Redactor::uncovered</code> and the CLI&rsquo;s
+      <code>--uncovered</code> flag report every leaf a policy names no rule for;
+      <code>er7::read_messages</code> streams a batch one message at a time instead of holding the
+      whole input; and <code>Segment::first_value</code> reads one field&rsquo;s first repetition
+      and subcomponent straight off a segment already in hand.
+    </p>
+  </div>
+</section>
+
+<section class="section">
   <h2 class="section-heading-eyebrow">2026-08-26</h2>
   <h2 class="section-heading">The HL7 marks, marked</h2>
   <div class="prose">

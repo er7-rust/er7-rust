@@ -41,7 +41,7 @@ change:
 ## 8.3 Following `er7`'s own versions
 
 This crate's `Cargo.toml` depends on `er7` by path during development
-(`../er7-rust`) and should track a semver-compatible range once both are
+(`../er7`) and should track a semver-compatible range once both are
 published to crates.io. A breaking change in `er7`'s own value tree
 (renaming a field, changing `Separators`) requires updating this crate's
 wire shape to match and bumping this crate's own version accordingly, even

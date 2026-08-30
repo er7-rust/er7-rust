@@ -23,24 +23,34 @@ toolchain the code in this workspace may assume.
 
 ## Where the MSRV is recorded
 
-| Location                             | Form                                                   |
-| ------------------------------------ | ------------------------------------------------------ |
-| `Cargo.toml` (`[workspace.package]`) | `rust-version = "1.(N-2)"`                             |
-| each `crates/*/Cargo.toml`           | `rust-version.workspace = true`                        |
-| `.github/workflows/ci.yml`           | an `msrv` job pinning `dtolnay/rust-toolchain@1.(N-2)` |
+Corrected 2026-08-30 against the actual tree, not the structure an earlier
+draft of this document assumed: the root `Cargo.toml` has no
+`[workspace.package]` table, and no member crate uses
+`rust-version.workspace = true` — there is no Cargo-level inheritance
+mechanism in play here at all.
 
-`rust-version` is the single source of truth inside the workspace: `cargo`
-refuses to build a crate with a toolchain older than it, and downstream
-consumers see it in the published crate metadata. Every member crate inherits
-it from `[workspace.package]`; a member MUST NOT declare its own value.
+| Location | Form |
+| -------- | ---- |
+| `er7/Cargo.toml`, `er7-redact/Cargo.toml`, `serde-er7/Cargo.toml` | each declares its own `rust-version = "1.(N-2)"` directly, in `[package]` |
+| `.github/workflows/ci.yml`, `msrv` job | reads `rust-version` from `er7/Cargo.toml` at run time, cross-checks that `er7-redact` and `serde-er7` declare the identical value (failing the job if they disagree), then installs exactly that toolchain via `dtolnay/rust-toolchain@master` — nothing is hard-coded a second time |
+
+`rust-version` is the single source of truth inside each published crate:
+`cargo` refuses to build it with an older toolchain, and downstream
+consumers see the value in the crate's own published metadata. The three
+crates MUST agree with each other — enforced mechanically by the `msrv`
+job's cross-check, not by Cargo inheritance — because a workspace with three
+different floors would make "the MSRV" a meaningless phrase.
 
 ## Maintenance
 
 When a new stable Rust release `1.N` appears, the MSRV becomes `1.(N-2)`
 **in the same change** that observes the release:
 
-1. Set `rust-version` in the root `Cargo.toml` to `1.(N-2)`.
-2. Set the pinned toolchain in the CI `msrv` job to the same value.
+1. Set `rust-version` in all three of `er7/Cargo.toml`, `er7-redact/Cargo.toml`,
+   and `serde-er7/Cargo.toml` to `1.(N-2)` — there is no single file that
+   covers all three.
+2. Nothing in `.github/workflows/ci.yml` needs to change: the `msrv` job
+   reads the new value from `er7/Cargo.toml` itself.
 3. Run `cargo +1.(N-2) check --all-targets --workspace` and fix anything that
    the older toolchain rejects — the MSRV is a floor the code must meet, not a
    ceiling on what the code may need.

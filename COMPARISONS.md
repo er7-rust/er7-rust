@@ -89,16 +89,16 @@ avoids having that conversation with anyone.
 ## The other Rust crates
 
 A small field, and cooperation beats competition in it. Download figures
-below are from the crates.io API on **2026-08-26** and are recorded as
-context, not as a ranking.
+below are from the crates.io API on **2026-08-30** (re-checked live; the
+previous pass was 2026-08-26) and are recorded as context, not as a ranking.
 
 | Crate | Latest | Last published | Downloads | Shape |
 |---|---|---|---|---|
-| [`hl7-parser`](https://github.com/hamaluik/hl7-parser) | 0.3.0 | 2025-02 | 16,640 | The most-used and most actively developed alternative. Parses structure without validating; optional `serde`, and timestamp parsing into `chrono`, `time`, or `jiff`; message building; cursor-by-character-index; lenient separators. Apache-2.0 |
-| [`hl7v2-parser`](https://github.com/EffortlessMetrics/hl7v2-rs) | 1.2.0 | 2026-03 | 209 | Newer. "Zero-allocation where possible"; a companion `hl7v2_stream` gives event-based streaming with bounded memory |
-| [`rust-hl7`](https://github.com/wokket/rust-hl7) | 0.5.0 | 2021-09 | 14,777 | Buffer-copy-free indexing with HL7 notation; self-described as experimental; explicitly no plan for conformance checking. Last published 2021 |
-| [`hl7-mllp-codec`](https://github.com/wokket/hl7-mllp-codec) | 0.4.0 | 2022-07 | 25,755 | Not a parser at all: a Tokio codec for MLLP framing. Complementary to any of the above, including these crates |
-| `er7` | 0.1.2 | 2026-08 | 161 | This one |
+| [`hl7-parser`](https://github.com/hamaluik/hl7-parser) | 0.3.0 | 2025-02 | 17,104 | The most-used and most actively developed alternative. Parses structure without validating; optional `serde`, and timestamp parsing into `chrono`, `time`, or `jiff`; message building; cursor-by-character-index; lenient separators. Apache-2.0 |
+| [`hl7v2-parser`](https://github.com/EffortlessMetrics/hl7v2-rs) | 1.2.0 | 2026-03 | 213 | Newer. "Zero-allocation where possible"; a companion `hl7v2_stream` gives event-based streaming with bounded memory |
+| [`rust-hl7`](https://github.com/wokket/rust-hl7) | 0.5.0 | 2021-09 | 14,782 | Buffer-copy-free indexing with HL7 notation; self-described as experimental; explicitly no plan for conformance checking. Last published 2021 |
+| [`hl7-mllp-codec`](https://github.com/wokket/hl7-mllp-codec) | 0.4.0 | 2022-07 | 25,778 | Not a parser at all: a Tokio codec for MLLP framing. Complementary to any of the above, including these crates |
+| `er7` | 0.2.1 | 2026-08 | 464 | This one |
 
 **When to choose one of those instead.** These are real reasons, not
 hedges:

@@ -16,11 +16,15 @@ listed" is not a good enough answer.
 
 ## Does it find identifiers in free text?
 
-Not yet. A name in an `NTE-3` comment survives every positional policy, and
-that is the biggest gap in the crate — recorded as
-[T1](../../spec/15-open-tasks/index.md). Today the answers are to name
-those positions (`NTE-3 clear`) or to reject by default with
-`Policy::all_but_the_header()`.
+Only a repeat. `Policy::search_known_values` (D23,
+[spec §2.10](../../spec/02-redaction-model/index.md)), on by default,
+redacts a value found at a named position wherever else it appears —
+case-insensitively, whole-word — so a name that also lands in an `NTE-3`
+comment is caught once it has shown up somewhere named. It does not find a
+name that appears **only** in free text and nowhere at a named position;
+name that position explicitly (`NTE-3 clear`) or reject by default with
+`Policy::all_but_the_header()` for that case. Shipped 2026-08-29, closing T1
+([spec §14.2](../../spec/14-roadmap/index.md)).
 
 Pattern matching was considered and declined
 ([spec §16.2](../../spec/16-open-questions-and-declined-decisions/index.md)):

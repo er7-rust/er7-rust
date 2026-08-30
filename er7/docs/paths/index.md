@@ -45,8 +45,8 @@ There are two, and they mean different things.
 Both are 1-based. Both may be omitted, and omitting one means "every one":
 
 ```rust
-// Three OBX segments, so three answers.
-assert_eq!(message.query_all("OBX-5")?, vec!["187", "102", ""]);
+// Three OBX segments, but only two carried a fifth field.
+assert_eq!(message.query_all("OBX-5")?, vec!["187", "102"]);
 
 // One, pinned down.
 assert_eq!(message.query_all("OBX[2]-5")?, vec!["102"]);

@@ -179,8 +179,8 @@ the latter (R24).
 
 ## 2.8 Why ER7 persists
 
-The tradeoffs are stark, and they have kept ER7 in place for thirty-five
-years.
+The tradeoffs are stark, and they have kept ER7 in place for thirty-six
+years (2.1 shipped 1990, per [§1.1](../01-purpose-and-scope/index.md)).
 
 In its favour: messages are tiny, so an interface engine can move millions
 a day; the format is trivially streamable; and it is embedded in hundreds

@@ -178,9 +178,13 @@ Parsing and writing are each a single pass, O(n). `unescape` and `escape`
 return `Cow::Borrowed` when there is nothing to do, and `split_messages`
 returns borrowed slices rather than copies.
 
-There are no benchmarks; whether they would earn their keep is tracked as
-[T3](../../spec/17-open-tasks/index.md). If you have a workload where this
-matters, please open an issue with the numbers.
+Yes, measured: Criterion benchmarks live in the unpublished workspace
+member `er7-bench/`, run with `cargo bench -p er7-bench`. Figures are in
+[`BENCHMARKS.md`](https://github.com/er7-rust/er7-rust/blob/main/BENCHMARKS.md)
+at the workspace root (updated; the crate's own FAQ used to say there
+were none, tracked as T3 — that task shipped and closed, see
+[spec §13.6](../../spec/13-testing-strategy/index.md)). If you have a
+workload the numbers don't cover, please open an issue with the numbers.
 
 ## How do I report a bug or ask for a feature?
 

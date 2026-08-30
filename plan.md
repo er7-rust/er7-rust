@@ -18,20 +18,24 @@ none of them can: the workspace-level professionalization work. Execution
 items live in [`tasks.md`](tasks.md), where a `[x]` means verified, not
 intended.
 
-## Where the workspace stands (verified 2026-08-26)
+## Where the workspace stands (verified 2026-08-30)
 
-Three crates released independently on crates.io (er7 0.1.2, serde-er7 0.1.2,
-er7-redact 0.2.0, per `CHANGELOG.md`). The root document set is nearly
-complete and unusually substantive — SECURITY.md documents checkable
+Three crates released independently on crates.io (er7 0.2.1, serde-er7 0.2.0,
+er7-redact 0.3.0, per `CHANGELOG.md`, re-checked against each crate's own
+`Cargo.toml` and against the crates.io API 2026-08-30). The root document
+set is complete and unusually substantive — SECURITY.md documents checkable
 properties with the commands that check them, TRADEMARKS.md has a mark-by-mark
 table, and `bin/check-trademarks` enforces the fair-use rules mechanically.
 The trademark-compliance sweep — 100+ files extending compliance into
 crate doc-comments, manifests, and the site copy — landed 2026-08-26.
 
-The honest part of the document set is that it names its own gaps —
-no CI, unsigned commits, no second security responder — rather than implying
-they are covered. This plan closes those gaps deliberately instead of leaving
-them as standing confessions.
+The honest part of the document set is that it still names the gaps that
+remain — no second security responder, no SBOM, no Trusted Publishing —
+rather than implying they are covered. The two gaps this sentence used to
+name here, "no CI" and "unsigned commits", were closed 2026-08-26 and
+2026-08-27 respectively (workstream 3, below), and are not restated as open.
+This plan closes what is still open the same deliberate way, instead of
+leaving it as a standing confession.
 
 ## Workstreams — professionalization (2026-08 onward)
 
@@ -128,10 +132,12 @@ posture. Open items for each are in `tasks.md`.
   the compliance posture in crate doc-comments and manifests reaches
   crates.io only with each crate's next release.
 - SECURITY.md's "checkable properties" now have a CI workflow behind them:
-  its first hosted run went green 2026-08-26, and as of 2026-08-27 it has
-  13 runs, 12 green, with the one failure root-caused and fixed the same
-  day. No longer a single-run proof of concept, though still a young
-  history by the standards of a mature project.
+  its first hosted run went green 2026-08-26, and as of 2026-08-30 it has
+  34 runs, 33 green (`gh run list -R er7-rust/er7-rust --workflow=ci.yml
+  --limit 200 --json conclusion`), with the one failure — the same
+  `61eb30d` flaky CLI-test race — root-caused and fixed the same day it
+  happened. No longer a single-run proof of concept, and the run count has
+  more than doubled since the last time this line was checked (2026-08-27).
 - Pseudonyms in `er7-redact` are FNV-1a and documented as not a security
   primitive — any outreach that touches de-identification must repeat that
   framing, not soften it.

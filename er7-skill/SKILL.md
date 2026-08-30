@@ -122,6 +122,17 @@ let last_name = message.query("PID-5.1")?;          // first match, decoded
 let all_obx_values = message.query_all("OBX-5")?;    // every match
 ```
 
+Already holding one `Segment` while iterating (say, every `OBX` in a
+message)? `Segment::first_value` reads one field's first repetition and
+subcomponent directly, treating an empty result as absent — no need to
+re-query the whole message by path:
+
+```rust
+for obx in message.segments_named("OBX") {
+    let observation_id = obx.first_value(2, 1, &message.separators); // Option<String>
+}
+```
+
 **Edit a value and write it back:**
 
 ```rust
@@ -149,12 +160,36 @@ for source in er7::split_messages(batch_text) {
 }
 ```
 
+Too large to load as one `String`? `er7::read_messages(reader)` is the
+streaming counterpart, for any `BufRead`: same splitting rules, one owned
+`String` per message, nothing held in memory but the reader's own buffer.
+
+```rust
+let mut messages = er7::read_messages(std::io::BufReader::new(file));
+while let Some(source) = messages.next().transpose()? {
+    let message = er7::parse(&source)?;
+    // ...
+}
+```
+
 **Redact before sharing:**
 
 ```sh
 er7-redact message.er7            # a redacted copy, same shape
 er7-redact --report message.er7   # what changed: paths and actions, no values
+er7-redact --uncovered message.er7 # positions no rule names, and not the message
 ```
+
+By default `Policy::search_known_values` is `true`: a value found at a
+named position (say, the patient ID in `PID-3`) is also redacted wherever
+else it repeats in the message, case-insensitively and as a whole word —
+not just at the position a rule names. Turn it off with
+`Policy::search_known_values(false)`, or `known-values off` in a policy
+file, for a policy that should only ever redact by position.
+
+`Redactor::uncovered(&message)` returns the paths no rule names at all
+(text-carrying leaves only) — useful to check a policy's coverage
+independent of whether its posture is accepting or rejecting.
 
 ## Where to look next
 

@@ -1,6 +1,7 @@
 //! [`Terminator`]: a three-variant enum, serialized as its Rust identifier.
 
 use std::fmt;
+use std::ops::{Deref, DerefMut};
 
 use serde::de::{self, Visitor};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -47,6 +48,20 @@ impl From<er7::Terminator> for Terminator {
 impl From<Terminator> for er7::Terminator {
     fn from(outer: Terminator) -> er7::Terminator {
         outer.0
+    }
+}
+
+impl Deref for Terminator {
+    type Target = er7::Terminator;
+
+    fn deref(&self) -> &er7::Terminator {
+        &self.0
+    }
+}
+
+impl DerefMut for Terminator {
+    fn deref_mut(&mut self) -> &mut er7::Terminator {
+        &mut self.0
     }
 }
 
