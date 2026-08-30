@@ -50,15 +50,24 @@ reusing `uncovered`'s own notion of "a leaf no rule or posture already
 touched" rather than a third way of walking the tree. Closed
 [T1](../15-open-tasks/index.md).
 
-## 14.3 Next — a caller-supplied action
+## 14.3 Shipped — a caller-supplied action
 
-`Action` is a closed enum, which means a caller who needs a real MAC, a
-date shift, or a lookup table cannot express it
-([§7.4](../07-pseudonyms/index.md)). A variant holding a function would
-open it. The cost is that `Action` stops being `Clone`, `PartialEq`, and
-`Display`-able in the ordinary way, and a policy stops round-tripping
-through a file — so the design has to keep the two kinds of policy
-separable. [T2](../15-open-tasks/index.md).
+`Action` was a closed enum, which meant a caller who needed a real MAC, a
+date shift, or a lookup table could not express it
+([§7.4](../07-pseudonyms/index.md)). Shipped 2026-08-30 as
+`Action::Custom(CustomAction)` (D24, [§3.8](../03-actions/index.md)),
+admitted by [§16.11](../16-open-questions-and-declined-decisions/index.md)
+per §3.1's own rule that a ninth action needs a section saying why the
+eight were not enough.
+
+The cost turned out smaller than expected: `Action` kept its ordinary
+`Clone`, `PartialEq`, and `Eq` unchanged — `CustomAction`, a newtype
+around the closure, carries the hand-written impls instead (`Clone` is an
+`Arc` clone; equality is identity, `Arc::ptr_eq`). What did not survive is
+`Display` round-tripping a policy that holds one through a file — it
+never could, since a closure has no text to spell — and that boundary is
+exactly what [§6.5](../06-policy-file-format/index.md) now states rather
+than leaves implicit. Closed [T2](../15-open-tasks/index.md).
 
 ## 14.4 Later — date shifting
 

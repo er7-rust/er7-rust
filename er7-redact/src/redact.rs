@@ -1294,4 +1294,45 @@ mod tests {
             message.to_er7()
         );
     }
+
+    #[test]
+    fn a_policy_mixing_built_in_and_custom_actions_redacts_correctly() {
+        // D24, T2's own done-when: both kinds of action run correctly in
+        // the same pass.
+        let mut message = message();
+        let mut mixed = Policy::accept_all();
+        mixed = mixed.with("PID-5", Action::redacted()).unwrap();
+        mixed = mixed
+            .with(
+                "PID-7",
+                Action::custom(|value, _key| Some(value.chars().rev().collect())),
+            )
+            .unwrap();
+
+        let report = redact(mixed, &mut message);
+
+        assert_eq!(
+            message.query("PID-5.1").unwrap().as_deref(),
+            Some("REDACTED")
+        );
+        // PID-7 was "19610615"; a custom action reversed it.
+        assert_eq!(message.query("PID-7").unwrap().as_deref(), Some("51601691"));
+        let paths: Vec<String> = report.changes.iter().map(|c| c.path.to_string()).collect();
+        assert!(paths.iter().any(|p| p.starts_with("PID[1]-5")), "{paths:?}");
+        assert!(paths.iter().any(|p| p.starts_with("PID[1]-7")), "{paths:?}");
+    }
+
+    #[test]
+    fn a_custom_action_reports_instead_of_panicking() {
+        // D24, spec §6.5: writing a policy holding a Custom rule to a file
+        // does not panic — it writes the fixed placeholder.
+        let policy = Policy::accept_all()
+            .with("PID-5", Action::custom(|v, _k| Some(v.to_string())))
+            .unwrap();
+        let text = policy.to_string();
+        assert!(text.contains("<custom>"), "{text}");
+
+        // And the placeholder is honest: it does not read back as itself.
+        assert!(Policy::parse(&text).is_err());
+    }
 }

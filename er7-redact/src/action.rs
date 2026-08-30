@@ -1,4 +1,5 @@
-//! The eight things redaction can do to a value.
+//! The eight built-in things redaction can do to a value, and a ninth a
+//! caller can supply.
 //!
 //! An action reads a leaf's **decoded** text and returns the text that
 //! should replace it, so `Mask` and `First` count characters the way a
@@ -11,6 +12,7 @@
 use crate::Error;
 use crate::pseudonym::pseudonym;
 use std::fmt;
+use std::sync::Arc;
 
 /// The placeholder every built-in policy writes.
 const REDACTED: &str = "REDACTED";
@@ -92,6 +94,15 @@ pub enum Action {
     /// linkage on purpose, and it is not a cryptographic guarantee (D12,
     /// spec §7.3).
     Pseudonym,
+    /// Run the caller's own function instead of one of the eight built-ins
+    /// above — a real MAC, a lookup table, a per-patient date shift.
+    ///
+    /// Not part of the closed set of eight (spec §3.1); admitted by spec
+    /// §16.11 under the rule that a ninth action needs a section saying why
+    /// the eight were not enough. See [`CustomAction`] and spec §3.8 (D24)
+    /// for what it costs: `Action` keeps its ordinary `Debug`, `Clone`,
+    /// `PartialEq`, and `Eq`, and there is no policy-file spelling, ever.
+    Custom(CustomAction),
 }
 
 impl Action {
@@ -108,6 +119,30 @@ impl Action {
     #[must_use]
     pub fn redacted() -> Action {
         Action::Replace(REDACTED.to_string())
+    }
+
+    /// Shorthand for `Action::Custom(CustomAction::new(f))` (D24, spec
+    /// §3.8).
+    ///
+    /// `f` receives the leaf's decoded text and the redactor's pseudonym
+    /// key — the same two things [`Action::apply`] always receives — and
+    /// returns the replacement the same way every other action does:
+    /// `Some(text)` to write `text`, `None` to leave the leaf as it is.
+    ///
+    /// Example:
+    ///
+    /// ```
+    /// use er7_redact::Action;
+    ///
+    /// let shout = Action::custom(|value, _key| Some(value.to_uppercase()));
+    /// assert_eq!(shout.apply("everywoman", 0).as_deref(), Some("EVERYWOMAN"));
+    ///
+    /// // There is no policy-file spelling for it.
+    /// assert_eq!(shout.to_string(), "<custom>");
+    /// ```
+    #[must_use]
+    pub fn custom(f: impl Fn(&str, u64) -> Option<String> + Send + Sync + 'static) -> Action {
+        Action::Custom(CustomAction::new(f))
     }
 
     /// Read an action as a policy file spells it (spec §6.2).
@@ -226,6 +261,7 @@ impl Action {
                 Some(value.chars().skip(skip).collect())
             }
             Action::Pseudonym => Some(pseudonym(key, value)),
+            Action::Custom(custom) => custom.apply(value, key),
         }
     }
 }
@@ -234,9 +270,11 @@ impl fmt::Display for Action {
     /// The spelling a policy file uses, so that a policy written out
     /// re-reads as the same policy (D18, spec §6.5).
     ///
-    /// The one value that does not survive the trip is `Replace` with empty
+    /// One value that does not survive the trip is `Replace` with empty
     /// text, written as `clear`, because nothing downstream can tell the
-    /// two apart.
+    /// two apart. `Custom` never survives it at all: it writes the fixed
+    /// placeholder `<custom>`, which is not a keyword [`Action::parse`]
+    /// recognises, on purpose (D24, spec §3.8, §6.5).
     ///
     /// Example:
     ///
@@ -259,9 +297,64 @@ impl fmt::Display for Action {
             Action::First(n) => write!(f, "first {n}"),
             Action::Last(n) => write!(f, "last {n}"),
             Action::Pseudonym => write!(f, "pseudonym"),
+            Action::Custom(_) => write!(f, "<custom>"),
         }
     }
 }
+
+/// A caller-supplied action, wrapped so [`Action`] can keep its ordinary
+/// `Debug`, `Clone`, `PartialEq`, and `Eq` (D24, spec §3.8).
+///
+/// A bare closure supports none of the four. This newtype carries
+/// hand-written versions instead of deriving them: `Debug` prints a fixed
+/// placeholder, `Clone` clones the `Arc` (cheap; every clone runs the same
+/// closure), and `PartialEq`/`Eq` compare **identity** — two
+/// `CustomAction`s are equal exactly when they wrap the same closure,
+/// never merely because two different closures compute the same values.
+/// There is no general way to compare closures for behavioral equality, so
+/// identity is the only comparison that is not lying about what it checked.
+#[derive(Clone)]
+pub struct CustomAction(Arc<Closure>);
+
+/// The shape of a caller-supplied action: the decoded value and the
+/// pseudonym key in, the replacement out — the same as [`Action::apply`].
+type Closure = dyn Fn(&str, u64) -> Option<String> + Send + Sync;
+
+impl CustomAction {
+    /// Wrap `f` as a caller-supplied action. [`Action::custom`] is the
+    /// usual way to reach this — `Action::Custom(CustomAction::new(f))`
+    /// spelled out is rarely needed directly.
+    #[must_use]
+    pub fn new(f: impl Fn(&str, u64) -> Option<String> + Send + Sync + 'static) -> CustomAction {
+        CustomAction(Arc::new(f))
+    }
+
+    /// Run the wrapped closure. Same signature and meaning as
+    /// [`Action::apply`]: the decoded value and the pseudonym key in,
+    /// `Some(text)` to write `text` or `None` to leave the leaf as it is,
+    /// out.
+    fn apply(&self, value: &str, key: u64) -> Option<String> {
+        (self.0)(value, key)
+    }
+}
+
+impl fmt::Debug for CustomAction {
+    /// A fixed placeholder. There is nothing truthful to print about an
+    /// opaque closure.
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("CustomAction(..)")
+    }
+}
+
+impl PartialEq for CustomAction {
+    /// Identity, not behavior: `Arc::ptr_eq`. Two closures that compute the
+    /// same values are still unequal here unless they are the same `Arc`.
+    fn eq(&self, other: &Self) -> bool {
+        Arc::ptr_eq(&self.0, &other.0)
+    }
+}
+
+impl Eq for CustomAction {}
 
 #[cfg(test)]
 mod tests {
@@ -359,5 +452,45 @@ mod tests {
         // special-case the boundary.
         assert_eq!(Action::First(0).apply("PATID1234", 0).as_deref(), Some(""));
         assert_eq!(Action::Last(0).apply("PATID1234", 0).as_deref(), Some(""));
+    }
+
+    #[test]
+    fn custom_action_runs_the_callers_closure() {
+        // D24: same signature and meaning as every other action — the
+        // decoded value and the key in, `Some`/`None` out.
+        let shout = Action::custom(|value, _key| Some(value.to_uppercase()));
+        assert_eq!(shout.apply("everywoman", 0).as_deref(), Some("EVERYWOMAN"));
+
+        // `None` leaves the leaf as it is, same as `Keep`.
+        let never = Action::custom(|_value, _key| None);
+        assert_eq!(never.apply("EVERYWOMAN", 0), None);
+
+        // The key reaches the closure, for a real MAC or a per-patient
+        // construction.
+        let echo_key = Action::custom(|_value, key| Some(key.to_string()));
+        assert_eq!(echo_key.apply("x", 42).as_deref(), Some("42"));
+    }
+
+    #[test]
+    fn custom_action_equality_is_identity_not_behavior() {
+        // D24: two closures that compute the same values are still
+        // unequal unless they are the same `Arc` — there is no general way
+        // to compare closures for behavioral equality.
+        let upper = CustomAction::new(|v: &str, _k| Some(v.to_uppercase()));
+        let also_upper = CustomAction::new(|v: &str, _k| Some(v.to_uppercase()));
+        assert_ne!(upper, also_upper, "different closures, even identical ones");
+
+        let cloned = upper.clone();
+        assert_eq!(upper, cloned, "a clone is the same Arc");
+    }
+
+    #[test]
+    fn custom_action_writes_a_placeholder_with_no_file_spelling() {
+        // D24, spec §6.5: `Custom` is the one action Display does not
+        // round-trip through parse, on purpose.
+        let action = Action::custom(|v: &str, _k| Some(v.to_string()));
+        assert_eq!(action.to_string(), "<custom>");
+        assert!(Action::parse("<custom>").is_err());
+        assert!(format!("{action:?}").contains("CustomAction"));
     }
 }

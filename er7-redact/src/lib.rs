@@ -132,7 +132,7 @@ pub mod policy;
 pub mod pseudonym;
 pub mod redact;
 
-pub use crate::action::Action;
+pub use crate::action::{Action, CustomAction};
 pub use crate::policy::{Policy, Posture, Rule, Unrecognised};
 pub use crate::pseudonym::pseudonym;
 pub use crate::redact::{Change, Redactor, Report};

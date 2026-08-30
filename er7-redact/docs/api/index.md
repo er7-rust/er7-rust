@@ -101,15 +101,26 @@ pub enum Action {
     First(usize),
     Last(usize),
     Pseudonym,
+    Custom(CustomAction),
 }
 ```
 
 | Item | Signature | Notes |
 | ---- | --------- | ----- |
 | `redacted` | `fn redacted() -> Action` | `Replace("REDACTED")` |
-| `parse` | `fn parse(text: &str) -> Result<Action, Error>` | the policy file spelling |
+| `custom` | `fn custom(f: impl Fn(&str, u64) -> Option<String> + Send + Sync + 'static) -> Action` | shorthand for `Action::Custom(CustomAction::new(f))` (D24, [spec §3.8](../../spec/03-actions/index.md)) |
+| `parse` | `fn parse(text: &str) -> Result<Action, Error>` | the policy file spelling; never produces `Custom` |
 | `apply` | `fn apply(&self, value: &str, key: u64) -> Option<String>` | on a **decoded** value; `None` means "write nothing" |
-| `Display` | | the policy file spelling |
+| `Display` | | the policy file spelling; `Custom` writes `<custom>`, which does not parse back |
+
+## `CustomAction`
+
+| Item | Signature | Notes |
+| ---- | --------- | ----- |
+| `new` | `fn new(f: impl Fn(&str, u64) -> Option<String> + Send + Sync + 'static) -> CustomAction` | wraps `f` in an `Arc` |
+| `Clone` | | clones the `Arc`; every clone runs the same closure |
+| `PartialEq`, `Eq` | | identity (`Arc::ptr_eq`), not behavior — two different closures are never equal, even if they compute the same values |
+| `Debug` | | a fixed placeholder; there is nothing truthful to print about a closure |
 
 ## `Report` and `Change`
 

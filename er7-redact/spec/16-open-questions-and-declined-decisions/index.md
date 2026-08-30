@@ -52,9 +52,14 @@ in a config file next to the data it protects. The honest posture is
 [§7.3](../07-pseudonyms/index.md) — say what leaks, and say when not to use
 it.
 
-**Revisit when** the key handling is solved, or a caller-supplied action
-([T2](../15-open-tasks/index.md)) makes it the caller's decision, which is
-where it belongs.
+**Partly resolved by [§16.11](#1611-added-a-ninth-action-caller-supplied-d24):**
+a caller who wants HMAC-SHA-256, keyed BLAKE3, or anything else can supply
+it with `Action::custom` instead of waiting for this crate to pick one.
+`Pseudonym` itself is unchanged, and still FNV-1a — that question, and the
+key-in-a-config-file honesty problem above, are about what the *built-in*
+should be, and `Action::custom` does not answer either. **Revisit the
+built-in** when key handling is solved; the caller-side gap this section
+first named is closed.
 
 ## 16.4 Open: an action's argument cannot contain `#`
 
@@ -168,6 +173,52 @@ stops being true for `first`/`last`, which have no meaning applied to a
 substring in the middle of a sentence. Left as it is, and written down,
 so nobody reads two different pseudonyms for the same value and concludes
 the crate has a bug rather than a documented boundary.
+
+## 16.11 Added: a ninth action, caller-supplied [D24]
+
+**Considered.** [§3.1](../03-actions/index.md) states the eight built-in
+actions are closed, and names its own exception clause: a ninth is added
+only with a section here saying why the eight were not enough. This is
+that section.
+
+**Why the eight were not enough.** A real MAC, a lookup table keyed on
+something outside the message, and a date shift with a per-patient offset
+([T5](../15-open-tasks/index.md)) all need to run caller code against the
+decoded value — nothing built in can express "redact this the way *my*
+function says to." [T2](../15-open-tasks/index.md)'s own "why" named all
+three; none is buildable as a closed-enum variant.
+
+**What it cost, and what it did not.** `Action` derives `Debug`, `Clone`,
+`PartialEq`, and `Eq`, none of which a bare closure supports. The
+new variant does not hold one directly — it holds `CustomAction`, a
+newtype around `Arc<dyn Fn(&str, u64) -> Option<String> + Send + Sync>`
+with its own hand-written `Debug` (a fixed placeholder; there is nothing
+truthful to print about an opaque closure), `Clone` (an `Arc` clone, cheap,
+already how [`Pseudonym`'s key](../07-pseudonyms/index.md) is threaded
+through unrelated call sites), and `PartialEq`/`Eq` (identity — two
+`CustomAction`s are equal exactly when they share the same `Arc`, never
+when two closures merely compute the same thing, because there is no
+general way to compare closures for behavioral equality and pretending
+otherwise would be the wrong kind of convenient). `Action` itself keeps
+its ordinary derives unchanged; only `CustomAction` carries the manual
+impls. So the pessimistic framing this task was raised under — "the cost
+is that `Action` stops being `Clone`, `PartialEq`, and `Display`-able in
+the ordinary way" — did not hold: it stayed all three, at the cost of one
+small wrapper type instead.
+
+**`Display` and the policy file are a real, permanent boundary, not a
+temporary gap.** A closure has no textual spelling, so `CustomAction`'s
+`Display` writes a fixed placeholder (`<custom>`) that is not a `#[6.2](../06-policy-file-format/index.md)`
+keyword and cannot be read back — `Action::parse` never produces a
+`Custom`, on purpose, because policy files are reviewed as text and a line
+that cannot be read is not a value a reviewer approved. A rule holding a
+`Custom` action is Rust-API-only; [§6.5](../06-policy-file-format/index.md)
+says what that means for round-tripping.
+
+**Idempotence (D10) is not claimed for it.** The built-in eight are
+idempotent except `Pseudonym`, and that exception is provable because this
+crate wrote all eight. A caller's closure can do anything, including
+something order-dependent; D10 stays a guarantee about the built-ins only.
 
 ---
 

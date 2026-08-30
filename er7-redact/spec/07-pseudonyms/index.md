@@ -82,9 +82,11 @@ reasons, both recorded in
    the data. The honest fix is a managed key, which is an application
    concern.
 
-A caller who needs a real MAC today has to do that pass themselves: walk
-the message with `er7` and write each identifier with
-`Subcomponent::set`, using whatever construction their threat model calls
-for. There is deliberately no `Action` variant that calls back into caller
-code — that is the shape the fix would take, and it is recorded as
-[T2](../15-open-tasks/index.md) rather than guessed at now.
+A caller who needs a real MAC can reach for
+[`Action::custom`](../03-actions/index.md#38-a-caller-supplied-action-d24)
+(D24) rather than walking the message and calling `Subcomponent::set`
+themselves: a rule naming a position with `Action::custom(|value, key|
+...)` runs the caller's own construction at exactly the point `Pseudonym`
+would have run its own. `Pseudonym` itself stays FNV-1a — a caller who
+wants a cryptographic construction supplies one, rather than this crate
+picking a dependency on their behalf.

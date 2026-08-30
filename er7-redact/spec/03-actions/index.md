@@ -6,11 +6,14 @@ numbers (§3.x) are stable and cited from code, tests, and commit messages.
 Implemented in `src/action.rs`.
 
 An action is what happens to a value the policy has selected. There are
-eight, and no more are added without a section in
-[§16](../16-open-questions-and-declined-decisions/index.md) saying why the
-existing eight were not enough.
+eight built in, and no more are added to that closed set without a section
+in [§16](../16-open-questions-and-declined-decisions/index.md) saying why
+the existing eight were not enough. A ninth, [§3.8](#38-a-caller-supplied-action-d24),
+is not part of that set — it is the caller's own code, not a new built-in
+— and [§16.11](../16-open-questions-and-declined-decisions/index.md) is
+the section that admitted it.
 
-## 3.1 The eight actions
+## 3.1 The eight built-in actions
 
 | Action | Spelled | `PATID1234` becomes | Use for |
 | ------ | ------- | ------------------- | ------- |
@@ -101,12 +104,70 @@ every action except `Pseudonym`:
   one. Redact once; if a message must be redacted again, redact the
   original.
 
+This is a guarantee about the eight built-ins, provable because this crate
+wrote all eight. It is not extended to
+[§3.8](#38-a-caller-supplied-action-d24): a caller's own closure can do
+anything, idempotent or not, and that is the caller's decision to make and
+the caller's property to prove.
+
 ## 3.7 Zero counts
 
 `first 0` and `last 0` are legal and equivalent to `clear`. They are not
 rejected: a policy computed from a configuration table should not have to
 special-case the boundary, and the result — no characters kept — is
 unambiguous.
+
+## 3.8 A caller-supplied action [D24]
+
+`Action::Custom(CustomAction)` runs the caller's own function instead of
+one of the eight built-ins — a real MAC, a lookup table keyed on
+something outside the message, a per-patient date shift
+([T5](../15-open-tasks/index.md)). [§16.11](../16-open-questions-and-declined-decisions/index.md)
+is why it exists at all; this section is what it is.
+
+```rust
+pub struct CustomAction(/* private */);
+
+impl CustomAction {
+    pub fn new(f: impl Fn(&str, u64) -> Option<String> + Send + Sync + 'static) -> CustomAction;
+}
+```
+
+`Action::custom(f)` is the usual way to reach it —
+`Action::custom(|value, _key| Some(value.to_uppercase()))` — and is
+shorthand for `Action::Custom(CustomAction::new(f))`.
+
+**Same signature as [`Action::apply`](#32-actions-read-and-write-decoded-values),
+because it runs through the same call.** The closure receives the leaf's
+*decoded* text and the redactor's pseudonym key, and returns the
+replacement the same way every other action does: `Some(text)` to write
+`text`, `None` to leave the leaf as it is. Everything [§3.2](#32-actions-read-and-write-decoded-values)
+says about decoded text and [D11](#35-replacement-text-cannot-corrupt-the-message-d11)'s
+encoding-on-the-way-in applies unchanged — a custom action cannot break
+the message any more than a built-in one can.
+
+**`Action` keeps its ordinary `Debug`, `Clone`, `PartialEq`, and `Eq`.**
+None of the four is meaningful for a bare closure, so `CustomAction`
+carries hand-written versions instead of deriving them:
+
+- `Debug` prints a fixed placeholder. There is nothing truthful to say
+  about an opaque function.
+- `Clone` clones the `Arc` — cheap, and every clone still runs the same
+  closure.
+- `PartialEq`/`Eq` compare **identity**, via `Arc::ptr_eq`: two
+  `CustomAction`s are equal exactly when they wrap the same closure, never
+  merely because two different closures happen to compute the same
+  values. There is no general way to compare closures for behavioral
+  equality, so identity is the only comparison that is not lying.
+
+**No policy-file spelling, on purpose.** `Display` writes `<custom>` — not
+a keyword in [§6.2](../06-policy-file-format/index.md)'s grammar, and not
+readable back by `Action::parse`, which never produces a `Custom` action
+under any input. A policy file is reviewed as text, and a caller-supplied
+closure has no text to review; making `Custom` invisible to `parse` is
+what keeps that promise rather than silently breaking it.
+[§6.5](../06-policy-file-format/index.md) says what this means for a
+policy that holds one.
 
 [`er7::Subcomponent::value`]: https://docs.rs/er7/latest/er7/message/struct.Subcomponent.html#method.value
 [`er7::Subcomponent::set`]: https://docs.rs/er7/latest/er7/message/struct.Subcomponent.html#method.set

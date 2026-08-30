@@ -64,6 +64,13 @@ accept
 Action names are matched **case-insensitively** (`CLEAR` and `clear` are
 the same action); replacement text is taken as written.
 
+**A caller-supplied action ([§3.8](../03-actions/index.md)) has no line
+here, and never will.** `Action::parse` recognises exactly the ten
+spellings above and nothing else — there is no keyword for `Custom`,
+because a closure has no text to spell. A rule built with
+`Action::custom(...)` can only be reached from Rust; it does not exist as
+far as a policy file is concerned.
+
 ## 6.3 The default lines
 
 Four first words are reserved. Each sets one of the policy's defaults
@@ -152,9 +159,18 @@ prevent — so it is caught at load time instead
 ## 6.5 Writing a policy back out
 
 `Policy` implements `Display`, and its output re-parses to an equal
-policy. The canonical form is one rule per line, with the paths padded to a
-common width and at least two spaces before the action; then a blank line;
-then the three default lines, always all three, whatever they say:
+policy — **unless a rule holds a caller-supplied action**
+([§3.8](../03-actions/index.md)), in which case it writes `<custom>` in
+that rule's place and re-parsing fails: `<custom>` is not a keyword
+[§6.2](#62-action-grammar) recognises, on purpose, because there was never
+any text describing what the closure does. `--show-policy`
+([§10](../10-command-line-interface/index.md)) still writes something
+useful for every rule it *can* fully describe, and reports rather than
+panics on the rest — this is exactly what [T2](../15-open-tasks/index.md)'s
+own "done when" asked for. The canonical form is one rule per line, with
+the paths padded to a common width and at least two spaces before the
+action; then a blank line; then the three default lines, always all
+three, whatever they say:
 
 ```
 PID-3  pseudonym

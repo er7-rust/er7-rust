@@ -27,7 +27,7 @@ repository, pasted into a ticket, or fed to a test suite.
 | ---------- | ------- |
 | A policy: an ordered list of rules, each an HL7 path and an action | [§2](../02-redaction-model/index.md) |
 | Two postures: accept by default, or reject by default | [§2.6](../02-redaction-model/index.md) |
-| Eight actions — keep, clear, null, replace, mask, first, last, pseudonym | [§3](../03-actions/index.md) |
+| Eight built-in actions — keep, clear, null, replace, mask, first, last, pseudonym — plus a caller-supplied ninth | [§3](../03-actions/index.md) |
 | Shape preservation, and the absent/empty/null contract | [§4](../04-what-redaction-preserves/index.md) |
 | Four built-in policies, and the curated positions behind two of them | [§5](../05-built-in-policies/index.md) |
 | A line-oriented policy file, readable and writable | [§6](../06-policy-file-format/index.md) |
@@ -56,7 +56,7 @@ A message this crate has redacted is **a message with less in it**, which
 is progress, and is not the same thing as a safe one. See
 [§5.5](../05-built-in-policies/index.md) for how to think about the gap.
 
-## 1.4 Rule index (D1–D23)
+## 1.4 Rule index (D1–D24)
 
 Every behavioural rule the crate guarantees, with a stable ID. Prose,
 tests, code comments, and commit messages cite these. **IDs are never
@@ -88,8 +88,9 @@ test that enforces it.
 | D21 | A payload that is not ER7 is refused, passed through, or acted on whole, as the policy says. | [§2.8](../02-redaction-model/index.md) |
 | D22 | `uncovered` reports every leaf that carries text and is named by no rule, independent of the policy's posture. | [§2.9](../02-redaction-model/index.md) |
 | D23 | A value found at a named position is redacted wherever else it appears, whole-word and case-insensitively, unless `search_known_values` is off. | [§2.10](../02-redaction-model/index.md) |
+| D24 | A caller-supplied action runs the same way a built-in one does; `Action` keeps `Debug`, `Clone`, `PartialEq`, and `Eq`; it has no policy-file spelling. | [§3.8](../03-actions/index.md) |
 
-The next rule ID is **D24**.
+The next rule ID is **D25**.
 
 ## 1.5 Design priorities, in order
 

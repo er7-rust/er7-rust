@@ -10,22 +10,6 @@ archive — and name the `T<n>` in the commit message.
 
 ---
 
-## T2 — A caller-supplied action
-
-**Why.** `Action` is closed, so a real MAC
-([§7.4](../07-pseudonyms/index.md)), a lookup table, or a date shift cannot
-be expressed at all.
-
-**Shape.** A variant holding a boxed function from the decoded value to a
-replacement, plus a decision about what happens to `Clone`, `PartialEq`,
-`Display`, and the policy file format when one is present.
-
-**Done when.** A policy mixing built-in and caller-supplied actions
-redacts correctly, a policy holding one reports rather than panics when
-asked to write itself to a file, and §3 and §6 say what the boundary is.
-
----
-
 ## T5 — Date shifting
 
 **Why.** `first 4` on a birth date destroys the interval between events,

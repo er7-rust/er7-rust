@@ -651,7 +651,7 @@ fn every_rule_has_a_coverage_row() {
     let declared = rule_ids(include_str!("../spec/01-purpose-and-scope/index.md"));
     let covered = rule_ids(include_str!("../spec/11-testing-strategy/index.md"));
 
-    assert_eq!(declared.len(), 23, "§1.4 should index D1–D23");
+    assert_eq!(declared.len(), 24, "§1.4 should index D1–D24");
     let missing: Vec<&String> = declared.iter().filter(|d| !covered.contains(d)).collect();
     assert!(missing.is_empty(), "no row in §11.1 for {missing:?}");
     let orphan: Vec<&String> = covered.iter().filter(|d| !declared.contains(d)).collect();
