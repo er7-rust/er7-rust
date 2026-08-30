@@ -11,7 +11,7 @@ items with a "done when" clause and an ID live in
 
 The shape described by §1–§13 as of the 0.2 release: policies, eight
 actions, the two postures and the four built-ins they come in, the file
-format, pseudonyms, the report, and the CLI. Complete — and, as of 0.3.0,
+format, pseudonyms, the report, and the CLI. Complete — and, as of 0.4.0,
 one action further: D24 added a ninth, caller-supplied one
 ([§3.8](../03-actions/index.md)), which is why §14.2–§14.4 below each
 say "shipped" or "resolved" rather than "now."

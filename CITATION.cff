@@ -51,5 +51,5 @@ license:
 # The workspace has no single version number — three crates version
 # independently on crates.io (see CHANGELOG.md). The version below names
 # all three as of the release date.
-version: 'er7 0.2.1, serde-er7 0.2.0, er7-redact 0.3.0'
-date-released: '2026-08-29'
+version: 'er7 0.2.1, serde-er7 0.2.0, er7-redact 0.4.0'
+date-released: '2026-08-30'

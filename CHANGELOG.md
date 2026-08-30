@@ -15,6 +15,50 @@ raised minimum supported Rust version, which is always a breaking change
 and never lands in a patch
 ([`spec/rust-msrv-n-minus-2/index.md`](spec/rust-msrv-n-minus-2/index.md)).
 
+## 2026-08-30 — `er7-redact` 0.4.0
+
+### Changed
+
+- **Breaking: `Action` gained a ninth variant, `Custom(CustomAction)`.**
+  `Action` is not `#[non_exhaustive]` (spec §13.1 lists adding a variant as
+  breaking), so a caller matching it exhaustively needs a new arm.
+  `Action::custom(f)` is the usual way to reach it: the same signature as
+  `Action::apply` itself (`&str, u64) -> Option<String>`), because it runs
+  through that same call — a rule naming a position with a custom action
+  runs at exactly the point a built-in one would. `CustomAction` is a
+  newtype around `Arc<dyn Fn(&str, u64) -> Option<String> + Send + Sync>`,
+  with hand-written `Debug` (a fixed placeholder — nothing truthful to
+  print about a closure), `Clone` (an `Arc` clone), and `PartialEq`/`Eq`
+  (`Arc::ptr_eq` — identity, not behavior, since there is no general way to
+  compare closures). `Display` writes the fixed placeholder `<custom>`,
+  which is not a §6.2 keyword and does not re-parse to an equal policy — a
+  real, permanent exception to that guarantee, alongside the pre-existing
+  empty-`Replace`/clear one, since a closure has no text to spell.
+  Idempotence (D10) is not claimed for it either: provable for the
+  built-in eight because this crate wrote all eight; a caller's own
+  closure is the caller's property to prove. D24,
+  [`er7-redact` §3.8](er7-redact/spec/03-actions/index.md). Closes T2.
+
+### Added
+
+- **`er7-redact`: `examples/date_shift_with_a_custom_action.rs`.** T5
+  asked for a ninth built-in action — parse an HL7® timestamp, shift it by
+  a per-patient offset derived from the pseudonym key, write it back at
+  the same precision — and was declined as a built-in on the same grounds
+  as pattern matching ([§16.2](er7-redact/spec/16-open-questions-and-declined-decisions/index.md)):
+  it would be the first action whose correctness depends on timestamp
+  *format* knowledge (leap years, variable precision) rather than
+  redaction logic. `Action::custom` (D24, shipped alongside it) answers
+  T5's three open questions for free — where the per-patient key comes
+  from, what happens to an unparseable timestamp, whether parsing a
+  timestamp crosses the "no dictionary knowledge" line — so the example
+  builds the whole thing on published API: a from-scratch
+  proleptic-Gregorian calendar, verified round-trip correct for 146,000
+  consecutive days, and a per-patient offset from this crate's own
+  `pseudonym()`. Documentation only; no API surface changed beyond D24
+  itself.
+  [`er7-redact` §14.4](er7-redact/spec/14-roadmap/index.md).
+
 ## 2026-08-29 — `er7` 0.2.1
 
 Patch: purely additive, no existing signature changed.
