@@ -220,6 +220,58 @@ idempotent except `Pseudonym`, and that exception is provable because this
 crate wrote all eight. A caller's closure can do anything, including
 something order-dependent; D10 stays a guarantee about the built-ins only.
 
+## 16.12 Declined: a built-in date-shift action
+
+**Considered.** [T5](../15-open-tasks/index.md) asked for a ninth action
+that parses an HL7® timestamp, adds a per-patient offset derived from the
+pseudonym key, and writes the result back at the same precision it was
+given — because `first 4` on a birth date keeps the year and destroys
+every interval to the next event, which is what longitudinal test data
+needs.
+
+**Declined as a built-in, resolved by [§3.8](../03-actions/index.md)
+instead.** T5's own open questions turn out to be the same question asked
+three ways, and `Action::custom` (D24) answers all three at once, for
+free:
+
+- *"Whether parsing an HL7 timestamp crosses the line §5.3 draws."*
+  [§5.3](../05-built-in-policies/index.md) allows a table that is
+  explicit and not inferred from a data dictionary; parsing timestamp
+  *syntax* is closer to that than to knowing what a code *means*, but the
+  question does not have to be settled, because the caller's own closure
+  does the parsing — this crate never touches a timestamp either way.
+- *"What happens to a timestamp the action cannot parse."* The caller's
+  closure decides, the same way it decides everything else `Action::custom`
+  runs: `None` to leave it, `Some(String::new())` to clear it.
+- *"Where the per-patient key comes from when the policy is applied to
+  one message at a time."* From the message's own patient identifier,
+  read before the policy for *that* message is built, the same way a
+  caller already reads it to pick a pseudonym key per run. There is
+  nothing this crate could add here: it never sees "the patient" as a
+  concept spanning positions, only one leaf and one key per call.
+
+**What a built-in would have cost, and why that tips it.** Unlike D24
+itself — additive, and the eight built-ins keep meaning exactly what they
+meant — a date-shift built-in would be this crate's first `Action` whose
+correctness depends on HL7 timestamp *format* knowledge (leap years,
+variable precision, an optional degree-of-precision indicator on the wire
+in later releases). That is exactly the kind of scope creep
+[§16.2](#162-declined-pattern-matching) already declined pattern matching
+over, for the same reason: the crate would own a piece of parsing logic
+that has nothing to do with redaction and everything to do with getting
+subtly wrong on a message shaped slightly differently than the one it was
+tested against.
+
+**Done when, reframed.** T5's own bar — "a message's dates shift
+consistently, an unparseable timestamp has a documented outcome" — is met
+by [`examples/date_shift_with_a_custom_action.rs`](../../examples/date_shift_with_a_custom_action.rs):
+a full, tested worked example, including a from-scratch proleptic-Gregorian
+calendar implementation (correct across two centuries, checked day by
+day) and the explicit "same offset for the same patient, independently of
+message order" property. It lives as an example, not in `src/`, precisely
+because it is a demonstration of what `Action::custom` can do, not a
+built-in this crate maintains.
+
 ---
 
 HL7®, and FHIR® are the registered trademarks of Health Level Seven

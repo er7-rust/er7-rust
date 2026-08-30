@@ -69,14 +69,22 @@ never could, since a closure has no text to spell — and that boundary is
 exactly what [§6.5](../06-policy-file-format/index.md) now states rather
 than leaves implicit. Closed [T2](../15-open-tasks/index.md).
 
-## 14.4 Later — date shifting
+## 14.4 Resolved — date shifting, without a built-in
 
 Shifting every date in a message by a per-patient offset preserves
 intervals — the thing `first 4` destroys and the thing longitudinal
 analysis needs. It requires parsing HL7® timestamps, which is dictionary
 knowledge of exactly the kind [§5.3](../05-built-in-policies/index.md) is
 careful about, and it needs the per-patient offset to come from somewhere.
-Worth doing, not worth guessing at. [T5](../15-open-tasks/index.md).
+
+Resolved 2026-08-30, once `Action::custom` (D24,
+[§3.8](../03-actions/index.md)) existed to resolve it into: not a ninth
+built-in, all three of T5's open questions answered by the same
+mechanism, and a full worked example
+(`examples/date_shift_with_a_custom_action.rs`) rather than a promise this
+crate would parse a timestamp correctly forever.
+[§16.12](../16-open-questions-and-declined-decisions/index.md) is the
+decision; closed [T5](../15-open-tasks/index.md).
 
 ## 14.5 Shipped — a redaction check
 

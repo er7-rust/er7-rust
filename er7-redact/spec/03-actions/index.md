@@ -169,6 +169,16 @@ what keeps that promise rather than silently breaking it.
 [§6.5](../06-policy-file-format/index.md) says what this means for a
 policy that holds one.
 
+**A worked example: date shifting.** `first 4` on a birth date keeps the
+year and destroys the interval to the next event, which longitudinal test
+data needs intact. `Action::custom` shifts every date in a message by a
+per-patient offset instead, computed from the message's own patient
+identifier before the policy for that message is built — a full,
+independently tested worked example is
+[`examples/date_shift_with_a_custom_action.rs`](../../examples/date_shift_with_a_custom_action.rs).
+It is not a ninth built-in, and
+[§16.12](../16-open-questions-and-declined-decisions/index.md) says why.
+
 [`er7::Subcomponent::value`]: https://docs.rs/er7/latest/er7/message/struct.Subcomponent.html#method.value
 [`er7::Subcomponent::set`]: https://docs.rs/er7/latest/er7/message/struct.Subcomponent.html#method.set
 
