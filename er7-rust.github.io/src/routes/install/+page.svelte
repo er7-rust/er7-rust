@@ -1,9 +1,12 @@
 <script lang="ts">
   import { links, version } from '$lib/site';
+  import type { PageData } from './$types';
+
+  let { data }: { data: PageData } = $props();
 </script>
 
 <svelte:head>
-  <title>Install — er7</title>
+  <title>{data.title}</title>
   <meta
     name="description"
     content="Install er7, er7-redact, and serde-er7: the command-line tools, the libraries, building from source, the requirements, and how to verify the install."

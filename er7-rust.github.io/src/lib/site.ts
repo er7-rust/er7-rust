@@ -6,6 +6,8 @@
  * is one edit.
  */
 
+import type { ShareTarget } from 'lily-design-system-svelte-share-picker';
+
 /** Where the crate lives. */
 export const links = {
   repository: 'https://github.com/er7-rust/er7-rust',
@@ -17,6 +19,55 @@ export const links = {
 
 /** The crate version this site documents. */
 export const version = '0.2.1';
+
+/**
+ * The header ThemePicker's catalog, attribute-based
+ * (`:root[data-theme="…"]`, set by the package on `<html>`) and built for
+ * more than the two entries listed today. Adding a third theme touches
+ * four places, all named in AGENTS.md's "Header controls": this array,
+ * a `static/assets/themes/<slug>.css` file scoping its `--lily-*`
+ * overrides to `:root[data-theme="<slug>"]`, a preload `<link>` in
+ * `src/app.html`, and that same file's inline no-flash script, which
+ * validates a stored value against the known slugs by name.
+ */
+export const themes = ['light', 'dark'] as const;
+
+export type Theme = (typeof themes)[number];
+
+/**
+ * The header SharePicker's destinations. `href` builds each network's own
+ * share-intent URL from the shared page's `url` and `title` — this
+ * package ships no endpoints of its own (see its README's "you supply the
+ * destinations"), so the four below are this project's own choice, not
+ * Lily's. A destination link does not imply this project has an account
+ * on that network; it only gives a visitor one.
+ */
+export const shareTargets: ShareTarget[] = [
+  {
+    id: 'linkedin',
+    label: 'LinkedIn',
+    href: (url) => `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`
+  },
+  {
+    id: 'mastodon',
+    label: 'Mastodon',
+    // mastodon.social's own /share redirects to the visitor's own
+    // instance if they are not signed in there — the standard pattern
+    // for a protocol with no single central share endpoint.
+    href: (url, title) => `https://mastodon.social/share?text=${encodeURIComponent(`${title} ${url}`)}`
+  },
+  {
+    id: 'bluesky',
+    label: 'Bluesky',
+    href: (url, title) => `https://bsky.app/intent/compose?text=${encodeURIComponent(`${title} ${url}`)}`
+  },
+  {
+    id: 'reddit',
+    label: 'Reddit',
+    href: (url, title) =>
+      `https://www.reddit.com/submit?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`
+  }
+];
 
 export type NavLink = { href: string; label: string };
 

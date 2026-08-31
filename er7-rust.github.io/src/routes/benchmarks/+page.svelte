@@ -1,5 +1,8 @@
 <script lang="ts">
   import { links } from '$lib/site';
+  import type { PageData } from './$types';
+
+  let { data }: { data: PageData } = $props();
 
   // Measured 2026-08-26 on an Apple M4 Max, macOS 26.6.1, rustc 1.98.0,
   // aarch64-apple-darwin, release profile. Criterion, 100 samples each; the
@@ -38,7 +41,7 @@
 </script>
 
 <svelte:head>
-  <title>Benchmarks — er7</title>
+  <title>{data.title}</title>
   <meta
     name="description"
     content="Measured figures for parsing, writing, escaping, and querying HL7® v2 messages in ER7 — with the machine, the toolchain, the confidence intervals, and how not to read them."

@@ -1,5 +1,8 @@
 <script lang="ts">
   import { links } from '$lib/site';
+  import type { PageData } from './$types';
+
+  let { data }: { data: PageData } = $props();
 
   const boilerplate = `ER7 Rust is an open-source Cargo workspace of three Rust crates for
 HL7® v2 messages in the ER7 pipe-hat encoding: er7 parses, queries, edits,
@@ -12,7 +15,7 @@ Henderson. https://er7-rust.github.io`;
 </script>
 
 <svelte:head>
-  <title>News — er7</title>
+  <title>{data.title}</title>
   <meta
     name="description"
     content="Announcements, project status, where updates appear, and press contacts for the ER7 Rust crate family."

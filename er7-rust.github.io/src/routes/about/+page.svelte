@@ -1,5 +1,8 @@
 <script lang="ts">
   import { links, version } from '$lib/site';
+  import type { PageData } from './$types';
+
+  let { data }: { data: PageData } = $props();
 
   const citation = `@software{henderson_er7,
   author  = {Henderson, Joel Parker},
@@ -11,7 +14,7 @@
 </script>
 
 <svelte:head>
-  <title>About — er7</title>
+  <title>{data.title}</title>
   <meta
     name="description"
     content="About the er7 crate: who maintains it, how it is licensed, how to contribute, and how it is built and documented."

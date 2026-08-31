@@ -1,9 +1,12 @@
 <script lang="ts">
   import { crates } from '$lib/site';
+  import type { PageData } from './$types';
+
+  let { data }: { data: PageData } = $props();
 </script>
 
 <svelte:head>
-  <title>Ecosystem — er7</title>
+  <title>{data.title}</title>
   <meta
     name="description"
     content="The crate family: er7 for the ER7 encoding, er7-redact and serde-er7 as tools on top of it, and hl7-2-from-er7-into-xml and hl7-2-from-er7-into-json for the HL7® v2.5 dictionary layer."

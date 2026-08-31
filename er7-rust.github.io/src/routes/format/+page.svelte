@@ -1,4 +1,8 @@
 <script lang="ts">
+  import type { PageData } from './$types';
+
+  let { data }: { data: PageData } = $props();
+
   const hierarchy = [
     { level: 'message', sep: '—', example: 'the whole text' },
     { level: 'segment', sep: 'carriage return', example: 'PID|1||444333222...' },
@@ -20,7 +24,7 @@
 </script>
 
 <svelte:head>
-  <title>The ER7 format — er7</title>
+  <title>{data.title}</title>
   <meta
     name="description"
     content="What ER7 is: the pipe-hat text encoding for HL7® v2 messages. Hierarchy, delimiters, the explicit null, escape sequences, batch files, and why it persists."

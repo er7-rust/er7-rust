@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import { links, navLinks } from '$lib/site';
+  import { links, navLinks, themes, shareTargets } from '$lib/site';
   import ThemePicker from 'lily-design-system-svelte-theme-picker';
   import TextSizePicker from 'lily-design-system-svelte-text-size-picker';
   import SharePicker from 'lily-design-system-svelte-share-picker';
@@ -14,10 +14,24 @@
   let theme = $state('');
   let textSize = $state('');
 
-  // No destinations: this project has no social account (see NEWS.md,
-  // "Where updates appear") and makes no third-party requests
-  // (spec/index.md §6), so SharePicker offers only the OS native share
-  // sheet where one exists, and copy-the-URL everywhere else.
+  // page.data.title convention: every route's +page.ts sets `title` via
+  // its load function (the same string its own <svelte:head><title>
+  // reads, so the two cannot drift), and page.data — the merged data of
+  // every load function on the current route — carries it up here. The
+  // fallback only matters for a route that has not adopted the
+  // convention yet; every route in this repository has.
+  let shareTitle = $derived(
+    (page.data as { title?: string }).title ??
+      'er7 — HL7® v2 messages in the ER7 pipe-hat encoding, in Rust'
+  );
+
+  // Four destinations, chosen deliberately, not exhaustively: LinkedIn,
+  // Mastodon, Bluesky, Reddit. A share link does not require this project
+  // to have an account there itself — see AGENTS.md's "Header controls"
+  // — and it is not a third-party *request*: it is a plain <a href> the
+  // visitor chooses to follow, the same as the GitHub/crates.io/docs.rs
+  // links already in this file's footer, so spec/index.md §6's "no
+  // third-party requests" is unaffected.
 </script>
 
 <a class="skip-link" href="#main">Skip to main content</a>
@@ -45,15 +59,15 @@
       <ThemePicker
         label="Theme"
         themesUrl="/assets/themes/"
-        themes={['light', 'dark']}
+        themes={[...themes]}
         bind:value={theme}
         storageKey="lily-theme"
         detectFromSystem
       />
       <SharePicker
         label="Share this page"
-        title="er7: HL7® v2 in the ER7 pipe-hat encoding, in Rust"
-        targets={[]}
+        title={shareTitle}
+        targets={shareTargets}
         copyLabel="Copy link"
         copiedLabel="Link copied"
         copyFailedLabel="Could not copy — copy it from the address bar"

@@ -1,5 +1,8 @@
 <script lang="ts">
   import { links } from '$lib/site';
+  import type { PageData } from './$types';
+
+  let { data }: { data: PageData } = $props();
 
   const questions = [
     {
@@ -81,7 +84,7 @@
 </script>
 
 <svelte:head>
-  <title>Request for comments — er7</title>
+  <title>{data.title}</title>
   <meta
     name="description"
     content="The specific feedback the ER7 Rust project is asking for: fourteen open questions, each recorded in a specification section, each with a decision a good answer would change."

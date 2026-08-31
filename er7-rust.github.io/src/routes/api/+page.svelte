@@ -1,5 +1,8 @@
 <script lang="ts">
   import { links } from '$lib/site';
+  import type { PageData } from './$types';
+
+  let { data }: { data: PageData } = $props();
 
   const entries = [
     { item: 'er7::parse', sig: 'fn(&str) -> Result<Message, Error>', note: 'needs an MSH/FHS/BHS header' },
@@ -36,7 +39,7 @@ Subcomponent { raw: String }`;
 </script>
 
 <svelte:head>
-  <title>API surface — er7</title>
+  <title>{data.title}</title>
   <meta
     name="description"
     content="The complete public API of the er7 crate: entry points, the six-level value tree, accessors, configuration, escape sequences, and errors."

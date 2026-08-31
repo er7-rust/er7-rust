@@ -1,9 +1,12 @@
 <script lang="ts">
   import { links } from '$lib/site';
+  import type { PageData } from './$types';
+
+  let { data }: { data: PageData } = $props();
 </script>
 
 <svelte:head>
-  <title>Security — er7</title>
+  <title>{data.title}</title>
   <meta
     name="description"
     content="The security policy for the ER7 Rust crates: how to report a vulnerability, what is in scope, what is honestly promised, and what the project does not have."

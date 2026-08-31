@@ -1,5 +1,8 @@
 <script lang="ts">
   import { crates } from '$lib/site';
+  import type { PageData } from './$types';
+
+  let { data }: { data: PageData } = $props();
 
   const crate = crates.find((c) => c.name === 'serde-er7')!;
 
@@ -22,7 +25,7 @@
 </script>
 
 <svelte:head>
-  <title>serde-er7 — Serde support for the ER7 message tree</title>
+  <title>{data.title}</title>
   <meta
     name="description"
     content="Tutorial, help, and examples for serde-er7: Serialize and Deserialize implementations for every er7 type, so an HL7® v2 message tree can flow through JSON, YAML, or any Serde format."

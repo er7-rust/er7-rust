@@ -1,9 +1,12 @@
 <script lang="ts">
   import { links } from '$lib/site';
+  import type { PageData } from './$types';
+
+  let { data }: { data: PageData } = $props();
 </script>
 
 <svelte:head>
-  <title>Agent skills — er7</title>
+  <title>{data.title}</title>
   <meta
     name="description"
     content="Two packaged Claude Code Skills for the er7-rust crate family: er7-skill for using er7, er7-redact, and serde-er7 correctly, and er7-rust-maintainer-skill for changing this repository itself."

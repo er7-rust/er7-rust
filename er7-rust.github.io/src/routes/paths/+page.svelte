@@ -1,4 +1,8 @@
 <script lang="ts">
+  import type { PageData } from './$types';
+
+  let { data }: { data: PageData } = $props();
+
   const levels = [
     { path: 'PID', names: 'every PID segment, whole', result: 'PID|1||9|4|SMITH^JOHN^Q' },
     { path: 'PID-5', names: 'field 5', result: 'SMITH^JOHN^Q' },
@@ -39,10 +43,10 @@
 </script>
 
 <svelte:head>
-  <title>HL7® paths — er7</title>
+  <title>{data.title}</title>
   <meta
     name="description"
-    content="The HL7 path notation used to name one place in a message: PID-5.1, OBX[2]-5, PID-13[2].1. Grammar, occurrence indices, and the four query methods."
+    content="The HL7® path notation used to name one place in a message: PID-5.1, OBX[2]-5, PID-13[2].1. Grammar, occurrence indices, and the four query methods."
   />
 </svelte:head>
 

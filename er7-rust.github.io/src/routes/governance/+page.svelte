@@ -1,9 +1,12 @@
 <script lang="ts">
   import { links } from '$lib/site';
+  import type { PageData } from './$types';
+
+  let { data }: { data: PageData } = $props();
 </script>
 
 <svelte:head>
-  <title>Governance — er7</title>
+  <title>{data.title}</title>
   <meta
     name="description"
     content="How decisions about the ER7 Rust crates get made and recorded: one maintainer, a canonical specification, recorded declines, and forking as legitimate continuity."

@@ -1,5 +1,8 @@
 <script lang="ts">
   import { links, version } from '$lib/site';
+  import type { PageData } from './$types';
+
+  let { data }: { data: PageData } = $props();
 
   const outline = `MSH-1       |
 MSH-2       ^~\\&
@@ -30,10 +33,10 @@ assert_eq!(message.to_er7(), text);`;
 </script>
 
 <svelte:head>
-  <title>er7 — HL7® v2 messages in the ER7 pipe-hat encoding, in Rust</title>
+  <title>{data.title}</title>
   <meta
     name="description"
-    content="A Rust crate and command-line tool to parse, query, edit, and write HL7 v2 messages in the ER7 pipe-hat encoding. Byte-for-byte round trip, zero dependencies."
+    content="A Rust crate and command-line tool to parse, query, edit, and write HL7® v2 messages in the ER7 pipe-hat encoding. Byte-for-byte round trip, zero dependencies."
   />
 </svelte:head>
 

@@ -1,4 +1,8 @@
 <script lang="ts">
+  import type { PageData } from './$types';
+
+  let { data }: { data: PageData } = $props();
+
   type Row = { sequence: string; meaning: string; decoded: boolean };
 
   const sequences: Row[] = [
@@ -33,7 +37,7 @@
 </script>
 
 <svelte:head>
-  <title>Escape sequences — er7</title>
+  <title>{data.title}</title>
   <meta
     name="description"
     content="How an ER7 value carries characters that would otherwise be read as structure — and which sequences this crate deliberately leaves alone."

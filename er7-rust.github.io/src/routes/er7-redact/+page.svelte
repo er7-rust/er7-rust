@@ -1,5 +1,8 @@
 <script lang="ts">
   import { crates } from '$lib/site';
+  import type { PageData } from './$types';
+
+  let { data }: { data: PageData } = $props();
 
   const crate = crates.find((c) => c.name === 'er7-redact')!;
 
@@ -42,7 +45,7 @@
 </script>
 
 <svelte:head>
-  <title>er7-redact — remove patient detail without breaking the message</title>
+  <title>{data.title}</title>
   <meta
     name="description"
     content="Tutorial, help, and examples for er7-redact: redact HL7 v2 messages in the ER7 encoding with a policy of paths and actions, stable pseudonyms, and a report of every position changed."

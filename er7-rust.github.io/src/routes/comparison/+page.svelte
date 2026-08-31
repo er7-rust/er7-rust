@@ -1,5 +1,8 @@
 <script lang="ts">
   import { links } from '$lib/site';
+  import type { PageData } from './$types';
+
+  let { data }: { data: PageData } = $props();
 
   // crates.io figures, read from its API on 2026-08-26. Recorded as context,
   // not as a ranking: an older crate has had longer to accumulate downloads.
@@ -44,7 +47,7 @@
 </script>
 
 <svelte:head>
-  <title>Comparison — er7</title>
+  <title>{data.title}</title>
   <meta
     name="description"
     content="How er7 compares to interface engines, HAPI and the mature libraries, the other Rust HL7 crates, and hand-rolled pipe splitting — including when to choose one of those instead."

@@ -1,4 +1,8 @@
 <script lang="ts">
+  import type { PageData } from './$types';
+
+  let { data }: { data: PageData } = $props();
+
   const options = [
     { flag: '-q, --query <PATH>', effect: 'Print the values at an HL7® path, one per line. May be repeated; outputs appear in the order the options were given.' },
     { flag: '-n, --normalize', effect: 'Rewrite the input as canonical ER7, with a trailing terminator on every message.' },
@@ -22,7 +26,7 @@ OBX[2]-3.2  Triglycerides`;
 </script>
 
 <svelte:head>
-  <title>Command line — er7</title>
+  <title>{data.title}</title>
   <meta
     name="description"
     content="The er7 command-line tool: outline every value with its HL7 path, query by path, or rewrite a message as canonical ER7."

@@ -1,9 +1,12 @@
 <script lang="ts">
   import { links } from '$lib/site';
+  import type { PageData } from './$types';
+
+  let { data }: { data: PageData } = $props();
 </script>
 
 <svelte:head>
-  <title>Maintainers — er7</title>
+  <title>{data.title}</title>
   <meta
     name="description"
     content="The maintainer roster for the ER7 Rust crates, the stated bus factor of one, and what happens if the person who can ship a fix is unavailable."

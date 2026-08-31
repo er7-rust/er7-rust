@@ -1,9 +1,12 @@
 <script lang="ts">
   import { links } from '$lib/site';
+  import type { PageData } from './$types';
+
+  let { data }: { data: PageData } = $props();
 </script>
 
 <svelte:head>
-  <title>Trademarks — er7</title>
+  <title>{data.title}</title>
   <meta
     name="description"
     content="The trademark notice for the ER7 Rust crate family: whose marks these are, how they are used here under fair use, and what this project does not claim."

@@ -118,30 +118,50 @@ listbox (verify against the installed package's own
 still describes a native `<select>` from an earlier version; 0.1.1
 actually ships the same button-plus-listbox markup as the other two).
 
-- **Theme.** `themesUrl="/assets/themes/"`, `themes={['light', 'dark']}`,
-  `storageKey="lily-theme"`, `detectFromSystem`. `static/assets/themes/
-  light.css` and `dark.css` each scope their `--lily-*` overrides to
-  `:root[data-theme="…"]`; `src/app.html` preloads both (so switching is
-  instant, no per-switch fetch) and runs a small inline script, before the
-  stylesheet link, that resolves `data-theme` synchronously from storage
-  or `prefers-color-scheme` — matching the picker's own resolution order —
-  so there is no flash of the light default on a dark-preferring visit.
-  Two of Lily's own (unedited) rules hardcode a light-only background tint
-  (`#eef2ff`, in `.tag`, `.site-nav a[aria-current="page"]`, and
-  `.button-secondary:hover`) rather than a token; overridden for
-  `data-theme="dark"` in the additions block rather than in Lily's rules,
-  per the invariant above.
+- **Theme.** Attribute-based, and built for a multi-stylesheet catalog,
+  not just the two entries it ships with today. `themesUrl="/assets/themes/"`,
+  `themes={[...themes]}` (from `src/lib/site.ts`, the one place the
+  catalog is listed — see its own doc comment for the four places adding
+  a theme touches), `storageKey="lily-theme"`, `detectFromSystem`.
+  `static/assets/themes/light.css` and `dark.css` each scope their
+  `--lily-*` overrides to `:root[data-theme="…"]`; `src/app.html` preloads
+  both (so switching is instant, no per-switch fetch) and runs a small
+  inline script, before the stylesheet link, that resolves `data-theme`
+  synchronously from storage or `prefers-color-scheme` — matching the
+  picker's own resolution order — so there is no flash of the light
+  default on a dark-preferring visit. Two of Lily's own (unedited) rules
+  hardcode a light-only background tint (`#eef2ff`, in `.tag`,
+  `.site-nav a[aria-current="page"]`, and `.button-secondary:hover`)
+  rather than a token; overridden for `data-theme="dark"` in the
+  additions block rather than in Lily's rules, per the invariant above.
 - **Text size.** `sizes={['small', 'medium', 'large', 'x-large']}`,
   `storageKey="lily-text-size"`. Sets `data-text-size` on `<html>`; the
   additions block maps each slug to a `font-size` on `:root`.
-- **Share.** `targets={[]}` — deliberately: this project has no social
-  account (`NEWS.md`, "Where updates appear") and makes no third-party
-  requests (`spec/index.md` §6), so the native share sheet and
-  copy-the-URL are the only paths offered, never a third-party endpoint.
+- **Share.** `title={shareTitle}` reads the page.data.title convention
+  below (never a fixed string); `targets={shareTargets}`
+  (`src/lib/site.ts`) is four networks — LinkedIn, Mastodon, Bluesky,
+  Reddit — chosen deliberately, not exhaustively. Each `href` builds that
+  network's own share-intent URL from `url`/`title`; the package ships no
+  endpoints of its own (see its README). A share link does not put this
+  project on that network — it gives a visitor one path there — and it is
+  not a third-party *request*: a plain `<a href>` the visitor chooses to
+  follow, no different from the GitHub/crates.io/docs.rs links already in
+  this file's footer, so `spec/index.md` §6's "no third-party requests"
+  still holds.
 
 All three ship zero CSS by design (Lily is headless); every rule for them
 lives in the additions block, built from `--lily-*` tokens like every
 other addition.
+
+## page.data.title convention
+
+Every route's `+page.ts` sets `title` via its `load` function — see
+"Adding a route" above for the exact shape. `+page.svelte` reads it back
+as `{data.title}` in `<svelte:head>`; `+layout.svelte` reads the same
+value from `page.data.title` (with a home-page-title fallback, for a
+route that has not adopted the convention — none currently haven't) and
+passes it to the SharePicker above. One string, read in two places,
+never duplicated into two that can drift.
 
 ## Checks
 
@@ -159,19 +179,41 @@ silence it; add the missing page, or fix the link.
 
 ## Adding a route
 
-Four edits, all required:
+Five edits, all required:
 
-1. `src/routes/<name>/+page.svelte` — the page, with a `<svelte:head>`
-   holding a `<title>` and a `<meta name="description">`.
-2. A link in `+layout.svelte`: a `navLinks` entry in `src/lib/site.ts` for
+1. `src/routes/<name>/+page.ts` — `export const load: PageLoad = () => ({
+   title: '…' })`. This is the **page.data.title convention**: the one
+   place a route's title is written down. `+page.svelte`'s
+   `<svelte:head>` reads it back as `{data.title}` rather than repeating
+   the string, and `+layout.svelte` reads the same value from
+   `page.data.title` for the header's SharePicker — one string, never two
+   that can drift. Every route has one; there is no route without a
+   title.
+2. `src/routes/<name>/+page.svelte` — the page. Its script block starts
+   `import type { PageData } from './$types';` then
+   `let { data }: { data: PageData } = $props();`, before any other
+   import or const. `<svelte:head>` holds `<title>{data.title}</title>`
+   and a `<meta name="description">` (this one still hand-written per
+   page — only the title is shared).
+3. A link in `+layout.svelte`: a `navLinks` entry in `src/lib/site.ts` for
    a main-navigation page, or a hard-coded link in the footer's own link
    list for a governance/outreach/agent-facing page that does not belong
    in the main nav (the pattern every route under §3.1.1 of
    [`spec/index.md`](spec/index.md) already follows — `security`,
    `governance`, `maintainers`, `rfc`, `ai-statement`, `trademarks`,
    `news`, `agent-skill`).
-3. `static/sitemap.xml` — a `<url>` entry.
-4. `index.md` and `spec/index.md` — a row in the routes table.
+4. `static/sitemap.xml` — a `<url>` entry.
+5. `index.md` and `spec/index.md` — a row in the routes table.
+
+A trademark trap worth naming: if a route's title carries a mark's first
+use (e.g. `paths`'s "HL7® paths — er7"), that ® lives in `+page.ts` now,
+not `+page.svelte` — `bin/check-trademarks` scans per file, so a page
+whose *next* "HL7" mention (typically the `<meta name="description">`)
+has no ® of its own will fail, even though the rendered page's real first
+use (the `<title>`, which the browser paints before the meta tag) is
+covered. Give that next mention its own ® rather than relying on the
+title in the other file to cover it — `/` and `/paths/` both needed this
+fix when the convention landed.
 
 ## Adding a subproject
 
@@ -213,3 +255,9 @@ dates, facility names, and identifier formats.
   ships no tracking and makes no third-party requests.
 - **Duplicating the rustdoc.** `/api/` is a map with links to
   <https://docs.rs/er7>; it is not a substitute for it.
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.
