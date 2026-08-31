@@ -128,14 +128,32 @@ dark theme.
 
 ## Deployment
 
-GitHub Actions builds and deploys on every push to `main`
-(`.github/workflows/deploy.yml`). The repository is named
-`er7-rust.github.io` under the `er7-rust` organization, so the site is
-served from the **domain root** — which is why `svelte.config.js` sets no
-`paths.base`. A project-pages repository would need one.
+Two pushes, not one — a push to *this* monorepo's `main` does not, by
+itself, deploy anything. `make publish`, from the monorepo root, does
+both in the right order and refuses to run from a dirty tree or a branch
+other than `main`:
 
-One-time setup in the repository settings: **Settings → Pages → Source →
-GitHub Actions**.
+1. `git push origin main` — the monorepo itself.
+2. `git subtree push --prefix=er7-rust.github.io site main` — **this
+   directory's own history, exported to a separate, read-only
+   repository**, `github.com/er7-rust/er7-rust.github.io` (the `site` git
+   remote). Policy: [`spec/monorepo-github-pages/index.md`](../spec/monorepo-github-pages/index.md).
+   Never edit that sibling repository directly; a change made there is
+   overwritten by the next `make publish`. `make publish` also reports
+   whether the site actually changed, rather than always claiming a
+   deploy started.
+
+That second push is what triggers the deploy: GitHub Actions builds and
+deploys on every push to *that* repository's `main`
+(`.github/workflows/deploy.yml`, which lives at this directory's own root
+and so becomes the sibling repo's root workflow once exported). The
+repository is named `er7-rust.github.io` under the `er7-rust`
+organization, so the site is served from the **domain root** — which is
+why `svelte.config.js` sets no `paths.base`. A project-pages repository
+would need one.
+
+One-time setup in the sibling repository's settings: **Settings → Pages
+→ Source → GitHub Actions**.
 
 ## Editing content
 

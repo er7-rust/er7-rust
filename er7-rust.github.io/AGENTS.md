@@ -16,7 +16,7 @@ See [`index.md`](index.md) for the human-oriented overview, and
 | Stack | SvelteKit 2 + Svelte 5 (runes), `@sveltejs/adapter-static`, TypeScript |
 | Design system | Lily Design System™ |
 | Package manager | pnpm |
-| Deploy | GitHub Actions → GitHub Pages, on push to `main` |
+| Deploy | `make publish` (from the monorepo root; `git subtree push`) exports this directory to the sibling `er7-rust/er7-rust.github.io` repo; GitHub Actions there builds and deploys on push to *its* `main` — [`index.md`](index.md)'s "Deployment" section, policy in [`spec/monorepo-github-pages/index.md`](../spec/monorepo-github-pages/index.md) |
 | Crate repositories | https://github.com/er7-rust — `er7`, `er7-redact`, `serde-er7` |
 | Maintainer | Joel Parker Henderson — joel@joelparkerhenderson.com |
 

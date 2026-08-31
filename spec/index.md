@@ -32,6 +32,7 @@ specific crate does.
 | [§10 `llms.json` and `llms.txt`](llms-json-and-llms-txt/index.md) | Curated, machine-readable maps for a language model to read without crawling: repo-relative at the workspace root, absolute-URL at the published site's own root |
 | [§11 Agent skills](agent-skills/index.md) | The two packaged Claude Code Skills published as top-level folders, one per audience — `er7-skill` for using the crates, `er7-rust-maintainer-skill` for changing this repository — and why they are two, not one |
 | [§12 Node current version](node-current-version/index.md) | The Node.js floor for `er7-rust.github.io`, the only JavaScript project in this workspace — pinned to the current major release wherever a file already names one: CI, `package.json`'s `engines`, and local dev tool-version files |
+| [§13 Monorepo GitHub Pages](monorepo-github-pages/index.md) | How `er7-rust.github.io/`, a subdirectory of this monorepo, reaches the separate, read-only `er7-rust/er7-rust.github.io` repository that actually serves the live site — `make publish`'s `git subtree push`, never hand-edited in the sibling repo directly |
 
 ## What belongs here vs. in a crate's own spec
 
