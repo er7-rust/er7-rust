@@ -62,12 +62,14 @@ src/app.html               Document shell; loads the stylesheet
 src/lib/site.ts            Navigation, external links, crate family, version
 src/routes/+layout.svelte  Header, nav, footer
 src/routes/+layout.ts      prerender = true, trailingSlash = 'always'
+src/routes/*/+page.ts      load() returns { title } — page.data.title convention
 src/routes/*/+page.svelte  One page per route
 static/assets/style.css    Lily base + an "er7 additions" block
 static/assets/themes/      light.css, dark.css — ThemePicker's catalog
 static/.nojekyll           Stops Pages running Jekyll over the output
 static/sitemap.xml         Must stay in step with the routes
-.github/workflows/deploy.yml  Build, type-check, deploy
+.tool-versions             Pins Node for local dev (mise/asdf); matches deploy.yml
+.github/workflows/deploy.yml  Build, type-check, deploy — Node 26
 ```
 
 ## Working conventions

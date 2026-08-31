@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "description": "Public site for the er7 Rust crate, built with SvelteKit and the Lily Design System",
+  "engines": {
+    "node": ">=26"
+  },
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
