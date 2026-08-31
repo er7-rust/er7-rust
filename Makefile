@@ -21,34 +21,14 @@ help:
 check-trademarks:
 	@bin/check-trademarks
 
-# The guards cover the two ways this goes wrong. A dirty tree means the
-# subtree split would publish something older than what is on disk, silently.
-# A branch other than main means the split has no relationship to the site
-# repository's main, and the push is rejected after the monorepo push has
-# already happened.
-#
 # The remote is named github-pages (git@github.com:er7-rust/er7-rust.github.io.git),
 # matching the sibling repositories' own convention rather than this one's
-# former idiosyncratic "site" — `git subtree push --prefix=er7-rust.github.io
-# github-pages main` is the operative line; everything else here is the
-# guards and the push-origin-first step that line alone doesn't give you.
+# former idiosyncratic "site". The guards (dirty tree, branch other than
+# main) and the push-origin-first step live in the script, not here —
+# see bin/make-github-pages for the reasoning.
 .PHONY: github-pages
 github-pages:
-	@test -z "$$(git status --porcelain)" || { \
-		echo 'github-pages: working tree is dirty, commit first'; git status --short; exit 1; }
-	@test "$$(git rev-parse --abbrev-ref HEAD)" = main || { \
-		echo "github-pages: on $$(git rev-parse --abbrev-ref HEAD), not main"; exit 1; }
-	git push origin main
-	@git fetch -q github-pages main
-	@before=$$(git rev-parse github-pages/main); \
-	git subtree push --prefix=$(SITE) github-pages main; \
-	git fetch -q github-pages main; \
-	if [ "$$before" = "$$(git rev-parse github-pages/main)" ]; then \
-		echo; echo 'Site unchanged; nothing to deploy.'; \
-	else \
-		echo; echo 'Pages is building. Watch it with:'; \
-		echo '  gh run watch $$(gh run list -R er7-rust/$(SITE) -L1 --json databaseId --jq ".[0].databaseId") -R er7-rust/$(SITE)'; \
-	fi
+	@bin/make-github-pages
 
 # Kept as an alias: every doc written before this target's rename
 # (CHANGELOG.md, MAINTAINERS.md, tasks.md, CONTRIBUTING.md) says

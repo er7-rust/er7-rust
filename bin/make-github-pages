@@ -1,0 +1,45 @@
+#!/bin/sh
+# Publish er7-rust.github.io/ to the sibling, read-only er7-rust.github.io
+# repository (the github-pages git remote), whose own workflow builds and
+# deploys it. Policy: spec/monorepo-github-pages/index.md. Invoked by
+# `make github-pages` (or `make publish`, kept as an alias) — not meant to
+# be run from anywhere but the monorepo root, and not meant to replace
+# the Makefile target's job of being the documented entry point.
+#
+# The guards cover the two ways this goes wrong. A dirty tree means the
+# subtree push would publish something older than what is on disk,
+# silently. A branch other than main means the push has no relationship
+# to the site repository's main, and would be rejected after the
+# monorepo push has already happened.
+
+set -eu
+
+SITE=er7-rust.github.io
+REMOTE=github-pages
+
+if [ -n "$(git status --porcelain)" ]; then
+	echo 'make-github-pages: working tree is dirty, commit first' >&2
+	git status --short >&2
+	exit 1
+fi
+
+branch=$(git rev-parse --abbrev-ref HEAD)
+if [ "$branch" != main ]; then
+	echo "make-github-pages: on $branch, not main" >&2
+	exit 1
+fi
+
+git push origin main
+git fetch -q "$REMOTE" main
+before=$(git rev-parse "$REMOTE/main")
+git subtree push --prefix="$SITE" "$REMOTE" main
+git fetch -q "$REMOTE" main
+after=$(git rev-parse "$REMOTE/main")
+
+echo
+if [ "$before" = "$after" ]; then
+	echo 'Site unchanged; nothing to deploy.'
+else
+	echo 'Pages is building. Watch it with:'
+	echo "  gh run watch \$(gh run list -R er7-rust/$SITE -L1 --json databaseId --jq '.[0].databaseId') -R er7-rust/$SITE"
+fi
