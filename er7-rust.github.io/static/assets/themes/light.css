@@ -1,0 +1,28 @@
+/* er7-rust.github.io — light theme
+ *
+ * Loaded by lily-design-system-svelte-theme-picker, and preloaded
+ * statically in src/app.html for zero-flicker switching (both this file
+ * and dark.css load up front; only the one matching the active
+ * data-theme attribute applies). Values are identical to the un-themed
+ * :root block in ../style.css, which stays as the no-JS fallback.
+ *
+ * See AGENTS.md's "Styling" section before editing.
+ */
+
+:root[data-theme="light"] {
+  --lily-primary: #2563eb;
+  --lily-primary-hover: #1d4ed8;
+  --lily-accent: #005eb8;
+  --lily-danger: #dc2626;
+  --lily-warning: #f59e0b;
+  --lily-success: #16a34a;
+  --lily-page-bg: #f9fafb;
+  --lily-card-bg: #ffffff;
+  --lily-text: #111827;
+  --lily-text-muted: #4b5563;
+  --lily-text-subtle: #6b7280;
+  --lily-border: #e5e7eb;
+  --lily-border-strong: #d1d5db;
+  --lily-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  --lily-shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+}

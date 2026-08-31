@@ -81,6 +81,7 @@ src/routes/+layout.svelte Header, nav, footer
 src/routes/+layout.ts     prerender = true, trailingSlash = 'always'
 src/routes/*/+page.svelte One page per route
 static/assets/style.css   Lily Design System base + er7 additions
+static/assets/themes/     light.css, dark.css — the ThemePicker's catalog
 static/.nojekyll          Tells Pages not to run Jekyll over the output
 static/sitemap.xml        Kept in step with the routes table above
 .github/workflows/        Build, type-check, deploy
@@ -109,6 +110,21 @@ of it is built from Lily tokens.
 To restyle, change a token. To add a component, add it to the additions
 block — do not edit Lily's rules in place, so the base stays a clean copy
 that can be refreshed from upstream.
+
+The header's three controls — text size, theme, and share — are Lily's
+own published Svelte helper packages, not hand-rolled:
+[`lily-design-system-svelte-theme-picker`](https://www.npmjs.com/package/lily-design-system-svelte-theme-picker),
+[`-text-size-picker`](https://www.npmjs.com/package/lily-design-system-svelte-text-size-picker), and
+[`-share-picker`](https://www.npmjs.com/package/lily-design-system-svelte-share-picker), plus
+[`lily-design-system-svelte-headless`](https://www.npmjs.com/package/lily-design-system-svelte-headless)
+as a dependency for future interactive components (not yet used by any
+page). All four ship zero CSS by design — Lily is headless — so the
+`.theme-picker*`/`.text-size-picker*`/`.share-picker*` rules, and the
+`data-theme`/`data-text-size` token overrides they drive, are this site's
+own, in the additions block. `src/app.html` preloads both theme
+stylesheets and resolves the active one synchronously before first paint,
+so there is no flash from the light default to a stored or OS-preferred
+dark theme.
 
 ## Deployment
 

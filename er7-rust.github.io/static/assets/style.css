@@ -707,3 +707,163 @@ details.faq-item p { margin-top: 0.75rem; }
 .anchor-heading {
   scroll-margin-top: 5.5rem;
 }
+
+/* Header controls: theme, text-size, and share pickers from
+ * lily-design-system-svelte-theme-picker / -text-size-picker /
+ * -share-picker. All three ship zero CSS by design (see AGENTS.md); the
+ * rules below are this site's own, built from Lily tokens like every
+ * other addition in this block. */
+
+.site-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Two dark-mode-only overrides for backgrounds Lily's own (unedited)
+ * rules hardcode as #eef2ff — a pale-blue tint with no dark equivalent —
+ * rather than a --lily-* token: .tag, the current nav link, and the
+ * secondary button's hover state. Scoped to data-theme="dark" and placed
+ * here, not in the Lily block above, so the base stays the clean copy
+ * AGENTS.md's "Styling" section requires. */
+:root[data-theme="dark"] .tag,
+:root[data-theme="dark"] .site-nav a[aria-current="page"],
+:root[data-theme="dark"] .button-secondary:hover {
+  background: rgba(96, 165, 250, 0.18);
+}
+
+/* data-text-size, set by lily-design-system-svelte-text-size-picker.
+ * "medium" is the unscaled default (matches the file's base font-size),
+ * so it needs no rule of its own. */
+:root[data-text-size="small"] { font-size: 87.5%; }
+:root[data-text-size="large"] { font-size: 112.5%; }
+:root[data-text-size="x-large"] { font-size: 125%; }
+
+/* ThemePicker and TextSizePicker: both an icon button (◑ / A) opening a
+ * listbox of slugs, and both share one rule set below since the rendered
+ * markup is identical apart from the class prefix: .theme-picker >
+ * .theme-picker-button > .theme-picker-icon, .theme-picker-list >
+ * .theme-picker-option[aria-selected]. */
+
+.theme-picker,
+.text-size-picker,
+.share-picker {
+  position: relative;
+  display: inline-flex;
+}
+
+.theme-picker-button,
+.text-size-picker-button,
+.share-picker-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: none;
+  border-radius: var(--lily-radius);
+  background: transparent;
+  color: var(--lily-text-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 150ms, color 150ms;
+}
+.theme-picker-button:hover,
+.text-size-picker-button:hover,
+.share-picker-button:hover {
+  background: var(--lily-border);
+  color: var(--lily-text);
+}
+.theme-picker-button:focus-visible,
+.text-size-picker-button:focus-visible,
+.share-picker-button:focus-visible {
+  outline: 3px solid var(--lily-primary);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+.theme-picker-list,
+.text-size-picker-list,
+.share-picker-list {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  z-index: 60;
+  min-width: 10rem;
+  margin: 0;
+  padding: 0.25rem;
+  list-style: none;
+  background: var(--lily-card-bg);
+  border: 1px solid var(--lily-border);
+  border-radius: var(--lily-radius);
+  box-shadow: var(--lily-shadow-lg);
+}
+
+.theme-picker-option,
+.text-size-picker-option {
+  padding: 0.5rem 0.75rem;
+  border-radius: calc(var(--lily-radius) - 0.15rem);
+  font-size: 0.9rem;
+  color: var(--lily-text);
+  cursor: pointer;
+}
+.theme-picker-option:hover,
+.theme-picker-option[data-active],
+.text-size-picker-option:hover,
+.text-size-picker-option[data-active] {
+  background: var(--lily-border);
+}
+.theme-picker-option[aria-selected="true"],
+.text-size-picker-option[aria-selected="true"] {
+  font-weight: 600;
+  color: var(--lily-primary);
+}
+
+/* SharePicker: destinations render as real <a> elements plus a
+ * copy-to-clipboard <button>, per the package's own "why links, not a
+ * menu" rule. */
+
+.share-picker-list-item {
+  margin: 0;
+}
+.share-picker-target {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  border-radius: calc(var(--lily-radius) - 0.15rem);
+  font-size: 0.9rem;
+  color: var(--lily-text);
+  text-decoration: none;
+}
+.share-picker-target:hover {
+  background: var(--lily-border);
+}
+.share-picker-copy {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  background: none;
+  border-radius: calc(var(--lily-radius) - 0.15rem);
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--lily-text);
+  cursor: pointer;
+}
+.share-picker-copy:hover {
+  background: var(--lily-border);
+}
+.share-picker-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+/* TextSizePicker: despite the package's published README describing a
+ * native <select>, 0.1.1 actually ships the same icon-button-plus-listbox
+ * pattern as ThemePicker (confirmed by reading dist/TextSizePicker.svelte
+ * directly) — styled identically above, sharing its rules with
+ * .theme-picker*. */

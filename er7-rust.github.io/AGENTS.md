@@ -64,6 +64,7 @@ src/routes/+layout.svelte  Header, nav, footer
 src/routes/+layout.ts      prerender = true, trailingSlash = 'always'
 src/routes/*/+page.svelte  One page per route
 static/assets/style.css    Lily base + an "er7 additions" block
+static/assets/themes/      light.css, dark.css — ThemePicker's catalog
 static/.nojekyll           Stops Pages running Jekyll over the output
 static/sitemap.xml         Must stay in step with the routes
 .github/workflows/deploy.yml  Build, type-check, deploy
@@ -75,9 +76,12 @@ static/sitemap.xml         Must stay in step with the routes
   `export let`, not stores, unless there is a reason to be written down.
 - **Keyed `{#each}`.** Always `{#each items as item (item.key)}`.
 - **TypeScript everywhere**, including `<script lang="ts">` in components.
-- **No new dependencies** without the user asking. The site needs
-  SvelteKit and nothing else; it has no runtime JavaScript beyond what
-  SvelteKit ships.
+- **No new dependencies** without the user asking. As of 2026-08-31 the
+  user has asked for four: `lily-design-system-svelte-theme-picker`,
+  `-text-size-picker`, `-share-picker`, and `-headless` (the last, unused
+  by any page yet, for future interactive components) — see "Header
+  controls" below. Nothing else; the site still ships no other runtime
+  JavaScript beyond what SvelteKit and these four provide.
 - **Shared values live in `src/lib/site.ts`.** Links, the crate version,
   the crate family. Never hard-code a URL in a page — a rename should be
   one edit.
@@ -101,7 +105,43 @@ an additions block appended.
   `.callout`, `.button`, `.stat`, `.stat-row`, `.tag`, `.tag-list`,
   `.prose`, `.site-*`.
 - The additions block adds `.table`, `.table-wrap`, `.er7-figure`,
-  `.er7-line`, `.pair-grid`, `.defs`, `.toc`, `.anchor-heading`.
+  `.er7-line`, `.pair-grid`, `.defs`, `.toc`, `.anchor-heading`,
+  `.site-controls`, and the `.theme-picker*`/`.text-size-picker*`/
+  `.share-picker*` rules for the three header controls below.
+
+## Header controls
+
+`+layout.svelte`'s header renders three Lily Svelte helper packages —
+text size, theme, and share — each an icon button opening a WAI-ARIA APG
+listbox (verify against the installed package's own
+`dist/*.svelte`, not its README: the text-size-picker's published README
+still describes a native `<select>` from an earlier version; 0.1.1
+actually ships the same button-plus-listbox markup as the other two).
+
+- **Theme.** `themesUrl="/assets/themes/"`, `themes={['light', 'dark']}`,
+  `storageKey="lily-theme"`, `detectFromSystem`. `static/assets/themes/
+  light.css` and `dark.css` each scope their `--lily-*` overrides to
+  `:root[data-theme="…"]`; `src/app.html` preloads both (so switching is
+  instant, no per-switch fetch) and runs a small inline script, before the
+  stylesheet link, that resolves `data-theme` synchronously from storage
+  or `prefers-color-scheme` — matching the picker's own resolution order —
+  so there is no flash of the light default on a dark-preferring visit.
+  Two of Lily's own (unedited) rules hardcode a light-only background tint
+  (`#eef2ff`, in `.tag`, `.site-nav a[aria-current="page"]`, and
+  `.button-secondary:hover`) rather than a token; overridden for
+  `data-theme="dark"` in the additions block rather than in Lily's rules,
+  per the invariant above.
+- **Text size.** `sizes={['small', 'medium', 'large', 'x-large']}`,
+  `storageKey="lily-text-size"`. Sets `data-text-size` on `<html>`; the
+  additions block maps each slug to a `font-size` on `:root`.
+- **Share.** `targets={[]}` — deliberately: this project has no social
+  account (`NEWS.md`, "Where updates appear") and makes no third-party
+  requests (`spec/index.md` §6), so the native share sheet and
+  copy-the-URL are the only paths offered, never a third-party endpoint.
+
+All three ship zero CSS by design (Lily is headless); every rule for them
+lives in the additions block, built from `--lily-*` tokens like every
+other addition.
 
 ## Checks
 

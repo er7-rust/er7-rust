@@ -1,12 +1,23 @@
 <script lang="ts">
   import { page } from '$app/state';
   import { links, navLinks } from '$lib/site';
+  import ThemePicker from 'lily-design-system-svelte-theme-picker';
+  import TextSizePicker from 'lily-design-system-svelte-text-size-picker';
+  import SharePicker from 'lily-design-system-svelte-share-picker';
 
   let { children } = $props();
 
   function isCurrent(href: string): boolean {
     return page.url.pathname === href;
   }
+
+  let theme = $state('');
+  let textSize = $state('');
+
+  // No destinations: this project has no social account (see NEWS.md,
+  // "Where updates appear") and makes no third-party requests
+  // (spec/index.md §6), so SharePicker offers only the OS native share
+  // sheet where one exists, and copy-the-URL everywhere else.
 </script>
 
 <a class="skip-link" href="#main">Skip to main content</a>
@@ -24,6 +35,30 @@
       {/each}
       <a href={links.repository}>GitHub</a>
     </nav>
+    <div class="site-controls">
+      <TextSizePicker
+        label="Text size"
+        sizes={['small', 'medium', 'large', 'x-large']}
+        bind:value={textSize}
+        storageKey="lily-text-size"
+      />
+      <ThemePicker
+        label="Theme"
+        themesUrl="/assets/themes/"
+        themes={['light', 'dark']}
+        bind:value={theme}
+        storageKey="lily-theme"
+        detectFromSystem
+      />
+      <SharePicker
+        label="Share this page"
+        title="er7: HL7® v2 in the ER7 pipe-hat encoding, in Rust"
+        targets={[]}
+        copyLabel="Copy link"
+        copiedLabel="Link copied"
+        copyFailedLabel="Could not copy — copy it from the address bar"
+      />
+    </div>
   </div>
 </header>
 
