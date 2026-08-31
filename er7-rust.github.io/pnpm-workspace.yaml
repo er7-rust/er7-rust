@@ -1,2 +1,14 @@
 allowBuilds:
   esbuild: true
+
+# GHSA-pxg6-pf52-xh8x / CVE-2024-47764 (low): cookie <0.7.0 accepts
+# out-of-bounds characters in name/path/domain. @sveltejs/kit still
+# declares cookie: ^0.6.0 as of its latest release (checked via `npm view
+# @sveltejs/kit@latest dependencies`), so the fix has to be forced here.
+# Pinned to ^0.7.0, not a bare ">=0.7.0": cookie 1.x/2.x dropped the
+# named parse/serialize exports @sveltejs/kit's own runtime imports,
+# which floating to "latest" silently picked up and broke the build
+# (rollup: '"parse" is not exported by cookie') — caught by actually
+# running pnpm build after the override, not just pnpm install.
+overrides:
+  cookie: "^0.7.0"

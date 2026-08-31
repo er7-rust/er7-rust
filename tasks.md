@@ -448,6 +448,30 @@ pass:
         listed there (a second security responder), checked against the
         live file rather than assumed unchanged.
 
+- [x] **Fix the `cookie` Dependabot alert left open above** — done
+      2026-08-31, on the maintainer's explicit instruction ("yes fix it")
+      rather than this agent's own call, since the earlier entry named
+      that trade as his to make. `@sveltejs/kit@2.70.2` (latest, rechecked
+      via `npm view`) still declares `cookie: ^0.6.0`, unchanged from
+      before — upstream has not moved in the five days since. Forced with
+      a `pnpm-workspace.yaml` `overrides` entry, which is where this pnpm
+      version (11.0.8) actually reads it — `pnpm.overrides` in
+      `package.json` and a top-level `overrides` there were both tried
+      first and silently ignored (no `overrides` key ever appeared in
+      `pnpm-lock.yaml`; confirmed pnpm reacts to other `package.json`
+      edits at all with an unrelated add/remove smoke test before
+      concluding the field itself was the problem), which cost real time
+      before landing on the documented location.
+      `cookie: ">=0.7.0"` was the first attempt and is not what shipped:
+      it resolved to `2.0.1`, which dropped the named `parse`/`serialize`
+      exports `@sveltejs/kit`'s runtime imports, breaking `pnpm build`
+      outright (`"parse" is not exported by cookie`) — caught by actually
+      running the build after the override, not by stopping at a clean
+      `pnpm install`. Narrowed to `cookie: "^0.7.0"` (0.7.2 resolves),
+      the last version before that export change, verified against the
+      advisory's own "first patched version: 0.7.0". `pnpm check` (358
+      files, 0 errors) and `pnpm build` both clean afterward.
+
 ## Trademarks
 
 HL7®, and FHIR® are the registered trademarks of Health Level Seven
