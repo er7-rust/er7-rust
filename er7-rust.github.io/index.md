@@ -129,17 +129,18 @@ dark theme.
 ## Deployment
 
 Two pushes, not one — a push to *this* monorepo's `main` does not, by
-itself, deploy anything. `make publish`, from the monorepo root, does
-both in the right order and refuses to run from a dirty tree or a branch
-other than `main`:
+itself, deploy anything. `make github-pages` (`make publish` still works,
+as an alias), from the monorepo root, does both in the right order and
+refuses to run from a dirty tree or a branch other than `main`:
 
 1. `git push origin main` — the monorepo itself.
-2. `git subtree push --prefix=er7-rust.github.io site main` — **this
-   directory's own history, exported to a separate, read-only
-   repository**, `github.com/er7-rust/er7-rust.github.io` (the `site` git
-   remote). Policy: [`spec/monorepo-github-pages/index.md`](../spec/monorepo-github-pages/index.md).
+2. `git subtree push --prefix=er7-rust.github.io github-pages main` —
+   **this directory's own history, exported to a separate, read-only
+   repository**, `github.com/er7-rust/er7-rust.github.io` (the
+   `github-pages` git remote). Policy:
+   [`spec/monorepo-github-pages/index.md`](../spec/monorepo-github-pages/index.md).
    Never edit that sibling repository directly; a change made there is
-   overwritten by the next `make publish`. `make publish` also reports
+   overwritten by the next `make github-pages`. The target also reports
    whether the site actually changed, rather than always claiming a
    deploy started.
 
