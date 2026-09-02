@@ -7,7 +7,7 @@ use serde::de::{self, MapAccess, Visitor};
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-use crate::Field;
+use crate::{Field, Strict};
 
 /// A Serde-enabled [`er7::Segment`].
 ///
@@ -76,9 +76,17 @@ impl Serialize for Segment {
     }
 }
 
-const FIELDS: &[&str] = &["name", "fields"];
+pub(crate) const FIELDS: &[&str] = &["name", "fields"];
 
-struct SegmentVisitor;
+/// `strict` selects between the two `Deserialize` entry points below: the
+/// ordinary tolerant one (`strict: false`, rule S8) and [`Strict`]`<Segment>`'s
+/// (`strict: true`, rule S13, spec §11). `message.rs` also constructs this
+/// visitor directly, with `strict` carried down from `Strict<Message>`'s
+/// own deserialization, so a typo inside a segment nested in a strict
+/// message is caught too.
+pub(crate) struct SegmentVisitor {
+    pub(crate) strict: bool,
+}
 
 impl<'de> Visitor<'de> for SegmentVisitor {
     type Value = Segment;
@@ -108,6 +116,9 @@ impl<'de> Visitor<'de> for SegmentVisitor {
                     }
                     fields = Some(map.next_value()?);
                 }
+                _ if self.strict => {
+                    return Err(de::Error::unknown_field(&key, FIELDS));
+                }
                 _ => {
                     let _ = map.next_value::<de::IgnoredAny>()?;
                 }
@@ -128,7 +139,21 @@ impl<'de> Deserialize<'de> for Segment {
     where
         D: Deserializer<'de>,
     {
-        deserializer.deserialize_struct("Segment", FIELDS, SegmentVisitor)
+        deserializer.deserialize_struct("Segment", FIELDS, SegmentVisitor { strict: false })
+    }
+}
+
+impl<'de> Deserialize<'de> for Strict<Segment> {
+    /// See [`Strict`] (rule S13, [§11](../spec/11-strict-mode/index.md)):
+    /// an unrecognized key is a `serde::de::Error::unknown_field` rather
+    /// than being ignored.
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        deserializer
+            .deserialize_struct("Segment", FIELDS, SegmentVisitor { strict: true })
+            .map(Strict)
     }
 }
 
@@ -164,5 +189,25 @@ mod tests {
         let json = r#"{"name":"ZZZ","fields":[],"extra":true}"#;
         let back: Segment = serde_json::from_str(json).unwrap();
         assert_eq!(back.name, "ZZZ");
+    }
+
+    #[test]
+    fn strict_rejects_an_unknown_field() {
+        let json = r#"{"name":"ZZZ","fields":[],"extra":true}"#;
+        let err = serde_json::from_str::<Strict<Segment>>(json).unwrap_err();
+        assert!(err.to_string().contains("extra"));
+    }
+
+    #[test]
+    fn strict_still_accepts_a_segment_with_no_extra_keys() {
+        let json = r#"{"name":"ZZZ","fields":[]}"#;
+        let back = serde_json::from_str::<Strict<Segment>>(json).unwrap();
+        assert_eq!(back.0.name, "ZZZ");
+    }
+
+    #[test]
+    fn strict_still_requires_every_field_the_plain_type_does() {
+        let err = serde_json::from_str::<Strict<Segment>>(r#"{"fields":[]}"#).unwrap_err();
+        assert!(err.to_string().contains("name"));
     }
 }

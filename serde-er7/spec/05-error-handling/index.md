@@ -33,10 +33,16 @@ that has added a field this crate does not yet know about should not break
 a consumer that only needs the fields it already understands.
 
 This is a deliberate asymmetry with `#[serde(deny_unknown_fields)]`-style
-strictness some Serde types choose: this crate always behaves as if that
-attribute is absent, for every wrapper type, with no configuration to turn
-it on. A change that added `deny_unknown_fields` behaviour would be a
-breaking change to this rule and needs a spec update here first.
+strictness some Serde types choose: `T::deserialize` always behaves as if
+that attribute is absent, for every wrapper type. A change that made
+`Message::deserialize` (or any other type's) reject unknown fields *by
+default* would be a breaking change to this rule and would need a spec
+update here first — that has not happened. What has been added is an
+opt-in alternative *type*, not a flag on this one:
+[§11](../11-strict-mode/index.md)'s `Strict<T>` gives a caller who wants
+`deny_unknown_fields`-style checking a way to ask for it explicitly, at the
+one call site that wants it, without this rule's own default changing for
+anyone who does not.
 
 ## 5.3 Rule S9: a missing required field names itself
 

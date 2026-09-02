@@ -70,7 +70,11 @@ change (see [§8](../08-versioning-and-compatibility/index.md), rule S10).
 - Every object ignores keys it does not recognize (S8), so a `Message`
   produced by a newer version of this crate that has grown an additional
   field can still be read by an older one, forward-compatibly, as long as
-  no currently-required key changes shape.
+  no currently-required key changes shape. A caller who wants the opposite
+  — an unrecognized key reported as an error, to catch a typo in a
+  hand-written fixture — opts into it per call with
+  [`Strict<T>`](../11-strict-mode/index.md) (S13); nothing above changes
+  for a caller who does not.
 
 ## 2.4 Why not derive
 

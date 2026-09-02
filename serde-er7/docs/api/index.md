@@ -49,6 +49,21 @@ for the complete, normative version of the wire-shape column above, and
 [`spec/06-ergonomics/index.md`](../../spec/06-ergonomics/index.md) for why
 the conventions above look the way they do.
 
+## Strict deserialization
+
+| Item | What |
+| ---- | ---- |
+| `Strict<T>` | Wraps `T` (one of `Message`, `Segment`, `Separators`). `Deserialize` rejects an unrecognized key instead of ignoring it — for `Strict<Message>`, at every level: top-level keys, a nested segment's keys, and the separators object's keys. `T::deserialize` alone stays tolerant, unconditionally; this is a separate, opt-in type, not a flag on the existing one. `Deref`/`DerefMut`/`From` both ways and a delegating `Serialize`, same as every other wrapper. |
+
+Reach for it when validating a hand-written JSON fixture (like the one in
+[§2](../usage/index.md#2-back-the-other-way-json-to-er7) of the usage
+guide): a typo on a required key becomes an error naming the typo, instead
+of a generic "missing field" that does not; a typo on the one optional key
+this crate has (`separators.truncation`) becomes an error at all, instead
+of silently defaulting. See
+[`spec/11-strict-mode/index.md`](../../spec/11-strict-mode/index.md) for
+the full rationale.
+
 ## The `er7` re-export
 
 `serde_er7::er7` re-exports the whole `er7` crate, so `er7::Message`,

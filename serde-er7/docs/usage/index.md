@@ -74,6 +74,15 @@ Building this JSON by hand is the fiddly part — see
 [§3](#3-the-shape-worked-through-by-hand) for the nesting rule that makes
 it mechanical rather than guesswork.
 
+Typo a required key while hand-writing a fixture like this (`"feilds"` for
+`"fields"`) and `Message::deserialize` above still fails — but with
+"missing field `fields`," which does not say why it is missing or mention
+`"feilds"` at all. Typo the one *optional* key this crate has
+(`"truncation"`, on `separators`) and it fails silently instead, quietly
+defaulting to `None`. Deserialize into `serde_er7::Strict<Message>` to get
+an error naming the actual mistake in both cases — see
+[`docs/api/index.md`](../api/index.md#strict-deserialization).
+
 ## §3 The shape, worked through by hand
 
 Every level below `Message`/`Segment` is a plain sequence, one array level

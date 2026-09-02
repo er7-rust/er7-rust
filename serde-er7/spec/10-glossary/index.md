@@ -42,6 +42,12 @@ see the `er7` spec's own glossary (its spec §19).
   distinguish it from an `er7` spec `R`-numbered rule when both are
   discussed together. See the [rule index](../index.md#rule-index).
 
+**Strict mode**
+: Deserializing through [`Strict<T>`](../11-strict-mode/index.md) rather
+  than `T` directly, so an unrecognized key is a `serde::de::Error`
+  instead of being ignored. Opt-in, per call; `T::deserialize` alone stays
+  tolerant (S8). See [§11](../11-strict-mode/index.md).
+
 ---
 
 HL7®, and FHIR® are the registered trademarks of Health Level Seven

@@ -27,6 +27,7 @@ already defines.
 | [8](08-versioning-and-compatibility/index.md) | Versioning and compatibility | SemVer commitments, the wire-shape table as a compatibility surface, the N-2 Rust MSRV |
 | [9](09-roadmap-and-open-questions/index.md) | Roadmap and open questions | What is deliberately deferred, and why |
 | [10](10-glossary/index.md) | Glossary | Terms this document uses that are specific to this crate |
+| [11](11-strict-mode/index.md) | Strict mode | The opt-in `Strict<T>` wrapper that rejects unknown fields, for `Message`, `Segment`, and `Separators` |
 
 ## Rule index
 
@@ -49,6 +50,7 @@ when the two are discussed together.
 | S10 | The wire shape in [§2](02-wire-shapes/index.md) is part of this crate's public API and its SemVer contract | [§8](08-versioning-and-compatibility/index.md) |
 | S11 | Every wrapper type implements `Deref`, `DerefMut`, and `From` both ways | [§6](06-ergonomics/index.md) |
 | S12 | Every public item carries a doc comment; `cargo rustdoc --lib -- -W missing-docs` stays clean | [§7](07-testing-strategy/index.md) |
+| S13 | `Strict<T>` (`T` in `Message`, `Segment`, `Separators`) rejects an unknown field instead of ignoring it; `T::deserialize` alone stays tolerant (S8) | [§11](11-strict-mode/index.md) |
 
 ## Which goal wins when two conflict
 

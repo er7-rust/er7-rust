@@ -21,6 +21,7 @@ enforces it. A rule with no test is a bug in this table.
 | S10 | `round_trips_through_json`, `pretty_json_keeps_the_tree_shape`, and every shape test above | `tests/integration.rs`, `src/message.rs` |
 | S11 | `deref_reaches_query`, `deref_reaches_the_inner_api` | `src/message.rs`, `src/subcomponent.rs` |
 | S12 | *by `cargo rustdoc --lib -- -W missing-docs`*, which is one of the four checks (§7.4) | — |
+| S13 | `strict_rejects_an_unknown_top_level_field`, `strict_rejects_an_unknown_field_inside_a_nested_segment`, `strict_rejects_an_unknown_field_inside_separators`, `strict_still_requires_every_field_the_plain_type_does`, `plain_deserialize_is_unaffected_by_strict_existing`, `strict_rejects_an_unknown_field` | `src/message.rs`, `src/segment.rs`, `src/separators.rs` |
 
 The table is **checked by `cargo test`**, not only by review:
 `every_rule_has_a_coverage_row` reads this file and the rule index and

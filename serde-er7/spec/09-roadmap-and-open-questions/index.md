@@ -34,12 +34,16 @@ convention `er7` itself follows (its `AGENTS.md`).
   is a useful worked example of the "simple C-like enum" case. If it turns
   out nobody serializes a bare `Terminator` in practice, removing it would
   be a minor scope narrowing, not a design failure.
-- **Should a future version offer an opt-in `deny_unknown_fields` mode?**
-  Rule S8 currently makes tolerance unconditional. A validating mode could
-  be useful for a caller who wants to catch typos in hand-written JSON
-  fixtures (see `examples/build_message_from_json.rs`) — but it would need
-  its own section here, its own rule ID, and a clear default (tolerant,
-  matching `er7`'s own R6) before it is added.
+- ~~**Should a future version offer an opt-in `deny_unknown_fields`
+  mode?**~~ **Resolved, 2026-09-02.** Rule S8 stayed unconditional for the
+  ordinary `T::deserialize` path — the default is still tolerant, matching
+  `er7`'s own R6, exactly as this item asked. What shipped is the opt-in
+  itself: `Strict<T>` (S13, [§11](../11-strict-mode/index.md)), for `T` in
+  `Message`, `Segment`, `Separators` — the three object-shaped types where
+  "unknown field" has meaning. A caller who wants to catch a typo in a
+  hand-written JSON fixture (`examples/build_message_from_json.rs`) now
+  can, at the one call site that wants it, without changing what any other
+  caller's `serde_json::from_str::<Message>(...)` accepts.
 
 ## 9.3 Process
 

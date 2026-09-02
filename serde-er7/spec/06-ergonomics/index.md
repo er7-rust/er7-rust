@@ -51,6 +51,14 @@ crate's type surface to avoid. If profiling ever shows this mattering for
 a real workload, the fix is additive — a borrowing family living alongside
 the existing owning one — not a rewrite of what already exists.
 
+## 6.5 `Strict<T>` follows the same convention
+
+[§11](../11-strict-mode/index.md)'s `Strict<T>` is not one of the eight
+per-level wrappers listed in [§6.1](#61-rule-s11), but it still carries
+`Deref`, `DerefMut`, and `From` both ways, plus a delegating `Serialize`,
+for the same reason: a caller reaching for `Strict<Message>` should not
+lose any of the ergonomics a plain `Message` already has.
+
 ---
 
 HL7®, and FHIR® are the registered trademarks of Health Level Seven

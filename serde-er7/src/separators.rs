@@ -8,6 +8,8 @@ use serde::de::{self, MapAccess, Visitor};
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
+use crate::Strict;
+
 /// A Serde-enabled [`er7::Separators`].
 ///
 /// This is the plainest wrapper in the crate: six named, scalar fields, no
@@ -81,7 +83,7 @@ impl Serialize for Separators {
     }
 }
 
-const FIELDS: &[&str] = &[
+pub(crate) const FIELDS: &[&str] = &[
     "field",
     "component",
     "repetition",
@@ -90,7 +92,14 @@ const FIELDS: &[&str] = &[
     "truncation",
 ];
 
-struct SeparatorsVisitor;
+/// `strict` distinguishes the ordinary tolerant `Deserialize` entry point
+/// (`strict: false`, rule S8) from [`Strict`]`<Separators>`'s (`strict:
+/// true`, rule S13, spec §11). `message.rs` also constructs this visitor
+/// directly with `strict` carried down from `Strict<Message>`'s own
+/// deserialization.
+pub(crate) struct SeparatorsVisitor {
+    pub(crate) strict: bool,
+}
 
 impl<'de> Visitor<'de> for SeparatorsVisitor {
     type Value = Separators;
@@ -125,6 +134,9 @@ impl<'de> Visitor<'de> for SeparatorsVisitor {
                         return Err(de::Error::duplicate_field("truncation"));
                     }
                     truncation = Some(map.next_value()?);
+                }
+                _ if self.strict => {
+                    return Err(de::Error::unknown_field(&key, FIELDS));
                 }
                 _ => {
                     let _ = map.next_value::<de::IgnoredAny>()?;
@@ -175,7 +187,21 @@ impl<'de> Deserialize<'de> for Separators {
     where
         D: Deserializer<'de>,
     {
-        deserializer.deserialize_struct("Separators", FIELDS, SeparatorsVisitor)
+        deserializer.deserialize_struct("Separators", FIELDS, SeparatorsVisitor { strict: false })
+    }
+}
+
+impl<'de> Deserialize<'de> for Strict<Separators> {
+    /// See [`Strict`] (rule S13, [§11](../spec/11-strict-mode/index.md)):
+    /// an unrecognized key is a `serde::de::Error::unknown_field` rather
+    /// than being ignored.
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        deserializer
+            .deserialize_struct("Separators", FIELDS, SeparatorsVisitor { strict: true })
+            .map(Strict)
     }
 }
 
@@ -218,5 +244,21 @@ mod tests {
     fn rejects_a_missing_required_field() {
         let err = serde_json::from_str::<Separators>(r#"{"field":"|"}"#).unwrap_err();
         assert!(err.to_string().contains("component"));
+    }
+
+    #[test]
+    fn strict_rejects_an_unknown_field() {
+        let json = r#"{"field":"|","component":"^","repetition":"~","escape":"\\",
+            "subcomponent":"&","extra":true}"#;
+        let err = serde_json::from_str::<Strict<Separators>>(json).unwrap_err();
+        assert!(err.to_string().contains("extra"));
+    }
+
+    #[test]
+    fn strict_still_treats_a_missing_truncation_key_as_none() {
+        let json =
+            r#"{"field":"|","component":"^","repetition":"~","escape":"\\","subcomponent":"&"}"#;
+        let back = serde_json::from_str::<Strict<Separators>>(json).unwrap();
+        assert_eq!(back.0.truncation, None);
     }
 }

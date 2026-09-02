@@ -3,11 +3,11 @@
 use std::fmt;
 use std::ops::{Deref, DerefMut};
 
-use serde::de::{self, MapAccess, Visitor};
+use serde::de::{self, DeserializeSeed, MapAccess, SeqAccess, Visitor};
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-use crate::{Segment, Separators};
+use crate::{Segment, Separators, Strict};
 
 /// A Serde-enabled [`er7::Message`] — the crate's main entry point.
 ///
@@ -136,7 +136,19 @@ impl Serialize for Message {
 
 const FIELDS: &[&str] = &["separators", "segments"];
 
-struct MessageVisitor;
+/// `strict` distinguishes the ordinary tolerant `Deserialize` entry point
+/// (`strict: false`, rule S8) from [`Strict`]`<Message>`'s (`strict: true`,
+/// rule S13, spec §11). When `strict`, `"separators"` and `"segments"` are
+/// each read through a [`DeserializeSeed`] that carries the flag down into
+/// [`crate::segment::SegmentVisitor`] and
+/// [`crate::separators::SeparatorsVisitor`] directly, rather than through
+/// `Segment`'s or `Separators`' own (always-tolerant) `Deserialize` impl —
+/// see [§11.2](../spec/11-strict-mode/index.md) for why an unknown key
+/// nested inside a segment or the separators object needs to be caught the
+/// same way as one at the top level.
+struct MessageVisitor {
+    strict: bool,
+}
 
 impl<'de> Visitor<'de> for MessageVisitor {
     type Value = Message;
@@ -158,13 +170,24 @@ impl<'de> Visitor<'de> for MessageVisitor {
                     if separators.is_some() {
                         return Err(de::Error::duplicate_field("separators"));
                     }
-                    separators = Some(map.next_value()?);
+                    separators = Some(if self.strict {
+                        map.next_value_seed(SeparatorsSeed { strict: true })?
+                    } else {
+                        map.next_value()?
+                    });
                 }
                 "segments" => {
                     if segments.is_some() {
                         return Err(de::Error::duplicate_field("segments"));
                     }
-                    segments = Some(map.next_value()?);
+                    segments = Some(if self.strict {
+                        map.next_value_seed(SegmentsSeed { strict: true })?
+                    } else {
+                        map.next_value()?
+                    });
+                }
+                _ if self.strict => {
+                    return Err(de::Error::unknown_field(&key, FIELDS));
                 }
                 _ => {
                     let _ = map.next_value::<de::IgnoredAny>()?;
@@ -181,12 +204,120 @@ impl<'de> Visitor<'de> for MessageVisitor {
     }
 }
 
+/// Deserializes one [`Segment`], strictly or not — used from
+/// [`MessageVisitor`] via `next_value_seed` so a nested segment's own
+/// unknown-field check runs with the same `strict` flag as the message
+/// around it, which a plain `map.next_value::<Segment>()?` (always
+/// `strict: false`) could not do.
+struct SegmentSeed {
+    strict: bool,
+}
+
+impl<'de> DeserializeSeed<'de> for SegmentSeed {
+    type Value = Segment;
+
+    fn deserialize<D>(self, deserializer: D) -> Result<Segment, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        deserializer.deserialize_struct(
+            "Segment",
+            crate::segment::FIELDS,
+            crate::segment::SegmentVisitor {
+                strict: self.strict,
+            },
+        )
+    }
+}
+
+/// Deserializes `"segments"` as a `Vec<Segment>`, using [`SegmentSeed`] for
+/// each element so strictness reaches every segment in the sequence.
+struct SegmentsSeed {
+    strict: bool,
+}
+
+impl<'de> DeserializeSeed<'de> for SegmentsSeed {
+    type Value = Vec<Segment>;
+
+    fn deserialize<D>(self, deserializer: D) -> Result<Vec<Segment>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct SegmentsVisitor {
+            strict: bool,
+        }
+
+        impl<'de> Visitor<'de> for SegmentsVisitor {
+            type Value = Vec<Segment>;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a sequence of segments")
+            }
+
+            fn visit_seq<A>(self, mut seq: A) -> Result<Vec<Segment>, A::Error>
+            where
+                A: SeqAccess<'de>,
+            {
+                let mut segments = Vec::new();
+                while let Some(segment) = seq.next_element_seed(SegmentSeed {
+                    strict: self.strict,
+                })? {
+                    segments.push(segment);
+                }
+                Ok(segments)
+            }
+        }
+
+        deserializer.deserialize_seq(SegmentsVisitor {
+            strict: self.strict,
+        })
+    }
+}
+
+/// Deserializes one [`Separators`], strictly or not — the same reasoning
+/// as [`SegmentSeed`].
+struct SeparatorsSeed {
+    strict: bool,
+}
+
+impl<'de> DeserializeSeed<'de> for SeparatorsSeed {
+    type Value = Separators;
+
+    fn deserialize<D>(self, deserializer: D) -> Result<Separators, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        deserializer.deserialize_struct(
+            "Separators",
+            crate::separators::FIELDS,
+            crate::separators::SeparatorsVisitor {
+                strict: self.strict,
+            },
+        )
+    }
+}
+
 impl<'de> Deserialize<'de> for Message {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'de>,
     {
-        deserializer.deserialize_struct("Message", FIELDS, MessageVisitor)
+        deserializer.deserialize_struct("Message", FIELDS, MessageVisitor { strict: false })
+    }
+}
+
+impl<'de> Deserialize<'de> for Strict<Message> {
+    /// See [`Strict`] (rule S13, [§11](../spec/11-strict-mode/index.md)):
+    /// an unrecognized key — at the top level, inside a segment, or inside
+    /// the separators object — is a `serde::de::Error::unknown_field`
+    /// rather than being ignored.
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        deserializer
+            .deserialize_struct("Message", FIELDS, MessageVisitor { strict: true })
+            .map(Strict)
     }
 }
 
@@ -253,5 +384,56 @@ mod tests {
             pid["fields"][4][0],
             serde_json::json!([["SMITH"], ["JOHN"]])
         );
+    }
+
+    #[test]
+    fn strict_rejects_an_unknown_top_level_field() {
+        let json = r#"{"separators":{"field":"|","component":"^","repetition":"~",
+            "escape":"\\","subcomponent":"&","truncation":null},"segments":[],"extra":true}"#;
+        let err = serde_json::from_str::<Strict<Message>>(json).unwrap_err();
+        assert!(err.to_string().contains("extra"));
+    }
+
+    #[test]
+    fn strict_rejects_an_unknown_field_inside_a_nested_segment() {
+        let json = r#"{"separators":{"field":"|","component":"^","repetition":"~",
+            "escape":"\\","subcomponent":"&","truncation":null},
+            "segments":[{"name":"PID","fields":[],"extra":true}]}"#;
+        let err = serde_json::from_str::<Strict<Message>>(json).unwrap_err();
+        assert!(err.to_string().contains("extra"));
+    }
+
+    #[test]
+    fn strict_rejects_an_unknown_field_inside_separators() {
+        let json = r#"{"separators":{"field":"|","component":"^","repetition":"~",
+            "escape":"\\","subcomponent":"&","extra":true},"segments":[]}"#;
+        let err = serde_json::from_str::<Strict<Message>>(json).unwrap_err();
+        assert!(err.to_string().contains("extra"));
+    }
+
+    #[test]
+    fn strict_still_requires_every_field_the_plain_type_does() {
+        let json = r#"{"separators":{"field":"|","component":"^","repetition":"~",
+            "escape":"\\","subcomponent":"&","truncation":null}}"#;
+        let err = serde_json::from_str::<Strict<Message>>(json).unwrap_err();
+        assert!(err.to_string().contains("segments"));
+    }
+
+    #[test]
+    fn strict_accepts_a_real_message_with_no_typos() {
+        let message = Message::parse(ADT).unwrap();
+        let json = serde_json::to_string(&message).unwrap();
+        let back = serde_json::from_str::<Strict<Message>>(&json).unwrap();
+        assert_eq!(back.0, message);
+    }
+
+    #[test]
+    fn plain_deserialize_is_unaffected_by_strict_existing() {
+        // The whole point of S13 is additive: Strict<Message> existing does
+        // not change what plain `Message::deserialize` accepts.
+        let json = r#"{"separators":{"field":"|","component":"^","repetition":"~",
+            "escape":"\\","subcomponent":"&","truncation":null},"segments":[],"extra":true}"#;
+        let back: Message = serde_json::from_str(json).unwrap();
+        assert!(back.segments.is_empty());
     }
 }

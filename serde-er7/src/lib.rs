@@ -77,6 +77,13 @@
 //! only wants to serialize one segment, or one field, out of a larger
 //! message can do that too.
 //!
+//! Deserializing any of the three object-shaped types above ([`Message`],
+//! [`Segment`], [`Separators`]) ignores a key it does not recognize, by
+//! default. A caller who wants a typo in a hand-written JSON fixture
+//! reported instead deserializes into [`Strict<Message>`](Strict), which
+//! rejects an unknown key — at the top level or nested inside a segment or
+//! the separators object — rather than ignoring it.
+//!
 //! # What is deliberately not here
 //!
 //! This crate adds exactly one thing to [`er7`]: Serde support for its
@@ -107,6 +114,7 @@ mod message;
 mod repetition;
 mod segment;
 mod separators;
+mod strict;
 mod subcomponent;
 mod terminator;
 
@@ -116,6 +124,7 @@ pub use message::Message;
 pub use repetition::Repetition;
 pub use segment::Segment;
 pub use separators::Separators;
+pub use strict::Strict;
 pub use subcomponent::Subcomponent;
 pub use terminator::Terminator;
 
