@@ -65,17 +65,20 @@ early for GitHub only would leave the token in place for the mirrors
 anyway, which is not the reduction it would look like.
 
 **A prerequisite that spec file does not yet name:** Trusted Publishing
-authenticates a *CI workflow run* to crates.io — it has no meaning for a
-human typing `cargo publish` at their own terminal, which is what
-"Cuts releases" below actually means today: one person, on his own
-machine. It is also what [`GOVERNANCE.md`](GOVERNANCE.md) states as a
-rule, not a habit: "a release is a decision, not an automation; no
-workflow publishes; one person runs `cargo publish`." Adopting Trusted
-Publishing as it exists today would mean moving the publish step into a
-CI job — a governance change, not a credential swap, and one this
-document is not pre-committing to just by naming the token as removable.
-That tension is not resolved here; it is named so the day this gets
-picked up, nobody has to rediscover it.
+authenticates a *CI workflow run* to crates.io — it has no meaning for
+`cargo publish` run locally, at a terminal, which is what "Cuts releases"
+below actually means today, and still means as of 2026-09-02: the
+maintainer decides on a release, and either types the command himself or
+directs an agent working in this repository to type it for him — either
+way, on his own machine, never inside a CI job. That is what
+[`GOVERNANCE.md`](GOVERNANCE.md) states as a rule, not a habit: "no CI
+workflow publishes on its own trigger; `cargo publish` runs only when the
+maintainer decides to release, whether he types it himself or directs an
+agent to." Adopting Trusted Publishing as it exists today would mean
+moving the publish step into a CI job — a governance change, not a
+credential swap, and one this document is not pre-committing to just by
+naming the token as removable. That tension is not resolved here; it is
+named so the day this gets picked up, nobody has to rediscover it.
 
 **Commits and tags are cryptographically signed as of 2026-08-27**, with
 the dedicated code-signing key in the publishing-identities table above —

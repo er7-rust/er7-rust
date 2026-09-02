@@ -13,11 +13,10 @@ We intend to add "Trusted Publishing" when it is production-ready across all our
 Recorded 2026-08-28, while propagating this intent into
 [`MAINTAINERS.md`](../../MAINTAINERS.md) and
 [`SECURITY.md`](../../SECURITY.md): Trusted Publishing authenticates a
-*CI workflow run* to crates.io. It has no meaning for a human running
-`cargo publish` at their own terminal, which is what actually happens in
-this workspace today — [`GOVERNANCE.md`](../../GOVERNANCE.md) states it
-as a rule, not a habit: "a release is a decision, not an automation; no
-workflow publishes; one person runs `cargo publish`."
+*CI workflow run* to crates.io. It has no meaning for `cargo publish` run
+locally, at a terminal, which is what actually happens in this workspace
+today — [`GOVERNANCE.md`](../../GOVERNANCE.md) states it as a rule, not
+a habit.
 
 Adopting Trusted Publishing as it exists today would therefore mean
 moving the publish step into a CI job first — a governance change, not
@@ -26,3 +25,14 @@ finding; it is a real prerequisite the intent did not yet name, so that
 whoever picks this up next does not have to rediscover it before
 deciding whether the governance change is one this project actually
 wants to make, separately from wanting the credential improvement.
+
+**Updated 2026-09-02: this gap did not close, though a related one
+did.** [`GOVERNANCE.md`](../../GOVERNANCE.md) now lets the maintainer
+direct an AI coding agent to run `cargo publish` for a release he has
+decided on, rather than only ever typing it himself. That is not the
+change this section is about: an agent running the command locally, on
+the maintainer's own machine, on his direction, is still not a CI
+workflow authenticating to crates.io over OIDC — the distinction this
+section draws (local terminal vs. CI job) survives unchanged; only which
+hands are allowed at the local terminal has widened. Trusted
+Publishing's actual prerequisite is still open.

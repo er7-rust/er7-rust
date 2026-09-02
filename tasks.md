@@ -472,6 +472,30 @@ pass:
       advisory's own "first patched version: 0.7.0". `pnpm check` (358
       files, 0 errors) and `pnpm build` both clean afterward.
 
+- [x] **Change governance: an AI coding agent may run `cargo publish`,
+      directed by the maintainer** — done 2026-09-02, on the maintainer's
+      explicit instruction after this agent surfaced the previous rule
+      (`GOVERNANCE.md`'s "one person runs `cargo publish`") and asked
+      which of two things a bare confirmation meant: a one-time exception,
+      or changing the rule itself. The maintainer chose the rule change.
+      `GOVERNANCE.md`'s "Release authority" section rewritten: the
+      decision to release stays the maintainer's alone, and no CI workflow
+      publishes on its own trigger either way — what changed is that the
+      maintainer's own hands no longer have to be the ones typing
+      `cargo publish`; he may direct an agent to run it for a release he
+      has decided on. `MAINTAINERS.md`'s parallel description (the
+      Trusted Publishing prerequisite discussion, which quoted the old
+      rule verbatim) and `spec/trusted-publishing/index.md` §7.1 (which
+      also quoted it, and reasons about "a human running `cargo publish`
+      at their own terminal") both updated in the same change, rather than
+      left as stale quotations of a rule that no longer reads that way.
+      §7.1 gained a dated note distinguishing what did and did not change:
+      Trusted Publishing's own prerequisite — moving the publish step
+      into a CI job, authenticated over OIDC — did **not** close; an agent
+      running the command locally, on the maintainer's machine, on his
+      direction, is still not a CI workflow run, so that gap this section
+      names is exactly as open as before.
+
 ## Trademarks
 
 HL7®, and FHIR® are the registered trademarks of Health Level Seven
