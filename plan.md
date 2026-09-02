@@ -128,9 +128,19 @@ posture. Open items for each are in `tasks.md`.
 
 ## Risks & watch items
 
-- The trademark sweep is committed, but the *published* crates predate it:
-  the compliance posture in crate doc-comments and manifests reaches
-  crates.io only with each crate's next release.
+- ~~The trademark sweep is committed, but the *published* crates predate
+  it: the compliance posture in crate doc-comments and manifests reaches
+  crates.io only with each crate's next release.~~ **Stale as of
+  2026-09-02, and had been since 2026-08-29.** The sweep landed
+  2026-08-26 (`2215514`); every crate's *next* release already carries it
+  — `er7` 0.2.1, `serde-er7` 0.2.0, and `er7-redact` 0.3.0 all published
+  2026-08-29, three days after, and today's `serde-er7` 0.3.0 and
+  `er7-redact` 0.4.0 releases confirm it again. Checked against crates.io
+  version timestamps directly (`GET /api/v1/crates/<c>/versions`), not
+  assumed from the CITATION.cff dates this file otherwise cites — a claim
+  found stale while looking at something else, per rule 2 of
+  `spec/professionalization/index.md`, not a scheduled audit of this
+  line.
 - SECURITY.md's "checkable properties" now have a CI workflow behind them:
   its first hosted run went green 2026-08-26, and as of 2026-09-02 it has
   39 runs, 38 green (`gh run list -R er7-rust/er7-rust --workflow=ci.yml
