@@ -15,6 +15,31 @@ raised minimum supported Rust version, which is always a breaking change
 and never lands in a patch
 ([`spec/rust-msrv-n-minus-2/index.md`](spec/rust-msrv-n-minus-2/index.md)).
 
+## 2026-09-02 — `serde-er7` 0.3.0
+
+### Added
+
+- **`Strict<T>` (`T` in `Message`, `Segment`, `Separators`): opt-in
+  `deny_unknown_fields`-style deserialization.** The plain types keep
+  rule S8's tolerance unconditionally — deserializing `Message`, `Segment`,
+  or `Separators` directly still ignores a key it does not recognize, the
+  same as before this release. `Strict<T>` is a separate, additive entry
+  point for a caller who wants the opposite for one particular call, such
+  as validating a hand-written JSON fixture: it reports an unrecognized
+  key with `serde::de::Error::unknown_field`, naming the key and what it
+  could have meant, instead of ignoring it. Strictness nests —
+  `Strict<Message>` also catches a typo inside a segment or the separators
+  object it contains, not only at the top level. Two distinct things
+  improve over the plain type: a typo on a *required* key now names the
+  actual mistake instead of a generic "missing field" that never mentions
+  it, and a typo on the one *optional* key this crate has
+  (`Separators::truncation`) is caught at all, where the plain type
+  silently defaults it to `None`. Follows the same `Deref`/`DerefMut`/
+  `From`-both-ways convention every other wrapper type in this crate
+  carries, plus a delegating `Serialize`. S13,
+  [`serde-er7` §11](serde-er7/spec/11-strict-mode/index.md). New example:
+  `examples/catch_a_typo_with_strict.rs`.
+
 ## 2026-08-30 — `er7-redact` 0.4.0
 
 ### Changed
