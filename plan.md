@@ -143,11 +143,12 @@ posture. Open items for each are in `tasks.md`.
   line.
 - SECURITY.md's "checkable properties" now have a CI workflow behind them:
   its first hosted run went green 2026-08-26, and as of 2026-09-02 it has
-  39 runs, 38 green (`gh run list -R er7-rust/er7-rust --workflow=ci.yml
+  44 runs, 43 green (`gh run list -R er7-rust/er7-rust --workflow=ci.yml
   --limit 200 --json conclusion`), with the one failure — the same
   `61eb30d` flaky CLI-test race — root-caused and fixed the same day it
-  happened. No longer a single-run proof of concept, and the run count has
-  grown by five since the last time this line was checked (2026-08-30).
+  happened. No longer a single-run proof of concept — and this line has
+  now been re-checked four times in one day (34, 39, 43, 44), entirely
+  from this session's own pushes; nothing here says it stopped moving.
 - Pseudonyms in `er7-redact` are FNV-1a and documented as not a security
   primitive — any outreach that touches de-identification must repeat that
   framing, not soften it.

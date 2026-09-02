@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Version | 1.6.0 |
+| Version | 1.7.0 |
 | Effective date | 2026-09-02 |
 | Status | Active |
 | Author and owner | Joel Parker Henderson, maintainer |
@@ -169,7 +169,7 @@ cargo +1.96 check --workspace --all-targets       # the MSRV floor
 What these controls do **not** prove is §12. A workflow
 ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs these gates
 on every push and pull request; its first hosted run went green
-2026-08-26, and as of 2026-09-02 it has run 43 times, 42 green
+2026-08-26, and as of 2026-09-02 it has run 44 times, 43 green
 (`gh run list -R er7-rust/er7-rust --workflow=ci.yml --limit 200 --json
 conclusion`) — a real, growing track record, not a single proof-of-concept
 run. The one failure (`61eb30d`) was a flaky CLI-test race, root-caused and
@@ -269,7 +269,7 @@ This section exists because a disclosure without one is marketing.
   upward, and it is still a boundary.
 - **The machine enforcement of the gates has a young but real history.** A
   CI workflow exists as of 2026-08-26 (`.github/workflows/ci.yml`); as of
-  2026-09-02 it has 43 hosted runs, 42 green, and the one failure was
+  2026-09-02 it has 44 hosted runs, 43 green, and the one failure was
   root-caused and fixed the same day it happened rather than ignored. A
   gate that depends on one person remembering to run it is weaker than
   one a robot refuses to skip; this project now has the stronger kind,
@@ -347,6 +347,7 @@ FerroEHR project, whose AI statement is the structural model for this one.
 | 1.4.0 | 2026-08-30 | §7 and §12 updated a fourth time, same §13 trigger: "13 runs, 12 green" had become 34 runs, 33 green (`gh run list -R er7-rust/er7-rust --workflow=ci.yml --limit 200 --json conclusion`), and the document still said 13. Corrected; the one failure and its same-day fix are still named rather than dropped now that the run count has grown past it. |
 | 1.5.0 | 2026-09-02 | §7 and §12 updated a fifth time, same §13 trigger: "34 runs, 33 green" had become 39 runs, 38 green, and the document still said 34. Corrected; same one failure, still named. |
 | 1.6.0 | 2026-09-02 | §13's "the tooling changes materially" trigger, not the run-count one: `GOVERNANCE.md`'s Release authority changed the same day — the maintainer may now direct an agent to run `cargo publish` for a release he has decided on, rather than only ever typing it himself. §5 gained a table row, §6 gained a paragraph, and §11's prohibited-uses list now names publishing on an agent's own authority alongside committing on its own authority, which it already prohibited. §7 and §12's run count corrected again in the same change, the usual §13 run-count trigger, since it had moved again by the time this version landed. |
+| 1.7.0 | 2026-09-02 | §7 and §12 corrected a sixth time, same run-count trigger, same day: "43 runs, 42 green" (1.6.0, a few hours earlier) had become 44 runs, 43 green — this session's own commits, including 1.6.0's own publish, each push a new run. Corrected once more, together with `SECURITY.md`, `CONTRIBUTING.md`, `plan.md`, `spec/professionalization/index.md`, and `help/outreach/index.md` in the same pass, so all six agree. Noted here rather than left implicit: this number will be stale again by the time this very commit's own CI run concludes, and that is not a defect in the correction — see the note added to `plan.md` and `spec/professionalization/index.md` the same day. This is the last correction to this specific figure for one session; re-check on the next trigger, not on a timer. |
 
 ## Annex B. Machine-readable summary
 
@@ -355,7 +356,7 @@ is authoritative where the two could ever disagree.
 
 ```yaml
 ai-statement:
-  version: 1.6.0
+  version: 1.7.0
   last-updated: 2026-09-02
   vocabulary: w3c-ai-content-disclosure
   disclosure-default: ai-generated
