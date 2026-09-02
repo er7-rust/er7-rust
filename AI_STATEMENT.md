@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Version | 1.5.0 |
+| Version | 1.6.0 |
 | Effective date | 2026-09-02 |
 | Status | Active |
 | Author and owner | Joel Parker Henderson, maintainer |
@@ -101,6 +101,7 @@ anywhere in this document: no defensible method exists for measuring one.
 | The `spec/` documents | ai-generated | The normative layer. A rule in a spec is only there because a test backs it |
 | Documentation, the website, and this statement | ai-generated | Held to the repository's own prose rules |
 | What the crates do and do not do — scope, non-goals, what a release claims | none | Decided by the maintainer |
+| Whether and when to publish a release | none | Decided by the maintainer. As of 2026-09-02, the `cargo publish` keystroke itself is no longer reserved to his own hands — he may direct an agent to run it, for a release he has already decided on and named. See [`GOVERNANCE.md`'s Release authority](GOVERNANCE.md#release-authority) |
 | Accepting a contribution from someone else | none | Prohibited use; see §11 |
 
 **autonomous** appears in no row, and that is the point of the next
@@ -115,6 +116,17 @@ consequences — what a specification rule means, whether an incompleteness
 is acceptable, what a released version claims — are the maintainer's. A
 decision that exists only inside a tool session is not a decision this
 project made.
+
+**Publishing is a decision, and separately, a keystroke — and only the
+keystroke changed.** Until 2026-09-02, both were reserved to the
+maintainer's own hands: he alone decided whether to release, and he alone
+typed `cargo publish`. The decision is unchanged and stays his alone; what
+changed is that he may now direct an agent to run the command for a
+release he has already decided on and named, rather than always typing it
+himself. An agent still never decides to release, and never publishes on
+its own initiative or as a standing, unattended job — see the prohibition
+in §11 and [`GOVERNANCE.md`'s Release authority](GOVERNANCE.md#release-authority)
+for the rule itself.
 
 ## 7. Quality controls, and what each one proves
 
@@ -157,12 +169,15 @@ cargo +1.96 check --workspace --all-targets       # the MSRV floor
 What these controls do **not** prove is §12. A workflow
 ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs these gates
 on every push and pull request; its first hosted run went green
-2026-08-26, and as of 2026-09-02 it has run 39 times, 38 green
+2026-08-26, and as of 2026-09-02 it has run 43 times, 42 green
 (`gh run list -R er7-rust/er7-rust --workflow=ci.yml --limit 200 --json
 conclusion`) — a real, growing track record, not a single proof-of-concept
 run. The one failure (`61eb30d`) was a flaky CLI-test race, root-caused and
-fixed the same day (`574daaf`), not swept aside. [`MAINTAINERS.md`](MAINTAINERS.md)
-says the same thing.
+fixed the same day (`574daaf`), not swept aside. [`SECURITY.md`](SECURITY.md#security-relevant-design-decisions)
+carries the same figure in its checkable-properties table — corrected here
+to a cross-reference that actually holds it, in place of a prior version's
+"`MAINTAINERS.md` says the same thing," which by the time this was
+rechecked, `MAINTAINERS.md` no longer did.
 
 ## 8. Licensing and provenance of AI output
 
@@ -229,8 +244,12 @@ understood, explained on request, tested, and honest.
 In this project, AI **shall not**: commit or merge anything on its own
 authority; decide whether to accept a contribution from someone else; sign
 anything; decide what the HL7 v2 standard means where it is silent, or what
-a release claims; or weaken a test, an expectation, a spec rule, or a gate
-to make something pass.
+a release claims; decide to publish a release, or publish one as a
+standing job or on its own initiative — running `cargo publish` is
+permitted only when the maintainer has already decided on and named the
+release and directs the command for it, per [§6](#6-human-oversight); or
+weaken a test, an expectation, a spec rule, or a gate to make something
+pass.
 
 Two more, specific to this domain:
 
@@ -250,7 +269,7 @@ This section exists because a disclosure without one is marketing.
   upward, and it is still a boundary.
 - **The machine enforcement of the gates has a young but real history.** A
   CI workflow exists as of 2026-08-26 (`.github/workflows/ci.yml`); as of
-  2026-09-02 it has 39 hosted runs, 38 green, and the one failure was
+  2026-09-02 it has 43 hosted runs, 42 green, and the one failure was
   root-caused and fixed the same day it happened rather than ignored. A
   gate that depends on one person remembering to run it is weaker than
   one a robot refuses to skip; this project now has the stronger kind,
@@ -307,7 +326,9 @@ described here: [`LICENSE.md`](LICENSE.md);
 [`spec/rust-msrv-n-minus-2/index.md`](spec/rust-msrv-n-minus-2/index.md);
 each crate's own `spec/index.md`; the workspace and per-crate `AGENTS.md`;
 [`CONTRIBUTING.md`](CONTRIBUTING.md);
-[`MAINTAINERS.md`](MAINTAINERS.md).
+[`MAINTAINERS.md`](MAINTAINERS.md);
+[`GOVERNANCE.md`](GOVERNANCE.md), whose Release authority section §§5–6
+now cite directly.
 
 **Informative** — the sources this document's structure and positions draw
 on: the W3C AI Content Disclosure vocabulary; the ISO/IEC Directives Part 2
@@ -325,6 +346,7 @@ FerroEHR project, whose AI statement is the structural model for this one.
 | 1.3.0 | 2026-08-27 | §7 and §12 updated a third time: a claim in this document stopped being true, per §13's own trigger — "one run proves the gate executes" had become 13 runs, 12 green, and the document still said one. Corrected to the real figure, with the one failure named and its fix cited rather than omitted. |
 | 1.4.0 | 2026-08-30 | §7 and §12 updated a fourth time, same §13 trigger: "13 runs, 12 green" had become 34 runs, 33 green (`gh run list -R er7-rust/er7-rust --workflow=ci.yml --limit 200 --json conclusion`), and the document still said 13. Corrected; the one failure and its same-day fix are still named rather than dropped now that the run count has grown past it. |
 | 1.5.0 | 2026-09-02 | §7 and §12 updated a fifth time, same §13 trigger: "34 runs, 33 green" had become 39 runs, 38 green, and the document still said 34. Corrected; same one failure, still named. |
+| 1.6.0 | 2026-09-02 | §13's "the tooling changes materially" trigger, not the run-count one: `GOVERNANCE.md`'s Release authority changed the same day — the maintainer may now direct an agent to run `cargo publish` for a release he has decided on, rather than only ever typing it himself. §5 gained a table row, §6 gained a paragraph, and §11's prohibited-uses list now names publishing on an agent's own authority alongside committing on its own authority, which it already prohibited. §7 and §12's run count corrected again in the same change, the usual §13 run-count trigger, since it had moved again by the time this version landed. |
 
 ## Annex B. Machine-readable summary
 
@@ -333,7 +355,7 @@ is authoritative where the two could ever disagree.
 
 ```yaml
 ai-statement:
-  version: 1.5.0
+  version: 1.6.0
   last-updated: 2026-09-02
   vocabulary: w3c-ai-content-disclosure
   disclosure-default: ai-generated
@@ -349,6 +371,11 @@ ai-statement:
     standards-adjudication: none
     release-decisions: none
   commit-trailers: true
+  # cargo publish itself, not the decision to release (release-decisions
+  # above, unchanged at none): as of 2026-09-02 an agent may run it, but
+  # only when the maintainer has already decided on and named the
+  # release. See GOVERNANCE.md's Release authority.
+  agent-may-run-cargo-publish: true
   ships-ai-system: false
   autonomous-use: none
 ```
