@@ -82,6 +82,16 @@ The questions an evaluation asks, answered in one place each:
 | [`TRADEMARKS.md`](TRADEMARKS.md) | Whose trademarks are these, and what does this project claim about them? |
 | [`spec/`](spec/index.md) | What policy do the three crates share, and why? |
 
+**On AI oversight, specifically:** the maintainer alone decides what a
+crate does and what a released version claims — an agent scopes nothing
+on its own. As of 2026-09-02, an agent working in this repository (this
+project uses Claude Code) may, once the maintainer has scoped and named a
+release, judge whether it meets this project's own stated readiness
+criteria and run `cargo publish` for it, without a further per-release
+checkpoint. See [`GOVERNANCE.md`'s Release authority](GOVERNANCE.md#release-authority)
+for the rule and [`AI_STATEMENT.md`](AI_STATEMENT.md#6-human-oversight)
+for the full disclosure.
+
 ## License
 
 This workspace is multi-licensed: **MIT OR Apache-2.0 OR BSD-3-Clause OR

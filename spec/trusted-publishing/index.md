@@ -36,3 +36,21 @@ workflow authenticating to crates.io over OIDC — the distinction this
 section draws (local terminal vs. CI job) survives unchanged; only which
 hands are allowed at the local terminal has widened. Trusted
 Publishing's actual prerequisite is still open.
+
+**Updated again, later the same day: which hands widened further, the
+distinction did not.** [`GOVERNANCE.md`](../../GOVERNANCE.md) now also
+lets an agent working in this repository decide that a specific,
+already-scoped release is ready to publish: for `er7` and `er7-redact`,
+it may work through the readiness checklist each crate's own
+`help/releasing/index.md` states (`serde-er7` has no checklist of its
+own yet — its release still leans on the four checks and
+`cargo package --list` directly), decide the release meets it, and carry
+out the publish step itself — the
+maintainer no longer has to tick every box personally before
+`cargo publish` runs. That is still a decision made locally, by whoever
+the maintainer has directed, against this project's own stated criteria —
+not a CI workflow's own judgment, and not authenticated to crates.io by
+anything but the same long-lived token this section is about in the first
+place. Trusted Publishing's prerequisite — moving the publish step into
+an authenticated CI job — is unaffected by either widening and remains
+exactly as open as §7.1 originally found it.

@@ -168,11 +168,28 @@ standing job or its own initiative. See
 what this does and does not change about that separate question (a CI
 workflow authenticating to crates.io over OIDC, which this still is not).
 
+**Later the same day, a further step moved: an agent may now decide that
+a specific, already-scoped release is ready to publish.** Scoping and
+naming a release — what changes go in it, what version number it gets —
+is still the maintainer's alone, unconditionally; nothing here changes
+that. What moved is the readiness judgment for a release he has already
+scoped: does the code match the spec, do the four checks pass, is the
+version bump classified correctly against the table below, does
+`cargo package --list` show nothing surprising. That is a checklist
+against criteria this project already states, not a fresh decision, and
+an agent may now work through it, decide the release meets them, and —
+combined with the publish authority above — complete the release without
+a further per-release checkpoint. See
+[`AI_STATEMENT.md`](AI_STATEMENT.md#6-human-oversight) for the disclosure
+this binds, and [`AI_STATEMENT.md`](AI_STATEMENT.md#11-prohibited-uses)
+for what still is not permitted: deciding that a crate should release *at
+all* is not a readiness judgment, and stays outside this delegation.
+
 | Rule | Effect |
 | ---- | ------ |
 | While a crate is `0.x`, the minor bump is the one allowed to break | A `0.1.2 → 0.2.0` may change an API; a patch never does |
 | Raising the minimum Rust version is a breaking change | It never lands in a patch ([§2](spec/rust-msrv-n-minus-2/index.md)) |
-| A release is a decision, not an automation | No CI workflow publishes on its own trigger; `cargo publish` runs only when the maintainer decides to release, whether he types it himself or directs an agent to |
+| A release is a decision, not an automation | No CI workflow publishes on its own trigger; the maintainer alone scopes and names a release, and either he or an agent he directs may then judge it ready and run `cargo publish` for it |
 | Yanking is reserved for genuinely dangerous versions | See [`SECURITY.md`](SECURITY.md) |
 
 Every release is recorded in [`CHANGELOG.md`](CHANGELOG.md), and the ones

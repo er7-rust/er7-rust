@@ -68,17 +68,18 @@ anyway, which is not the reduction it would look like.
 authenticates a *CI workflow run* to crates.io — it has no meaning for
 `cargo publish` run locally, at a terminal, which is what "Cuts releases"
 below actually means today, and still means as of 2026-09-02: the
-maintainer decides on a release, and either types the command himself or
-directs an agent working in this repository to type it for him — either
-way, on his own machine, never inside a CI job. That is what
+maintainer alone scopes and names a release, and either he or an agent he
+directs judges it ready and types the command — either way, on his own
+machine, never inside a CI job. That is what
 [`GOVERNANCE.md`](GOVERNANCE.md) states as a rule, not a habit: "no CI
-workflow publishes on its own trigger; `cargo publish` runs only when the
-maintainer decides to release, whether he types it himself or directs an
-agent to." Adopting Trusted Publishing as it exists today would mean
-moving the publish step into a CI job — a governance change, not a
-credential swap, and one this document is not pre-committing to just by
-naming the token as removable. That tension is not resolved here; it is
-named so the day this gets picked up, nobody has to rediscover it.
+workflow publishes on its own trigger; the maintainer alone scopes and
+names a release, and either he or an agent he directs may then judge it
+ready and run `cargo publish` for it." Adopting Trusted Publishing as it
+exists today would mean moving the publish step into a CI job — a
+governance change, not a credential swap, and one this document is not
+pre-committing to just by naming the token as removable. That tension is
+not resolved here; it is named so the day this gets picked up, nobody has
+to rediscover it.
 
 **Commits and tags are cryptographically signed as of 2026-08-27**, with
 the dedicated code-signing key in the publishing-identities table above —

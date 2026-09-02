@@ -496,6 +496,51 @@ pass:
       direction, is still not a CI workflow run, so that gap this section
       names is exactly as open as before.
 
+- [x] **Change governance further, same day: an agent may decide a
+      specific, already-scoped release is ready to publish** — done
+      2026-09-02, explicit maintainer instruction naming five places to
+      update: `AI_STATEMENT.md`, `GOVERNANCE.md`, `README.md`,
+      "documentation," and "spec." Distinguished carefully from the
+      earlier same-day change above, which only moved the `cargo publish`
+      *keystroke* — this one moves the *readiness judgment* that used to
+      gate it: given a release the maintainer has already scoped and
+      named (what changes, what version), an agent may now work through
+      this project's own stated readiness criteria (the four checks,
+      spec/code/test agreement, correct SemVer classification, a clean
+      `cargo package --list`) and decide the release meets them, then
+      publish it, without a further per-release checkpoint. What did not
+      move, stated explicitly in every file touched: deciding that a
+      crate should release *at all* is scoping, not readiness, and stays
+      the maintainer's alone, unconditionally.
+
+      `GOVERNANCE.md`'s Release authority section gained a second dated
+      paragraph and its rule-table row updated again. `AI_STATEMENT.md`
+      bumped 1.7.0 → 1.8.0: §5's single publish-related row split into
+      three (scope/claims still `none`; readiness and the keystroke both
+      `ai-assisted`) so the level column keeps meaning one thing per row;
+      §6 rewritten around three parts instead of two; §11's prohibited-use
+      wording narrowed from "decide to publish a release" (now too broad)
+      to "decide that a crate should release at all" (still prohibited),
+      with an explicit permitted-uses note added next to it so the
+      boundary reads as one list rather than two documents a reader has to
+      reconcile; Annex B gained `agent-may-decide-release-readiness: true`,
+      kept distinct from `agent-may-run-cargo-publish` (the earlier
+      change) and `release-decisions: none` (unaffected by both).
+      `README.md` (`index.md`) gained a short disclosure paragraph after
+      the project-documents table. "Documentation" read as each crate's
+      own release checklist — `er7/help/releasing/index.md` and
+      `er7-redact/help/releasing/index.md` both gained a note identifying
+      that checklist as the readiness criteria the other documents now
+      point to (`serde-er7` has no checklist of its own yet, named as
+      such rather than silently skipped). "Spec" read as
+      `spec/trusted-publishing/index.md` §7.1, which already carried the
+      matching note for the keystroke change — given a third dated update
+      in the same section rather than a new one, since it is the same
+      "which hands are allowed locally" question widening again, not a
+      new question; Trusted Publishing's own prerequisite (moving the
+      publish step into an authenticated CI job) is unaffected by either
+      widening and stated as still exactly as open as before.
+
 ## Trademarks
 
 HL7®, and FHIR® are the registered trademarks of Health Level Seven

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Version | 1.7.0 |
+| Version | 1.8.0 |
 | Effective date | 2026-09-02 |
 | Status | Active |
 | Author and owner | Joel Parker Henderson, maintainer |
@@ -100,8 +100,9 @@ anywhere in this document: no defensible method exists for measuring one.
 | Tests, fuzz targets, benchmarks | ai-generated | Held to the same authority as the code they exercise; §7 governs what happens when one fails |
 | The `spec/` documents | ai-generated | The normative layer. A rule in a spec is only there because a test backs it |
 | Documentation, the website, and this statement | ai-generated | Held to the repository's own prose rules |
-| What the crates do and do not do — scope, non-goals, what a release claims | none | Decided by the maintainer |
-| Whether and when to publish a release | none | Decided by the maintainer. As of 2026-09-02, the `cargo publish` keystroke itself is no longer reserved to his own hands — he may direct an agent to run it, for a release he has already decided on and named. See [`GOVERNANCE.md`'s Release authority](GOVERNANCE.md#release-authority) |
+| What the crates do and do not do — scope, non-goals, what a release claims | none | Decided by the maintainer. This is the one release-related row that stayed `none` through both changes below: an agent scopes nothing on its own |
+| Whether a specific, already-scoped release is ready to publish | ai-assisted | As of 2026-09-02, an agent may judge this against the project's own stated readiness criteria — the four checks, spec/code/test agreement, correct SemVer classification, a clean `cargo package --list` — once the maintainer has scoped and named the release. See [`GOVERNANCE.md`'s Release authority](GOVERNANCE.md#release-authority) |
+| Running `cargo publish` for a release already decided ready | ai-assisted | As of 2026-09-02, an agent may run the command itself. Same section |
 | Accepting a contribution from someone else | none | Prohibited use; see §11 |
 
 **autonomous** appears in no row, and that is the point of the next
@@ -117,15 +118,25 @@ is acceptable, what a released version claims — are the maintainer's. A
 decision that exists only inside a tool session is not a decision this
 project made.
 
-**Publishing is a decision, and separately, a keystroke — and only the
-keystroke changed.** Until 2026-09-02, both were reserved to the
-maintainer's own hands: he alone decided whether to release, and he alone
-typed `cargo publish`. The decision is unchanged and stays his alone; what
-changed is that he may now direct an agent to run the command for a
-release he has already decided on and named, rather than always typing it
-himself. An agent still never decides to release, and never publishes on
-its own initiative or as a standing, unattended job — see the prohibition
-in §11 and [`GOVERNANCE.md`'s Release authority](GOVERNANCE.md#release-authority)
+**Publishing has three parts: scoping a release, judging it ready, and
+running the command — and only the first is unconditionally the
+maintainer's.** Before 2026-09-02, all three were his alone. That day, the
+keystroke moved: he could direct an agent to run `cargo publish` for a
+release he had already decided on and named, but the readiness judgment
+stayed his. Later the same day, the readiness judgment moved too: given a
+release the maintainer has already scoped and named — what changes, what
+version — an agent may work through this project's own stated readiness
+criteria (the four checks, spec/code/test agreement, correct SemVer
+classification, a clean `cargo package --list`) and decide the release
+meets them, then run `cargo publish` for it, without a further per-release
+checkpoint from the maintainer.
+
+What did not move, either time: an agent never decides that a crate
+should release *at all* — scoping and naming a release is the maintainer's
+alone, unconditionally — never decides what a released version *claims*,
+and never publishes as a standing, unattended job or on its own
+initiative outside a session the maintainer is directing. See the
+prohibition in §11 and [`GOVERNANCE.md`'s Release authority](GOVERNANCE.md#release-authority)
 for the rule itself.
 
 ## 7. Quality controls, and what each one proves
@@ -244,12 +255,16 @@ understood, explained on request, tested, and honest.
 In this project, AI **shall not**: commit or merge anything on its own
 authority; decide whether to accept a contribution from someone else; sign
 anything; decide what the HL7 v2 standard means where it is silent, or what
-a release claims; decide to publish a release, or publish one as a
-standing job or on its own initiative — running `cargo publish` is
-permitted only when the maintainer has already decided on and named the
-release and directs the command for it, per [§6](#6-human-oversight); or
-weaken a test, an expectation, a spec rule, or a gate to make something
-pass.
+a release claims; decide that a crate should release *at all*, or publish
+as a standing job or on its own initiative outside a session the
+maintainer is directing; or weaken a test, an expectation, a spec rule, or
+a gate to make something pass.
+
+**Permitted, not prohibited, once the maintainer has scoped and named a
+release:** judging whether it meets this project's own stated readiness
+criteria, and running `cargo publish` for it — per [§6](#6-human-oversight),
+as of 2026-09-02. Stated here so the boundary reads as one list, not two
+documents that have to be reconciled by a reader.
 
 Two more, specific to this domain:
 
@@ -348,6 +363,7 @@ FerroEHR project, whose AI statement is the structural model for this one.
 | 1.5.0 | 2026-09-02 | §7 and §12 updated a fifth time, same §13 trigger: "34 runs, 33 green" had become 39 runs, 38 green, and the document still said 34. Corrected; same one failure, still named. |
 | 1.6.0 | 2026-09-02 | §13's "the tooling changes materially" trigger, not the run-count one: `GOVERNANCE.md`'s Release authority changed the same day — the maintainer may now direct an agent to run `cargo publish` for a release he has decided on, rather than only ever typing it himself. §5 gained a table row, §6 gained a paragraph, and §11's prohibited-uses list now names publishing on an agent's own authority alongside committing on its own authority, which it already prohibited. §7 and §12's run count corrected again in the same change, the usual §13 run-count trigger, since it had moved again by the time this version landed. |
 | 1.7.0 | 2026-09-02 | §7 and §12 corrected a sixth time, same run-count trigger, same day: "43 runs, 42 green" (1.6.0, a few hours earlier) had become 44 runs, 43 green — this session's own commits, including 1.6.0's own publish, each push a new run. Corrected once more, together with `SECURITY.md`, `CONTRIBUTING.md`, `plan.md`, `spec/professionalization/index.md`, and `help/outreach/index.md` in the same pass, so all six agree. Noted here rather than left implicit: this number will be stale again by the time this very commit's own CI run concludes, and that is not a defect in the correction — see the note added to `plan.md` and `spec/professionalization/index.md` the same day. This is the last correction to this specific figure for one session; re-check on the next trigger, not on a timer. |
+| 1.8.0 | 2026-09-02 | Explicit maintainer instruction, §13's "tooling changes materially" trigger: an agent may now decide that a specific, already-scoped release is ready to publish, not only run the command for one the maintainer judged ready himself (1.6.0). §5 split the single "whether and when to publish" row into three — scope/claims (still `none`), readiness (now `ai-assisted`), and running the command (already `ai-assisted`, unchanged) — so the level column keeps meaning one thing per row. §6 rewritten around three parts, not two: scoping (unconditionally the maintainer's), readiness, and the keystroke. §11's prohibited-uses list narrowed from "decide to publish a release" (now too broad — readiness is permitted) to "decide that a crate should release at all" (still prohibited — scoping is not), with an explicit permitted-uses note added in the same place so the boundary reads as one list. Annex B gained `agent-may-decide-release-readiness: true`, distinct from `agent-may-run-cargo-publish` (1.6.0) and `release-decisions: none` (unchanged, unaffected by both). |
 
 ## Annex B. Machine-readable summary
 
@@ -356,7 +372,7 @@ is authoritative where the two could ever disagree.
 
 ```yaml
 ai-statement:
-  version: 1.7.0
+  version: 1.8.0
   last-updated: 2026-09-02
   vocabulary: w3c-ai-content-disclosure
   disclosure-default: ai-generated
@@ -370,6 +386,8 @@ ai-statement:
     documentation: ai-generated
     review: none
     standards-adjudication: none
+    # Whether a crate releases at all, and what a released version
+    # claims — unaffected by either field below.
     release-decisions: none
   commit-trailers: true
   # cargo publish itself, not the decision to release (release-decisions
@@ -377,6 +395,12 @@ ai-statement:
   # only when the maintainer has already decided on and named the
   # release. See GOVERNANCE.md's Release authority.
   agent-may-run-cargo-publish: true
+  # Judging whether an already-scoped, already-named release meets this
+  # project's own stated readiness criteria — the four checks, spec/code/
+  # test agreement, correct SemVer classification. Also as of 2026-09-02,
+  # added later the same day. Still requires the maintainer to have
+  # scoped and named the release first; see release-decisions above.
+  agent-may-decide-release-readiness: true
   ships-ai-system: false
   autonomous-use: none
 ```

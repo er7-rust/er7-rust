@@ -5,6 +5,17 @@
 The policy behind these steps is
 [`AGENTS/release.md`](../../AGENTS/release.md).
 
+**This checklist is the readiness criteria [`GOVERNANCE.md`'s Release
+authority](../../GOVERNANCE.md#release-authority) refers to.** As of
+2026-09-02, once the maintainer has scoped and named a release (what
+changes, what version), an agent working in this repository may work
+through §§1–4 below, decide the release meets them, and carry out §5
+itself — the maintainer no longer has to confirm every step personally
+before `cargo publish` runs. Scoping and naming the release in the first
+place stays the maintainer's alone; see
+[`AI_STATEMENT.md`](../../AI_STATEMENT.md#6-human-oversight) for the full
+disclosure.
+
 ## 1. Confirm the tree is clean
 
 ```sh
