@@ -118,8 +118,8 @@ bin/check-trademarks                           # or: make check-trademarks
 ```
 
 CI (`.github/workflows/ci.yml`) runs the four checks, the MSRV build, and
-the trademark checker on every push and pull request — 34 hosted runs as of
-2026-08-30, 33 green (`gh run list -R er7-rust/er7-rust --workflow=ci.yml
+the trademark checker on every push and pull request — 39 hosted runs as of
+2026-09-02, 38 green (`gh run list -R er7-rust/er7-rust --workflow=ci.yml
 --limit 200 --json conclusion`), not a new, unproven workflow. Run the
 checks on your machine first anyway: CI catches what you missed, it is not
 a substitute for running them yourself before you push.

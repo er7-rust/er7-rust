@@ -33,15 +33,17 @@ reading the file named — not by recalling an earlier pass.
 | The trademark question is answered | **Met** | Unlike `hl7-rust`, whose crate is literally named `hl7` and sought written clearance from HL7® International before promoting under that name, nothing in this workspace's own names uses a word mark — [`TRADEMARKS.md`](../../TRADEMARKS.md) states so plainly, and it is what makes rule T4 of [`spec/hl7-trademarks-fair-use/`](../../spec/hl7-trademarks-fair-use/index.md) easy to keep. `bin/check-trademarks` passes across the tree, checked immediately before writing this row, and no written request to HL7 International is outstanding — none was needed |
 | The MSRV policy is documented, and is a genuine selling point to the integration-engineer audience | **Met** | [`spec/rust-msrv-n-minus-2/`](../../spec/rust-msrv-n-minus-2/index.md); already surfaced in [`INSTALL.md`](../../INSTALL.md) and [`COMPARISONS.md`](../../COMPARISONS.md). Hospital toolchains move in quarters — say so explicitly in any promotional copy, per [§3.2](../../spec/promote/index.md#32-what-we-have-to-promote) |
 | Dependency auditing runs, so a supply-chain question from audience C ([§3.1](../../spec/promote/index.md#31-who-we-are-actually-talking-to)) has an answer that is not "we haven't checked" | **Met**, 2026-08-27 | `deny.toml`, `.github/workflows/ci.yml`'s `deny` job, `.github/workflows/audit.yml`'s weekly rerun |
-| CI actually runs, and has a track record | **Partly met** | [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) runs on every push; per [`SECURITY.md`](../../SECURITY.md)'s own "what this project does not have" list, one green hosted run proves the gate executes, not yet a history. Not a blocker — the gate is that CI exists and runs, which rule 4 of the professionalization spec already required, not that it has aged |
+| CI actually runs, and has a track record | **Met**, re-checked 2026-09-02 | [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) runs on every push; `gh run list -R er7-rust/er7-rust --workflow=ci.yml --limit 200 --json conclusion` shows 39 hosted runs, 38 green — this row was "partly met" as of 2026-08-27, when the track record was one green run; per this page's own [re-checking](#re-checking-this-page) instructions, a row that no longer holds is fixed, not left standing |
 
 ## Verdict
 
-**All prerequisites this file gates are met as of 2026-08-27.** The one
-row marked "partly met" — CI's track record — is not something waiting for
-a decision or an action; it accrues automatically as pushes happen; see
-[`SECURITY.md`](../../SECURITY.md#what-this-project-does-not-have) for how
-this project already discloses that rather than overstating it.
+**All prerequisites this file gates are met.** The one row that stood at
+"partly met" as of 2026-08-27 — CI's track record — needed no decision or
+action to close: it accrued automatically as pushes happened, and reading
+the tree again on 2026-09-02 found it holding 39 hosted runs, 38 green,
+comfortably past "one green run." (`SECURITY.md`'s own "what this project
+does not have" list no longer names this gap either, closed there in an
+earlier pass — checked here rather than left as a stale cross-reference.)
 
 That means [`spec/promote/`](../../spec/promote/index.md)'s [ninety-day
 sequence](../../spec/promote/index.md#310-a-ninety-day-sequence) is
