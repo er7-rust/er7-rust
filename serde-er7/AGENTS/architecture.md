@@ -14,6 +14,7 @@ src/
 ├── component.rs            Component
 └── subcomponent.rs            Subcomponent   — the leaf
     separators.rs      Separators  (sibling of Message, not nested under it)
+    strict.rs           Strict<T>  (opt-in strict deserialization; see below)
     terminator.rs       Terminator (standalone; a render option, not tree data)
 ```
 
@@ -41,6 +42,19 @@ what each `Serialize`/`Deserialize` pair must produce and accept, and
 [`spec/06-ergonomics/index.md`](../spec/06-ergonomics/index.md) for why the
 pattern looks like this (in particular §6.3 on the orphan rule, which is
 *why* there is a wrapper at all).
+
+**`Strict<T>` (`src/strict.rs`) is the one exception to the pattern above.**
+It is `pub struct Strict<T>(pub T)`, generic over this crate's *own* types
+(`T` in `{Message, Segment, Separators}`), not over an `er7::X`. There is
+one `From<T> for Strict<T>` impl (generic), but the reverse `From<Strict<T>>
+for T` cannot be written generically — the orphan rule rejects it, since
+`T` would be a completely uncovered impl parameter — so each of the three
+supported types gets its own concrete `From<Strict<T>> for T` impl instead.
+`Serialize` is a single generic impl that just delegates to `T::serialize`,
+since strictness only changes how deserialization behaves. See
+`src/strict.rs`'s own doc comments and
+[`spec/06-ergonomics/index.md`](../spec/06-ergonomics/index.md) §6.5 for the
+full reasoning.
 
 ## Two shapes of implementation
 

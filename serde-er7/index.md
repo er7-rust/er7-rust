@@ -92,6 +92,11 @@ itself.
   `Deref`/`DerefMut` to its `er7` type, plus `From` conversions both ways,
   so `message.query(...)`, `message.segments`, and the rest of `er7`'s API
   work directly on a `Message` without unwrapping it first.
+- **Opt-in strict deserialization**: `Strict<Message>`, `Strict<Segment>`,
+  and `Strict<Separators>` reject an unrecognized field instead of
+  ignoring it — useful for catching a typo in a hand-written JSON fixture.
+  See [`docs/usage/`](docs/usage/index.md) or [`docs/api/`](docs/api/index.md)
+  for detail.
 
 ## What it deliberately does not do
 

@@ -70,6 +70,13 @@ break a consumer that only needs the fields it already understands. See
 [`spec/05-error-handling/index.md`](../../spec/05-error-handling/index.md)
 §5.2.
 
+Want the opposite — an unrecognized key reported as an error, to catch a
+typo in a hand-written fixture? Deserialize into
+[`Strict<T>`](../api/index.md#strict-deserialization) instead of `T`
+directly. The default stays tolerant either way; `Strict<T>` is a separate,
+opt-in type you reach for at the one call site that wants it. See
+[§11](../../spec/11-strict-mode/index.md).
+
 ## Why does `er7` itself not just depend on `serde` directly?
 
 `er7` has zero dependencies by design — it is meant to sit at the bottom of

@@ -25,7 +25,7 @@ See [`index.md`](index.md) for the human-oriented overview, and
 **This site is derived, not normative.** Every crate repository holds the
 source of truth for its own behaviour, in its `spec/` directory, with
 numbered rules and a test for each — `R1`–`R27` for `er7`, `D1`–`D24` for
-`er7-redact`, `S1`–`S12` for `serde-er7`. These pages explain and
+`er7-redact`, `S1`–`S13` for `serde-er7`. These pages explain and
 illustrate those specs; they do not define anything.
 
 So: **never state a behaviour here that the owning crate's spec does not
@@ -48,7 +48,7 @@ the matching section of the owning crate's spec:
 | `/cli/` | `er7` | §12 Command-line interface |
 | `/api/` | `er7` | §5 value tree, §11 errors, and `docs/api/index.md` |
 | `/er7-redact/` | `er7-redact` | §2 model, §3 actions, §4 preservation, §5 policies, §6 file format, §7 pseudonyms, §8 report, §10 CLI |
-| `/serde-er7/` | `serde-er7` | §1 purpose, §2 wire shapes, §4 round trip, §5 errors, §6 ergonomics |
+| `/serde-er7/` | `serde-er7` | §1 purpose, §2 wire shapes, §4 round trip, §5 errors, §6 ergonomics, §11 strict mode |
 | `/ecosystem/` | `er7` | §1.3 scope, §18.1 the layer boundary |
 | `/about/` | `er7` | §14 versioning, §15 metadata |
 

@@ -60,8 +60,8 @@ than just reading it:
 ```toml
 [dependencies]
 er7 = "0.2"
-# er7-redact = "0.3"   # only if you are redacting
-# serde-er7 = "0.2"    # only if you need Serde
+# er7-redact = "0.4"   # only if you are redacting
+# serde-er7 = "0.3"    # only if you need Serde
 ```
 
 None of these three know what a field *means* — no dictionary of segment
@@ -190,6 +190,24 @@ file, for a policy that should only ever redact by position.
 `Redactor::uncovered(&message)` returns the paths no rule names at all
 (text-carrying leaves only) — useful to check a policy's coverage
 independent of whether its posture is accepting or rejecting.
+
+**Cross a Serde boundary (JSON):**
+
+```rust
+let message = serde_er7::Message::parse(text)?;
+let json = serde_json::to_string(&message)?;
+let back: serde_er7::Message = serde_json::from_str(&json)?;
+```
+
+Hand-writing a JSON fixture instead of generating one? Parse it as
+`serde_er7::Strict<serde_er7::Message>` rather than plain `Message`. Two
+distinct wins, not one: a typo on a *required* key (`"feilds"` for
+`"fields"`) already fails with the plain type, but only as a generic
+"missing field `fields`" that never names the typo — `Strict<Message>`
+reports `` unknown field `feilds` `` instead. A typo on the one *optional*
+key this crate has (`separators.truncation`) is the case the plain type
+genuinely hides: it silently defaults to `None`, with no error at all,
+where `Strict<Message>` catches it.
 
 ## Where to look next
 

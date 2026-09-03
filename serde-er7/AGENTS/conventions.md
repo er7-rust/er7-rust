@@ -33,7 +33,11 @@ unmodified; this file only states what differs or adds to it.
 
 - **One wrapper type per `er7` level, no more, no fewer.** Do not
   introduce an intermediate type that does not correspond to something in
-  `er7`'s own tree.
+  `er7`'s own tree. `Strict<T>` is the documented exception: it does not
+  correspond to an `er7` level at all — it wraps three of this crate's
+  *own* types (`Message`, `Segment`, `Separators`) to opt into rejecting
+  unknown fields. See
+  [`spec/06-ergonomics/index.md`](../spec/06-ergonomics/index.md) §6.5.
 - **Public fields, always.** Every wrapper's inner value is `pub` (`pub
   struct Message(pub er7::Message)`), matching `er7`'s own "keep public
   fields public" rule and letting a caller who does not need `From`/`Deref`

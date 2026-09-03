@@ -26,9 +26,9 @@
         { "title": "er7-redact/index.md", "url": "er7-redact/index.md", "description": "Redact patient detail from an ER7 message without changing its shape." },
         { "title": "er7-redact/AGENTS.md", "url": "er7-redact/AGENTS.md", "description": "Agent entry point for er7-redact." },
         { "title": "er7-redact/spec/index.md", "url": "er7-redact/spec/index.md", "description": "er7-redact's own specification: policies, actions, pseudonyms, the rule index (D1-D24)." },
-        { "title": "serde-er7/index.md", "url": "serde-er7/index.md", "description": "Serialize and deserialize ER7 message trees with Serde." },
+        { "title": "serde-er7/index.md", "url": "serde-er7/index.md", "description": "Serialize and deserialize ER7 message trees with Serde, plus an opt-in `Strict<T>` for catching unknown-field typos." },
         { "title": "serde-er7/AGENTS.md", "url": "serde-er7/AGENTS.md", "description": "Agent entry point for serde-er7." },
-        { "title": "serde-er7/spec/index.md", "url": "serde-er7/spec/index.md", "description": "serde-er7's own specification: the wire shape per level, the rule index (S1-S12)." }
+        { "title": "serde-er7/spec/index.md", "url": "serde-er7/spec/index.md", "description": "serde-er7's own specification: the wire shape per level, the rule index (S1-S13)." }
       ]
     },
     {

@@ -81,7 +81,9 @@ Typo a required key while hand-writing a fixture like this (`"feilds"` for
 (`"truncation"`, on `separators`) and it fails silently instead, quietly
 defaulting to `None`. Deserialize into `serde_er7::Strict<Message>` to get
 an error naming the actual mistake in both cases — see
-[`docs/api/index.md`](../api/index.md#strict-deserialization).
+[`docs/api/index.md`](../api/index.md#strict-deserialization). Run
+`cargo run --example catch_a_typo_with_strict` to see both cases side by
+side, printed and asserted on.
 
 ## §3 The shape, worked through by hand
 

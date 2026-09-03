@@ -17,8 +17,15 @@
    requirement alone, so an out-of-date requirement would silently pull a
    different `er7` than what was tested.
 4. `examples/` all still run: `for e in round_trip_via_json
-   build_message_from_json inspect_a_segment_as_json; do cargo run
-   --example "$e"; done`.
+   build_message_from_json inspect_a_segment_as_json
+   catch_a_typo_with_strict; do cargo run --example "$e"; done`.
+
+## Who may run `cargo publish`
+
+The maintainer alone scopes and names a release; once he has, he may
+direct an agent to judge readiness against the checklist above and run
+`cargo publish` — see [`GOVERNANCE.md`](../../GOVERNANCE.md)'s "Release
+authority" section.
 
 ## Versioning
 

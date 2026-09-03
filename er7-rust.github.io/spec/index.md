@@ -53,7 +53,7 @@ test:
 | ----- | ---- | ----- |
 | `er7` | 19 sections | `R1`–`R27` |
 | `er7-redact` | 17 sections | `D1`–`D24` |
-| `serde-er7` | 10 sections | `S1`–`S12` |
+| `serde-er7` | 11 sections | `S1`–`S13` |
 
 **This site explains and illustrates those specifications.** It never
 defines behaviour, for any crate.

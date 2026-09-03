@@ -35,9 +35,9 @@ endorsement by HL7.
 - [er7-redact/index.md](er7-redact/index.md): Redact patient detail from an ER7 message without changing its shape.
 - [er7-redact/AGENTS.md](er7-redact/AGENTS.md): Agent entry point for er7-redact.
 - [er7-redact/spec/index.md](er7-redact/spec/index.md): er7-redact's own specification: policies, actions, pseudonyms, the rule index (D1-D24).
-- [serde-er7/index.md](serde-er7/index.md): Serialize and deserialize ER7 message trees with Serde.
+- [serde-er7/index.md](serde-er7/index.md): Serialize and deserialize ER7 message trees with Serde, plus an opt-in `Strict<T>` for catching unknown-field typos.
 - [serde-er7/AGENTS.md](serde-er7/AGENTS.md): Agent entry point for serde-er7.
-- [serde-er7/spec/index.md](serde-er7/spec/index.md): serde-er7's own specification: the wire shape per level, the rule index (S1-S12).
+- [serde-er7/spec/index.md](serde-er7/spec/index.md): serde-er7's own specification: the wire shape per level, the rule index (S1-S13).
 
 ## Agent skills
 
