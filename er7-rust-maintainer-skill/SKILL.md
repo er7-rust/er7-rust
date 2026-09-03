@@ -104,7 +104,16 @@ checklist: version bump rules (a `0.x` minor bump is the one allowed to
 break), `CHANGELOG.md`'s per-crate-dated entry format, and what
 `cargo publish` requires. Cutting a release is a deliberate decision, not
 a mechanical consequence of a task closing — say so rather than
-publishing as a side effect of finishing a task.
+publishing as a side effect of finishing a task. That decision — what
+ships, and what version it gets — stays the maintainer's alone,
+unconditionally. What an agent *may* now be directed to do, once the
+maintainer has made that decision: judge whether the scoped release meets
+this project's own stated readiness criteria (the four checks, spec/code/
+test agreement, correct SemVer classification, a clean
+`cargo package --list`), and, combined with the publish authority
+[`GOVERNANCE.md`](../GOVERNANCE.md)'s "Release authority" section
+describes, run `cargo publish` for it. Deciding that a crate should
+release *at all* is not part of that delegation.
 
 ---
 

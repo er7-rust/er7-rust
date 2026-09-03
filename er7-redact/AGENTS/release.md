@@ -44,3 +44,10 @@ negotiable in a release without editing that section first.
    synthetic.
 5. Version bumped in `Cargo.toml`, `CITATION.cff`, and the spec index's
    "Applies to" line.
+
+## Who may run `cargo publish`
+
+The maintainer alone scopes and names a release; once he has, he may
+direct an agent to judge readiness against the checklist above and run
+`cargo publish` — see [`GOVERNANCE.md`](../../GOVERNANCE.md)'s "Release
+authority" section.

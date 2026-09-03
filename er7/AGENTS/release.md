@@ -70,6 +70,18 @@ git push && git push --tags
 cargo publish
 ```
 
+**Who may run step 5.** Scoping and naming a release — what changes go
+in it, what version number it gets — is the maintainer's decision alone,
+unconditionally. Once he has made that decision, he may direct an AI
+coding agent to judge whether the release is ready (steps 1-2 above,
+`cargo package --list`, correct SemVer classification) and to run
+`cargo publish` for it, without a further per-release checkpoint. See
+[`GOVERNANCE.md`](../../GOVERNANCE.md)'s "Release authority" section for
+the full policy, and [`AI_STATEMENT.md`](../../AI_STATEMENT.md) §5, §6,
+and §11 for what oversight this still requires and what remains outside
+it — deciding that this crate should release *at all* is not part of the
+delegation.
+
 ## Checking what ships
 
 `cargo package --list` should show `src/`, `Cargo.toml`, `README.md`,
