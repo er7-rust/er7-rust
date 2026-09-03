@@ -24,7 +24,7 @@ the section that admitted it.
 | `Mask(char)` | `mask *` | `*********` | a value whose length is wanted and whose content is not |
 | `First(n)` | `first 4` | `PATI` | a birth date reduced to its year (`19610615` → `1961`) |
 | `Last(n)` | `last 4` | `1234` | an account number reduced to the digits a human matches on |
-| `Pseudonym` | `pseudonym` | `1f0b7a6d5c4e3b2a` | an identifier that must stay *linkable* across messages ([§7](../07-pseudonyms/index.md)) |
+| `Pseudonym` | `pseudonym` | `11a9d74f8a6a54a7` | an identifier that must stay *linkable* across messages ([§7](../07-pseudonyms/index.md)) |
 
 `Action::redacted()` is the shorthand for `Replace("REDACTED")`, and the
 placeholder every built-in policy uses.
