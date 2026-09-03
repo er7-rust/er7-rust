@@ -13,9 +13,10 @@ cargo doc --no-deps --open                  # build and open rustdoc
 cargo run --example round_trip_via_json     # ER7 → JSON → ER7
 cargo run --example build_message_from_json # JSON → ER7
 cargo run --example inspect_a_segment_as_json
+cargo run --example catch_a_typo_with_strict # Strict<T> rejects an unknown field
 
 cargo clippy --all-targets -- -D warnings   # lint
-cargo fmt                                   # format
+cargo fmt --check                           # format
 cargo rustdoc --lib -- -W missing-docs      # confirm every public item is documented
 ```
 

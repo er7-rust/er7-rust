@@ -17,7 +17,7 @@ cargo run -- --all-but-the-header samples/oru_r01.er7   # reject all but MSH
 cargo run --example redact_a_message        # run an example
 
 cargo clippy --all-targets -- -D warnings   # lint
-cargo fmt                                   # format
+cargo fmt --check                           # format
 cargo rustdoc --lib -- -W missing-docs      # confirm every public item is documented
 ```
 

@@ -114,7 +114,7 @@ cargo run -- --report samples/adt_a08.er7   # Show what would change
 cargo run -- --show-policy                  # The built-in policy, as a file
 cargo run --example redact_a_message        # Run an example
 cargo clippy --all-targets -- -D warnings   # Lint
-cargo fmt                                   # Format
+cargo fmt --check                           # Format
 cargo rustdoc --lib -- -W missing-docs      # Confirm every public item is documented
 ```
 

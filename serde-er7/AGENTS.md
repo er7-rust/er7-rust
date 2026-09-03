@@ -107,7 +107,7 @@ cargo test -- --nocapture                  # Show println!() output
 cargo doc --no-deps --open                 # Build and open rustdoc
 cargo run --example round_trip_via_json    # Run an example
 cargo clippy --all-targets -- -D warnings  # Lint
-cargo fmt                                  # Format
+cargo fmt --check                          # Format
 cargo rustdoc --lib -- -W missing-docs     # Confirm every public item is documented
 ```
 
