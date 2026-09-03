@@ -20,7 +20,8 @@
   const examples = [
     { name: 'round_trip_via_json', shows: 'Parse ER7, serialize to JSON, deserialize, and write the original text back out.' },
     { name: 'build_message_from_json', shows: 'The direction most tutorials skip: JSON in, ER7 text out.' },
-    { name: 'inspect_a_segment_as_json', shows: 'Serializing one segment, to see the shape each level chooses for itself.' }
+    { name: 'inspect_a_segment_as_json', shows: 'Serializing one segment, to see the shape each level chooses for itself.' },
+    { name: 'catch_a_typo_with_strict', shows: 'Strict<Message> reporting a mistyped key by name, where the plain type either gives a less specific error or, on the one optional key, none at all.' }
   ];
 </script>
 
@@ -28,7 +29,7 @@
   <title>{data.title}</title>
   <meta
     name="description"
-    content="Tutorial, help, and examples for serde-er7: Serialize and Deserialize implementations for every er7 type, so an HL7® v2 message tree can flow through JSON, YAML, or any Serde format."
+    content="Tutorial, help, and examples for serde-er7: Serialize and Deserialize implementations for every er7 type, so an HL7® v2 message tree can flow through JSON, YAML, or any Serde format. Includes Strict<T>, an opt-in deny_unknown_fields for catching typos in hand-written fixtures."
   />
 </svelte:head>
 
@@ -230,6 +231,10 @@ println!("{}", message.to_er7());`}</code></pre>
       An unknown field in an object is <strong>ignored</strong> rather than rejected, so a document
       that carries extra keys still loads. A missing required field is an error naming that field.
       Anything that parses is accepted — the same posture <code>er7</code> takes below its header.
+      That tolerance is unconditional for <code>Message</code>, <code>Segment</code>, and
+      <code>Separators</code> themselves; wrapping any of the three in <code>Strict&lt;T&gt;</code>
+      opts in to the opposite for one particular call — reporting an unrecognized key by name
+      instead of ignoring it — which is what you want validating a hand-written JSON fixture.
     </p>
   </div>
 </section>
@@ -238,7 +243,7 @@ println!("{}", message.to_er7());`}</code></pre>
   <h2 class="section-heading">Examples</h2>
   <div class="prose">
     <p>
-      Three runnable programs in the crate's <a href={`${crate.repository}/examples`}
+      Four runnable programs in the crate's <a href={`${crate.repository}/examples`}
         ><code>examples/</code></a
       > directory, each asserting its own results.
     </p>

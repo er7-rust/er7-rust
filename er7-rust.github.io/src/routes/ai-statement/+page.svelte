@@ -44,8 +44,14 @@
       documentation are <strong>ai-generated</strong> in the W3C AI Content Disclosure
       vocabulary&rsquo;s sense: AI-generated with human prompting and review. What the crates do
       and do not do &mdash; scope, non-goals, what a release claims &mdash; is decided by the
-      maintainer, with no AI involvement. Nothing is <strong>autonomous</strong>: no commit or
-      release is automated, and nothing lands on its own authority.
+      maintainer, with no AI involvement &mdash; deciding that a crate should release
+      <em>at all</em> stays his alone, unconditionally. As of 2026-09-02, once he has scoped and
+      named a release, an agent may judge whether it is ready against this project&rsquo;s own
+      stated criteria and run <code>cargo publish</code> for it; that is
+      <strong>ai-assisted</strong>, not <strong>autonomous</strong> &mdash; the document&rsquo;s
+      term for AI-generated without meaningful human oversight. Nothing is autonomous: no commit is
+      automated, no agent publishes as a standing job or on its own initiative, and nothing lands on
+      its own authority.
     </p>
     <p>
       <strong>One named human is accountable for every change</strong>, whatever tool produced the
@@ -70,7 +76,15 @@
     <ul>
       <li>committing or merging anything on its own authority, or signing anything;</li>
       <li>deciding whether to accept a contribution from someone else;</li>
-      <li>deciding what the HL7&reg; v2 standard means where it is silent, or what a release claims;</li>
+      <li>
+        deciding what the HL7&reg; v2 standard means where it is silent, or what a release claims;
+      </li>
+      <li>
+        deciding that a crate should release <em>at all</em>, or publishing as a standing job or on
+        its own initiative outside a session the maintainer is directing &mdash; judging whether an
+        already-scoped, maintainer-named release is ready, and running <code>cargo publish</code>
+        for it, is the one exception, permitted as of 2026-09-02;
+      </li>
       <li>weakening a test, an expectation, a spec rule, or a gate to make something pass;</li>
       <li>adding a dependency to any of the three crates;</li>
       <li>generating a sample or fixture by paraphrasing a real message &mdash; synthetic means constructed, not laundered.</li>

@@ -69,12 +69,6 @@
       detail: 'Did the candour read as rigour, or as a project protesting too much? Which document did you actually use?'
     },
     {
-      id: 'Q13',
-      title: 'Would "redact what you know" catch what you actually find in free text?',
-      detail:
-        'When you found an identifier in free text by hand, was it a value that also appeared at a named position — or something else entirely?'
-    },
-    {
       id: 'Q14',
       title: 'What does a defensible Safe Harbor statement need from a tool like this?',
       detail:
@@ -87,7 +81,7 @@
   <title>{data.title}</title>
   <meta
     name="description"
-    content="The specific feedback the ER7 Rust project is asking for: fourteen open questions, each recorded in a specification section, each with a decision a good answer would change."
+    content="The specific feedback the ER7 Rust project is asking for: thirteen open questions, each recorded in a specification section, each with a decision a good answer would change."
   />
 </svelte:head>
 

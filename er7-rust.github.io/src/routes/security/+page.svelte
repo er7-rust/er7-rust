@@ -119,7 +119,7 @@
     </p>
     <p>
       What the project does not have is named rather than omitted: no bug bounty, no second
-      responder, no third-party audit, no signed commits or tags, no certification of any kind. The
+      responder, no third-party audit, no certification of any kind. The
       full list, and the reasoning, is in the canonical policy.
     </p>
     <p>

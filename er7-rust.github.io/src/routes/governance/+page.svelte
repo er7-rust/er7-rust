@@ -29,9 +29,13 @@
       <strong>One person: the maintainer.</strong> There is no steering committee, no technical
       board, no voting, and no legal entity. This is a benevolent-dictator model, and naming it is
       more honest than implying a process. The dictator part is real: one person can accept a pull
-      request, publish a release, or change a repository setting, and nobody can overrule them. The
-      benevolent part is not a promise &mdash; it is a set of constraints anyone can check: a
-      decision about behaviour is written down before it is implemented, a declined idea is
+      request or change a repository setting, and nobody can overrule them. Publishing a release is
+      similar but not identical: the maintainer alone still decides <em>whether</em> a crate
+      releases at all &mdash; scoping and naming a release is his, unconditionally &mdash; but as of
+      2026-09-02 he may direct an AI coding agent to judge whether a release he has already scoped
+      meets this project's own stated readiness criteria and, if so, run <code>cargo publish</code>
+      for it. The benevolent part is not a promise &mdash; it is a set of constraints anyone can
+      check: a decision about behaviour is written down before it is implemented, a declined idea is
       recorded with its reasoning, a rule without a test fails the build, nothing merges
       automatically, and the project says what it does not have rather than omitting it.
     </p>

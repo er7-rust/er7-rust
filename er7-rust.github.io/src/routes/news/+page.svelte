@@ -50,6 +50,40 @@ Henderson. https://er7-rust.github.io`;
 </section>
 
 <section class="section">
+  <h2 class="section-heading-eyebrow">2026-09-02 · serde-er7 0.3.0</h2>
+  <h2 class="section-heading">A typo in a hand-written JSON fixture can now name itself</h2>
+  <div class="prose">
+    <p>
+      <code>Strict&lt;T&gt;</code> (for <code>Message</code>, <code>Segment</code>, and
+      <code>Separators</code>) is a new, opt-in wrapper that reports an unrecognized JSON key by
+      name instead of ignoring it &mdash; the plain types keep their unconditional tolerance for
+      an unknown field. Two cases improve: a typo on a required key now names the actual mistake
+      instead of a generic &ldquo;missing field&rdquo; that never mentions it, and a typo on the
+      one optional key this crate has (<code>Separators::truncation</code>) is caught at all,
+      where the plain type silently defaults it to <code>None</code>. Strictness nests, so
+      <code>Strict&lt;Message&gt;</code> catches a typo inside a segment or its separators, not
+      only at the top level.
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <h2 class="section-heading-eyebrow">2026-08-30 · er7-redact 0.4.0</h2>
+  <h2 class="section-heading">A redaction rule can now run a caller&rsquo;s own code</h2>
+  <div class="prose">
+    <p>
+      <code>Action</code> gained a ninth variant, <code>Custom</code>, reached through
+      <code>Action::custom(f)</code> &mdash; a closure with the same signature as
+      <code>Action::apply</code> itself, run at exactly the point a built-in action would run.
+      <strong>This is a breaking change</strong>: <code>Action</code> is not marked
+      non-exhaustive, so code matching it exhaustively needs a new arm. A worked example ships
+      alongside it: shifting an HL7&reg; timestamp by a per-patient offset, declined as a built-in
+      action but now expressible as a custom one.
+    </p>
+  </div>
+</section>
+
+<section class="section">
   <h2 class="section-heading-eyebrow">2026-08-29 · er7 0.2.0, 0.2.1 · serde-er7 0.2.0 · er7-redact 0.3.0</h2>
   <h2 class="section-heading">The floor moved to 1.96, and known values now get caught wherever they repeat</h2>
   <div class="prose">
