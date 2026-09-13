@@ -107,10 +107,18 @@ carries, or what any code table means. It does not validate, and it does
 not pick a wire format for you: that choice — `serde_json`, `serde_yaml`,
 anything else — is the caller's, every time.
 
-For the HL7 v2.5 dictionary layer, see the sibling crates
-[`hl7-2-from-er7-into-xml`](https://github.com/hl7-rust/hl7-rust/tree/main/hl7-2-from-er7-into-xml)
+For the HL7 v2 dictionary layer, see the sibling crates
+[`hl7-2`](https://github.com/hl7-rust/hl7-rust/tree/main/hl7-2),
+[`hl7-2-from-er7-into-xml`](https://github.com/hl7-rust/hl7-rust/tree/main/hl7-2-from-er7-into-xml),
 and
 [`hl7-2-from-er7-into-json`](https://github.com/hl7-rust/hl7-rust/tree/main/hl7-2-from-er7-into-json).
+For Serde support *at* that layer — `hl7-2`'s message, its
+dictionary-named tree, and its validation findings — see
+[`serde-hl7-v2`](https://github.com/hl7-rust/hl7-rust/tree/main/serde-hl7-v2),
+built the way this crate is built, one layer up: it serializes a message
+as its ER7 text plus release rather than repeating this crate's tree
+shape, and its tree is the dictionary's view, with `PID.5` and `XPN.1`
+for names.
 
 ## Documentation
 
@@ -136,6 +144,7 @@ is at <https://er7-rust.github.io/serde-er7/>.
 | **`serde-er7`** | this crate: Serde support for every type in that tree |
 | [`er7-redact`](https://crates.io/crates/er7-redact) | redaction: remove patient detail without changing the shape of the message |
 | [`hl7-2-from-er7-into-xml`](https://crates.io/crates/hl7-2-from-er7-into-xml) / [`hl7-2-from-er7-into-json`](https://crates.io/crates/hl7-2-from-er7-into-json) | the HL7 v2.5 dictionary: data types, message structures, and a renderer |
+| [`serde-hl7-v2`](https://crates.io/crates/serde-hl7-v2), via the [`serde-hl7`](https://crates.io/crates/serde-hl7) umbrella | this crate's pattern applied to `hl7-2`: Serde for the dictionary layer's message, tree, and diagnostics |
 
 The boundary between them is `er7`'s own spec §1.3.1, and they are
 presented together at <https://er7-rust.github.io/ecosystem/>.
