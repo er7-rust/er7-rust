@@ -14,7 +14,6 @@
 :root {
   --lily-primary: #2563eb;
   --lily-primary-hover: #1d4ed8;
-  --lily-accent: #005eb8;
   --lily-danger: #dc2626;
   --lily-warning: #f59e0b;
   --lily-success: #16a34a;
@@ -207,10 +206,7 @@ kbd {
 .hero h1 {
   font-size: clamp(2.25rem, 5vw, 3.5rem);
   margin: 0.5rem 0 1rem;
-  background: linear-gradient(135deg, var(--lily-primary), var(--lily-accent));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--lily-primary);
 }
 .hero-tagline {
   font-size: 1.25rem;
