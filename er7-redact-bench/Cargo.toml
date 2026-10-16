@@ -18,7 +18,7 @@ er7 = { path = "../er7", version = "0" }
 er7-redact = { path = "../er7-redact", version = "0" }
 
 [dev-dependencies]
-criterion = { version = "0.5", default-features = false, features = ["cargo_bench_support"] }
+criterion = { version = "0.8", default-features = false, features = ["cargo_bench_support"] }
 
 [lib]
 path = "src/lib.rs"
