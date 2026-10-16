@@ -15,6 +15,13 @@ raised minimum supported Rust version, which is always a breaking change
 and never lands in a patch
 ([`spec/rust-msrv-n-minus-2/index.md`](spec/rust-msrv-n-minus-2/index.md)).
 
+## 2026-10-16 — `er7` 0.2.2, `serde-er7` 0.3.1, `er7-redact` 0.4.1
+
+### Changed
+
+- Dependency refresh only (`cargo update`; benchmark crates move to
+  `criterion` 0.8). No API or behavior changes.
+
 ## 2026-09-02 — `serde-er7` 0.3.0
 
 ### Added
