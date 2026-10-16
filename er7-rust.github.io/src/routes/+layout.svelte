@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import { links, navLinks, themes, shareTargets } from '$lib/site';
+  import { links, navLinks, themes, shareTargets } from '#lib/site.js';
   import ThemePicker from 'lily-design-system-svelte-theme-picker';
   import TextSizePicker from 'lily-design-system-svelte-text-size-picker';
   import SharePicker from 'lily-design-system-svelte-share-picker';

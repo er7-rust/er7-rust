@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { links } from '$lib/site';
+  import { links } from '#lib/site.js';
   import type { PageData } from './$types';
 
   let { data }: { data: PageData } = $props();
