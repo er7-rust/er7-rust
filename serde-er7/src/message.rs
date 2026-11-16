@@ -434,6 +434,6 @@ mod tests {
         let json = r#"{"separators":{"field":"|","component":"^","repetition":"~",
             "escape":"\\","subcomponent":"&","truncation":null},"segments":[],"extra":true}"#;
         let back: Message = serde_json::from_str(json).unwrap();
-        assert!(back.segments.is_empty());
+        assert_eq!(back.segments, [] as [er7::Segment; 0]);
     }
 }

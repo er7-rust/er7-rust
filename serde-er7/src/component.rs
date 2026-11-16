@@ -145,6 +145,6 @@ mod tests {
         let json = serde_json::to_string(&component).unwrap();
         assert_eq!(json, "[]");
         let back: Component = serde_json::from_str(&json).unwrap();
-        assert!(back.subcomponents.is_empty());
+        assert_eq!(back.subcomponents, [] as [er7::Subcomponent; 0]);
     }
 }

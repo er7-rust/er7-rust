@@ -1124,7 +1124,10 @@ mod tests {
         assert_eq!(message.query("PID-5.1.9").unwrap(), None);
         assert_eq!(message.query("ZZZ-1").unwrap(), None);
         assert_eq!(message.query("OBX[9]-1").unwrap(), None);
-        assert!(message.query_all("PID-99").unwrap().is_empty());
+        assert_eq!(
+            message.query_all("PID-99").unwrap(),
+            [] as [std::string::String; 0]
+        );
         // Two OBX segments, but only one carried a sixth field.
         assert_eq!(message.segments_named("OBX").count(), 2);
         assert_eq!(message.query_all("OBX-6").unwrap(), vec!["mg/dL"]);

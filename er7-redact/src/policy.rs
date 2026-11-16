@@ -1062,12 +1062,12 @@ mod tests {
         // Spec §5.6: no rules and no field table, and the two defaults
         // that match what each one claims about itself.
         let accept = Policy::accept_all();
-        assert!(accept.rules.is_empty());
+        assert_eq!(accept.rules, [] as [Rule; 0]);
         assert_eq!(accept.posture, Posture::Accept);
         assert_eq!(accept.unrecognised, Unrecognised::Pass);
 
         let reject = Policy::reject_all();
-        assert!(reject.rules.is_empty());
+        assert_eq!(reject.rules, [] as [Rule; 0]);
         assert_eq!(reject.posture, Posture::Reject(Action::redacted()));
         assert_eq!(reject.unrecognised, Unrecognised::Apply(Action::Mask('*')));
 
