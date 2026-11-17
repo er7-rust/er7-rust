@@ -174,7 +174,7 @@ pnpm check       # svelte-check: types and accessibility
 pnpm build       # prerender; fails on a dead internal link
 ```
 
-`svelte.config.js` sets `strict: true`, so **a link to a page that does
+`vite.config.ts` sets `strict: true`, so **a link to a page that does
 not exist fails the build**. That is deliberate — it is the check that
 keeps the site's cross-references honest. Do not add `handleHttpError` to
 silence it; add the missing page, or fix the link.

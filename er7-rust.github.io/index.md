@@ -151,7 +151,7 @@ deploys on every push to *that* repository's `main`
 and so becomes the sibling repo's root workflow once exported). The
 repository is named `er7-rust.github.io` under the `er7-rust`
 organization, so the site is served from the **domain root** — which is
-why `svelte.config.js` sets no `paths.base`. A project-pages repository
+why `vite.config.ts` sets no `paths.base`. A project-pages repository
 would need one.
 
 One-time setup in the sibling repository's settings: **Settings → Pages
@@ -166,7 +166,7 @@ One-time setup in the sibling repository's settings: **Settings → Pages
 - Adding a route means adding a directory under `src/routes/`, a link in
   `navLinks`, a row in the routes table above, and an entry in
   `static/sitemap.xml`.
-- `svelte.config.js` sets `strict: true`, so a link to a page that does
+- `vite.config.ts` sets `strict: true`, so a link to a page that does
   not exist **fails the build** rather than shipping a dead link.
 
 ## License

@@ -48,7 +48,7 @@ same content addressed by URL.
 
 `er7-rust.github.io/static/llms.txt` and `.../static/llms.json` are the
 canonical **site** files: `static/` is the one directory SvelteKit's
-`adapter-static` copies to the built site verbatim (`svelte.config.js`),
+`adapter-static` copies to the built site verbatim (`vite.config.ts`),
 which is exactly where `robots.txt` and `sitemap.xml` already live and
 exactly what makes a well-known path like `/llms.txt` actually fetchable
 at the published URL — the whole point of the convention.

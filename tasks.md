@@ -349,7 +349,7 @@ pass:
       handling against a dependency version it was not tested with, to
       close a hole that is very likely unreachable anyway: this site is
       prerendered by `adapter-static` with no server at runtime
-      (`svelte.config.js` says so explicitly), so the vulnerable code path
+      (`vite.config.ts` says so explicitly), so the vulnerable code path
       — cookie name/path/domain validation in server-side request
       handling — never executes in production. That trade is not this
       agent's to make unilaterally; the alert is left open, and whether to
