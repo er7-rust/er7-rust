@@ -44,3 +44,8 @@ site-dev:
 .PHONY: site-check
 site-check:
 	cd $(SITE) && pnpm check
+
+# Check and test on the minimum supported Rust version (N-2) and on N-1.
+.PHONY: test-minimum-supported-rust-version
+test-minimum-supported-rust-version:
+	bin/make-test-minimum-supported-rust-version
