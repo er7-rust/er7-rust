@@ -94,7 +94,7 @@ The same path for everyone, maintainer included:
    cargo clippy --workspace --all-targets -- -D warnings
    cargo fmt --check
    cargo rustdoc -p er7 --lib -- -W missing-docs
-   cargo +1.96 check --workspace --all-targets
+   cargo +1.98 check --workspace --all-targets
    bin/check-trademarks
    ```
 

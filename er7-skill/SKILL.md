@@ -59,9 +59,9 @@ than just reading it:
 
 ```toml
 [dependencies]
-er7 = "0.2"
-# er7-redact = "0.4"   # only if you are redacting
-# serde-er7 = "0.3"    # only if you need Serde
+er7 = "0.3"
+# er7-redact = "0.5"   # only if you are redacting
+# serde-er7 = "0.4"    # only if you need Serde
 ```
 
 None of these three know what a field *means* — no dictionary of segment

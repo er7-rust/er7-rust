@@ -44,7 +44,7 @@ test suite needs a data format.
 | Field | Value |
 | ----- | ----- |
 | Edition | 2024 |
-| MSRV | 1.96 — current stable minus two, matching `er7` |
+| MSRV | 1.98 — current stable minus two, matching `er7` |
 | Targets | anything `std` builds for; no platform-specific code |
 | `no_std` | not supported; the crate owns `String`s throughout |
 

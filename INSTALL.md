@@ -120,7 +120,7 @@ Mirrors of the repository are on
 
 | | |
 |---|---|
-| Rust | Current stable minus two releases. Today that is **1.96**. |
+| Rust | Current stable minus two releases. Today that is **1.98**. |
 | Edition | 2024, which needs 1.85 — no longer the binding constraint. |
 | Platform | Anything Rust targets. No platform-specific code, no C dependency, no build script. |
 | Network | None, at build time or run time. |
@@ -134,7 +134,7 @@ library that cannot be adopted.
 Check a build against the floor with:
 
 ```sh
-cargo +1.96 check --workspace --all-targets
+cargo +1.98 check --workspace --all-targets
 ```
 
 If you do not have Rust: <https://rustup.rs>.

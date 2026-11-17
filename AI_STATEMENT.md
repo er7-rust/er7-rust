@@ -150,7 +150,7 @@ cargo test --workspace                            # unit, integration, and doc t
 cargo clippy --workspace --all-targets -- -D warnings   # pedantic lints, denied
 cargo fmt --check                                 # formatting
 cargo rustdoc -p er7 --lib -- -W missing-docs     # every public item documented
-cargo +1.96 check --workspace --all-targets       # the MSRV floor
+cargo +1.98 check --workspace --all-targets       # the MSRV floor
 ```
 
 - **Spec authority.** Each crate's `spec/index.md` is the single source of

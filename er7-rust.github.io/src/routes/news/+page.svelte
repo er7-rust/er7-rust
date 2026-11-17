@@ -42,7 +42,7 @@ Henderson. https://er7-rust.github.io`;
         <tr><th>Maintainers</th><td>One. The bus factor is stated plainly in <code>MAINTAINERS.md</code>.</td></tr>
         <tr><th>Scope</th><td>The ER7 pipe-hat <em>encoding</em>. Not validation, not a typed segment model, not a transport, not the HL7® FHIR® standard.</td></tr>
         <tr><th>Runtime dependencies</th><td><code>er7</code> zero, <code>er7-redact</code> one, <code>serde-er7</code> two</td></tr>
-        <tr><th>Rust</th><td>Current stable minus two releases; today 1.96</td></tr>
+        <tr><th>Rust</th><td>Current stable minus two releases; today 1.98</td></tr>
         <tr><th>License</th><td>MIT, Apache-2.0, BSD-3-Clause, GPL-2.0-only, or GPL-3.0-only</td></tr>
       </tbody>
     </table>

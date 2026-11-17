@@ -56,7 +56,7 @@ Anything that *would* require knowing the version is out of scope by R24.
 | Item | Value |
 | ---- | ----- |
 | Edition | 2024 |
-| Minimum supported Rust version | 1.96 — current stable minus two releases |
+| Minimum supported Rust version | 1.98 — current stable minus two releases |
 | Target support | any target with `std`; no platform-specific code |
 | `no_std` | not supported — the crate uses `String` and `Vec` throughout |
 

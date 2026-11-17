@@ -15,6 +15,17 @@ raised minimum supported Rust version, which is always a breaking change
 and never lands in a patch
 ([`spec/rust-msrv-n-minus-2/index.md`](spec/rust-msrv-n-minus-2/index.md)).
 
+## 2026-11-17 — `er7` 0.3.0, `serde-er7` 0.4.0, `er7-redact` 0.5.0
+
+### Changed
+
+- **Breaking, all three crates: the MSRV moved from N-2 at the time, 1.96,
+  to 1.98** (current stable is 1.100). `rust-version` bumped in each
+  `Cargo.toml`; docs and CI references updated. Verified with
+  `cargo +1.98 check --workspace --all-targets`.
+- Dependency refresh (`cargo update`, website lockfile). No API or behavior
+  changes.
+
 ## 2026-10-16 — `er7` 0.2.2, `serde-er7` 0.3.1, `er7-redact` 0.4.1
 
 ### Changed

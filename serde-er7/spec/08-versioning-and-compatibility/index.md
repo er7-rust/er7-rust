@@ -53,7 +53,7 @@ terms of `er7`'s types, so a break there is a break here too.
 | Item | Value |
 | ---- | ----- |
 | Edition | 2024 |
-| MSRV | 1.96 — current stable minus two releases |
+| MSRV | 1.98 — current stable minus two releases |
 | `no_std` | not supported; the wrapper types own `er7`'s `String`-bearing tree |
 
 The MSRV comes from the workspace-wide **N-2** policy — this family

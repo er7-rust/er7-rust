@@ -38,7 +38,7 @@
         <tr><th>Purpose</th><td>Parse, query, edit, and write HL7 v2 messages in ER7</td></tr>
         <tr><th>Trademarks</th><td><a href="/trademarks/">HL7 is a mark of Health Level Seven International</a></td></tr>
         <tr><th>Layer</th><td>Encoding only — no dictionary, no validation, no transport</td></tr>
-        <tr><th>Language</th><td>Rust, edition 2024, MSRV 1.96 — current stable minus two</td></tr>
+        <tr><th>Language</th><td>Rust, edition 2024, MSRV 1.98 — current stable minus two</td></tr>
         <tr><th>Runtime dependencies</th><td>none, and that is a guarantee</td></tr>
         <tr><th>License</th><td>MIT, Apache-2.0, BSD-3-Clause, GPL-2.0-only, or GPL-3.0-only</td></tr>
         <tr><th>Source</th><td><a href="{links.repository}/tree/main/er7">github.com/er7-rust/er7-rust/tree/main/er7</a></td></tr>

@@ -17,7 +17,7 @@ readers rather than for a repository, is at <https://er7-rust.github.io/news/>.
 | Maintainers | One — [`MAINTAINERS.md`](MAINTAINERS.md) states the bus factor plainly |
 | Scope | The ER7 pipe-hat *encoding*: parse, query, edit, write, redact, and Serde. Not validation, not a typed segment model, not a transport, not the HL7® FHIR® standard |
 | Runtime dependencies | `er7` zero, `er7-redact` one, `serde-er7` two |
-| Rust | Current stable minus two releases; today 1.96 |
+| Rust | Current stable minus two releases; today 1.98 |
 | License | MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only |
 
 ## 2026-08-29 — `er7-redact` now catches a repeated identifier wherever it appears

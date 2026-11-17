@@ -113,7 +113,7 @@ cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
 cargo fmt --check
 cargo rustdoc -p er7 --lib -- -W missing-docs
-cargo +1.96 check --workspace --all-targets   # the MSRV floor
+cargo +1.98 check --workspace --all-targets   # the MSRV floor
 bin/check-trademarks                           # or: make check-trademarks
 ```
 
