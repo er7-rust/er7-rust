@@ -2,13 +2,21 @@
 
 # §7 Trusted Publishing
 
-Trusted Publishing is a secure way to publish your Rust crates from CI/CD platforms like GitHub Actions and GitLab CI/CD without manually managing API tokens. It uses OpenID Connect (OIDC) to verify that your workflow is running from your repository, then provides a short-lived token for publishing.
+Trusted Publishing is a secure way to publish Rust crates from supported
+CI/CD platforms without manually managing API tokens. It uses OpenID
+Connect (OIDC) to verify that a workflow is running from a configured
+repository, then provides a short-lived token for publishing.
 
-Instead of storing long-lived API tokens in your repository secrets, Trusted Publishing allows your CI/CD platform to authenticate directly with crates.io using cryptographically signed tokens that prove the workflow's identity.
+Instead of storing a long-lived API token, Trusted Publishing allows the
+selected release workflow to authenticate directly with crates.io using a
+cryptographically signed token that proves the workflow's identity.
 
-We intend to add "Trusted Publishing" when it is production-ready across all our code forges (GitHub.com, GitLab.com, Codeberg.org, etc.) and across all our target destinations (Rust crates.io, NPM npmjs.com, etc.).
+The project intends to adopt Trusted Publishing if it explicitly changes
+the release-authority rule described below. Support on source-code mirrors
+is not a prerequisite: crates are published once to crates.io, not once
+per forge.
 
-## §7.1 A prerequisite this note does not yet name
+## §7.1 The release-authority prerequisite
 
 Recorded 2026-08-28, while propagating this intent into
 [`MAINTAINERS.md`](../../MAINTAINERS.md) and
@@ -21,7 +29,7 @@ a habit.
 Adopting Trusted Publishing as it exists today would therefore mean
 moving the publish step into a CI job first — a governance change, not
 a credential swap. This section's stated intent is not withdrawn by that
-finding; it is a real prerequisite the intent did not yet name, so that
+finding; it is a real prerequisite the original intent did not name, so that
 whoever picks this up next does not have to rediscover it before
 deciding whether the governance change is one this project actually
 wants to make, separately from wanting the credential improvement.
@@ -54,3 +62,39 @@ anything but the same long-lived token this section is about in the first
 place. Trusted Publishing's prerequisite — moving the publish step into
 an authenticated CI job — is unaffected by either widening and remains
 exactly as open as §7.1 originally found it.
+
+## §7.2 Support matrix re-evaluation and the remaining decision
+
+Re-evaluated 2026-11-19 against the crates.io team's current
+[documentation](https://crates.io/docs/trusted-publishing) and
+[development update](https://blog.rust-lang.org/2026/01/21/crates-io-development-update/):
+
+| Surface | Current status | Relevance here |
+| ------- | -------------- | -------------- |
+| GitHub Actions | Supported | GitHub is the canonical repository and already runs this workspace's CI. |
+| GitLab.com CI/CD | Supported in public beta | The GitLab repository is a source mirror; it does not need a second publishing job. |
+| Codeberg/Forgejo | Not supported by crates.io | The Codeberg repository is also a source mirror, so this does not prevent a GitHub release job from eliminating the crates.io API token. |
+| crates.io | Supported destination | This is the only package registry to which the three Rust crates publish. |
+| npm | Not a release destination | The website's private JavaScript dependencies are build inputs; this project does not publish an npm package. |
+
+The previous requirement that every mirror support Trusted Publishing was
+therefore based on a false equivalence between *mirroring source* and
+*publishing a package*. A GitHub-only release authority would remove the
+long-lived crates.io token; no corresponding token is needed by either
+mirror.
+
+One governance choice remains:
+
+1. Keep publishing locally and accept the long-lived maintainer token; or
+2. amend [`GOVERNANCE.md`](../../GOVERNANCE.md) to permit a manually
+   dispatched GitHub Actions release job for one maintainer-scoped crate,
+   version, and commit, protected by a release environment, with OIDC as
+   its only crates.io credential.
+
+Option 2 is the recommended security posture. It preserves the existing
+rule that no push, merge, tag, or schedule autonomously publishes, while
+removing a credential that remains useful between releases. If selected,
+implementation must update the governance rule, add and verify the
+manual workflow, configure a trusted publisher for all three crates, and
+only then enable crates.io's Trusted-Publishing-only mode. This repository
+does not make that policy choice merely by recommending it.

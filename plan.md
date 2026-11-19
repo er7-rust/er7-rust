@@ -68,6 +68,11 @@ remain — no second security responder and no Trusted Publishing — rather
 than implying they are covered. The gaps this sentence used to name here,
 "no CI", "unsigned commits", and "no SBOM", are closed and are not
 restated as open.
+The Trusted Publishing support matrix was re-evaluated 2026-11-19: source
+mirrors do not each need registry publishing authority, so Codeberg's lack
+of crates.io OIDC support is not a blocker. The remaining work is now the
+actual governance decision: retain local token-based releases or permit a
+protected, manually dispatched GitHub release workflow.
 This plan closes what is still open the same deliberate way, instead of
 leaving it as a standing confession.
 

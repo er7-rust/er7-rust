@@ -122,9 +122,16 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
 - [ ] **Resolve the Trusted Publishing governance decision.** Re-evaluate
       the forge/destination support matrix, then decide explicitly whether
       releases may move from the local, maintainer-scoped workflow into a
-      manually dispatched OIDC-authenticated CI job. Implement only after
-      the governance rule changes; `spec/trusted-publishing/index.md` §7.1
-      records why this is not merely a credential substitution.
+      manually dispatched OIDC-authenticated CI job. Matrix re-evaluation
+      completed 2026-11-19: crates.io supports GitHub Actions and
+      GitLab.com (public beta), but not Codeberg/Forgejo; only GitHub needs
+      publishing authority because GitLab and Codeberg are source mirrors,
+      not registry destinations. `spec/trusted-publishing/index.md` §7.2
+      corrects the earlier premise and recommends a protected,
+      manually-dispatched GitHub workflow. The item remains open for the
+      explicit policy choice. Implement only after the governance rule
+      changes; §7.1 records why this is not merely a credential
+      substitution.
 
 ### In flight — land it first
 

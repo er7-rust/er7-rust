@@ -240,8 +240,10 @@ question:
   short-lived OIDC credential issued per CI run. The intent to adopt it is
   recorded, not silently deferred — see
   [`spec/trusted-publishing/index.md`](spec/trusted-publishing/index.md)
-  and [`MAINTAINERS.md`](MAINTAINERS.md) for why it waits on every forge
-  this repository publishes to, not just the first one that supports it.
+  and [`MAINTAINERS.md`](MAINTAINERS.md). The 2026-11-19 support-matrix
+  review established that source mirrors do not block adoption; the open
+  question is whether governance should permit a manually dispatched
+  GitHub release job.
 - **No bug bounty, and no security budget.**
 - **No second responder.** One email address, one person.
 - **No third-party audit.** Nobody has reviewed this code but its author

@@ -56,15 +56,15 @@ behind it.
 OIDC-based, short-lived credentials issued per CI run instead of one
 long-lived token sitting on the maintainer's machine indefinitely. It is
 not adopted yet, and [`spec/trusted-publishing/index.md`](spec/trusted-publishing/index.md)
-states why plainly: the intent is to add it once it is production-ready
-across every forge this repository actually publishes to or mirrors on
-(GitHub, GitLab, Codeberg) and every destination it actually publishes to
-(crates.io today; npm if the site's own tooling ever needed it), not the
-moment crates.io alone supports it for one of those forges. Adopting it
-early for GitHub only would leave the token in place for the mirrors
-anyway, which is not the reduction it would look like.
+records the remaining governance choice. As of 2026-11-19, crates.io
+supports GitHub Actions and GitLab.com CI/CD (the latter in public beta),
+but not Codeberg/Forgejo. That does not require waiting for Codeberg: the
+GitLab and Codeberg repositories are source mirrors, not separate package
+publishers. A single GitHub release workflow could remove the long-lived
+crates.io token completely. Whether releases are allowed to move into that
+manually dispatched workflow remains an explicit policy decision.
 
-**A prerequisite that spec file does not yet name:** Trusted Publishing
+**The release-authority prerequisite:** Trusted Publishing
 authenticates a *CI workflow run* to crates.io — it has no meaning for
 `cargo publish` run locally, at a terminal, which is what "Cuts releases"
 below actually means today, and still means as of 2026-09-02: the
