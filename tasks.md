@@ -130,14 +130,22 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       corrects the earlier premise. The protected, manually dispatched
       GitHub workflow was selected and implemented 2026-11-19, the
       governance rule now permits it, and GitHub environment `release`
-      requires maintainer review and a protected branch. Complete the
-      external transition: configure all three crates to trust
-      `er7-rust/er7-rust`, `.github/workflows/publish.yml`, environment
-      `release`; prove the OIDC exchange in a hosted run; enable
-      Trusted-Publishing-only mode; remove the local API token; then update
-      the credential inventory and release guides to describe only the
-      active path. §7.1 records why this is not merely a credential
-      substitution.
+      requires maintainer review and a protected branch. Crates.io
+      configuration IDs 35314–35316 now trust that exact identity. The
+      non-publishing verification runs for
+      [`er7`](https://github.com/er7-rust/er7-rust/actions/runs/44564934519),
+      [`er7-redact`](https://github.com/er7-rust/er7-rust/actions/runs/44564934596),
+      and
+      [`serde-er7`](https://github.com/er7-rust/er7-rust/actions/runs/44564934930)
+      each passed the protected gate, checks, package build, OIDC exchange,
+      token assertion, and revocation without publishing. Complete the
+      external transition in the crates.io owner UI: enable
+      Trusted-Publishing-only mode for all three crates. The legacy token
+      correctly received HTTP 403 for this setting because it lacks the
+      `trusted-publishing` scope. After the toggles are verified, remove
+      the local token and update the credential inventory and release guides
+      to describe only the active path. §7.1 records why this is not merely
+      a credential substitution.
 
 ### In flight — land it first
 

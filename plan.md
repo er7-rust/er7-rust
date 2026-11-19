@@ -72,8 +72,9 @@ The Trusted Publishing support matrix was re-evaluated 2026-11-19: source
 mirrors do not each need registry publishing authority, so Codeberg's lack
 of crates.io OIDC support is not a blocker. The project selected and
 implemented a protected, manually dispatched GitHub release workflow. The
-remaining work is external activation and proof across all three crates,
-then removal of the local API token.
+three crates.io mappings and non-publishing OIDC proofs now pass. The
+remaining work is enabling Trusted-Publishing-only mode in each crate's
+owner settings, then removing the local API token.
 This plan closes what is still open the same deliberate way, instead of
 leaving it as a standing confession.
 

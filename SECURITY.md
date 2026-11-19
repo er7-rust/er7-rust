@@ -243,9 +243,10 @@ question:
   and [`MAINTAINERS.md`](MAINTAINERS.md). The 2026-11-19 support-matrix
   review established that source mirrors do not block adoption, governance
   now permits the protected manual workflow, and the repository-side
-  implementation exists. The gap remains until trusted publishers are
-  configured for all three crates, a hosted OIDC exchange passes, and the
-  local token is removed.
+  implementation exists. All three trusted publishers and hosted OIDC
+  exchanges are verified. The gap remains until the owner enables
+  Trusted-Publishing-only mode for all three crates and removes the local
+  token.
 - **No bug bounty, and no security budget.**
 - **No second responder.** One email address, one person.
 - **No third-party audit.** Nobody has reviewed this code but its author

@@ -61,15 +61,16 @@ supports GitHub Actions and GitLab.com CI/CD (the latter in public beta),
 but not Codeberg/Forgejo. That does not require waiting for Codeberg: the
 GitLab and Codeberg repositories are source mirrors, not separate package
 publishers. The project selected a single protected GitHub release workflow
-on 2026-11-19; it will remove the long-lived crates.io token completely
-after all three crate settings and the OIDC exchange are verified.
+on 2026-11-19. All three trusted-publisher configurations and OIDC exchanges
+are verified; the long-lived crates.io token will be removed after the
+owner enables Trusted-Publishing-only mode for all three crates.
 
 **The release-authority prerequisite is now resolved:**
 [`GOVERNANCE.md`](GOVERNANCE.md) permits the manually dispatched,
 environment-protected workflow for one already-scoped release, while still
 forbidding publishing on any automatic trigger. The repository workflow
-and GitHub environment exist; crates.io trusted-publisher configuration and
-a hosted OIDC proof remain before the local token can be removed.
+and GitHub environment exist, and all three hosted OIDC proofs pass. The
+registry's Trusted-Publishing-only toggles and local-token removal remain.
 
 **Commits and tags are cryptographically signed as of 2026-08-27**, with
 the dedicated code-signing key in the publishing-identities table above —

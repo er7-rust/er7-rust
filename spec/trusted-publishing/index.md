@@ -110,11 +110,22 @@ privileged path is pinned to immutable commits.
 
 GitHub environment `release` was created 2026-11-19 with `main`'s protected
 branch policy and Joel Parker Henderson as required reviewer. The workflow
-cannot be called operational until all three crates configure
-`er7-rust/er7-rust`, `.github/workflows/publish.yml`, and environment
-`release` as their trusted publisher on crates.io and a hosted run proves
-the OIDC exchange. After that proof, enable crates.io's
-Trusted-Publishing-only mode for all three crates and remove the local API
-token. During this transition, release documentation must state which
-credential path is actually active rather than implying configuration that
-has not been verified.
+is configured on crates.io for all three crates as
+`er7-rust/er7-rust`, `publish.yml`, environment `release` (configuration
+IDs 35314, 35315, and 35316). Three non-publishing hosted runs proved the
+complete protected path, including token exchange and automatic
+revocation:
+
+- [`er7`](https://github.com/er7-rust/er7-rust/actions/runs/44564934519)
+- [`er7-redact`](https://github.com/er7-rust/er7-rust/actions/runs/44564934596)
+- [`serde-er7`](https://github.com/er7-rust/er7-rust/actions/runs/44564934930)
+
+One registry setting remains before the local credential can be removed:
+enable crates.io's Trusted-Publishing-only mode for all three crates. The
+existing legacy API token cannot change that setting; crates.io correctly
+returned HTTP 403 and requires either its owner settings UI or a new token
+scoped specifically to `trusted-publishing`. Creating another durable
+secret solely to disable durable-secret publishing would be perverse, so
+the owner UI is the preferred final step. During this transition, release
+documentation must state which credential path is actually active rather
+than implying configuration that has not been verified.
