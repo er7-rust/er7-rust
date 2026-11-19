@@ -152,21 +152,21 @@ The maintainer alone decides what ships and when. Each crate versions and
 releases independently — there is no workspace version — and every crate
 follows [Semantic Versioning](https://semver.org/).
 
-**As of 2026-09-02, the maintainer's own hands are no longer required on
-the `cargo publish` keystroke.** Before that date, the decision and the
-act were fused: only the maintainer, at his own terminal, ran the command.
-That fusion is deliberately broken now — the maintainer may direct an AI
-coding agent working in this repository (this project uses Claude Code)
-to run `cargo publish` for a release he has decided on, the same way an
-agent already runs the four checks and commits changes on his behalf
-elsewhere in this project. What does not change is the decision itself,
-and where an automatic trigger is still refused: no CI workflow publishes,
-on a push, a merge, or any other event it fires on its own — an agent
-runs `cargo publish` only when told to, for one named release, never as a
-standing job or its own initiative. See
+**As of 2026-11-19, the maintainer may direct the protected manual release
+workflow to perform the `cargo publish` step.** The maintainer still scopes
+and names every release. Either the maintainer or an agent he directs may
+judge that named release ready against the repository's checklist, then
+dispatch `.github/workflows/publish.yml` with the exact crate, version,
+and signed commit. The maintainer must approve the `release` environment
+before the job can obtain its short-lived crates.io credential.
+
+No push, merge, tag, schedule, or completion of another workflow publishes
+a crate. The publish workflow exposes only `workflow_dispatch`, checks that
+the exact commit is signed and reachable from `main`, repeats the four
+checks and package dry-run, and publishes one crate. This changes where the
+command runs, not who decides that a release exists. See
 [`spec/trusted-publishing/index.md`](spec/trusted-publishing/index.md) for
-what this does and does not change about that separate question (a CI
-workflow authenticating to crates.io over OIDC, which this still is not).
+the support matrix, credential boundary, and activation requirements.
 
 **Later the same day, a further step moved: an agent may now decide that
 a specific, already-scoped release is ready to publish.** Scoping and
@@ -189,7 +189,7 @@ all* is not a readiness judgment, and stays outside this delegation.
 | ---- | ------ |
 | While a crate is `0.x`, the minor bump is the one allowed to break | A `0.1.2 → 0.2.0` may change an API; a patch never does |
 | Raising the minimum Rust version is a breaking change | It never lands in a patch ([§2](spec/rust-msrv-n-minus-2/index.md)) |
-| A release is a decision, not an automation | No CI workflow publishes on its own trigger; the maintainer alone scopes and names a release, and either he or an agent he directs may then judge it ready and run `cargo publish` for it |
+| A release is a decision, not an automation | No CI workflow publishes on an automatic trigger; the maintainer alone scopes and names a release, and either he or an agent he directs may then judge it ready and dispatch the protected manual workflow for that exact release |
 | Yanking is reserved for genuinely dangerous versions | See [`SECURITY.md`](SECURITY.md) |
 
 Every release is recorded in [`CHANGELOG.md`](CHANGELOG.md), and the ones

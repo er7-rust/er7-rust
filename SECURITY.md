@@ -241,9 +241,11 @@ question:
   recorded, not silently deferred — see
   [`spec/trusted-publishing/index.md`](spec/trusted-publishing/index.md)
   and [`MAINTAINERS.md`](MAINTAINERS.md). The 2026-11-19 support-matrix
-  review established that source mirrors do not block adoption; the open
-  question is whether governance should permit a manually dispatched
-  GitHub release job.
+  review established that source mirrors do not block adoption, governance
+  now permits the protected manual workflow, and the repository-side
+  implementation exists. The gap remains until trusted publishers are
+  configured for all three crates, a hosted OIDC exchange passes, and the
+  local token is removed.
 - **No bug bounty, and no security budget.**
 - **No second responder.** One email address, one person.
 - **No third-party audit.** Nobody has reviewed this code but its author

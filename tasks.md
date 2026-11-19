@@ -119,7 +119,7 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       cannot be closed by adding an unowned alias or naming somebody without
       consent. Update `SECURITY.md`, `MAINTAINERS.md`, and the conduct
       escalation path together when that person exists.
-- [ ] **Resolve the Trusted Publishing governance decision.** Re-evaluate
+- [ ] **Activate and verify Trusted Publishing.** Re-evaluate
       the forge/destination support matrix, then decide explicitly whether
       releases may move from the local, maintainer-scoped workflow into a
       manually dispatched OIDC-authenticated CI job. Matrix re-evaluation
@@ -127,10 +127,16 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       GitLab.com (public beta), but not Codeberg/Forgejo; only GitHub needs
       publishing authority because GitLab and Codeberg are source mirrors,
       not registry destinations. `spec/trusted-publishing/index.md` §7.2
-      corrects the earlier premise and recommends a protected,
-      manually-dispatched GitHub workflow. The item remains open for the
-      explicit policy choice. Implement only after the governance rule
-      changes; §7.1 records why this is not merely a credential
+      corrects the earlier premise. The protected, manually dispatched
+      GitHub workflow was selected and implemented 2026-11-19, the
+      governance rule now permits it, and GitHub environment `release`
+      requires maintainer review and a protected branch. Complete the
+      external transition: configure all three crates to trust
+      `er7-rust/er7-rust`, `.github/workflows/publish.yml`, environment
+      `release`; prove the OIDC exchange in a hosted run; enable
+      Trusted-Publishing-only mode; remove the local API token; then update
+      the credential inventory and release guides to describe only the
+      active path. §7.1 records why this is not merely a credential
       substitution.
 
 ### In flight — land it first

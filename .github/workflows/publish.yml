@@ -1,0 +1,164 @@
+# Publish exactly one maintainer-scoped crate through crates.io Trusted
+# Publishing. This workflow has no automatic trigger: selecting the crate,
+# version, and exact signed commit remains a deliberate release decision.
+
+name: publish crate
+run-name: ${{ inputs.operation }} ${{ inputs.crate }} ${{ inputs.version }} from ${{ inputs.commit }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Verify OIDC configuration without publishing, or publish
+        required: true
+        type: choice
+        options:
+          - verify
+          - publish
+      crate:
+        description: Crate to publish
+        required: true
+        type: choice
+        options:
+          - er7
+          - er7-redact
+          - serde-er7
+      version:
+        description: Exact version in the selected crate's Cargo.toml
+        required: true
+        type: string
+      commit:
+        description: Exact 40-character commit SHA on main
+        required: true
+        type: string
+      confirmation:
+        description: Type "<operation> <crate> <version>"
+        required: true
+        type: string
+
+concurrency:
+  group: publish-${{ inputs.crate }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    name: ${{ inputs.operation }} ${{ inputs.crate }} ${{ inputs.version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: release
+    steps:
+      # Privileged workflows pin every action to an immutable reviewed commit.
+      - name: check out the exact release commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.commit }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: validate release authority and inputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_COMMIT: ${{ inputs.commit }}
+          RELEASE_CONFIRMATION: ${{ inputs.confirmation }}
+          RELEASE_CRATE: ${{ inputs.crate }}
+          RELEASE_OPERATION: ${{ inputs.operation }}
+          RELEASE_VERSION: ${{ inputs.version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ ! "$RELEASE_COMMIT" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::commit must be a full lowercase 40-character SHA"
+            exit 1
+          fi
+          if [[ "$RELEASE_CONFIRMATION" != "$RELEASE_OPERATION $RELEASE_CRATE $RELEASE_VERSION" ]]; then
+            echo "::error::confirmation does not match the selected crate and version"
+            exit 1
+          fi
+
+          actual_commit=$(git rev-parse HEAD)
+          if [[ "$actual_commit" != "$RELEASE_COMMIT" ]]; then
+            echo "::error::checkout resolved to $actual_commit, not $RELEASE_COMMIT"
+            exit 1
+          fi
+
+          git fetch --no-tags origin main
+          if ! git merge-base --is-ancestor "$RELEASE_COMMIT" origin/main; then
+            echo "::error::release commit is not reachable from origin/main"
+            exit 1
+          fi
+
+          verified=$(gh api "repos/$GITHUB_REPOSITORY/commits/$RELEASE_COMMIT" \
+            --jq '.commit.verification.verified')
+          if [[ "$verified" != "true" ]]; then
+            echo "::error::GitHub does not report a valid signature for the release commit"
+            exit 1
+          fi
+
+          case "$RELEASE_CRATE" in
+            er7) manifest=er7/Cargo.toml ;;
+            er7-redact) manifest=er7-redact/Cargo.toml ;;
+            serde-er7) manifest=serde-er7/Cargo.toml ;;
+            *) echo "::error::unsupported crate"; exit 1 ;;
+          esac
+          manifest_version=$(python3 -c \
+            'import sys, tomllib; print(tomllib.load(open(sys.argv[1], "rb"))["package"]["version"])' \
+            "$manifest")
+          if [[ "$manifest_version" != "$RELEASE_VERSION" ]]; then
+            echo "::error::$RELEASE_CRATE is version $manifest_version, not $RELEASE_VERSION"
+            exit 1
+          fi
+
+      - name: install the current stable Rust toolchain
+        run: rustup toolchain install stable --profile minimal --component clippy,rustfmt
+
+      - name: test
+        env:
+          RELEASE_CRATE: ${{ inputs.crate }}
+        run: cargo +stable test --locked -p "$RELEASE_CRATE"
+
+      - name: lint
+        env:
+          RELEASE_CRATE: ${{ inputs.crate }}
+        run: cargo +stable clippy --locked -p "$RELEASE_CRATE" --all-targets -- -D warnings
+
+      - name: check formatting
+        run: cargo +stable fmt --check
+
+      - name: check public documentation
+        env:
+          RELEASE_CRATE: ${{ inputs.crate }}
+        run: cargo +stable rustdoc --locked -p "$RELEASE_CRATE" --lib -- -D missing-docs
+
+      - name: verify the crates.io package for publication
+        if: inputs.operation == 'publish'
+        env:
+          RELEASE_CRATE: ${{ inputs.crate }}
+        run: cargo +stable publish --locked --dry-run -p "$RELEASE_CRATE"
+
+      - name: verify the package archive without publishing
+        if: inputs.operation == 'verify'
+        env:
+          RELEASE_CRATE: ${{ inputs.crate }}
+        run: cargo +stable package --locked -p "$RELEASE_CRATE"
+
+      - name: obtain a short-lived crates.io token
+        id: crates-io-auth
+        uses: rust-lang/crates-io-auth-action@3268eb413133e2960fa4ae0e963ca76380c54cd9 # v1
+
+      - name: publish the verified package
+        if: inputs.operation == 'publish'
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.crates-io-auth.outputs.token }}
+          RELEASE_CRATE: ${{ inputs.crate }}
+        run: cargo +stable publish --locked -p "$RELEASE_CRATE"
+
+      - name: confirm the OIDC exchange without publishing
+        if: inputs.operation == 'verify'
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.crates-io-auth.outputs.token }}
+        run: test -n "$CARGO_REGISTRY_TOKEN"

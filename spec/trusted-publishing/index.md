@@ -63,7 +63,7 @@ place. Trusted Publishing's prerequisite — moving the publish step into
 an authenticated CI job — is unaffected by either widening and remains
 exactly as open as §7.1 originally found it.
 
-## §7.2 Support matrix re-evaluation and the remaining decision
+## §7.2 Support matrix re-evaluation and decision
 
 Re-evaluated 2026-11-19 against the crates.io team's current
 [documentation](https://crates.io/docs/trusted-publishing) and
@@ -83,7 +83,7 @@ therefore based on a false equivalence between *mirroring source* and
 long-lived crates.io token; no corresponding token is needed by either
 mirror.
 
-One governance choice remains:
+The governance choice was:
 
 1. Keep publishing locally and accept the long-lived maintainer token; or
 2. amend [`GOVERNANCE.md`](../../GOVERNANCE.md) to permit a manually
@@ -91,10 +91,30 @@ One governance choice remains:
    version, and commit, protected by a release environment, with OIDC as
    its only crates.io credential.
 
-Option 2 is the recommended security posture. It preserves the existing
+Option 2 was selected 2026-11-19. It preserves the existing
 rule that no push, merge, tag, or schedule autonomously publishes, while
-removing a credential that remains useful between releases. If selected,
-implementation must update the governance rule, add and verify the
-manual workflow, configure a trusted publisher for all three crates, and
-only then enable crates.io's Trusted-Publishing-only mode. This repository
-does not make that policy choice merely by recommending it.
+removing a credential that remains useful between releases.
+
+## §7.3 Activation requirements
+
+The repository side is implemented in
+[`.github/workflows/publish.yml`](../../.github/workflows/publish.yml).
+The workflow has only a manual trigger; requires an exact crate, manifest
+version, full commit SHA, operation, and matching confirmation phrase;
+offers a verification operation that proves OIDC without publishing;
+requires the commit to be signed and reachable from `main`; repeats the
+four checks and package verification; obtains a short-lived token only
+after those checks; and publishes exactly one crate only when the publish
+operation was explicitly selected. Third-party action code in this
+privileged path is pinned to immutable commits.
+
+GitHub environment `release` was created 2026-11-19 with `main`'s protected
+branch policy and Joel Parker Henderson as required reviewer. The workflow
+cannot be called operational until all three crates configure
+`er7-rust/er7-rust`, `.github/workflows/publish.yml`, and environment
+`release` as their trusted publisher on crates.io and a hosted run proves
+the OIDC exchange. After that proof, enable crates.io's
+Trusted-Publishing-only mode for all three crates and remove the local API
+token. During this transition, release documentation must state which
+credential path is actually active rather than implying configuration that
+has not been verified.

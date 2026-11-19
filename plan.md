@@ -70,9 +70,10 @@ than implying they are covered. The gaps this sentence used to name here,
 restated as open.
 The Trusted Publishing support matrix was re-evaluated 2026-11-19: source
 mirrors do not each need registry publishing authority, so Codeberg's lack
-of crates.io OIDC support is not a blocker. The remaining work is now the
-actual governance decision: retain local token-based releases or permit a
-protected, manually dispatched GitHub release workflow.
+of crates.io OIDC support is not a blocker. The project selected and
+implemented a protected, manually dispatched GitHub release workflow. The
+remaining work is external activation and proof across all three crates,
+then removal of the local API token.
 This plan closes what is still open the same deliberate way, instead of
 leaving it as a standing confession.
 

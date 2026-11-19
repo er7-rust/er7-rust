@@ -60,26 +60,16 @@ records the remaining governance choice. As of 2026-11-19, crates.io
 supports GitHub Actions and GitLab.com CI/CD (the latter in public beta),
 but not Codeberg/Forgejo. That does not require waiting for Codeberg: the
 GitLab and Codeberg repositories are source mirrors, not separate package
-publishers. A single GitHub release workflow could remove the long-lived
-crates.io token completely. Whether releases are allowed to move into that
-manually dispatched workflow remains an explicit policy decision.
+publishers. The project selected a single protected GitHub release workflow
+on 2026-11-19; it will remove the long-lived crates.io token completely
+after all three crate settings and the OIDC exchange are verified.
 
-**The release-authority prerequisite:** Trusted Publishing
-authenticates a *CI workflow run* to crates.io — it has no meaning for
-`cargo publish` run locally, at a terminal, which is what "Cuts releases"
-below actually means today, and still means as of 2026-09-02: the
-maintainer alone scopes and names a release, and either he or an agent he
-directs judges it ready and types the command — either way, on his own
-machine, never inside a CI job. That is what
-[`GOVERNANCE.md`](GOVERNANCE.md) states as a rule, not a habit: "no CI
-workflow publishes on its own trigger; the maintainer alone scopes and
-names a release, and either he or an agent he directs may then judge it
-ready and run `cargo publish` for it." Adopting Trusted Publishing as it
-exists today would mean moving the publish step into a CI job — a
-governance change, not a credential swap, and one this document is not
-pre-committing to just by naming the token as removable. That tension is
-not resolved here; it is named so the day this gets picked up, nobody has
-to rediscover it.
+**The release-authority prerequisite is now resolved:**
+[`GOVERNANCE.md`](GOVERNANCE.md) permits the manually dispatched,
+environment-protected workflow for one already-scoped release, while still
+forbidding publishing on any automatic trigger. The repository workflow
+and GitHub environment exist; crates.io trusted-publisher configuration and
+a hosted OIDC proof remain before the local token can be removed.
 
 **Commits and tags are cryptographically signed as of 2026-08-27**, with
 the dedicated code-signing key in the publishing-identities table above —
