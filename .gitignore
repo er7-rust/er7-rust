@@ -7,4 +7,3 @@
 er7/fuzz/target
 er7/fuzz/corpus
 er7/fuzz/artifacts
-er7/fuzz/Cargo.lock

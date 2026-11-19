@@ -30,6 +30,14 @@ The retained CI artifact contains:
 2. one SBOM for `er7/fuzz`, which is its own Cargo workspace and is not
    published.
 
+Both workspaces track their own `Cargo.lock`: the root lock for the five
+root members, and `er7/fuzz/Cargo.lock` for the isolated fuzz workspace.
+Without the latter, a hosted run could resolve a newer build dependency
+than a maintainer's checkout and produce two internally valid but different
+inventories from the same commit. `bin/check-sboms` invokes Cargo metadata
+with `--locked` so manifest/lock drift fails instead of being repaired during
+the check.
+
 Generating the published SBOMs from the root workspace would be wrong:
 workspace feature unification and the Criterion benchmark members can add
 packages that the published crate does not resolve. Conversely, folding the
