@@ -59,6 +59,12 @@ per-level wrappers listed in [§6.1](#61-rule-s11), but it still carries
 for the same reason: a caller reaching for `Strict<Message>` should not
 lose any of the ergonomics a plain `Message` already has.
 
+The public-API conformance test `every_wrapper_converts_and_mutates_through`
+exercises both conversion directions and mutable dereferencing for all eight
+per-level wrappers, plus each concrete reverse conversion supported by
+`Strict<T>`. This keeps S11 from being inferred from two representative
+types while the remaining implementations go unexecuted.
+
 ---
 
 HL7®, and FHIR® are the registered trademarks of Health Level Seven

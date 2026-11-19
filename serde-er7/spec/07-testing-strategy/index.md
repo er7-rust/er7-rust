@@ -19,7 +19,7 @@ enforces it. A rule with no test is a bug in this table.
 | S8 | `ignores_unknown_fields`, `treats_a_missing_truncation_key_as_none` | `src/segment.rs`, `src/separators.rs` |
 | S9 | `rejects_a_missing_name`, `rejects_a_missing_required_field`, `error_messages_still_name_the_missing_field` | `src/segment.rs`, `src/separators.rs`, `tests/integration.rs` |
 | S10 | `round_trips_through_json`, `pretty_json_keeps_the_tree_shape`, and every shape test above | `tests/integration.rs`, `src/message.rs` |
-| S11 | `deref_reaches_query`, `deref_reaches_the_inner_api` | `src/message.rs`, `src/subcomponent.rs` |
+| S11 | `every_wrapper_converts_and_mutates_through`, `deref_reaches_query`, `deref_reaches_the_inner_api` | `tests/integration.rs`, `src/message.rs`, `src/subcomponent.rs` |
 | S12 | *by `cargo rustdoc --lib -- -W missing-docs`*, which is one of the four checks (§7.4) | — |
 | S13 | `strict_rejects_an_unknown_top_level_field`, `strict_rejects_an_unknown_field_inside_a_nested_segment`, `strict_rejects_an_unknown_field_inside_separators`, `strict_still_requires_every_field_the_plain_type_does`, `plain_deserialize_is_unaffected_by_strict_existing`, `strict_rejects_an_unknown_field` | `src/message.rs`, `src/segment.rs`, `src/separators.rs` |
 
@@ -63,6 +63,7 @@ the build rather than a habit.
 | Wrong shape for one level (§2 violated) | unit test for that module |
 | Round trip loses information (§4 violated) | integration test |
 | Error message does not name the field (§5 violated) | unit test (`rejects_a_missing_...`) |
+| Wrong top-level kind does not report the expected shape (§5.1 violated) | integration test (`wrong_json_kinds_report_each_expected_shape`) |
 | A tutorial example no longer compiles or produces stale output | doctest / `cargo run --example` |
 | A real sample message from `er7` fails silently | integration test against `samples/` |
 

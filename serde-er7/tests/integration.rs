@@ -4,7 +4,9 @@
 //! round trip through this crate is checked against real messages, not
 //! just literals written for this crate.
 
-use serde_er7::Message;
+use serde_er7::{
+    Component, Field, Message, Repetition, Segment, Separators, Strict, Subcomponent, Terminator,
+};
 
 // The sample files end with a trailing segment terminator, which `er7`
 // itself normalizes away at parse time (there is no trailing terminator by
@@ -131,6 +133,97 @@ fn preserves_repeated_fields_and_ragged_segments() {
 fn error_messages_still_name_the_missing_field() {
     let err = serde_json::from_str::<Message>(r#"{"segments":[]}"#).unwrap_err();
     assert!(err.to_string().contains("separators"), "{err}");
+}
+
+#[test]
+fn wrong_json_kinds_report_each_expected_shape() {
+    let cases = [
+        serde_json::from_str::<Component>("{}").unwrap_err(),
+        serde_json::from_str::<Field>("{}").unwrap_err(),
+        serde_json::from_str::<Repetition>("{}").unwrap_err(),
+    ];
+    for error in cases {
+        assert!(error.to_string().contains("array"), "{error}");
+    }
+
+    let error = serde_json::from_str::<Subcomponent>("[]").unwrap_err();
+    assert!(error.to_string().contains("string"), "{error}");
+    let error = serde_json::from_str::<Terminator>("[]").unwrap_err();
+    assert!(error.to_string().contains("CrLf"), "{error}");
+
+    let error = serde_json::from_str::<Message>("[]").unwrap_err();
+    assert!(error.to_string().contains("separators"), "{error}");
+    let error = serde_json::from_str::<Segment>("[]").unwrap_err();
+    assert!(error.to_string().contains("name"), "{error}");
+    let error = serde_json::from_str::<Separators>("[]").unwrap_err();
+    assert!(error.to_string().contains("truncation"), "{error}");
+}
+
+#[test]
+fn every_wrapper_converts_and_mutates_through() {
+    // S11 is a promise about every wrapper, not two representative types.
+    // Exercise the public conversion and DerefMut surface from outside the
+    // crate so an omitted or incorrectly wired implementation is visible.
+    let inner_message = er7::parse("MSH|^~\\&|LAB").unwrap();
+    let mut message: Message = inner_message.into();
+    message.segments.push(er7::Segment {
+        name: "ZZZ".into(),
+        fields: Vec::new(),
+    });
+    let inner_message: er7::Message = message.into();
+    assert_eq!(inner_message.segments.last().unwrap().name, "ZZZ");
+
+    let mut segment: Segment = inner_message.segments[0].clone().into();
+    segment.name = "HDR".into();
+    let inner_segment: er7::Segment = segment.into();
+    assert_eq!(inner_segment.name, "HDR");
+
+    let mut field: Field = er7::Field::default().into();
+    field.repetitions.push(er7::Repetition::default());
+    let inner_field: er7::Field = field.into();
+    assert_eq!(inner_field.repetitions.len(), 1);
+
+    let mut repetition: Repetition = er7::Repetition::default().into();
+    repetition.components.push(er7::Component::default());
+    let inner_repetition: er7::Repetition = repetition.into();
+    assert_eq!(inner_repetition.components.len(), 1);
+
+    let mut component: Component = er7::Component::default().into();
+    component
+        .subcomponents
+        .push(er7::Subcomponent::new("VALUE"));
+    let inner_component: er7::Component = component.into();
+    assert_eq!(inner_component.subcomponents[0].raw, "VALUE");
+
+    let mut subcomponent: Subcomponent = er7::Subcomponent::new("A").into();
+    subcomponent.raw.push('B');
+    let inner_subcomponent: er7::Subcomponent = subcomponent.into();
+    assert_eq!(inner_subcomponent.raw, "AB");
+
+    let mut separators: Separators = er7::Separators::default().into();
+    separators.field = '#';
+    let inner_separators: er7::Separators = separators.into();
+    assert_eq!(inner_separators.field, '#');
+
+    let mut terminator: Terminator = er7::Terminator::Cr.into();
+    *terminator = er7::Terminator::CrLf;
+    let inner_terminator: er7::Terminator = terminator.into();
+    assert_eq!(inner_terminator, er7::Terminator::CrLf);
+
+    let mut strict_message: Strict<Message> = Message::parse("MSH|^~\\&|LAB").unwrap().into();
+    strict_message.segments.clear();
+    let plain_message: Message = strict_message.into();
+    assert_eq!(plain_message.segments, [] as [er7::Segment; 0]);
+
+    let mut strict_segment: Strict<Segment> = Segment(inner_segment).into();
+    strict_segment.name = "STRICT".into();
+    let plain_segment: Segment = strict_segment.into();
+    assert_eq!(plain_segment.name, "STRICT");
+
+    let mut strict_separators: Strict<Separators> = Separators::default().into();
+    strict_separators.escape = '!';
+    let plain_separators: Separators = strict_separators.into();
+    assert_eq!(plain_separators.escape, '!');
 }
 
 /// The `[dependencies]` and `[dev-dependencies]` tables of this crate's

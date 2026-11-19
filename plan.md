@@ -41,6 +41,17 @@ integration suites passed on Linux with Rust 1.100.0 and on a native
 Windows runner with stable Rust. Evidence and commands are in the
 [production readiness checklist](tasks.md#production-readiness-review-2026-11-19).
 
+The next pass closed two release-evidence gaps. CI now assembles and builds
+the exact crates.io archive for each publishable crate, rather than waiting
+for `cargo publish` to discover an include-list or normalized-manifest
+failure. A workspace coverage baseline then found 93.29% line coverage but
+an unevenly tested public ergonomics surface in `serde-er7`; one black-box
+conformance test now executes both conversions and mutable dereferencing
+for every wrapper. A second black-box test checks that every wrapper's
+deserializer identifies its expected shape when the input has the wrong
+JSON kind. Line coverage rose to 96.05%, and function coverage from 88.56%
+to 95.46%, without adding a percentage-only test or a runtime dependency.
+
 ## Where the workspace stands (verified 2026-08-30)
 
 Three crates released independently on crates.io (er7 0.2.1, serde-er7 0.2.0,
@@ -99,6 +110,13 @@ posture. Open items for each are in `tasks.md`.
    maintainer registered that key's public half himself — confirmed by
    `commit.verification.verified: true` via the API on every commit made
    after registration. No SBOM.
+
+   The release artifacts themselves are now checked independently of the
+   workspace build: CI runs `cargo package --locked` for `er7`,
+   `er7-redact`, and `serde-er7`, which applies each include list, resolves
+   published dependency requirements, and builds the archive that would be
+   uploaded. This does not close the SBOM gap; it closes the earlier point
+   at which a malformed package could first be discovered.
 
 4. **Privacy and patient data.** `er7-redact` is a PHI tool, and its claims
    are scoped correctly — "a starting point, not a compliance certification"

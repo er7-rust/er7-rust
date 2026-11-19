@@ -158,6 +158,30 @@ the three were merged into this workspace, and its own release checklist
 in `AGENTS/release.md` — publishing one crate does not require publishing
 the others.
 
+## §1.6 Release artifacts are built in CI
+
+The four checks exercise the workspace checkout, where `er7-redact` and
+`serde-er7` see the local `er7` path dependency and every test file is
+available. A crates.io release is a different build surface: Cargo applies
+each manifest's `include` list, strips the path part of a published
+dependency, resolves its version requirement from the registry, and builds
+from the resulting archive.
+
+CI therefore runs the following for every publishable crate:
+
+```sh
+cargo package --locked -p er7
+cargo package --locked -p er7-redact
+cargo package --locked -p serde-er7
+```
+
+This is deliberately a package-build invariant, not a substitute for the
+four checks. The integration suites are not part of the published archives;
+they run against the workspace earlier in CI. The package job proves the
+complementary facts: each archive can be assembled from its allow-listed
+files, its normalized manifest is valid, and the code that actually ships
+builds against the registry dependencies a downstream user will receive.
+
 ---
 
 HL7®, and FHIR® are the registered trademarks of Health Level Seven

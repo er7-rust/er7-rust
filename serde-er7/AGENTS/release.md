@@ -19,6 +19,9 @@
 4. `examples/` all still run: `for e in round_trip_via_json
    build_message_from_json inspect_a_segment_as_json
    catch_a_typo_with_strict; do cargo run --example "$e"; done`.
+5. `cargo package --locked --list` contains only the intended source,
+   specification, documentation, examples, and root package files; then
+   `cargo package --locked` builds the exact archive Cargo would publish.
 
 ## Who may run `cargo publish`
 

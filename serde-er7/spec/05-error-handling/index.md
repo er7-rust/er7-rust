@@ -15,6 +15,12 @@ This crate sits between two error domains that must not be conflated:
   is reported through the format's own error type (`D::Error`/`S::Error`),
   via the standard `serde::de::Error`/`serde::ser::Error` constructors.
 
+Each deserializer also supplies its expected shape to Serde's visitor. A
+wrong top-level kind therefore reports useful context — for example,
+`Component` says it expected an array of subcomponent strings, while
+`Message` says it expected an object with `separators` and `segments` —
+rather than returning an unqualified type mismatch.
+
 A message can be well-formed ER7 and fail at the Serde layer (malformed
 JSON handed to `from_str`), or vice versa is not applicable in the other
 direction — Serde deserialization builds a `Message` directly, without

@@ -76,6 +76,20 @@ jobs:
       - run: cargo +stable test -p er7-bench -p er7-redact-bench
       - run: cargo +stable clippy -p er7-bench -p er7-redact-bench --all-targets -- -D warnings
 
+  # The workspace checks above exercise path dependencies and files that do
+  # not ship. Packaging applies each crate's include list, replaces path
+  # dependencies with registry requirements, and verifies the resulting
+  # archive builds: spec/01-family-policy/index.md §1.6.
+  packages:
+    name: crates.io package artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo +stable package --locked -p er7
+      - run: cargo +stable package --locked -p er7-redact
+      - run: cargo +stable package --locked -p serde-er7
+
   # The Linux checks above also run these two integration suites.
   windows-cli:
     name: Windows CLI integration tests

@@ -73,6 +73,45 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       The private reporting address matches the published maintainer
       roster, and the escalation link points to the conduct enforcement
       section of GOVERNANCE.md.
+- [x] **Build the artifacts that would actually ship.** Added the shared
+      package-build invariant in family-policy §1.6 and a CI job running
+      `cargo package --locked` for all three publishable crates. The exact
+      commands passed locally: 69 files for `er7`, 66 for `er7-redact`,
+      and 49 for `serde-er7`; each normalized archive then compiled.
+- [x] **Improve coverage where it represented untested public behavior.**
+      Measured all publishable crates with `cargo llvm-cov --workspace
+      --exclude er7-bench --exclude er7-redact-bench --all-targets`.
+      Added `every_wrapper_converts_and_mutates_through`, a black-box S11
+      test covering both conversion directions and mutable dereferencing
+      across all eight `serde-er7` wrappers and all supported `Strict<T>`
+      reverse conversions. Added `wrong_json_kinds_report_each_expected_shape`
+      to verify useful type-mismatch diagnostics across all eight wrappers.
+      Workspace line coverage moved from 93.29% to 96.05%; function
+      coverage moved from 88.56% to 95.46%.
+
+### Remaining declared gaps
+
+- [ ] **Generate standards-based SBOMs without conflating build surfaces.**
+      Specify the format and generator first, pin and audit the generator,
+      then generate separate machine-readable inventories for the root
+      workspace and `er7/fuzz` from their locked dependency graphs. CI must
+      reproduce and retain them as artifacts; release guidance must say
+      which SBOM belongs to each published crate. Distinguish runtime,
+      development/benchmark, and fuzz dependencies, and do not call an SBOM
+      signed provenance or an attestation. Update `SECURITY.md`, `plan.md`,
+      and the workspace spec when the implementation and hosted evidence
+      exist.
+- [ ] **Add a second security responder.** This needs a real person who has
+      agreed to the role and a private reporting route they control; it
+      cannot be closed by adding an unowned alias or naming somebody without
+      consent. Update `SECURITY.md`, `MAINTAINERS.md`, and the conduct
+      escalation path together when that person exists.
+- [ ] **Resolve the Trusted Publishing governance decision.** Re-evaluate
+      the forge/destination support matrix, then decide explicitly whether
+      releases may move from the local, maintainer-scoped workflow into a
+      manually dispatched OIDC-authenticated CI job. Implement only after
+      the governance rule changes; `spec/trusted-publishing/index.md` §7.1
+      records why this is not merely a credential substitution.
 
 ### In flight — land it first
 
