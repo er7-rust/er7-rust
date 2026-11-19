@@ -161,7 +161,11 @@ jobs:
           key: ${{ runner.os }}-cargo-fuzz-${{ hashFiles('er7/fuzz/Cargo.toml') }}
           restore-keys: |
             ${{ runner.os }}-cargo-fuzz-
-      - run: cargo +nightly install cargo-fuzz --locked
+      - name: ensure cargo-fuzz is available
+        run: |
+          if ! cargo +nightly fuzz --version; then
+            cargo +nightly install cargo-fuzz --locked --force
+          fi
       - run: cargo +nightly fmt --all -- --check
         working-directory: er7/fuzz
       - run: cargo +nightly clippy --all-targets -- -D warnings

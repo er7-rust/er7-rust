@@ -36,10 +36,9 @@ incomplete evidence for an integrator.
   See the [policy guide](er7-redact/docs/policies/index.md#values-found-elsewhere).
 
 For release verification, stable CI now includes the redaction benchmark
-crate and fails on missing public library documentation. The next
-portability milestone is a native Windows run of the two CLIs' file and
-pipe contracts. The Linux integration suites passed on Rust 1.100.0.
-Evidence and acceptance criteria are in the
+crate and fails on missing public library documentation. Both CLI
+integration suites passed on Linux with Rust 1.100.0 and on a native
+Windows runner with stable Rust. Evidence and commands are in the
 [production readiness checklist](tasks.md#production-readiness-review-2026-11-19).
 
 ## Where the workspace stands (verified 2026-08-30)

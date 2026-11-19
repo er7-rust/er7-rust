@@ -47,15 +47,16 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       the installed script and accepts a patch-specific toolchain. The
       workspace tests and fuzz-manifest compile checks passed locally on
       Rust 1.98 and 1.99.1.
-- [ ] **Verify the stable CI changes on a hosted runner.** Record a green
-      run for this revision covering both benchmark crates and the strict
-      rustdoc commands for the three published libraries.
+- [x] **Verify the stable CI changes on a hosted runner.** The stable job
+      passed at `fe4a903`, including both benchmark crates and all three
+      strict rustdoc commands. The MSRV job also passed using Rust 1.98.
+      [Hosted workflow](https://github.com/er7-rust/er7-rust/actions/runs/44499021467)
 - [x] **Document multilingual redaction limits for integrators (T7).**
       `multilingual_known_values_in_notes` checks the original field and
       the note in ten cases. The [policy guide](er7-redact/docs/policies/index.md#values-found-elsewhere)
       gives the observed outcomes for accents, dotted I, short CJK text,
       and adjacent letters.
-- [ ] **Prove CLI portability.** Run both binaries' integration suites
+- [x] **Prove CLI portability.** Run both binaries' integration suites
       on Windows and Linux with synthetic UTF-8 paths, piped input,
       exact CR/LF/CRLF output, and an invalid UTF-8 input that must fail
       before an existing output file is written. Record the runner and
@@ -64,8 +65,9 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       **Linux verified 2026-11-19.** In a `rust:1.100.0-slim` Linux
       container, `cargo test --locked -p er7 -p er7-redact --test integration`
       passed all 22 parser and 29 redactor integration tests. The
-      `windows-cli` CI job runs the same command on `windows-latest`.
-      A successful native Windows run remains outstanding.
+      `windows-cli` job passed on `windows-latest` at commit `fe4a903`
+      using `cargo +stable test --locked -p er7 -p er7-redact --test integration`.
+      [Windows job log](https://github.com/er7-rust/er7-rust/actions/runs/44499021467/job/135473563198)
 - [x] **Reconcile the conduct documents.** The Covenant 3.0 text includes
       the claim-accuracy clause required by professionalization rule 7.
       The private reporting address matches the published maintainer

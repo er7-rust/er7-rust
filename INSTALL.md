@@ -28,6 +28,11 @@ cargo install er7-redact    # installs `er7-redact`
 `cargo install` puts them in `~/.cargo/bin`, which Rust's installer adds to
 your `PATH`.
 
+The CLI integration suites verify Unicode filenames, UTF-8 pipes, and
+exact CR, LF, and CRLF output on Linux and Windows. They also verify that
+invalid UTF-8 leaves an existing output file intact. See the
+[verification record](tasks.md#production-readiness-review-2026-11-19).
+
 ```sh
 er7 message.er7                        # every value, with the path that names it
 er7 --query PID-5.1 message.er7        # read one value
