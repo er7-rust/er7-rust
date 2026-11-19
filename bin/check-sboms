@@ -1,0 +1,114 @@
+#!/usr/bin/env python3
+"""Check generated SBOMs against Cargo's target-filtered dependency graphs."""
+
+import json
+import pathlib
+import subprocess
+import sys
+
+GENERATOR_VERSION = "0.5.10"
+PUBLISHED = ("er7", "er7-redact", "serde-er7")
+
+
+def fail(message):
+    raise SystemExit(f"SBOM check failed: {message}")
+
+
+def metadata(manifest, target):
+    command = [
+        "cargo",
+        "metadata",
+        "--format-version",
+        "1",
+        "--filter-platform",
+        target,
+        "--manifest-path",
+        str(manifest),
+    ]
+    return json.loads(subprocess.check_output(command, text=True))
+
+
+def expected_components(cargo, root_name):
+    packages = {package["id"]: package for package in cargo["packages"]}
+    nodes = {node["id"]: node for node in cargo["resolve"]["nodes"]}
+    roots = [package["id"] for package in cargo["packages"] if package["name"] == root_name]
+    if len(roots) != 1:
+        fail(f"expected one Cargo package named {root_name}, found {len(roots)}")
+
+    visited = set()
+    pending = [roots[0]]
+    while pending:
+        package_id = pending.pop()
+        if package_id in visited:
+            continue
+        visited.add(package_id)
+        for dependency in nodes[package_id]["deps"]:
+            kinds = dependency["dep_kinds"]
+            if any(kind["kind"] != "dev" for kind in kinds):
+                pending.append(dependency["pkg"])
+
+    visited.remove(roots[0])
+    return {(packages[item]["name"], packages[item]["version"]) for item in visited}
+
+
+def one_file(directory, prefix):
+    matches = sorted(directory.glob(f"{prefix}*.cdx.json"))
+    if len(matches) != 1:
+        fail(f"expected one {prefix}*.cdx.json in {directory}, found {len(matches)}")
+    return matches[0]
+
+
+def check_document(path, root_name, manifest, target):
+    document = json.loads(path.read_text(encoding="utf-8"))
+    if document.get("bomFormat") != "CycloneDX" or document.get("specVersion") != "1.7":
+        fail(f"{path}: expected CycloneDX 1.7")
+    if "serialNumber" in document:
+        fail(f"{path}: reproducible output must omit serialNumber")
+
+    details = document.get("metadata", {})
+    if not details.get("timestamp"):
+        fail(f"{path}: metadata.timestamp is missing")
+    component = details.get("component", {})
+    if component.get("name") != root_name:
+        fail(f"{path}: root is {component.get('name')!r}, expected {root_name!r}")
+
+    tools = {(tool.get("name"), tool.get("version")) for tool in details.get("tools", [])}
+    if ("cargo-cyclonedx", GENERATOR_VERSION) not in tools:
+        fail(f"{path}: cargo-cyclonedx {GENERATOR_VERSION} is not recorded")
+    properties = {item.get("name"): item.get("value") for item in details.get("properties", [])}
+    if properties.get("cdx:rustc:sbom:target:triple") != target:
+        fail(f"{path}: target triple is missing or wrong")
+
+    actual = {(item["name"], item["version"]) for item in document.get("components", [])}
+    expected = expected_components(metadata(manifest, target), root_name)
+    if actual != expected:
+        fail(f"{path}: components differ from cargo metadata: expected {sorted(expected)}, got {sorted(actual)}")
+
+
+def main():
+    if len(sys.argv) != 3:
+        fail("usage: bin/check-sboms OUTPUT_DIRECTORY TARGET_TRIPLE")
+    directory = pathlib.Path(sys.argv[1])
+    target = sys.argv[2]
+    workspace = pathlib.Path(__file__).resolve().parent.parent
+
+    for crate in PUBLISHED:
+        version = next(
+            line.split('"')[1]
+            for line in (workspace / crate / "Cargo.toml").read_text(encoding="utf-8").splitlines()
+            if line.startswith("version = ")
+        )
+        manifest = workspace / "target" / "package" / f"{crate}-{version}" / "Cargo.toml"
+        check_document(one_file(directory, f"{crate}-{version}-"), crate, manifest, target)
+
+    check_document(
+        one_file(directory, "er7-fuzz-"),
+        "er7-fuzz",
+        workspace / "er7" / "fuzz" / "Cargo.toml",
+        target,
+    )
+    print(f"SBOM check passed: four CycloneDX 1.7 documents match Cargo for {target}.")
+
+
+if __name__ == "__main__":
+    main()

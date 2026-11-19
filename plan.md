@@ -64,10 +64,10 @@ The trademark-compliance sweep — 100+ files extending compliance into
 crate doc-comments, manifests, and the site copy — landed 2026-08-26.
 
 The honest part of the document set is that it still names the gaps that
-remain — no second security responder, no SBOM, no Trusted Publishing —
-rather than implying they are covered. The two gaps this sentence used to
-name here, "no CI" and "unsigned commits", were closed 2026-08-26 and
-2026-08-27 respectively (workstream 3, below), and are not restated as open.
+remain — no second security responder and no Trusted Publishing — rather
+than implying they are covered. The gaps this sentence used to name here,
+"no CI", "unsigned commits", and "no SBOM", are closed and are not
+restated as open.
 This plan closes what is still open the same deliberate way, instead of
 leaving it as a standing confession.
 
@@ -109,14 +109,25 @@ posture. Open items for each are in `tasks.md`.
    one, and GitHub's "Verified" badge went live the same day once the
    maintainer registered that key's public half himself — confirmed by
    `commit.verification.verified: true` via the API on every commit made
-   after registration. No SBOM.
+   after registration.
 
    The release artifacts themselves are now checked independently of the
    workspace build: CI runs `cargo package --locked` for `er7`,
    `er7-redact`, and `serde-er7`, which applies each include list, resolves
    published dependency requirements, and builds the archive that would be
-   uploaded. This does not close the SBOM gap; it closes the earlier point
-   at which a malformed package could first be discovered.
+   uploaded. That package-build change did not itself close the SBOM gap;
+   it closed the earlier point at which a malformed package could first be
+   discovered. The next change below closes the inventory gap separately.
+
+   CycloneDX SBOMs closed the remaining inventory gap 2026-11-19. The
+   package CI job now emits a checked CycloneDX 1.7 document for each
+   normalized crates.io package plus a separate fuzz-workspace document,
+   using pinned `cargo-cyclonedx 0.5.10`. The generator uses one explicit
+   target instead of the misleading `--target all` result observed during
+   implementation, and `bin/check-sboms` requires exact agreement with
+   Cargo's target-filtered normal/build dependency graph. The documents
+   remain inventories, explicitly not provenance, attestations, or
+   vulnerability scans.
 
 4. **Privacy and patient data.** `er7-redact` is a PHI tool, and its claims
    are scoped correctly — "a starting point, not a compliance certification"

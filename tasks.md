@@ -92,15 +92,22 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
 ### Remaining declared gaps
 
 - [ ] **Generate standards-based SBOMs without conflating build surfaces.**
-      Specify the format and generator first, pin and audit the generator,
-      then generate separate machine-readable inventories for the root
-      workspace and `er7/fuzz` from their locked dependency graphs. CI must
-      reproduce and retain them as artifacts; release guidance must say
-      which SBOM belongs to each published crate. Distinguish runtime,
-      development/benchmark, and fuzz dependencies, and do not call an SBOM
-      signed provenance or an attestation. Update `SECURITY.md`, `plan.md`,
-      and the workspace spec when the implementation and hosted evidence
-      exist.
+      Implementation complete locally 2026-11-19 with spec §15,
+      `bin/generate-sboms`, and
+      `bin/check-sboms`. Pinned `cargo-cyclonedx 0.5.10` emits CycloneDX
+      1.7 JSON for each normalized package plus the separate fuzz
+      workspace. Generation uses the explicit
+      `x86_64-unknown-linux-gnu` target because testing `--target all`
+      exposed target-disabled packages as required components. The checker
+      compares every component list with `cargo metadata
+      --filter-platform`, excluding dev edges while retaining build edges.
+      Local evidence: four documents passed; component counts were 0
+      (`er7`), 1 (`er7-redact`), 3 (`serde-er7`), and 8 (`er7-fuzz`). CI
+      is configured to retain them as `cyclonedx-sboms`; release guides
+      identify the matching crate file. The spec and `SECURITY.md`
+      explicitly decline to call this provenance, an attestation, or a
+      vulnerability scan. Close this item after the hosted `packages` job
+      proves generation, semantic checking, and artifact upload together.
 - [ ] **Add a second security responder.** This needs a real person who has
       agreed to the role and a private reporting route they control; it
       cannot be closed by adding an unowned alias or naming somebody without

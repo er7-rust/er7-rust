@@ -49,6 +49,12 @@ cargo package --list
 No stray file, and **no message that is not synthetic** — see
 [`AGENTS/safety.md`](../../AGENTS/safety.md).
 
+From the green CI run for the release commit, retain
+`er7-redact-<version>-x86_64-unknown-linux-gnu.cdx.json` from the
+`cyclonedx-sboms` artifact. Attach that file if a GitHub Release is created;
+the other three documents describe different build surfaces (workspace spec
+§15).
+
 ## 5. Publish
 
 ```sh

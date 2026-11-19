@@ -22,6 +22,10 @@
 5. `cargo package --locked --list` contains only the intended source,
    specification, documentation, examples, and root package files; then
    `cargo package --locked` builds the exact archive Cargo would publish.
+6. From the green CI run for the release commit, retain
+   `serde-er7-<version>-x86_64-unknown-linux-gnu.cdx.json` from the
+   `cyclonedx-sboms` artifact. Attach it if a GitHub Release is created;
+   workspace spec §15 explains its target and assurance boundaries.
 
 ## Who may run `cargo publish`
 

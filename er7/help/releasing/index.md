@@ -57,6 +57,11 @@ disclosure.
       `LICENSE.md`, `index.md`, and nothing surprising.
 - [ ] `cargo publish --dry-run` — succeeds. This also confirms the crate
       builds with no dependencies (R25).
+- [ ] From the green CI run for this release commit, retain
+      `er7-<version>-x86_64-unknown-linux-gnu.cdx.json` from the
+      `cyclonedx-sboms` artifact. Attach that file if a GitHub Release is
+      created; the `er7-fuzz` document is maintenance evidence, not an
+      `er7` release SBOM (workspace spec §15).
 
 ## 5. Commit, tag, publish
 

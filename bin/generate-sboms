@@ -1,0 +1,66 @@
+#!/bin/sh
+
+# Generate the four CycloneDX documents specified by
+# spec/software-bills-of-materials/index.md. Run from anywhere after the
+# three `cargo package` commands in family-policy §1.6 have completed.
+
+set -eu
+
+workspace=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
+cd "$workspace"
+
+generator_version=0.5.10
+target=${SBOM_TARGET:-x86_64-unknown-linux-gnu}
+output=${1:-target/sbom}
+
+installed=$(cargo cyclonedx --version)
+case "$installed" in
+  *" $generator_version") ;;
+  *)
+    echo "cargo-cyclonedx $generator_version is required; found: $installed" >&2
+    exit 1
+    ;;
+esac
+
+mkdir -p "$output"
+output=$(CDPATH='' cd -- "$output" && pwd)
+
+if [ -z "${SOURCE_DATE_EPOCH:-}" ]; then
+  SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
+  export SOURCE_DATE_EPOCH
+fi
+
+generate_package() {
+  crate=$1
+  version=$(sed -n 's/^version = "\([^"]*\)"/\1/p' "$crate/Cargo.toml" | head -1)
+  package_dir="target/package/$crate-$version"
+  manifest="$package_dir/Cargo.toml"
+  generated="$package_dir/$crate.cdx.json"
+  destination="$output/$crate-$version-$target.cdx.json"
+
+  if [ ! -f "$manifest" ]; then
+    echo "missing $manifest; run cargo package --locked -p $crate first" >&2
+    exit 1
+  fi
+
+  cargo cyclonedx \
+    --manifest-path "$manifest" \
+    --format json \
+    --spec-version 1.7 \
+    --target "$target"
+  mv "$generated" "$destination"
+}
+
+generate_package er7
+generate_package er7-redact
+generate_package serde-er7
+
+fuzz_generated=er7/fuzz/er7-fuzz.cdx.json
+cargo cyclonedx \
+  --manifest-path er7/fuzz/Cargo.toml \
+  --format json \
+  --spec-version 1.7 \
+  --target "$target"
+mv "$fuzz_generated" "$output/er7-fuzz-$target.cdx.json"
+
+bin/check-sboms "$output" "$target"

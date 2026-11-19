@@ -2,7 +2,8 @@
 # (spec/01-family-policy/index.md §1.2), the MSRV floor
 # (spec/rust-msrv-n-minus-2/index.md), the trademark fair-use rules
 # (spec/hl7-trademarks-fair-use/index.md, enforced by bin/check-trademarks),
-# and dependency auditing (deny.toml: advisories, licenses, bans, sources).
+# dependency auditing (deny.toml: advisories, licenses, bans, sources),
+# package verification, and checked CycloneDX SBOM artifacts.
 # The same auditing check also runs on a weekly cron with no push required
 # — .github/workflows/audit.yml — so a newly-disclosed advisory against
 # something already in Cargo.lock is caught even in a quiet week.
@@ -89,6 +90,16 @@ jobs:
       - run: cargo +stable package --locked -p er7
       - run: cargo +stable package --locked -p er7-redact
       - run: cargo +stable package --locked -p serde-er7
+      - name: install the pinned SBOM generator
+        run: cargo +stable install cargo-cyclonedx --version 0.5.10 --locked
+      - name: generate and check CycloneDX SBOMs
+        run: bin/generate-sboms
+      - uses: actions/upload-artifact@v7
+        with:
+          name: cyclonedx-sboms
+          path: target/sbom/*.cdx.json
+          if-no-files-found: error
+          retention-days: 30
 
   # The Linux checks above also run these two integration suites.
   windows-cli:
