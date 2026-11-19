@@ -139,6 +139,12 @@ a surname `Wood` does not catch the `Wood` inside `Woodward`). Values
 shorter than three characters are skipped, and a `keep`'d position never
 contributes a value — `keep` already says "not identifying."
 
+The comparison lowercases decoded text and checks for alphanumeric
+characters on either side. It does not normalize Unicode spellings.
+For example, a rule can remove a name from its named field while a note
+with the same accent written as a separate combining character survives.
+Name such free-text fields explicitly when they must be cleared.
+
 The match takes the **whole leaf**, with the same action the named
 position used — `NTE-3` loses the whole sentence, not just the name
 inside it, the same way every other action in this crate already works on

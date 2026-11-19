@@ -19,6 +19,7 @@ fn sample(text: &str) -> &str {
 const ORU: &str = include_str!("../../er7/samples/oru_r01.er7");
 const ADT: &str = include_str!("../../er7/samples/adt_a08.er7");
 const BATCH: &str = include_str!("../../er7/samples/batch.er7");
+const MULTILINGUAL: &str = include_str!("../../er7/samples/multilingual.er7");
 
 fn round_trips_through_json(text: &str) {
     let text = sample(text);
@@ -38,7 +39,7 @@ fn round_trips_through_json(text: &str) {
 
 #[test]
 fn round_trips_every_sample_from_the_er7_crate() {
-    for sample in [ORU, ADT, BATCH] {
+    for sample in [ORU, ADT, BATCH, MULTILINGUAL] {
         round_trips_through_json(sample);
     }
 }

@@ -272,6 +272,14 @@ message order" property. It lives as an example, not in `src/`, precisely
 because it is a demonstration of what `Action::custom` can do, not a
 built-in this crate maintains.
 
+## 16.13 Coverage inspection and actions (D22)
+
+The coverage walk reused the editing pass on a copy. A field-level
+`null` collapsed the copy before its original leaves were marked as
+covered. A custom action could also perform caller-visible work while
+the caller was only asking for paths. Both diverged from the positional
+meaning of [§2.9](../02-redaction-model/index.md).
+
 ---
 
 HL7®, and FHIR® are the registered trademarks of Health Level Seven

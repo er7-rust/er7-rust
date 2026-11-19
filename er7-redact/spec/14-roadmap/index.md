@@ -95,9 +95,9 @@ The inverse tool: given a message and a policy, report the positions that
 carry text and are *not* named by any rule. This is how a caller finds out
 what a policy is missing. Shipped 2026-08-28 as `Redactor::uncovered`
 (D22, [§2.9](../02-redaction-model/index.md)) and the CLI's `--uncovered`
-([§10](../10-command-line-interface/index.md)) — small, as predicted: it
-reused the same rule-matching walk `redact` already runs, against a
-disposable clone of the message, rather than inventing a second one.
+([§10](../10-command-line-interface/index.md)). Coverage now inspects
+the original tree directly, including leaves that a null action would
+collapse ([§16.13](../16-open-questions-and-declined-decisions/index.md)).
 Closed [T6](../15-open-tasks/index.md).
 
 ## 14.6 Not planned

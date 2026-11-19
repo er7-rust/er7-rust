@@ -32,6 +32,36 @@ workspace-level professionalization work only.
 
 Grouped by `plan.md` workstream. Order within a group is priority order.
 
+### Production readiness review, 2026-11-19
+
+- [x] **Verify coverage reporting against the input tree.** Two D22
+      regressions failed on the previous implementation. One asserted the
+      exact remaining gaps under nested `null` rules, and the other detected
+      a custom action running during inspection. Both pass with the read-only
+      walk. See the [coverage table](er7-redact/spec/11-testing-strategy/index.md).
+- [x] **Exercise one synthetic multilingual message across all three
+      crates.** The parser and Serde tests compare ER7 bytes. The redactor
+      checks the exact masked output, change path, and shape after reparsing.
+      See the [fixture contract](spec/01-family-policy/index.md#multilingual-test-data).
+- [x] **Repair local toolchain verification.** The Make target now finds
+      the installed script and accepts a patch-specific toolchain. The
+      workspace tests and fuzz-manifest compile checks passed locally on
+      Rust 1.98 and 1.99.1.
+- [ ] **Verify the stable CI changes on a hosted runner.** Record a green
+      run for this revision covering both benchmark crates and the strict
+      rustdoc commands for the three published libraries.
+- [ ] **Document multilingual redaction limits for integrators.** Use the
+      cases and acceptance criteria in [redactor task T7](er7-redact/spec/15-open-tasks/index.md).
+- [ ] **Prove CLI portability.** Run both binaries' integration suites
+      on Windows and Linux with synthetic UTF-8 paths, piped input,
+      exact CR/LF/CRLF output, and an invalid UTF-8 input that must fail
+      before an existing output file is written. Record the runner and
+      commands before describing platform coverage in the install guide.
+- [ ] **Reconcile the conduct documents.** The adopted 3.0 text and
+      professionalization rule 7 differ on the explicit claim-accuracy
+      clause. Record the maintainer's decision in both documents and
+      verify the private reporting instructions before closing this item.
+
 ### In flight — land it first
 
 - [x] **Commit the trademark-compliance sweep** — landed 2026-08-26

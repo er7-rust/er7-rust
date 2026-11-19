@@ -9,6 +9,7 @@ use er7::{Message, RenderOptions, Separators, Terminator};
 const ORU: &str = include_str!("../samples/oru_r01.er7");
 const ADT: &str = include_str!("../samples/adt_a08.er7");
 const BATCH: &str = include_str!("../samples/batch.er7");
+const MULTILINGUAL: &str = include_str!("../samples/multilingual.er7");
 
 fn parse(text: &str) -> Message {
     er7::parse(text).expect("sample parses")
@@ -16,7 +17,7 @@ fn parse(text: &str) -> Message {
 
 #[test]
 fn every_sample_round_trips_byte_for_byte() {
-    for sample in [ORU, ADT] {
+    for sample in [ORU, ADT, MULTILINGUAL] {
         let options = RenderOptions {
             terminator: Terminator::Cr,
             trailing_terminator: true,

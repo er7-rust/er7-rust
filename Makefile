@@ -11,6 +11,7 @@ SITE := er7-rust.github.io
 .PHONY: help
 help:
 	@echo 'check-trademarks  enforce the HL7 fair-use rules across the tree'
+	@echo 'test-minimum-supported-rust-version  check the two supported older Rust minors'
 	@echo 'github-pages  push the monorepo, then publish the site (publish: same thing)'
 	@echo 'site-dev    run the site locally at http://localhost:5173'
 	@echo 'site-check  type-check the site, as CI does'
@@ -48,4 +49,4 @@ site-check:
 # Check and test on the minimum supported Rust version (N-2) and on N-1.
 .PHONY: test-minimum-supported-rust-version
 test-minimum-supported-rust-version:
-	bin/make-test-minimum-supported-rust-version
+	bin/test-minimum-supported-rust-version

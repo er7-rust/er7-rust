@@ -1,3 +1,10 @@
+**Workspace review, 2026-11-19.** This archived assessment includes a
+proposal to collect redacted real HL7® messages. The workspace requires
+synthetic fixtures for every test. The current plan uses a shared
+multilingual fixture written from scratch. See the
+[family policy](../../../spec/01-family-policy/index.md) and
+[reviewed tasks](../../../tasks.md).
+
 Based on my analysis of the `er7-rust` workspace, here are **prioritized, actionable quality improvement tasks** for AI to execute, organized by category. The project is exceptionally well-documented with all professionalization prerequisites met, so these focus on **growth, sustainability, and technical depth**.
 
 ---
@@ -181,3 +188,9 @@ From `er7/spec/17-open-tasks/` and similar:
 ---
 
 Would you like me to **dive deep into any specific category** and provide detailed implementation plans, or shall I **start executing** on one of these high-priority items?
+
+---
+
+HL7®, and FHIR® are the registered trademarks of Health Level Seven
+International and their use of these trademarks does not constitute an
+endorsement by HL7.

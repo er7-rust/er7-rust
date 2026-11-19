@@ -63,15 +63,16 @@ decision for `plan.md`, not a convenience.
 
 ## CI enforcement
 
-CI MUST verify the MSRV, not merely declare it. The `msrv` job installs the
-exact pinned toolchain and runs `cargo check --all-targets --workspace` with
-it. `cargo check` (not `cargo build`) is sufficient and fast: the MSRV question
-is "does this compile", and the `test` job already answers "does this work" on
-stable.
+The `msrv` job reads the floor from the manifests, then runs
+`cargo check --all-targets --workspace` and `cargo test --workspace` on
+that toolchain. The stable job runs separately.
 
-The `msrv` job is separate from the `test` job so a failure names the cause
-directly: `test` red means a behavior regression, `msrv` red means the code
-started requiring a newer toolchain than the policy allows.
+For a local check, install host toolchains for the MSRV and the following
+minor, then run `make test-minimum-supported-rust-version`. A minor alias
+or an installed patch release of the minor is sufficient. The target checks
+all targets and runs the tests for the root workspace, then compile-checks
+the separate fuzz manifest on each toolchain. Fuzz execution uses nightly
+in its own CI job.
 
 ## Current value
 

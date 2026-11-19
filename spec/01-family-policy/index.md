@@ -40,6 +40,10 @@ cargo fmt --check                         # formatting
 cargo rustdoc --lib -- -W missing-docs    # every public item documented
 ```
 
+Stable CI runs tests and all-target Clippy for both benchmark crates
+as well as the three published crates. Missing public library docs fail
+the CI rustdoc step.
+
 Clippy's pedantic lints are on (`[lints.clippy] pedantic = "warn"`) and the
 checks run with `-D warnings`, so a pedantic finding fails the build like
 any other. Run them per-crate (`-p er7`, `-p er7-redact`, `-p serde-er7`)
@@ -125,6 +129,16 @@ This matters most in `er7-redact`, whose entire purpose is handling
 patient identifiers, and each crate's own `AGENTS/safety.md` states what
 follows from this rule specifically for that crate — what it is and is not
 safe to claim about its own output.
+
+### Multilingual test data
+
+The shared UTF-8 [fixture](../../er7/samples/multilingual.er7) exercises
+Arabic and Japanese text, a decomposed Latin accent, and an escaped field
+separator. The parser and Serde suites compare canonical ER7 bytes across
+their round trips. The redaction suite checks the selected leaf and the
+exact text around it. These checks cover text after decoding to UTF-8.
+For a feed in another encoding, the integration must decode its bytes
+before passing text to the crates. MSH-18 alone does not perform that step.
 
 ## §1.5 Workspace layout and versioning
 

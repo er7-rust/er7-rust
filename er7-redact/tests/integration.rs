@@ -44,6 +44,22 @@ fn numbering(message: &Message) -> Vec<(String, usize)> {
 }
 
 #[test]
+fn masking_one_multilingual_leaf_preserves_the_surrounding_wire_text() {
+    let source = include_str!("../../er7/samples/multilingual.er7").trim_end_matches('\r');
+    let mut message = parse(source);
+    let before = shape(&message);
+    let policy = Policy::accept_all()
+        .with("ZTX-2[1].2", Action::Mask('*'))
+        .unwrap();
+    let report = Redactor::new(policy).redact(&mut message);
+    assert_eq!(report.changes.len(), 1);
+    assert_eq!(report.changes[0].path.to_string(), "ZTX[1]-2[1].2.1");
+    let wire = message.to_er7();
+    assert_eq!(wire, source.replace("مثال", "****"));
+    assert_eq!(shape(&parse(&wire)), before);
+}
+
+#[test]
 fn every_sample_keeps_its_shape() {
     // D1: whatever the policy, the redacted message has the same segments,
     // fields, repetitions, components, and subcomponents as the original

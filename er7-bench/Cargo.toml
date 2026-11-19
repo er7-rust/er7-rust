@@ -13,10 +13,8 @@ publish = false
 # (`the_crate_has_no_runtime_dependencies`, spec §15.1 R25). Criterion lives
 # here instead, one directory over, where it cannot reach the audit surface
 # of the crate being measured.
-[dependencies]
-er7 = { path = "../er7", version = "0" }
-
 [dev-dependencies]
+er7 = { path = "../er7", version = "0" }
 criterion = { version = "0.8", default-features = false, features = ["cargo_bench_support"] }
 
 [lib]

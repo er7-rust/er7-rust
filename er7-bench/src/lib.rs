@@ -1,4 +1,4 @@
-//! Benchmarks for [`er7`], kept in their own crate so that `er7` itself can
+//! Benchmarks for `er7`, kept in their own crate so that `er7` itself can
 //! carry no dependencies at all — not even development ones, which its own
 //! test enforces (`the_crate_has_no_runtime_dependencies`, `er7` spec
 //! §15.1, R25).

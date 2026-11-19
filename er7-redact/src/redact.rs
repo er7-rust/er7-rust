@@ -8,7 +8,7 @@
 //! Specified by spec §2 (the model), §4 (what is preserved), and §8 (the
 //! report).
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::fmt;
 
 use er7::message::NULL;
@@ -230,11 +230,8 @@ impl Redactor {
         // The segment name and occurrence of every segment, taken before
         // anything is borrowed mutably, so that a change can be labelled
         // with the path that names it.
-        let mut counts: Vec<usize> = Vec::with_capacity(message.segments.len());
+        let counts = segment_occurrences(message);
         let names: Vec<String> = message.segments.iter().map(|s| s.name.clone()).collect();
-        for (index, name) in names.iter().enumerate() {
-            counts.push(names[..index].iter().filter(|n| *n == name).count() + 1);
-        }
 
         let mut pass = Pass {
             key: self.key,
@@ -246,14 +243,7 @@ impl Redactor {
 
         for rule in &self.policy.rules {
             for index in 0..message.segments.len() {
-                if names[index] != rule.path.segment {
-                    continue;
-                }
-                if rule
-                    .path
-                    .segment_occurrence
-                    .is_some_and(|wanted| wanted != counts[index])
-                {
+                if !matches_segment(&rule.path, &names[index], counts[index]) {
                     continue;
                 }
                 let at = At {
@@ -301,15 +291,14 @@ impl Redactor {
     ///
     /// Independent of the policy's posture: this reports what no *rule*
     /// names, not what the policy will eventually do about it. Under an
-    /// accepting default this is the leak surface — what
-    /// [`redact`](Redactor::redact) will leave exactly as it arrived.
+    /// accepting default, text at these positions survives unless the
+    /// known-value sweep finds a match.
     /// Under a rejecting default it is what the posture is about to blank
     /// on the caller's behalf; reporting it here is not a defect.
     ///
-    /// Takes `&Message`, not `&mut Message`, and never mutates it: the
-    /// positions a rule would name are computed against a disposable copy
-    /// and discarded, so calling this before, after, or instead of
-    /// [`redact`](Redactor::redact) sees the same message either way.
+    /// Inspects the supplied message using rule paths alone. All original
+    /// leaves beneath a field-level null rule count as covered. Custom
+    /// actions run only when applying the policy.
     ///
     /// A leaf **carries text** when it is neither empty nor the explicit
     /// null (D3, D4) — the same test a rejecting posture already applies
@@ -346,105 +335,66 @@ impl Redactor {
     /// ```
     #[must_use]
     pub fn uncovered(&self, message: &Message) -> Vec<Path> {
-        let names: Vec<String> = message.segments.iter().map(|s| s.name.clone()).collect();
-        let mut counts: Vec<usize> = Vec::with_capacity(message.segments.len());
-        for (index, name) in names.iter().enumerate() {
-            counts.push(names[..index].iter().filter(|n| *n == name).count() + 1);
-        }
-        let covered = self.named_positions(message, &names, &counts);
-
-        let mut paths = Vec::new();
-        for (index, segment) in message.segments.iter().enumerate() {
-            let header = segment.is_header();
-            for field in 1..=segment.fields.len() {
-                // D5: the header's delimiter fields are never a gap —
-                // no rule can name them, and neither can this.
-                if header && field <= 2 {
+        let mut gaps = Vec::new();
+        for (segment, occurrence) in message.segments.iter().zip(segment_occurrences(message)) {
+            let rules: Vec<&Path> = self
+                .policy
+                .rules
+                .iter()
+                .map(|rule| &rule.path)
+                .filter(|path| matches_segment(path, &segment.name, occurrence))
+                .collect();
+            for (field, node) in segment.fields.iter().enumerate() {
+                if segment.is_header() && field < 2 {
                     continue;
                 }
-                let Some(node) = segment.field(field) else {
-                    continue;
-                };
-                for repetition in 1..=node.repetitions.len() {
-                    let Some(node) = node.repetition(repetition) else {
-                        continue;
-                    };
-                    for component in 1..=node.components.len() {
-                        let Some(node) = node.component(component) else {
-                            continue;
-                        };
-                        for subcomponent in 1..=node.subcomponents.len() {
-                            let position = (index, field, repetition, component, subcomponent);
-                            if covered.contains(&position) {
-                                continue;
-                            }
-                            let Some(leaf) = node.subcomponent(subcomponent) else {
-                                continue;
-                            };
+                for (rep, node) in node.repetitions.iter().enumerate() {
+                    for (component, node) in node.components.iter().enumerate() {
+                        for (sub, leaf) in node.subcomponents.iter().enumerate() {
                             if leaf.is_empty() || leaf.is_null() {
                                 continue;
                             }
-                            paths.push(Path {
-                                segment: names[index].clone(),
-                                segment_occurrence: Some(counts[index]),
-                                field: Some(field),
-                                repetition: Some(repetition),
-                                component: Some(component),
-                                subcomponent: Some(subcomponent),
+                            let covered = rules.iter().any(|path| {
+                                path.field.is_none_or(|n| n == field + 1)
+                                    && path.repetition.is_none_or(|n| n == rep + 1)
+                                    && path.component.is_none_or(|n| n == component + 1)
+                                    && path.subcomponent.is_none_or(|n| n == sub + 1)
                             });
+                            if !covered {
+                                gaps.push(Path {
+                                    segment: segment.name.clone(),
+                                    segment_occurrence: Some(occurrence),
+                                    field: Some(field + 1),
+                                    repetition: Some(rep + 1),
+                                    component: Some(component + 1),
+                                    subcomponent: Some(sub + 1),
+                                });
+                            }
                         }
                     }
                 }
             }
         }
-        paths
+        gaps
     }
+}
 
-    /// Every leaf position a rule in this policy would name in `message`,
-    /// computed without mutating it.
-    ///
-    /// Runs the same rule-matching walk [`Redactor::redact`] uses, on a
-    /// disposable clone — reusing tested, working mutation logic rather
-    /// than re-deriving "what a rule names" as a second, separately
-    /// maintained implementation that could quietly drift from the first.
-    /// The clone is discarded; only the set of positions it visited
-    /// survives.
-    fn named_positions(
-        &self,
-        message: &Message,
-        names: &[String],
-        counts: &[usize],
-    ) -> HashSet<Position> {
-        let mut throwaway = message.clone();
-        let mut pass = Pass {
-            key: self.key,
-            separators: throwaway.separators,
-            named: HashSet::new(),
-            report: Report::default(),
-            known: Vec::new(),
-        };
-        for rule in &self.policy.rules {
-            for index in 0..throwaway.segments.len() {
-                if names[index] != rule.path.segment {
-                    continue;
-                }
-                if rule
-                    .path
-                    .segment_occurrence
-                    .is_some_and(|wanted| wanted != counts[index])
-                {
-                    continue;
-                }
-                let at = At {
-                    name: &names[index],
-                    index,
-                    occurrence: counts[index],
-                };
-                pass.segment(&mut throwaway.segments[index], at, &rule.path, &rule.action);
-            }
-        }
-        pass.named
-    }
+fn matches_segment(path: &Path, name: &str, occurrence: usize) -> bool {
+    path.segment == name && path.segment_occurrence.is_none_or(|n| n == occurrence)
+}
+
+/// One-based occurrence of each segment within those of the same name.
+fn segment_occurrences(message: &Message) -> Vec<usize> {
+    let mut counts = HashMap::new();
+    message
+        .segments
+        .iter()
+        .map(|segment| {
+            let count = counts.entry(segment.name.as_str()).or_insert(0);
+            *count += 1;
+            *count
+        })
+        .collect()
 }
 
 impl Default for Redactor {
@@ -1166,6 +1116,33 @@ mod tests {
         // uncovered() did not consume or alter anything.
         let report = redactor.redact(&mut message);
         assert!(!report.is_empty());
+    }
+
+    #[test]
+    fn uncovered_uses_original_paths_for_null_rules() {
+        let message = er7::parse("MSH|^~\\&\rZTX|甲&乙^丙~丁\rZTX|A&B^C~D").unwrap();
+        let redactor = Redactor::new(policy(&["ZTX[1]-1 null", "ZTX[2]-1[1].1 null"]));
+        let gaps: Vec<_> = redactor
+            .uncovered(&message)
+            .iter()
+            .map(Path::to_string)
+            .collect();
+        assert_eq!(gaps, ["ZTX[2]-1[1].2.1", "ZTX[2]-1[2].1.1"]);
+    }
+
+    #[test]
+    fn uncovered_never_calls_custom_actions() {
+        let message = er7::parse("MSH|^~\\&\rZTX|例文").unwrap();
+        let policy = Policy::accept_all()
+            .with(
+                "ZTX-1",
+                Action::custom(|_, _| panic!("action ran during inspection")),
+            )
+            .unwrap();
+        assert_eq!(
+            Redactor::new(policy).uncovered(&message),
+            Vec::<Path>::new()
+        );
     }
 
     #[test]

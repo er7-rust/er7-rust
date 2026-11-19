@@ -10,6 +10,15 @@ chapter 2 of every HL7 v2 release and is still what nearly every production
 healthcare interface speaks. The format itself is described in
 [spec §2](../../spec/02-er7-encoding/index.md).
 
+## How do I read a feed in another character encoding?
+
+`er7::parse` accepts Rust text (`&str`). The CLI and `read_messages`
+expect UTF-8 input. If your feed supplies another encoding, decode its
+bytes using the encoding agreed with the sender before calling the
+parser. MSH-18 is carried as data. The byte-for-byte round trip applies
+to canonical ER7 text **after** that conversion. Keep the original bytes
+separately if you need to reproduce the source encoding exactly.
+
 ## Does this crate validate messages?
 
 No, and that is deliberate. It does not check cardinality, required fields,

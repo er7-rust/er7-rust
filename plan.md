@@ -18,6 +18,28 @@ none of them can: the workspace-level professionalization work. Execution
 items live in [`tasks.md`](tasks.md), where a `[x]` means verified, not
 intended.
 
+## Production readiness review, 2026-11-19
+
+The three libraries have executable rule indexes and independent release
+contracts. This review found two places where the existing checks gave
+incomplete evidence for an integrator.
+
+- **Can an operator trust the coverage report?** A field-level `null`
+  rule caused `--uncovered` to list leaves the rule actually covered.
+  The library inspection also invoked custom callbacks. Coverage now
+  reads the original positions, with regression tests for both cases.
+- **Which text survives the full pipeline?** A shared synthetic message
+  now checks UTF-8 text across parsing, JSON, and selective redaction.
+  The next priority is documenting and testing the known-value search
+  boundary across scripts. A preserved spelling can still miss a match
+  when a note uses a different Unicode representation.
+
+For release verification, stable CI now includes the redaction benchmark
+crate and fails on missing public library documentation. The next
+portability milestone is running the two CLIs' file and pipe contracts on
+Windows as well as Linux. Evidence and acceptance criteria are in the
+[production readiness checklist](tasks.md#production-readiness-review-2026-11-19).
+
 ## Where the workspace stands (verified 2026-08-30)
 
 Three crates released independently on crates.io (er7 0.2.1, serde-er7 0.2.0,

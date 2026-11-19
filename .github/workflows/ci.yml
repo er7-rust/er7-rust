@@ -32,7 +32,7 @@ jobs:
   # check runs once per library crate.
   #
   # Split into two phases with a `cargo clean` between them, deliberately:
-  # er7-bench's only dev-dependency is criterion, which alone pulls in
+  # The benchmark suites use criterion, which alone pulls in
   # roughly 50 transitive crates that the three published crates' own
   # test/clippy/doc steps never touch. Measured 2026-08-27 with a clean
   # target/ before each: phase 1 alone (the three published crates, all
@@ -66,15 +66,14 @@ jobs:
       - run: cargo test -p er7 -p er7-redact -p serde-er7
       - run: cargo clippy -p er7 -p er7-redact -p serde-er7 --all-targets -- -D warnings
       - run: cargo fmt --check
-      - run: cargo rustdoc -p er7 --lib -- -W missing-docs
-      - run: cargo rustdoc -p serde-er7 --lib -- -W missing-docs
-      - run: cargo rustdoc -p er7-redact --lib -- -W missing-docs
+      - run: cargo rustdoc -p er7 --lib -- -D missing-docs
+      - run: cargo rustdoc -p serde-er7 --lib -- -D missing-docs
+      - run: cargo rustdoc -p er7-redact --lib -- -D missing-docs
       - name: clean phase 1's target/ before building criterion
         run: cargo clean
-      # Phase 2: er7-bench, isolated so its criterion-sized target/ never
-      # coexists on disk with phase 1's.
-      - run: cargo test -p er7-bench
-      - run: cargo clippy -p er7-bench --all-targets -- -D warnings
+      # Phase 2: both benchmark crates share the criterion build.
+      - run: cargo test -p er7-bench -p er7-redact-bench
+      - run: cargo clippy -p er7-bench -p er7-redact-bench --all-targets -- -D warnings
 
   # The declared floor (rust-version in every publishable crate's own
   # Cargo.toml) actually builds and tests, so the pin cannot silently

@@ -86,7 +86,7 @@ test that enforces it.
 | D19 | A reject rule beats an accept rule for the same leaf, whichever order they are in. | [§2.4](../02-redaction-model/index.md) |
 | D20 | Appending one policy to another never weakens what it does by default. | [§2.6](../02-redaction-model/index.md) |
 | D21 | A payload that is not ER7 is refused, passed through, or acted on whole, as the policy says. | [§2.8](../02-redaction-model/index.md) |
-| D22 | `uncovered` reports every leaf that carries text and is named by no rule, independent of the policy's posture. | [§2.9](../02-redaction-model/index.md) |
+| D22 | `uncovered` reports every leaf that carries text and is named by no rule, independent of posture and without invoking actions. | [§2.9](../02-redaction-model/index.md) |
 | D23 | A value found at a named position is redacted wherever else it appears, whole-word and case-insensitively, unless `search_known_values` is off. | [§2.10](../02-redaction-model/index.md) |
 | D24 | A caller-supplied action runs the same way a built-in one does; `Action` keeps `Debug`, `Clone`, `PartialEq`, and `Eq`; it has no policy-file spelling. | [§3.8](../03-actions/index.md) |
 

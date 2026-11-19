@@ -273,9 +273,9 @@ qualified and in message order, the same convention
 
 **Independent of posture.** This reports what no *rule* names, not what
 the policy will eventually do to it. Under an accepting default
-([§2.6](#26-the-two-postures-d9)), an uncovered position is left exactly
-as it arrived when the message is redacted — this is the leak surface, and
-what [§14.5](../14-roadmap/index.md) built this to show. Under a
+([§2.6](#26-the-two-postures-d9)), an uncovered position keeps its input
+value unless the [known-value sweep](#210-known-values-wherever-they-appear-d23)
+finds a match. Under a
 rejecting default, an uncovered position is what the posture is about to
 blank on the caller's behalf; reporting it there is not a defect, it is
 telling the caller what the posture is silently doing.
@@ -285,13 +285,12 @@ telling the caller what the posture is silently doing.
 rejecting posture already applies before it acts. An empty or null leaf is
 not a gap, because a rule would find nothing to redact there either way.
 
-**Never mutates, and never sees redaction's own edits.** `uncovered`
-computes which positions a rule would name by running the same matching
-[§2.2](#22-what-a-rule-names) and [§2.3](#23-what-a-rule-reaches) logic
-`redact` uses, against a disposable copy of the message, and discards the
-copy. The positions it reports, and whether each one carries text, are
-read from the message the caller passed in — untouched, whatever order
-`uncovered` and `redact` are called in.
+**Inspect the supplied tree.** Coverage depends only on the rule paths
+and the leaves present at the time of the call. For example, `PID-5 null`
+covers every original leaf under PID-5, including every repetition.
+Inspecting coverage invokes no action, including a caller's custom callback.
+The path selection rules are [§2.2](#22-what-a-rule-names) and
+[§2.3](#23-what-a-rule-reaches).
 
 The default policy's own uncovered set is exactly the table in
 [§5.4](../05-built-in-policies/index.md): free text, the sensitive but
@@ -342,6 +341,10 @@ the name inside it. A leaf that matches more than one known value takes
 the action of whichever was collected first — rule order, then message
 order, the same order [`Change`](../08-report/index.md) rows already
 follow.
+
+Comparison uses Unicode lowercasing of the decoded strings. Composed and
+decomposed accents keep their original representations. Adjacent letters
+are alphanumeric across scripts, including in text written without spaces.
 
 **One surprising consequence, written down rather than hidden:** when the
 reused action is `pseudonym`, the swept leaf is hashed as its own whole

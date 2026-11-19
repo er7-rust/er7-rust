@@ -96,6 +96,7 @@ Test messages are either written inline or taken from `samples/`:
 | `samples/oru_r01.er7` | a lab result: repeated `OBX`, a repeated field, subcomponents, an escaped `&` |
 | `samples/adt_a08.er7` | an admission update: a repeated field with occurrence indices, a local `ZPD` segment |
 | `samples/batch.er7` | a batch file: `FHS`/`BHS`/`BTS`/`FTS` envelope, two `ACK` messages, an `ERR` segment |
+| `samples/multilingual.er7` | synthetic UTF-8 text in three scripts, including a decomposed accent, repetitions, an escaped delimiter, and an explicit null |
 
 Plus the `EDGES` constant in `tests/integration.rs`, which packs the
 corners into one message: a v2.7 truncation character, an explicit null, a
