@@ -127,7 +127,11 @@ posture. Open items for each are in `tasks.md`.
    implementation, and `bin/check-sboms` requires exact agreement with
    Cargo's target-filtered normal/build dependency graph. The documents
    remain inventories, explicitly not provenance, attestations, or
-   vulnerability scans.
+   vulnerability scans. Hosted run
+   [44535412441](https://github.com/er7-rust/er7-rust/actions/runs/44535412441)
+   then proved the complete package, generation, semantic-check, and
+   upload path against the committed workspace and fuzz lockfiles; its
+   downloaded four-file artifact independently passed `bin/check-sboms`.
 
 4. **Privacy and patient data.** `er7-redact` is a PHI tool, and its claims
    are scoped correctly — "a starting point, not a compliance certification"

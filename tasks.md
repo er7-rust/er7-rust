@@ -91,23 +91,29 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
 
 ### Remaining declared gaps
 
-- [ ] **Generate standards-based SBOMs without conflating build surfaces.**
-      Implementation complete locally 2026-11-19 with spec §15,
+- [x] **Generate standards-based SBOMs without conflating build surfaces.**
+      Completed 2026-11-19 with spec §15,
       `bin/generate-sboms`, and
       `bin/check-sboms`. Pinned `cargo-cyclonedx 0.5.10` emits CycloneDX
       1.7 JSON for each normalized package plus the separate fuzz
       workspace. Generation uses the explicit
       `x86_64-unknown-linux-gnu` target because testing `--target all`
       exposed target-disabled packages as required components. The checker
-      compares every component list with `cargo metadata
+      compares every component list with `cargo metadata --locked
       --filter-platform`, excluding dev edges while retaining build edges.
       Local evidence: four documents passed; component counts were 0
       (`er7`), 1 (`er7-redact`), 3 (`serde-er7`), and 8 (`er7-fuzz`). CI
-      is configured to retain them as `cyclonedx-sboms`; release guides
+      retains them as `cyclonedx-sboms`; release guides
       identify the matching crate file. The spec and `SECURITY.md`
       explicitly decline to call this provenance, an attestation, or a
-      vulnerability scan. Close this item after the hosted `packages` job
-      proves generation, semantic checking, and artifact upload together.
+      vulnerability scan. Hosted run
+      [44535412441](https://github.com/er7-rust/er7-rust/actions/runs/44535412441)
+      and its
+      [package job](https://github.com/er7-rust/er7-rust/actions/runs/44535412441/job/135599381897)
+      proved package creation, generation, semantic checking, and upload
+      together. Downloaded artifact `14536940589` independently passed
+      `bin/check-sboms`; GitHub recorded digest
+      `sha256:2b9e007ce657b22a45d24705aaafd8366cd29d59f342b482bd4c692e2954f3d0`.
 - [ ] **Add a second security responder.** This needs a real person who has
       agreed to the role and a private reporting route they control; it
       cannot be closed by adding an unowned alias or naming somebody without
