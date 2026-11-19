@@ -316,10 +316,11 @@ Collecting happens against the message as it arrived, so a `first 4` on
 `PID-7` still contributes the full, undoctored date of birth as a known
 value, not the four characters the rule kept.
 
-Values shorter than three characters are never collected: a one- or
-two-character value — a middle initial, a sex code — would match
-constantly across ordinary clinical text, and the crate would spend its
-credibility on it.
+The sweep counts Unicode scalar values **after lowercasing** and collects
+a value only if that count is at least three. For example, `示例` has two
+scalars and is skipped. `İX` lowercases to `i`, U+0307 (combining dot
+above), and `x`, so it reaches the threshold. The named position receives
+its rule's action in both cases.
 
 **Where the sweep looks.** Every leaf that carries text and that no rule
 or posture already touched — the same set [`uncovered`](#29-what-no-rule-names-d22)
@@ -343,8 +344,12 @@ order, the same order [`Change`](../08-report/index.md) rows already
 follow.
 
 Comparison uses Unicode lowercasing of the decoded strings. Composed and
-decomposed accents keep their original representations. Adjacent letters
-are alphanumeric across scripts, including in text written without spaces.
+decomposed accents keep their original representations. A collected
+`CAFÉ` matches `«café»` with U+00E9. An `e` followed by U+0301 in the
+note has a different representation and survives. Adjacent letters are
+alphanumeric across scripts, including in text written without spaces:
+`示例甲` matches inside `«示例甲»`, while either adjacent letter in
+`前示例甲` or `示例甲後` prevents that occurrence from matching.
 
 **One surprising consequence, written down rather than hidden:** when the
 reused action is `pseudonym`, the swept leaf is hashed as its own whole

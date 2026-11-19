@@ -50,13 +50,22 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
 - [ ] **Verify the stable CI changes on a hosted runner.** Record a green
       run for this revision covering both benchmark crates and the strict
       rustdoc commands for the three published libraries.
-- [ ] **Document multilingual redaction limits for integrators.** Use the
-      cases and acceptance criteria in [redactor task T7](er7-redact/spec/15-open-tasks/index.md).
+- [x] **Document multilingual redaction limits for integrators (T7).**
+      `multilingual_known_values_in_notes` checks the original field and
+      the note in ten cases. The [policy guide](er7-redact/docs/policies/index.md#values-found-elsewhere)
+      gives the observed outcomes for accents, dotted I, short CJK text,
+      and adjacent letters.
 - [ ] **Prove CLI portability.** Run both binaries' integration suites
       on Windows and Linux with synthetic UTF-8 paths, piped input,
       exact CR/LF/CRLF output, and an invalid UTF-8 input that must fail
       before an existing output file is written. Record the runner and
       commands before describing platform coverage in the install guide.
+
+      **Linux verified 2026-11-19.** In a `rust:1.100.0-slim` Linux
+      container, `cargo test --locked -p er7 -p er7-redact --test integration`
+      passed all 22 parser and 29 redactor integration tests. The
+      `windows-cli` CI job runs the same command on `windows-latest`.
+      A successful native Windows run remains outstanding.
 - [ ] **Reconcile the conduct documents.** The adopted 3.0 text and
       professionalization rule 7 differ on the explicit claim-accuracy
       clause. Record the maintainer's decision in both documents and

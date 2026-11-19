@@ -75,6 +75,15 @@ jobs:
       - run: cargo test -p er7-bench -p er7-redact-bench
       - run: cargo clippy -p er7-bench -p er7-redact-bench --all-targets -- -D warnings
 
+  # The Linux checks above also run these two integration suites.
+  windows-cli:
+    name: Windows CLI integration tests
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test --locked -p er7 -p er7-redact --test integration
+
   # The declared floor (rust-version in every publishable crate's own
   # Cargo.toml) actually builds and tests, so the pin cannot silently
   # drift from the real minimum — closes er7 spec §17 task T2. The value

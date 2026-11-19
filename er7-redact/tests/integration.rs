@@ -2,7 +2,8 @@
 //! input/output contract. Rules about one module's internals are tested
 //! next to that module instead.
 
-use std::process::{Command, Stdio};
+#[path = "../../er7/tests/support/cli.rs"]
+mod cli_support;
 
 use er7::Message;
 use er7_redact::{Action, Policy, Redactor};
@@ -41,6 +42,35 @@ fn numbering(message: &Message) -> Vec<(String, usize)> {
         .iter()
         .map(|segment| (segment.name.clone(), segment.fields.len()))
         .collect()
+}
+
+#[test]
+fn multilingual_known_values_in_notes() {
+    let policy = Policy::accept_all()
+        .with("ZTX-1", Action::redacted())
+        .unwrap();
+    let redactor = Redactor::new(policy);
+    for (field, note, swept) in [
+        ("CAFÉ", "«café»", true),
+        ("CAFÉ", "«cafe\u{301}»", false),
+        ("CAFE\u{301}", "«café»", false),
+        ("CAFE\u{301}", "«cafe\u{301}»", true),
+        ("İX", "«i\u{307}x»", true),
+        ("İX", "«ix»", false),
+        ("示例", "«示例»", false),
+        ("示例甲", "«示例甲»", true),
+        ("示例甲", "«前示例甲»", false),
+        ("示例甲", "«示例甲後»", false),
+    ] {
+        let mut message = parse(&format!("MSH|^~\\&\rZTX|{field}\rNTE|1||{note}"));
+        redactor.redact(&mut message);
+        let expected_note = if swept { "REDACTED" } else { note };
+        assert_eq!(
+            message.to_er7(),
+            format!("MSH|^~\\&\rZTX|REDACTED\rNTE|1||{expected_note}"),
+            "field {field:?}, note {note:?}"
+        );
+    }
 }
 
 #[test]
@@ -333,31 +363,16 @@ fn the_crate_has_one_runtime_dependency() {
 /// Run the command with `args`, feeding it `stdin`, and return
 /// (exit status success, stdout, stderr).
 fn cli(args: &[&str], stdin: &str) -> (bool, String, String) {
-    use std::io::Write;
-    let mut child = Command::new(env!("CARGO_BIN_EXE_er7-redact"))
-        .args(args)
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()
-        .expect("the command builds");
-    let mut pipe = child.stdin.take().expect("stdin is piped");
-    // A run that fails while reading its arguments exits before it reads
-    // standard input at all, which closes this pipe under us. That is the
-    // command behaving correctly, not the test failing, so a broken pipe
-    // here is expected rather than fatal.
-    match pipe.write_all(stdin.as_bytes()) {
-        Ok(()) => {}
-        Err(e) if e.kind() == std::io::ErrorKind::BrokenPipe => {}
-        Err(e) => panic!("writes to stdin: {e}"),
-    }
-    drop(pipe); // the child needs the EOF before it will finish
-    let output = child.wait_with_output().expect("the command finishes");
-    (
-        output.status.success(),
-        String::from_utf8_lossy(&output.stdout).into_owned(),
-        String::from_utf8_lossy(&output.stderr).into_owned(),
-    )
+    cli_support::cli(env!("CARGO_BIN_EXE_er7-redact"), args, stdin)
+}
+
+#[test]
+fn cli_preserves_utf8_and_output_bytes() {
+    cli_support::check_utf8_io(
+        env!("CARGO_BIN_EXE_er7-redact"),
+        &["--rule", "ZTX-1.1 replace REDACTED"],
+        "ZTX|REDACTED^例文",
+    );
 }
 
 #[test]
@@ -436,7 +451,8 @@ fn cli_accept_all_switches_off_a_policy_files_reject() {
     // Spec §10.2: appending never weakens (D20), so `--accept-all` is
     // applied last and is the one thing that can.
     let policy = "OBX-3 clear\nreject replace REDACTED\n";
-    let path = std::env::temp_dir().join("er7-redact-accept-all.policy");
+    let directory = cli_support::TestDirectory::new();
+    let path = directory.path().join("accept-all.policy");
     std::fs::write(&path, policy).expect("writes the policy");
     let path = path.to_string_lossy().into_owned();
 
@@ -449,7 +465,6 @@ fn cli_accept_all_switches_off_a_policy_files_reject() {
     assert!(!accepting.contains("REDACTED"), "{accepting}");
     // The file's own rule still ran; only its posture was overridden.
     assert!(!accepting.contains("2093-3"), "{accepting}");
-    let _ = std::fs::remove_file(&path);
 }
 
 #[test]
@@ -480,7 +495,8 @@ fn cli_masks_an_unrecognised_payload() {
     assert!(er7::parse(&stdout).is_err());
 
     // A policy file can ask for either, and the report says which.
-    let path = std::env::temp_dir().join("er7-redact-unrecognised.policy");
+    let directory = cli_support::TestDirectory::new();
+    let path = directory.path().join("unrecognised.policy");
     std::fs::write(&path, "PID-5 clear\nunrecognised pass\n").expect("writes the policy");
     let path = path.to_string_lossy().into_owned();
 
@@ -494,7 +510,6 @@ fn cli_masks_an_unrecognised_payload() {
         stdout.contains("# message 1: unrecognised payload, passed through"),
         "{stdout}"
     );
-    let _ = std::fs::remove_file(&path);
 }
 
 #[test]

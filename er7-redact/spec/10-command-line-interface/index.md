@@ -168,6 +168,11 @@ input.
 
 ## 10.4 Exit codes and diagnostics
 
+Files and piped input are read as UTF-8. Invalid UTF-8 exits with code 1
+before payload policy evaluation or opening the output file. An existing
+destination keeps its bytes. Message output uses the selected segment
+terminator on files and pipes on every platform.
+
 | Code | Meaning |
 | ---- | ------- |
 | 0 | success |

@@ -290,9 +290,11 @@ known-values on             # sweep every repeat of a value already redacted`}</
       which default was the quiet one.
     </p>
     <p>
-      <code>known-values on</code> (the default) sweeps every position for a value already
-      redacted at a named position elsewhere in the same message, case-insensitively and on whole
-      words; <code>known-values off</code> turns that sweep off, so only the rules themselves act.
+      <code>known-values on</code> (the default) looks for a named value in other eligible
+      leaves of the same message. After lowercasing, the value must have at least three
+      Unicode scalar values and match a whole word. For example, <code>示例甲</code>
+      matches inside <code>«示例甲»</code>. A repeat in <code>示例甲後</code> survives
+      because a letter touches its end. Use <code>known-values off</code> to disable the sweep.
     </p>
     <p>
       <code>reject ACTION</code> turns the policy from &ldquo;redact these&rdquo; into &ldquo;redact
@@ -399,11 +401,9 @@ known-values on             # sweep every repeat of a value already redacted`}</
         including the built-in one.
       </li>
       <li>
-        It does not find an identifier written into free text <strong>unless that exact value
-        already turned up at a named position</strong> — the known-values sweep catches a repeat,
-        not a first mention. A name that appears in an <code>NTE-3</code> comment and nowhere else
-        still survives every positional policy; name that position explicitly, or reject by
-        default.
+        Free text can retain a first mention or a differently spelled repeat. Even a visually
+        identical accent can have a different Unicode representation. If <code>NTE-3</code>
+        must always be cleared, name that field explicitly in the policy.
       </li>
       <li>There is no way back: no mapping table, no key escrow, no undo.</li>
     </ul>

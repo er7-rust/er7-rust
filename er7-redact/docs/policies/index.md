@@ -135,15 +135,21 @@ A patient name removed from `PID-5` is often still sitting in `NTE-3`:
 "spoke with Mrs Everywoman about the result." Every policy also sweeps for
 this, on by default: a value a rule found at a named position is redacted
 wherever else it turns up, case-insensitively and only as a whole word (so
-a surname `Wood` does not catch the `Wood` inside `Woodward`). Values
-shorter than three characters are skipped, and a `keep`'d position never
-contributes a value — `keep` already says "not identifying."
+a surname `Wood` does not catch the `Wood` inside `Woodward`). A
+`keep` rule contributes no value to the sweep.
 
-The comparison lowercases decoded text and checks for alphanumeric
-characters on either side. It does not normalize Unicode spellings.
-For example, a rule can remove a name from its named field while a note
-with the same accent written as a separate combining character survives.
-Name such free-text fields explicitly when they must be cleared.
+The following examples use a rule that replaces the named field. The
+rule always replaces that field. A note containing the value may survive.
+
+| Value in the field | What happens in a note |
+| --- | --- |
+| `CAFÉ` | `«café»` matches when both accents use a single character. An `e` followed by a combining acute accent survives. The sweep preserves the distinction between the two spellings. |
+| `İX` | Lowercasing produces three Unicode scalar values (`i`, combining dot above, and `x`). That meets the three-scalar minimum. The dotted spelling matches and plain `ix` survives. |
+| `示例` | This two-scalar value falls below the minimum. Even an exact repeat in the note survives. |
+| `示例甲` | `«示例甲»` matches. A letter touching either end, as in `前示例甲` or `示例甲後`, prevents a match. |
+
+Name a free-text field explicitly when it must be cleared regardless of
+spelling, length, or surrounding text.
 
 The match takes the **whole leaf**, with the same action the named
 position used — `NTE-3` loses the whole sentence, not just the name

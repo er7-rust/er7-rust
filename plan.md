@@ -30,14 +30,16 @@ incomplete evidence for an integrator.
   reads the original positions, with regression tests for both cases.
 - **Which text survives the full pipeline?** A shared synthetic message
   now checks UTF-8 text across parsing, JSON, and selective redaction.
-  The next priority is documenting and testing the known-value search
-  boundary across scripts. A preserved spelling can still miss a match
-  when a note uses a different Unicode representation.
+  Ten known-value cases now show when a note survives despite redaction
+  of the named field, including different accent representations and
+  CJK text below the length threshold or adjacent to another letter.
+  See the [policy guide](er7-redact/docs/policies/index.md#values-found-elsewhere).
 
 For release verification, stable CI now includes the redaction benchmark
 crate and fails on missing public library documentation. The next
-portability milestone is running the two CLIs' file and pipe contracts on
-Windows as well as Linux. Evidence and acceptance criteria are in the
+portability milestone is a native Windows run of the two CLIs' file and
+pipe contracts. The Linux integration suites passed on Rust 1.100.0.
+Evidence and acceptance criteria are in the
 [production readiness checklist](tasks.md#production-readiness-review-2026-11-19).
 
 ## Where the workspace stands (verified 2026-08-30)

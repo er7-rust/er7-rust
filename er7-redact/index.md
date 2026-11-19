@@ -162,7 +162,7 @@ unrecognised  refuse
 | **Never creates a position** | A rule for a field the message does not carry does nothing, rather than padding the segment out to reach it. |
 | **Cannot corrupt the message** | Replacement text goes in escaped, so a `\|` in a placeholder can never split a field. |
 | **Eight built-in actions, plus a caller-supplied ninth** | `keep`, `clear`, `null`, `replace`, `mask`, `first`, `last`, `pseudonym` — or `Action::custom` for a real MAC, a lookup table, or a date shift. |
-| **Catches a known value wherever it repeats** | A value found at a named position is redacted everywhere else it appears too — case-insensitively, whole-word — on by default, so a name in an `NTE-3` comment does not survive just because no rule named that position. |
+| **Sweeps for repeated known values** | By default, a qualifying whole-word match in a note receives the same action as the named field. Short values, adjacent letters, and different Unicode spellings can leave a note untouched. See the [worked examples](docs/policies/index.md#values-found-elsewhere). |
 | **Finds what a policy is missing** | `--uncovered` (or `Redactor::uncovered`) lists every leaf a rule never named, so you can check a policy against a real message before trusting it. |
 | **Stable pseudonyms** | The same identifier maps the same way in every message redacted with the same key, so a redacted export is still joinable. |
 | **Reports what it did** | One row per position changed, fully qualified, with no values in it. |

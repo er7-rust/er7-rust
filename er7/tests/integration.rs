@@ -2,7 +2,8 @@
 //! input/output contract. Rules about one module's internals are tested
 //! next to that module instead.
 
-use std::process::{Command, Stdio};
+#[path = "support/cli.rs"]
+mod cli_support;
 
 use er7::{Message, RenderOptions, Separators, Terminator};
 
@@ -217,31 +218,12 @@ fn carries_the_corners_through_unchanged() {
 /// Run the command with `args`, feeding it `stdin`, and return
 /// (exit status success, stdout, stderr).
 fn cli(args: &[&str], stdin: &str) -> (bool, String, String) {
-    use std::io::Write;
-    let mut child = Command::new(env!("CARGO_BIN_EXE_er7"))
-        .args(args)
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()
-        .expect("the command builds");
-    let mut pipe = child.stdin.take().expect("stdin is piped");
-    // A run that fails while reading its arguments exits before it reads
-    // standard input at all, which closes this pipe under us. That is the
-    // command behaving correctly, not the test failing, so a broken pipe
-    // here is expected rather than fatal.
-    match pipe.write_all(stdin.as_bytes()) {
-        Ok(()) => {}
-        Err(e) if e.kind() == std::io::ErrorKind::BrokenPipe => {}
-        Err(e) => panic!("writes to stdin: {e}"),
-    }
-    drop(pipe); // the child needs the EOF before it will finish
-    let output = child.wait_with_output().expect("the command finishes");
-    (
-        output.status.success(),
-        String::from_utf8_lossy(&output.stdout).into_owned(),
-        String::from_utf8_lossy(&output.stderr).into_owned(),
-    )
+    cli_support::cli(env!("CARGO_BIN_EXE_er7"), args, stdin)
+}
+
+#[test]
+fn cli_preserves_utf8_and_output_bytes() {
+    cli_support::check_utf8_io(env!("CARGO_BIN_EXE_er7"), &["--normalize"], "ZTX|示例^例文");
 }
 
 #[test]

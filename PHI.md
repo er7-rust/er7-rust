@@ -56,20 +56,16 @@ itself, satisfy either half.** What follows maps the default policy,
 (§5.1), against those categories — honestly, which means the third
 column matters more than the second.
 
-**The structural limit first** ([`§5.4`](er7-redact/spec/05-built-in-policies/index.md),
-[roadmap §14.2](er7-redact/spec/14-roadmap/index.md)): the policy is
-positional. An identifier written into free text — `NTE-3`, `OBX-5`, any
-narrative field — survives every positional rule, and the crate's own
-roadmap calls free-text scanning "the largest real gap". Every row below
-carries that asterisk: *covered at the named positions* never means
-*covered wherever it appears*. The same applies to `Z` segments (local
-extensions the crate cannot know) and to sender-specific field usage —
-field usage varies by interface, and the spec tells you to outline a
-real message before trusting any policy, including this one.
+The table describes the positions the default policy names. A second pass
+can catch a repeat of a known value in a note such as `NTE-3`. A first
+mention, a short repeat, or the same accent written using a different
+Unicode representation may survive. This also matters in local `Z`
+segments and sender-specific fields. See the [tested examples](er7-redact/docs/policies/index.md#values-found-elsewhere)
+and the [default policy's coverage](er7-redact/spec/05-built-in-policies/index.md).
 
 | # | Safe Harbor category | What `patient_identifiers()` does | What it does not do |
 | --- | --- | --- | --- |
-| 1 | Names | Replaces patient, alias, mother's maiden, next-of-kin, guarantor, insured, and clinician names at `PID-5/6/9`, `NK1-2`, `PV1-7/8/9/17`, `GT1-3/4`, `IN1-16` | Names in free text or any unnamed position stay |
+| 1 | Names | Replaces patient, alias, mother's maiden, next-of-kin, guarantor, insured, and clinician names at `PID-5/6/9`, `NK1-2`, `PV1-7/8/9/17`, `GT1-3/4`, `IN1-16` | Names can survive in free text and unnamed positions |
 | 2 | Geographic subdivisions smaller than a state | Clears addresses, county, birth place at `PID-11/12/23`, `NK1-4`, `GT1-5`, `IN1-19` | Facility names (`MSH-3`–`MSH-6`) are deliberately kept and can be quasi-identifiers |
 | 3 | Dates (all elements except year) related to the individual | Truncates birth and death dates to the year (`first 4` on `PID-7`, `PID-29`, `GT1-8`, `IN1-18`) | **Admission, discharge, and event timestamps are not touched** (`PV1`, `MSH-7`, `EVN`, `OBX-14`, …); the ≥90 age aggregation rule is not implemented |
 | 4 | Telephone numbers | Clears `PID-13/14`, `NK1-5/6`, `GT1-6/7` | Phone numbers anywhere else stay |
@@ -95,9 +91,9 @@ from the identifier — FNV-1a over a `u64` key and the value — so it does
 not meet that condition. For data leaving your trust boundary, the spec
 itself says to use `Clear` or `Replace` instead ([`§7.3`](er7-redact/spec/07-pseudonyms/index.md)).
 
-**The defensible summary**: with the default policy, categories 12–18
-are untouched, category 3 is materially incomplete, and every category
-is uncovered inside free text. The strict alternative,
+**The defensible summary**: with the default policy, the positional rules omit categories 12–18,
+category 3 is materially incomplete, and free text can retain identifiers
+of any category. The strict alternative,
 [`Policy::all_but_the_header()`](er7-redact/spec/05-built-in-policies/index.md)
 (§5.2), inverts the risk: reject by default, so nothing below `MSH`
 survives unless you name it — at the cost of clinical meaning. Either

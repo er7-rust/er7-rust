@@ -16,15 +16,12 @@ listed" is not a good enough answer.
 
 ## Does it find identifiers in free text?
 
-Only a repeat. `Policy::search_known_values` (D23,
-[spec §2.10](../../spec/02-redaction-model/index.md)), on by default,
-redacts a value found at a named position wherever else it appears —
-case-insensitively, whole-word — so a name that also lands in an `NTE-3`
-comment is caught once it has shown up somewhere named. It does not find a
-name that appears **only** in free text and nowhere at a named position;
-name that position explicitly (`NTE-3 clear`) or reject by default with
-`Policy::all_but_the_header()` for that case. Shipped 2026-08-29, closing T1
-([spec §14.2](../../spec/14-roadmap/index.md)).
+The default known-value sweep can catch a repeat from a named field.
+First mentions, short repeats, and visually identical accents written
+with different Unicode characters can survive in a note. If the note
+must be cleared, name its position explicitly, for example
+`NTE-3 clear`. See the [worked cases](../policies/index.md#values-found-elsewhere)
+and [spec §2.10](../../spec/02-redaction-model/index.md).
 
 Pattern matching was considered and declined
 ([spec §16.2](../../spec/16-open-questions-and-declined-decisions/index.md)):

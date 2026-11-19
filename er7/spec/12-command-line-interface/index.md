@@ -90,6 +90,11 @@ messages.
 
 ## 12.4 Exit codes and diagnostics
 
+Files and piped input are read as UTF-8. Invalid UTF-8 exits with code 1
+before opening the output file, so an existing destination keeps its bytes.
+The normalizer writes the selected segment terminator to files and pipes
+on every platform.
+
 | Code | Meaning |
 | ---- | ------- |
 | 0 | success |

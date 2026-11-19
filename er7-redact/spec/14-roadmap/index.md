@@ -33,17 +33,13 @@ out is a policy that still runs and has changed posture.
 
 ## 14.2 Shipped — free-text scanning
 
-The largest real gap ([§5.4](../05-built-in-policies/index.md)). A name in
-`NTE-3` survives every positional policy, and everybody who has redacted a
-message by hand has found one there.
+A rule for `PID-5` can remove a name there while leaving a repeat in
+`NTE-3`. This motivated the known-value sweep ([§5.4](../05-built-in-policies/index.md)).
 
-The design question was what the crate is allowed to know, and the
-redact-what-you-know answer was the one to build: take the values already
-found at named positions and remove those strings wherever else they
-appear, whole-word and case-insensitively. No pattern matching, no false
-positives on clinical text, and it composes with the existing model — the
-values come from the same policy, and misses anything not present in a
-named position to begin with. Pattern matching — recognising the *shape*
+The second pass compares text from positions named by rules with other
+leaves. A whole-word match can remove an entire note, including unrelated
+text in that note. The [policy guide](../../docs/policies/index.md#values-found-elsewhere)
+shows the verified Unicode boundaries (T7). Pattern matching — recognising the *shape*
 of a phone number, an SSN, a date — remains declined
 ([§16.2](../16-open-questions-and-declined-decisions/index.md)).
 

@@ -366,8 +366,8 @@ pub struct Policy {
     pub posture: Posture,
     /// What a payload that is not ER7 gets.
     pub unrecognised: Unrecognised,
-    /// Whether a value found at a named position is redacted wherever
-    /// else it appears (D23, spec §2.10). Defaults to `true`.
+    /// Whether to apply a named value's action to qualifying whole-word
+    /// repeats elsewhere (D23, spec §2.10). Defaults to `true`.
     pub search_known_values: bool,
 }
 
@@ -649,8 +649,7 @@ impl Policy {
         self
     }
 
-    /// Set whether a value found at a named position is redacted wherever
-    /// else it appears (D23, spec §2.10).
+    /// Enable or disable the known-value sweep (D23, spec §2.10).
     ///
     /// Every built-in policy defaults to `true`. There is no normalising
     /// to do here — unlike [`Policy::posture`] and
