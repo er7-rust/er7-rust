@@ -27,7 +27,8 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  # The four checks from spec/01-family-policy/index.md §1.2, verbatim.
+  # Select each job’s toolchain explicitly because rust-toolchain.toml pins local development.
+  # The four checks from spec/01-family-policy/index.md §1.2.
   # `cargo rustdoc --lib` needs one package at a time, so the fourth
   # check runs once per library crate.
   #
@@ -63,17 +64,17 @@ jobs:
           components: clippy, rustfmt
       # Phase 1: the three published crates. No criterion anywhere in this
       # phase's dependency graph.
-      - run: cargo test -p er7 -p er7-redact -p serde-er7
-      - run: cargo clippy -p er7 -p er7-redact -p serde-er7 --all-targets -- -D warnings
-      - run: cargo fmt --check
-      - run: cargo rustdoc -p er7 --lib -- -D missing-docs
-      - run: cargo rustdoc -p serde-er7 --lib -- -D missing-docs
-      - run: cargo rustdoc -p er7-redact --lib -- -D missing-docs
+      - run: cargo +stable test -p er7 -p er7-redact -p serde-er7
+      - run: cargo +stable clippy -p er7 -p er7-redact -p serde-er7 --all-targets -- -D warnings
+      - run: cargo +stable fmt --check
+      - run: cargo +stable rustdoc -p er7 --lib -- -D missing-docs
+      - run: cargo +stable rustdoc -p serde-er7 --lib -- -D missing-docs
+      - run: cargo +stable rustdoc -p er7-redact --lib -- -D missing-docs
       - name: clean phase 1's target/ before building criterion
         run: cargo clean
       # Phase 2: both benchmark crates share the criterion build.
-      - run: cargo test -p er7-bench -p er7-redact-bench
-      - run: cargo clippy -p er7-bench -p er7-redact-bench --all-targets -- -D warnings
+      - run: cargo +stable test -p er7-bench -p er7-redact-bench
+      - run: cargo +stable clippy -p er7-bench -p er7-redact-bench --all-targets -- -D warnings
 
   # The Linux checks above also run these two integration suites.
   windows-cli:
@@ -82,7 +83,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
-      - run: cargo test --locked -p er7 -p er7-redact --test integration
+      - run: cargo +stable test --locked -p er7 -p er7-redact --test integration
 
   # The declared floor (rust-version in every publishable crate's own
   # Cargo.toml) actually builds and tests, so the pin cannot silently
@@ -121,8 +122,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ steps.msrv.outputs.version }}
-      - run: cargo check --workspace --all-targets
-      - run: cargo test --workspace
+      - run: cargo +${{ steps.msrv.outputs.version }} check --workspace --all-targets
+      - run: cargo +${{ steps.msrv.outputs.version }} test --workspace
 
   # The three fuzz targets under er7/fuzz/ — a build plus a brief smoke
   # run over each, not a fuzzing campaign: it proves the targets still
@@ -160,8 +161,8 @@ jobs:
           key: ${{ runner.os }}-cargo-fuzz-${{ hashFiles('er7/fuzz/Cargo.toml') }}
           restore-keys: |
             ${{ runner.os }}-cargo-fuzz-
-      - run: cargo install cargo-fuzz --locked || true
-      - run: cargo fmt --all -- --check
+      - run: cargo +nightly install cargo-fuzz --locked
+      - run: cargo +nightly fmt --all -- --check
         working-directory: er7/fuzz
       - run: cargo +nightly clippy --all-targets -- -D warnings
         working-directory: er7/fuzz

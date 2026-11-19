@@ -16,7 +16,7 @@ Special files that use top-level markdown:
 - AI_STATEMENT.md (use this as template: https://github.com/rubentalstra/FerroEHR/blob/develop/AI_STATEMENT.md)
 - GOVERNANCE.md how decisions are made, what binds them, how to disagree, how to become a maintainer
 - SECURITY.md how to report a vulnerability, what is in scope, response windows, known open issues
-- CODE_OF_CONDUCT.md Contributor Covenant 2.1, plus this project's claim-accuracy clause
+- CODE_OF_CONDUCT.md Contributor Covenant 3.0, plus this project's claim-accuracy clause
 - PHI.md what the software does and does not do with patient data, in plain language
 - RFC.md the open questions this project wants answered, and what feedback helps
 - TRADEMARKS.md the trademark notice, and what the project does not claim
@@ -35,10 +35,9 @@ and the canonical copy does not.
 
 All of the above exist as of 2026-08-26. Two notes:
 
-- **The root CODE_OF_CONDUCT.md is Contributor Covenant 2.1**, matching
-  what `spec/professionalization/index.md` rule 7 names, since 2026-08-27
-  — it was 2.0 until then; `tasks.md` records the change and the one
-  textual difference between the versions.
+- The root code of conduct uses Contributor Covenant 3.0. It includes
+  the project’s claim-accuracy clause and the private reporting contact
+  specified by [rule 7](../professionalization/index.md#rules).
 - **The HL7® trademark rules in
   [`spec/hl7-trademarks-fair-use/`](../hl7-trademarks-fair-use/index.md)
   are met by all of these files as of the 2026-08-26 sweep.** They require

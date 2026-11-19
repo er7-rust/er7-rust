@@ -66,10 +66,11 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       passed all 22 parser and 29 redactor integration tests. The
       `windows-cli` CI job runs the same command on `windows-latest`.
       A successful native Windows run remains outstanding.
-- [ ] **Reconcile the conduct documents.** The adopted 3.0 text and
-      professionalization rule 7 differ on the explicit claim-accuracy
-      clause. Record the maintainer's decision in both documents and
-      verify the private reporting instructions before closing this item.
+- [x] **Reconcile the conduct documents.** The Covenant 3.0 text includes
+      the claim-accuracy clause required by professionalization rule 7.
+      The private reporting address matches the published maintainer
+      roster, and the escalation link points to the conduct enforcement
+      section of GOVERNANCE.md.
 
 ### In flight — land it first
 

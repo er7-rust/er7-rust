@@ -44,8 +44,8 @@ and [`tasks.md`](../../tasks.md); this file holds the rules.
    reader who is a privacy officer, not a Rust programmer. It never claims
    compliance or certification.
 7. **Conduct has a document and a path.** `CODE_OF_CONDUCT.md` at the root
-   (Contributor Covenant 2.1 plus this family's claim-accuracy clause:
-   overstating what the software does is a conduct matter, not only a bug).
+   uses Contributor Covenant 3.0, states the project's claim-accuracy
+   clause, and gives a private reporting address from the maintainer roster.
 8. **Harmonization runs through the family.** The sibling repositories
    (`hl7-rust`, `er7-rust`, `fhir-rust`, `snomed-rust`, `openehr-rust`)
    share these rules, the special-files list, and the six workstreams
@@ -69,7 +69,7 @@ reading the tree rather than remembering it.
 | 4 | **Met** | [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) runs the four checks, an MSRV build (1.98 as of 2026-11-17, read dynamically from `er7/Cargo.toml` rather than a second hard-coded pin — checked against the manifests 2026-08-30, not assumed unchanged since the last pass), a fuzz-target build-and-smoke job, `bin/check-trademarks`, and (since 2026-08-27) `cargo deny` — on every push and pull request. Checked against `gh run list -R er7-rust/er7-rust --workflow=ci.yml --limit 200 --json conclusion` 2026-09-02, not the 2026-08-30 figure this row previously carried: 44 hosted runs of this workflow, 43 green; the one failure (`61eb30d`) was a flaky CLI-test race, root-caused and fixed the same day (`574daaf`). A real, growing track record now, not a single proof-of-concept run — and, checked four times over the course of this one day alone (34, 39, 43, 44 runs), it is worth reading this figure as "still climbing," not as a number to expect fixed |
 | 5 | **Met** | `bin/check-trademarks` passes across the tree (run 2026-09-02); the 100+-file sweep extending compliance into crate doc-comments, manifests, and site copy landed 2026-08-26 and reached crates.io with each crate's very next release — `er7` 0.2.1, `serde-er7` 0.2.0, and `er7-redact` 0.3.0, all published 2026-08-29 — confirmed again by `serde-er7` 0.3.0 and `er7-redact` 0.4.0, both published 2026-09-02. Nothing published today predates the sweep |
 | 6 | **Met** | [`PHI.md`](../../PHI.md), added 2026-08-26: privacy-officer Q&A, the Safe Harbor coverage/non-coverage table, no compliance claim anywhere in it |
-| 7 | **Open on review, 2026-11-19** | The root code of conduct now uses Contributor Covenant 3.0 and directs reports to GitHub. Rule 7 still calls for an explicit claim-accuracy clause. Reconciliation and verification of the reporting route are tracked in [tasks.md](../../tasks.md#production-readiness-review-2026-11-19). |
+| 7 | **Met, 2026-11-19** | The root code of conduct uses Contributor Covenant 3.0 and includes the claim-accuracy clause. The private reporting address matches the maintainer roster, and the conduct enforcement policy describes the escalation route. |
 | 8 | **Met** | The rules, workstreams, and file set are shared with the family; the special-files list is back in sync (rule 2), and per-crate document parity was resolved 2026-08-26 — the root CONTRIBUTING.md/CODE_OF_CONDUCT.md/SECURITY.md cover all three crates, and each crate's README says so, rather than three drifting copies |
 | 9 | **Met at the 2026-08-27 review** | [`help/outreach/index.md`](../../help/outreach/index.md), added 2026-08-27: nine prerequisites checked against the tree that day, every one met or not applicable — the trademark row in particular, closed without ever needing the written-clearance step the sibling `hl7-rust` repository is still waiting on, since no name in this workspace uses a word mark. `spec/promote/` keeps the channel research; this file keeps only the gate. Recheck the prerequisites, including rule 7 above, before new outreach |
 

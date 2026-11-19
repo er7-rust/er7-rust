@@ -42,11 +42,24 @@ We agree to restrict the following behaviors in our community. Instances, threat
 4. **Irresponsible communication.** Failing to responsibly present content which includes, links or describes any other restricted behaviors.
 
 
+## Accuracy of software claims
+
+Describe what the software does using evidence from the specification,
+tests, or documented verification. Overstating a check, guarantee, or
+compliance property is a conduct concern because people may rely on
+those claims when handling clinical messages. State the limits of your
+verification. We welcome corrections to anyone's claims, including
+those made by a maintainer.
+
 ## Reporting an Issue
 
 Tensions can occur between community members even when they are trying their best to collaborate. Not every conflict represents a code of conduct violation, and this Code of Conduct reinforces encouraged behaviors and norms that can help avoid conflicts and minimize harm.
 
-When an incident does occur, it is important to report it promptly. To report a possible violation, contact the maintainers privately through GitHub: use this repository's private reporting feature if it is enabled, or message a maintainer directly from their GitHub profile.
+To report a possible violation privately, email the maintainer at
+<joel@joelparkerhenderson.com>. The [maintainer roster](MAINTAINERS.md#roster)
+lists the same contact. If the report concerns the maintainer,
+[the conduct enforcement policy](GOVERNANCE.md#conduct-enforcement)
+describes GitHub's reporting channels.
 
 Community Moderators take reports of violations seriously and will make every effort to respond in a timely manner. They will investigate all reports of code of conduct violations, reviewing messages, logs, and recordings, or interviewing witnesses and other participants. Community Moderators will keep investigation and enforcement actions as transparent as possible while prioritizing safety and confidentiality. In order to honor these values, enforcement actions are carried out in private with the involved parties, but communicating to the whole community may be part of a mutually agreed upon resolution.
 

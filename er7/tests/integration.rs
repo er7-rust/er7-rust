@@ -181,11 +181,10 @@ fn the_crate_has_no_runtime_dependencies() {
     // anything — instead, find er7's own [[package]] entry and check that
     // entry carries no `dependencies` key.
     let lock = include_str!("../../Cargo.lock");
-    let start = lock
-        .find("name = \"er7\"\n")
+    let entry = lock
+        .split("[[package]]")
+        .find(|entry| entry.lines().any(|line| line == r#"name = "er7""#))
         .expect("expected Cargo.lock to contain an er7 package entry");
-    let entry = &lock[start..];
-    let entry = &entry[..entry.find("\n\n").unwrap_or(entry.len())];
     assert!(
         !entry.contains("dependencies"),
         "expected er7's Cargo.lock entry to have no dependencies, found: {entry:?}"
