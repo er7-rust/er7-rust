@@ -160,8 +160,11 @@ pub fn split_messages(text: &str) -> Vec<&str> {
             // on its own, which is a better report than silently dropping
             // it here.
             spans.extend(current.replace((start, end)));
-        } else if let Some(span) = current.as_mut() {
-            span.1 = end;
+        } else {
+            // The preceding `current.is_none()` condition establishes that
+            // this is `Some`; mapping keeps the state transition total and
+            // avoids carrying an impossible fallback branch.
+            current = current.map(|(start, _)| (start, end));
         }
     }
     spans.extend(current);
@@ -503,10 +506,8 @@ mod tests {
     fn rejects_input_without_a_header() {
         assert!(matches!(parse(""), Err(Error::Empty)));
         assert!(matches!(parse("  \r\n  "), Err(Error::Empty)));
-        match parse("PID|1") {
-            Err(Error::MissingHeader(name)) => assert_eq!(name, "PID"),
-            other => panic!("expected a missing-header error, got {other:?}"),
-        }
+        let error = parse("PID|1").expect_err("PID cannot declare the separators");
+        assert_eq!(error, Error::MissingHeader("PID".into()));
         assert!(matches!(parse("MSH"), Err(Error::BadHeader(_))));
     }
 
@@ -515,6 +516,8 @@ mod tests {
         let fragment = parse_with("PID|1||A^B\rNTE|1||note", Separators::default());
         assert_eq!(fragment.segments.len(), 2);
         assert_eq!(fragment.query("PID-3.2").unwrap().as_deref(), Some("B"));
+        let bare_header = parse_with("MSH", Separators::default());
+        assert_eq!(bare_header.segments[0].fields.len(), 1);
     }
 
     #[test]
@@ -672,10 +675,11 @@ mod tests {
         bytes.push(0xFF); // not a valid UTF-8 sequence on its own
         bytes.push(b'\r');
         let mut messages = read_messages(Cursor::new(bytes));
-        match messages.next() {
-            Some(Err(e)) => assert_eq!(e.kind(), io::ErrorKind::InvalidData),
-            other => panic!("expected an InvalidData error, got {other:?}"),
-        }
+        let error = messages
+            .next()
+            .expect("one message result")
+            .expect_err("the message contains invalid UTF-8");
+        assert_eq!(error.kind(), io::ErrorKind::InvalidData);
         assert!(messages.next().is_none());
     }
 }

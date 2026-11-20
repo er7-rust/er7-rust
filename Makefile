@@ -11,6 +11,7 @@ SITE := er7-rust.github.io
 .PHONY: help
 help:
 	@echo 'check-trademarks  enforce the HL7 fair-use rules across the tree'
+	@echo 'check-coverage    require 100% published-source line coverage'
 	@echo 'test-minimum-supported-rust-version  check the two supported older Rust minors'
 	@echo 'github-pages  push the monorepo, then publish the site (publish: same thing)'
 	@echo 'site-dev    run the site locally at http://localhost:5173'
@@ -21,6 +22,12 @@ help:
 .PHONY: check-trademarks
 check-trademarks:
 	@bin/check-trademarks
+
+# Merged executable-line coverage across the published crates. Requires
+# cargo-llvm-cov and the llvm-tools-preview rustup component; CI installs both.
+.PHONY: check-coverage
+check-coverage:
+	@bin/check-coverage
 
 # The remote is named github-pages (git@github.com:er7-rust/er7-rust.github.io.git),
 # matching the sibling repositories' own convention rather than this one's

@@ -87,6 +87,23 @@ an `#[allow]` **with a `reason`**, not a hole in the group.
 `--all-targets` matters: it is what compiles `examples/` and so keeps the
 tutorials from rotting.
 
+The workspace also requires **100% executable-line coverage** across the
+three published crates' `src/` trees:
+
+```sh
+bin/check-coverage
+```
+
+The check runs all targets and reads cargo-llvm-cov's merged LCOV `DA`
+records. That distinction is deliberate: the summary table counts the same
+generic or linked function again for each integration test and example binary,
+including zero-test example harnesses, while an LCOV source line has one merged
+execution count. The gate therefore means exactly that every executable source
+line ran in at least one target; it does not relabel compiler-generated regions
+or duplicate monomorphizations as independent product behavior. Benchmark
+crates are excluded because they are measurement harnesses, not published
+source. CI pins the coverage driver version that produces the report.
+
 ## 13.4 Test data
 
 Test messages are either written inline or taken from `samples/`:

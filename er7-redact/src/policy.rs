@@ -899,12 +899,7 @@ impl fmt::Display for Policy {
 fn split_line(line: &str) -> Option<(&str, &str)> {
     let line = line.trim();
     let (path, action) = line.split_once(char::is_whitespace)?;
-    let action = action.trim();
-    if action.is_empty() {
-        None
-    } else {
-        Some((path, action))
-    }
+    Some((path, action.trim()))
 }
 
 #[cfg(test)]
@@ -995,6 +990,10 @@ mod tests {
                 "policy line 1: \"PID-5\": expected a path and an action",
             ),
             (
+                "PID-5   ",
+                "policy line 1: \"PID-5\": expected a path and an action",
+            ),
+            (
                 "# comment\n\nPID-7 first three",
                 "policy line 3: \"PID-7 first three\": action \"first\" wants a number \
                  of characters, not \"three\"",
@@ -1027,6 +1026,10 @@ mod tests {
         for (text, expected) in cases {
             let error = Policy::parse(text).unwrap_err();
             assert_eq!(error.to_string(), expected, "parsing {text:?}");
+        }
+        for text in ["PID-5", "PID-5   "] {
+            let error = Rule::parse(text).unwrap_err();
+            assert!(error.to_string().contains("expected a path and an action"));
         }
     }
 

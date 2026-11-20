@@ -423,6 +423,14 @@ mod tests {
     }
 
     #[test]
+    fn writes_character_set_sequences_losslessly() {
+        let mut rebuilt = String::new();
+        Escape::SingleByteCharacterSet("2842").write_er7(&mut rebuilt, &seps());
+        Escape::MultiByteCharacterSet("0F2842").write_er7(&mut rebuilt, &seps());
+        assert_eq!(rebuilt, r"\C2842\\M0F2842\");
+    }
+
+    #[test]
     fn classifies_every_sequence() {
         let tokens: Vec<_> = escapes(
             r"\F\\S\\T\\R\\E\\H\\N\\X0D\\Z99\\C2842\\M0F2842\\.br\\??\",

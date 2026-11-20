@@ -44,6 +44,22 @@ Stable CI runs tests and all-target Clippy for both benchmark crates
 as well as the three published crates. Missing public library docs fail
 the CI rustdoc step.
 
+CI also runs the supplemental workspace coverage gate:
+
+```sh
+bin/check-coverage  # 100% merged executable lines in published src/ trees
+```
+
+This is not renamed as a fifth member of the four checks: those four are
+the per-crate definition of done and need only Rust and Cargo. Coverage is
+a workspace evidence gate with an additional pinned tool. It runs all targets,
+excludes the two benchmark-only crates, and evaluates merged LCOV source-line
+records. The merge matters because LLVM otherwise counts copies of the same
+generic and linked function in every test and example binary, including
+zero-test example harnesses. A passing result means every executable source
+line in `er7/src`, `er7-redact/src`, and `serde-er7/src` ran in at least one
+target; no source module is excluded.
+
 Clippy's pedantic lints are on (`[lints.clippy] pedantic = "warn"`) and the
 checks run with `-D warnings`, so a pedantic finding fails the build like
 any other. Run them per-crate (`-p er7`, `-p er7-redact`, `-p serde-er7`)

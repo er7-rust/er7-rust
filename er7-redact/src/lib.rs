@@ -197,3 +197,20 @@ impl From<er7::Error> for Error {
         Error::Er7(e)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Error;
+    use std::error::Error as _;
+
+    #[test]
+    fn error_sources_distinguish_policy_text_from_er7_errors() {
+        let policy = Error::BadPolicy("bad policy".into());
+        assert_eq!(policy.to_string(), "bad policy");
+        assert!(policy.source().is_none());
+
+        let wrapped = Error::from(er7::Error::Empty);
+        assert_eq!(wrapped.to_string(), "input contains no HL7 segments");
+        assert!(wrapped.source().is_some());
+    }
+}

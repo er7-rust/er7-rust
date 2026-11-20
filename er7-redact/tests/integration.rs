@@ -629,6 +629,76 @@ fn cli_reports_errors_on_stderr() {
 }
 
 #[test]
+fn cli_rejects_invalid_and_incomplete_arguments() {
+    for (args, expected) in [
+        (vec!["--policy"], "missing value for --policy"),
+        (vec!["--rule"], "missing value for --rule"),
+        (vec!["--output"], "missing value for --output"),
+        (vec!["--key"], "missing value for --key"),
+        (vec!["--message"], "missing value for --message"),
+        (vec!["--message", "0"], "wants a number from 1"),
+        (vec!["--terminator"], "missing value for --terminator"),
+        (vec!["--terminator", "line"], "wants cr, lf, or crlf"),
+        (vec!["-", "-"], "more than one input file"),
+        (vec!["first.er7", "second.er7"], "more than one input file"),
+    ] {
+        let (ok, stdout, stderr) = cli(&args, ADT);
+        assert!(!ok, "expected {args:?} to fail");
+        assert!(stdout.is_empty(), "{args:?}: {stdout}");
+        assert!(stderr.contains(expected), "{args:?}: {stderr}");
+    }
+}
+
+#[test]
+fn cli_reports_policy_input_and_output_file_errors() {
+    let directory = cli_support::TestDirectory::new();
+    let bad_policy = directory.path().join("bad.policy");
+    std::fs::write(&bad_policy, "PID-5 obfuscate").unwrap();
+    let bad_policy = bad_policy.to_string_lossy().into_owned();
+    let (ok, _, stderr) = cli(&["--policy", &bad_policy], ADT);
+    assert!(!ok);
+    assert!(stderr.contains("unknown action"), "{stderr}");
+
+    let missing = "/a/path/that/does/not/exist/er7-redact-input";
+    let (ok, _, stderr) = cli(&[missing], "");
+    assert!(!ok);
+    assert!(stderr.contains("reading"), "{stderr}");
+
+    let unwritable = "/a/path/that/does/not/exist/er7-redact-output";
+    let (ok, _, stderr) = cli(&["--output", unwritable], ADT);
+    assert!(!ok);
+    assert!(stderr.contains("writing"), "{stderr}");
+}
+
+#[test]
+fn cli_reports_applied_actions_for_unrecognised_payloads() {
+    let directory = cli_support::TestDirectory::new();
+    let policy = directory.path().join("unrecognised-apply.policy");
+    std::fs::write(&policy, "unrecognised replace HIDDEN\n").unwrap();
+    let policy = policy.to_string_lossy().into_owned();
+    let batch = format!("not a message\r{ADT}");
+
+    for flag in ["--report", "--uncovered"] {
+        let (ok, stdout, stderr) = cli(&["--policy", &policy, flag], &batch);
+        assert!(ok, "{stderr}");
+        assert!(
+            stdout.contains("# message 1: unrecognised payload, replace HIDDEN"),
+            "{stdout}"
+        );
+        assert!(stdout.contains("# message 2"), "{stdout}");
+    }
+
+    for (terminator, ending) in [("lf", "HIDDEN\n"), ("crlf", "HIDDEN\r\n")] {
+        let (ok, stdout, stderr) = cli(
+            &["--policy", &policy, "--terminator", terminator],
+            "not a message",
+        );
+        assert!(ok, "{stderr}");
+        assert_eq!(stdout, ending);
+    }
+}
+
+#[test]
 fn cli_a_policy_that_changes_nothing_is_not_an_error() {
     // Spec §10.4: the message simply carried none of the positions the
     // policy names, which is not a failure.

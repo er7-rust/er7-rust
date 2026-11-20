@@ -371,12 +371,16 @@ fn write_output(path: Option<&str>, text: &str) -> Result<(), Exit> {
             Ok(()) => Ok(()),
             Err(e) => fail(format!("writing {path}: {e}")),
         },
-        None => match std::io::stdout().write_all(text.as_bytes()) {
-            Ok(()) => Ok(()),
-            // A closed pipe is how `head` says it has seen enough.
-            Err(e) if e.kind() == std::io::ErrorKind::BrokenPipe => Ok(()),
-            Err(e) => fail(format!("writing to standard output: {e}")),
-        },
+        None => write_to(std::io::stdout(), text),
+    }
+}
+
+fn write_to(mut writer: impl Write, text: &str) -> Result<(), Exit> {
+    match writer.write_all(text.as_bytes()) {
+        Ok(()) => Ok(()),
+        // A closed pipe is how `head` says it has seen enough.
+        Err(e) if e.kind() == std::io::ErrorKind::BrokenPipe => Ok(()),
+        Err(e) => fail(format!("writing to standard output: {e}")),
     }
 }
 
@@ -399,7 +403,10 @@ fn report(payloads: &[Payload], policy: &Policy) -> String {
                 let what = match &policy.unrecognised {
                     Unrecognised::Pass => "passed through".to_string(),
                     Unrecognised::Apply(action) => action.to_string(),
-                    Unrecognised::Refuse => unreachable!("a refused payload failed the run"),
+                    // A refused payload normally fails before reporting, but
+                    // keep this formatter total for callers and tests that
+                    // assemble payloads directly.
+                    Unrecognised::Refuse => "refused".to_string(),
                 };
                 let _ = writeln!(out, "# message {}: unrecognised payload, {what}", index + 1);
                 continue;
@@ -438,7 +445,7 @@ fn uncovered_report(payloads: &[Payload], policy: &Policy) -> String {
                 let what = match &policy.unrecognised {
                     Unrecognised::Pass => "passed through".to_string(),
                     Unrecognised::Apply(action) => action.to_string(),
-                    Unrecognised::Refuse => unreachable!("a refused payload failed the run"),
+                    Unrecognised::Refuse => "refused".to_string(),
                 };
                 let _ = writeln!(out, "# message {}: unrecognised payload, {what}", index + 1);
                 continue;
@@ -449,4 +456,60 @@ fn uncovered_report(payloads: &[Payload], policy: &Policy) -> String {
         }
     }
     out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    struct FailingWriter(std::io::ErrorKind);
+
+    impl Write for FailingWriter {
+        fn write(&mut self, _buffer: &[u8]) -> std::io::Result<usize> {
+            Err(std::io::Error::from(self.0))
+        }
+
+        fn flush(&mut self) -> std::io::Result<()> {
+            Ok(())
+        }
+    }
+
+    #[test]
+    fn output_treats_closed_pipes_as_success() {
+        assert!(write_to(FailingWriter(std::io::ErrorKind::BrokenPipe), "text").is_ok());
+    }
+
+    #[test]
+    fn output_reports_other_write_failures() {
+        let error = write_to(FailingWriter(std::io::ErrorKind::PermissionDenied), "text")
+            .expect_err("permission errors must be reported");
+        assert!(matches!(error, Exit::Failed(message) if message.contains("standard output")));
+    }
+
+    #[test]
+    fn helper_writer_flushes_successfully() {
+        let mut writer = FailingWriter(std::io::ErrorKind::Other);
+        writer.flush().unwrap();
+    }
+
+    #[test]
+    fn unrecognised_rendering_preserves_existing_line_endings() {
+        let payload = Payload::Unrecognised("already\n".into());
+        let rendered = payload.to_er7_with(RenderOptions {
+            terminator: Terminator::Cr,
+            trailing_terminator: true,
+        });
+        assert_eq!(rendered, "already\n");
+    }
+
+    #[test]
+    fn reports_describe_refused_payloads_totally() {
+        let payloads = [Payload::Unrecognised("payload".into())];
+        let policy = Policy::accept_all().on_unrecognised(Unrecognised::Refuse);
+        assert!(report(&payloads, &policy).contains("refused"));
+        assert!(uncovered_report(&payloads, &policy).contains("refused"));
+
+        let policy = Policy::accept_all().on_unrecognised(Unrecognised::Pass);
+        assert!(uncovered_report(&payloads, &policy).contains("passed through"));
+    }
 }

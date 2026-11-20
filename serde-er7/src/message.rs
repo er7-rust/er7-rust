@@ -374,6 +374,32 @@ mod tests {
     }
 
     #[test]
+    fn rejects_duplicate_top_level_fields() {
+        let separators =
+            r#"{"field":"|","component":"^","repetition":"~","escape":"\\","subcomponent":"&"}"#;
+        let duplicate_separators =
+            format!(r#"{{"separators":{separators},"separators":{separators},"segments":[]}}"#);
+        let error = serde_json::from_str::<Message>(&duplicate_separators).unwrap_err();
+        assert!(error.to_string().contains("duplicate field `separators`"));
+
+        let duplicate_segments =
+            format!(r#"{{"separators":{separators},"segments":[],"segments":[]}}"#);
+        let error = serde_json::from_str::<Message>(&duplicate_segments).unwrap_err();
+        assert!(error.to_string().contains("duplicate field `segments`"));
+    }
+
+    #[test]
+    fn rejects_a_non_sequence_segments_value() {
+        let json = r#"{"separators":{"field":"|","component":"^","repetition":"~",
+            "escape":"\\","subcomponent":"&"},"segments":{}}"#;
+        let error = serde_json::from_str::<Strict<Message>>(json).unwrap_err();
+        assert!(
+            error.to_string().contains("sequence of segments"),
+            "{error}"
+        );
+    }
+
+    #[test]
     fn pretty_json_keeps_the_tree_shape() {
         let message = Message::parse("MSH|^~\\&|LAB\rPID|1||9|4|SMITH^JOHN").unwrap();
         let json = serde_json::to_value(&message).unwrap();

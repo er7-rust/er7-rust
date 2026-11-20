@@ -77,6 +77,22 @@ jobs:
       - run: cargo +stable test -p er7-bench -p er7-redact-bench
       - run: cargo +stable clippy -p er7-bench -p er7-redact-bench --all-targets -- -D warnings
 
+  # The human-readable cargo-llvm-cov summary double-counts generic and
+  # linked functions compiled into several test/example binaries. The gate
+  # consumes merged LCOV records instead: every executable source line in
+  # each published crate must have a non-zero count in at least one target.
+  coverage:
+    name: 100% published-source line coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: llvm-tools-preview
+      - name: install the pinned coverage driver
+        run: cargo +stable install cargo-llvm-cov --version 0.9.1 --locked
+      - run: bin/check-coverage
+
   # The workspace checks above exercise path dependencies and files that do
   # not ship. Packaging applies each crate's include list, replaces path
   # dependencies with registry requirements, and verifies the resulting

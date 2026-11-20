@@ -291,7 +291,16 @@ mod tests {
     #[test]
     fn rejects_malformed_paths() {
         for text in [
-            "", "-5", "PID-", "PID-5.", "PID-0", "PID[0]-5", "PID[2-5", "PID-5x", "PID/5",
+            "",
+            "-5",
+            "PID-",
+            "PID-5.",
+            "PID-0",
+            "PID[0]-5",
+            "PID[2-5",
+            "PID[2x]-5",
+            "PID-5x",
+            "PID/5",
         ] {
             assert!(
                 Path::parse(text).is_err(),

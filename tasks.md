@@ -86,8 +86,14 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       across all eight `serde-er7` wrappers and all supported `Strict<T>`
       reverse conversions. Added `wrong_json_kinds_report_each_expected_shape`
       to verify useful type-mismatch diagnostics across all eight wrappers.
-      Workspace line coverage moved from 93.29% to 96.05%; function
-      coverage moved from 88.56% to 95.46%.
+      The follow-up pass completed executable-line coverage across all three
+      published `src/` trees: 4,078/4,078 merged LCOV lines (100.00%) on
+      2026-11-20. It added public/error/CLI edge cases, removed impossible
+      fallback branches, and introduced `bin/check-coverage`, `make
+      check-coverage`, and a pinned hosted CI gate. The gate uses merged
+      source-line records because the ordinary summary double-counts linked
+      and generic functions across zero-test example and integration binaries;
+      no published source module is excluded.
 
 ### Remaining declared gaps
 
@@ -142,7 +148,9 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       external transition in the crates.io owner UI: enable
       Trusted-Publishing-only mode for all three crates. The legacy token
       correctly received HTTP 403 for this setting because it lacks the
-      `trusted-publishing` scope. After the toggles are verified, remove
+      `trusted-publishing` scope. The public crate records were rechecked
+      2026-11-20 and still report `trustpub_only: false` for all three.
+      After the toggles are verified, remove
       the local token and update the credential inventory and release guides
       to describe only the active path. §7.1 records why this is not merely
       a credential substitution.

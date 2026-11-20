@@ -185,6 +185,23 @@ mod tests {
     }
 
     #[test]
+    fn rejects_missing_fields() {
+        let error = serde_json::from_str::<Segment>(r#"{"name":"PID"}"#).unwrap_err();
+        assert!(error.to_string().contains("fields"));
+    }
+
+    #[test]
+    fn rejects_duplicate_fields() {
+        let duplicate_name = r#"{"name":"PID","name":"OBX","fields":[]}"#;
+        let error = serde_json::from_str::<Segment>(duplicate_name).unwrap_err();
+        assert!(error.to_string().contains("duplicate field `name`"));
+
+        let duplicate_fields = r#"{"name":"PID","fields":[],"fields":[]}"#;
+        let error = serde_json::from_str::<Segment>(duplicate_fields).unwrap_err();
+        assert!(error.to_string().contains("duplicate field `fields`"));
+    }
+
+    #[test]
     fn ignores_unknown_fields() {
         let json = r#"{"name":"ZZZ","fields":[],"extra":true}"#;
         let back: Segment = serde_json::from_str(json).unwrap();

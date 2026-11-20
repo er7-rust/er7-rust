@@ -211,12 +211,16 @@ fn write_output(path: Option<&str>, text: &str) -> Result<(), Exit> {
             Ok(()) => Ok(()),
             Err(e) => fail(format!("writing {path}: {e}")),
         },
-        None => match std::io::stdout().write_all(text.as_bytes()) {
-            Ok(()) => Ok(()),
-            // A closed pipe is how `head` says it has seen enough.
-            Err(e) if e.kind() == std::io::ErrorKind::BrokenPipe => Ok(()),
-            Err(e) => fail(format!("writing to standard output: {e}")),
-        },
+        None => write_to(std::io::stdout(), text),
+    }
+}
+
+fn write_to(mut writer: impl Write, text: &str) -> Result<(), Exit> {
+    match writer.write_all(text.as_bytes()) {
+        Ok(()) => Ok(()),
+        // A closed pipe is how `head` says it has seen enough.
+        Err(e) if e.kind() == std::io::ErrorKind::BrokenPipe => Ok(()),
+        Err(e) => fail(format!("writing to standard output: {e}")),
     }
 }
 
@@ -403,4 +407,45 @@ fn for_display(value: &str) -> String {
         .replace('\r', "\\r")
         .replace('\n', "\\n")
         .replace('\t', "\\t")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    struct FailingWriter(std::io::ErrorKind);
+
+    impl Write for FailingWriter {
+        fn write(&mut self, _buffer: &[u8]) -> std::io::Result<usize> {
+            Err(std::io::Error::from(self.0))
+        }
+
+        fn flush(&mut self) -> std::io::Result<()> {
+            Ok(())
+        }
+    }
+
+    #[test]
+    fn output_treats_closed_pipes_as_success() {
+        assert!(write_to(FailingWriter(std::io::ErrorKind::BrokenPipe), "text").is_ok());
+    }
+
+    #[test]
+    fn output_reports_other_write_failures() {
+        let error = write_to(FailingWriter(std::io::ErrorKind::PermissionDenied), "text")
+            .expect_err("permission errors must be reported");
+        assert!(matches!(error, Exit::Failed(message) if message.contains("standard output")));
+    }
+
+    #[test]
+    fn helper_writer_flushes_successfully() {
+        let mut writer = FailingWriter(std::io::ErrorKind::Other);
+        writer.flush().unwrap();
+    }
+
+    #[test]
+    fn describe_handles_a_message_code_without_a_trigger() {
+        let message = er7::parse("MSH|^~\\&|||||||ADT").unwrap();
+        assert_eq!(describe(&message), ": ADT");
+    }
 }

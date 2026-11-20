@@ -91,6 +91,16 @@ cargo rustdoc --lib -- -W missing-docs    # every public item documented
 `--all-targets` matters: it is what compiles `examples/` and so keeps the
 tutorials from rotting.
 
+At workspace level, `bin/check-coverage` additionally requires **100%
+executable-line coverage** for every `src/` file in all three published crates.
+It runs all targets and checks merged LCOV line records, so a line executed in
+one test target is covered even though LLVM may also compile a zero-count copy
+of its function into an example or integration binary. That avoids mistaking
+duplicate monomorphizations and compiler-generated regions for separate product
+behavior while still failing on any real executable source line no test ran.
+The benchmark-only crates are outside this published-source gate, and CI pins
+the cargo-llvm-cov version used to produce it.
+
 ## 11.4 Test data
 
 Test messages are either written inline or taken from `samples/`:

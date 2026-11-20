@@ -304,6 +304,12 @@ mod tests {
     }
 
     #[test]
+    fn display_uses_default_rendering() {
+        let message = crate::parse("MSH|^~\\&|LAB\rPID|1").unwrap();
+        assert_eq!(message.to_string(), message.to_er7());
+    }
+
+    #[test]
     fn round_trips_custom_delimiters() {
         let text = "MSH#*!?@#LAB#*A*B#C!D";
         assert_eq!(parse(text).unwrap().to_er7(), text);

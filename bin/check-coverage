@@ -1,0 +1,55 @@
+#!/bin/sh
+# Require every executable line in the three published crates' source trees
+# to run in at least one test target. cargo-llvm-cov's summary adds duplicate
+# monomorphizations from every integration/example binary; LCOV instead gives
+# one merged DA record per source line, which is the stable quantity this gate
+# intentionally checks.
+
+set -eu
+
+root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+report=$(mktemp "${TMPDIR:-/tmp}/er7-coverage.XXXXXX")
+trap 'rm -f "$report"' EXIT HUP INT TERM
+
+cd "$root"
+cargo llvm-cov \
+    --workspace \
+    --exclude er7-bench \
+    --exclude er7-redact-bench \
+    --all-targets \
+    --lcov \
+    --output-path "$report"
+
+awk '
+function published_source(path) {
+    return path ~ /\/(er7|er7-redact|serde-er7)\/src\//
+}
+
+/^SF:/ {
+    source = substr($0, 4)
+    next
+}
+
+/^DA:/ && published_source(source) {
+    split(substr($0, 4), fields, ",")
+    total++
+    if (fields[2] > 0) {
+        covered++
+    } else {
+        missed++
+        print source ":" fields[1] ": uncovered executable line" > "/dev/stderr"
+    }
+}
+
+END {
+    if (total == 0) {
+        print "coverage report contained no published source lines" > "/dev/stderr"
+        exit 1
+    }
+    printf "published source line coverage: %d/%d (%.2f%%)\n", \
+        covered, total, 100 * covered / total
+    if (missed > 0) {
+        exit 1
+    }
+}
+' "$report"

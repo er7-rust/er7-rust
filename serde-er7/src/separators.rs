@@ -241,9 +241,57 @@ mod tests {
     }
 
     #[test]
+    fn plain_mode_ignores_unknown_fields() {
+        let json = r#"{"field":"|","component":"^","repetition":"~","escape":"\\",
+            "subcomponent":"&","extra":{"nested":true}}"#;
+        let back: Separators = serde_json::from_str(json).unwrap();
+        assert_eq!(back.0, er7::Separators::default());
+    }
+
+    #[test]
+    fn rejects_every_duplicate_field() {
+        for (name, value) in [
+            ("field", r#""|""#),
+            ("component", r#""^""#),
+            ("repetition", r#""~""#),
+            ("escape", r#""\\""#),
+            ("subcomponent", r#""&""#),
+            ("truncation", "null"),
+        ] {
+            let json = format!(
+                r#"{{"field":"|","component":"^","repetition":"~","escape":"\\","subcomponent":"&","truncation":null,"{name}":{value}}}"#
+            );
+            let error = serde_json::from_str::<Separators>(&json).unwrap_err();
+            assert!(
+                error
+                    .to_string()
+                    .contains(&format!("duplicate field `{name}`")),
+                "{name}: {error}"
+            );
+        }
+    }
+
+    #[test]
     fn rejects_a_missing_required_field() {
-        let err = serde_json::from_str::<Separators>(r#"{"field":"|"}"#).unwrap_err();
-        assert!(err.to_string().contains("component"));
+        let complete = [
+            ("field", r#""|""#),
+            ("component", r#""^""#),
+            ("repetition", r#""~""#),
+            ("escape", r#""\\""#),
+            ("subcomponent", r#""&""#),
+        ];
+
+        for missing in complete.map(|(name, _)| name) {
+            let members = complete
+                .iter()
+                .filter(|(name, _)| *name != missing)
+                .map(|(name, value)| format!(r#""{name}":{value}"#))
+                .collect::<Vec<_>>()
+                .join(",");
+            let error = serde_json::from_str::<Separators>(&format!("{{{members}}}"))
+                .expect_err("every required delimiter must be present");
+            assert!(error.to_string().contains(missing), "{missing}: {error}");
+        }
     }
 
     #[test]

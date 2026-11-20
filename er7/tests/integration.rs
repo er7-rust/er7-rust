@@ -265,6 +265,31 @@ fn cli_normalizes_to_the_chosen_terminator() {
     );
     assert!(ok);
     assert_eq!(stdout, "MSH|^~\\&|A\nPID|1\n");
+
+    for (name, ending) in [("cr", "\r"), ("crlf", "\r\n")] {
+        let (ok, stdout, _) = cli(&["--normalize", "--terminator", name], "MSH|^~\\&|A");
+        assert!(ok);
+        assert_eq!(stdout, format!("MSH|^~\\&|A{ending}"));
+    }
+}
+
+#[test]
+fn cli_outlines_multiple_sparse_messages() {
+    let input = "MSH|^~\\&|||||||ADT^A08\rPID|A~~B|A&&B\rMSH|^~\\&";
+    let (ok, stdout, stderr) = cli(&[], input);
+    assert!(ok, "{stderr}");
+    assert!(stdout.contains("# message 1: ADT^A08"), "{stdout}");
+    assert!(stdout.contains("# message 2\n"), "{stdout}");
+    assert!(stdout.contains("PID-1[1]"), "{stdout}");
+    assert!(stdout.contains("PID-1[3]"), "{stdout}");
+    assert!(!stdout.contains("PID-1[2]"), "{stdout}");
+    assert!(stdout.contains("PID-2.1"), "{stdout}");
+    assert!(stdout.contains("PID-2.3"), "{stdout}");
+    assert!(!stdout.contains("PID-2.2"), "{stdout}");
+
+    let (ok, stdout, stderr) = cli(&["--raw"], "MSH|^~\\&|LAB\rPID|Smith \\T\\ Jones");
+    assert!(ok, "{stderr}");
+    assert!(stdout.contains(r"Smith \T\ Jones"), "{stdout}");
 }
 
 #[test]
@@ -292,6 +317,39 @@ fn cli_reports_errors_on_stderr() {
         assert!(stderr.contains(expected), "{args:?}: {stderr}");
         assert!(stderr.starts_with("er7: error: "), "{stderr}");
     }
+}
+
+#[test]
+fn cli_rejects_invalid_and_incomplete_arguments() {
+    for (args, expected) in [
+        (vec!["--query"], "missing value for --query"),
+        (vec!["--output"], "missing value for --output"),
+        (vec!["--message"], "missing value for --message"),
+        (vec!["--message", "0"], "wants a number from 1"),
+        (vec!["--message", "many"], "wants a number from 1"),
+        (vec!["--terminator"], "missing value for --terminator"),
+        (vec!["--terminator", "line"], "wants cr, lf, or crlf"),
+        (vec!["-", "-"], "more than one input file"),
+        (vec!["first.er7", "second.er7"], "more than one input file"),
+    ] {
+        let (ok, stdout, stderr) = cli(&args, ORU);
+        assert!(!ok, "expected {args:?} to fail");
+        assert!(stdout.is_empty(), "{args:?}: {stdout}");
+        assert!(stderr.contains(expected), "{args:?}: {stderr}");
+    }
+}
+
+#[test]
+fn cli_reports_input_and_output_file_errors() {
+    let missing = "/a/path/that/does/not/exist/er7-input";
+    let (ok, _, stderr) = cli(&[missing], "");
+    assert!(!ok);
+    assert!(stderr.contains("reading"), "{stderr}");
+
+    let unwritable = "/a/path/that/does/not/exist/er7-output";
+    let (ok, _, stderr) = cli(&["--normalize", "--output", unwritable], ORU);
+    assert!(!ok);
+    assert!(stderr.contains("writing"), "{stderr}");
 }
 
 #[test]

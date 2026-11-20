@@ -1200,4 +1200,31 @@ mod tests {
         assert_eq!(subcomponent.raw, r"Smith \T\ Jones");
         assert_eq!(subcomponent.value(&separators), "Smith & Jones");
     }
+
+    #[test]
+    fn str_converts_to_a_subcomponent() {
+        let subcomponent = Subcomponent::from("VALUE");
+        assert_eq!(subcomponent.raw, "VALUE");
+    }
+
+    #[test]
+    fn raw_paths_cover_every_tree_depth() {
+        let message = message();
+        let segment: Path = "PID".parse().unwrap();
+        assert_eq!(
+            message.query_path_raw(&segment),
+            [message.segment("PID").unwrap().to_er7(&message.separators)]
+        );
+
+        let repetition: Path = "PID-5[1]".parse().unwrap();
+        assert_eq!(message.query_path_raw(&repetition), ["SMITH^JOHN^Q"]);
+        let absent_repetition: Path = "PID-5[9]".parse().unwrap();
+        assert_eq!(
+            message.query_path_raw(&absent_repetition),
+            Vec::<String>::new()
+        );
+
+        let subcomponent: Path = "PID-5.1.1".parse().unwrap();
+        assert_eq!(message.query_path_raw(&subcomponent), ["SMITH"]);
+    }
 }

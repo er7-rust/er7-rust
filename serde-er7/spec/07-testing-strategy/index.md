@@ -74,6 +74,17 @@ the build rather than a habit.
 [the index](../index.md#required-checks)). This applies to struct fields
 and enum-like match arms as much as to the types and functions themselves.
 
+The workspace's separate `bin/check-coverage` gate requires **100% executable
+line coverage** across every published crate's `src/` tree, including this one.
+It consumes merged LCOV line records from an all-target cargo-llvm-cov run.
+This is intentionally a source-line contract: LLVM's summary counts generic
+Serde implementations once per binary and reports zero-count copies from
+zero-test example harnesses even when the same source line ran elsewhere.
+Merged lines answer the useful question—whether every executable source line
+ran in at least one target—without excluding modules or claiming that
+compiler-generated regions are additional behavior. CI pins the coverage
+driver version.
+
 ## 7.5 Golden-fixture style
 
 Where a test needs a literal message, prefer the shortest text that

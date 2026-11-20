@@ -171,3 +171,25 @@ impl fmt::Display for Error {
 }
 
 impl std::error::Error for Error {}
+
+#[cfg(test)]
+mod tests {
+    use super::Error;
+
+    #[test]
+    fn every_error_variant_has_a_standalone_sentence() {
+        assert_eq!(Error::Empty.to_string(), "input contains no HL7 segments");
+        assert_eq!(
+            Error::MissingHeader("PID".into()).to_string(),
+            "message starts with a PID segment, not the MSH, FHS, or BHS header that declares the delimiters"
+        );
+        assert_eq!(
+            Error::BadHeader("duplicate separator".into()).to_string(),
+            "unusable delimiters in the header: duplicate separator"
+        );
+        assert_eq!(
+            Error::BadPath("\"PID-0\": indices start at 1".into()).to_string(),
+            "invalid HL7 path \"PID-0\": indices start at 1"
+        );
+    }
+}

@@ -525,30 +525,22 @@ impl Pass {
     /// that no rule named (D9, spec §2.6).
     fn reject_the_rest(&mut self, segment: &mut Segment, at: At, action: &Action) {
         let header = segment.is_header();
-        for field in 1..=segment.fields.len() {
+        for (field_index, node) in segment.fields.iter_mut().enumerate() {
+            let field = field_index + 1;
             // D5 again: the posture reaches no further than a rule does.
             if header && field <= 2 {
                 continue;
             }
-            let Some(node) = segment.field_mut(field) else {
-                continue;
-            };
-            for repetition in 1..=node.repetitions.len() {
-                let Some(node) = node.repetition_mut(repetition) else {
-                    continue;
-                };
-                for component in 1..=node.components.len() {
-                    let Some(node) = node.component_mut(component) else {
-                        continue;
-                    };
-                    for subcomponent in 1..=node.subcomponents.len() {
+            for (repetition_index, node) in node.repetitions.iter_mut().enumerate() {
+                let repetition = repetition_index + 1;
+                for (component_index, node) in node.components.iter_mut().enumerate() {
+                    let component = component_index + 1;
+                    for (subcomponent_index, leaf) in node.subcomponents.iter_mut().enumerate() {
+                        let subcomponent = subcomponent_index + 1;
                         let position = (at.index, field, repetition, component, subcomponent);
                         if self.named.contains(&position) {
                             continue;
                         }
-                        let Some(leaf) = node.subcomponent_mut(subcomponent) else {
-                            continue;
-                        };
                         if self.leaf(leaf, action) {
                             self.record(at, field, repetition, component, subcomponent, action);
                         }
@@ -647,30 +639,22 @@ impl Pass {
             return;
         }
         let header = segment.is_header();
-        for field in 1..=segment.fields.len() {
+        for (field_index, node) in segment.fields.iter_mut().enumerate() {
+            let field = field_index + 1;
             // D5 again: the sweep reaches no further than a rule does.
             if header && field <= 2 {
                 continue;
             }
-            let Some(node) = segment.field_mut(field) else {
-                continue;
-            };
-            for repetition in 1..=node.repetitions.len() {
-                let Some(node) = node.repetition_mut(repetition) else {
-                    continue;
-                };
-                for component in 1..=node.components.len() {
-                    let Some(node) = node.component_mut(component) else {
-                        continue;
-                    };
-                    for subcomponent in 1..=node.subcomponents.len() {
+            for (repetition_index, node) in node.repetitions.iter_mut().enumerate() {
+                let repetition = repetition_index + 1;
+                for (component_index, node) in node.components.iter_mut().enumerate() {
+                    let component = component_index + 1;
+                    for (subcomponent_index, leaf) in node.subcomponents.iter_mut().enumerate() {
+                        let subcomponent = subcomponent_index + 1;
                         let position = (at.index, field, repetition, component, subcomponent);
                         if self.named.contains(&position) {
                             continue;
                         }
-                        let Some(leaf) = node.subcomponent_mut(subcomponent) else {
-                            continue;
-                        };
                         if leaf.is_empty() || leaf.is_null() {
                             continue;
                         }
@@ -1311,5 +1295,70 @@ mod tests {
 
         // And the placeholder is honest: it does not read back as itself.
         assert!(Policy::parse(&text).is_err());
+    }
+
+    #[test]
+    fn accessors_report_the_configured_policy_and_key() {
+        let policy = Policy::accept_all();
+        let redactor = Redactor::new(policy.clone()).with_key(42);
+        assert_eq!(redactor.policy(), &policy);
+        assert_eq!(redactor.key(), 42);
+    }
+
+    #[test]
+    fn unrecognised_keep_falls_back_to_the_original_payload() {
+        // Public fields allow callers to construct this state directly even
+        // though the builder normalizes no-op actions to `Pass`.
+        let mut policy = Policy::accept_all();
+        policy.unrecognised = Unrecognised::Apply(Action::Keep);
+        assert_eq!(
+            Redactor::new(policy).unrecognised("payload").as_deref(),
+            Some("payload")
+        );
+    }
+
+    #[test]
+    fn out_of_range_nested_positions_are_no_ops() {
+        let text = "MSH|^~\\&|LAB\rPID|1||9||SMITH^JOHN";
+        let mut message = er7::parse(text).unwrap();
+        let report = redact(
+            policy(&["PID-5[9] clear", "PID-5[1].9 clear", "PID-5[1].1.9 clear"]),
+            &mut message,
+        );
+        assert!(report.is_empty());
+        assert_eq!(message.to_er7(), text);
+    }
+
+    #[test]
+    fn null_handles_repetition_component_and_leaf_states() {
+        let mut message = er7::parse("MSH|^~\\&|LAB\rPID|1|\"\"|9||SMITH^JOHN~JONES^MARY").unwrap();
+        let report = redact(
+            policy(&[
+                "PID-2.1.1 null",
+                "PID-5[1] null",
+                "PID-5[1] null",
+                "PID-5[2].1 null",
+                "PID-5[2].1 null",
+            ]),
+            &mut message,
+        );
+        assert_eq!(
+            message.to_er7(),
+            "MSH|^~\\&|LAB\rPID|1|\"\"|9||\"\"~\"\"^MARY"
+        );
+        assert_eq!(report.len(), 2);
+    }
+
+    #[test]
+    fn identity_replacements_are_not_reported_or_reencoded() {
+        let text = "MSH|^~\\&|LAB\rPID|Smith \\T\\ Jones\rNTE|1||Smith \\T\\ Jones";
+        let mut message = er7::parse(text).unwrap();
+        let identity = Action::custom(|value, _| Some(value.to_string()));
+        let report = redact(
+            Policy::accept_all().with("PID-1", identity).unwrap(),
+            &mut message,
+        );
+        assert!(report.is_empty());
+        assert_eq!(message.to_er7(), text);
     }
 }

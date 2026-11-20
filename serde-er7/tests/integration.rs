@@ -226,6 +226,31 @@ fn every_wrapper_converts_and_mutates_through() {
     assert_eq!(plain_separators.escape, '!');
 }
 
+#[test]
+fn every_wrapper_dereferences_immutably() {
+    // Exercise `Deref::deref` itself, independently of the mutable coercions
+    // above. This catches a wrapper accidentally exposing the wrong inner
+    // type even when its `DerefMut` implementation remains correct.
+    let message = Message::parse("MSH|^~\\&|LAB").unwrap();
+    let segment: Segment = message.segments[0].clone().into();
+    let field: Field = segment.fields[0].clone().into();
+    let repetition: Repetition = field.repetitions[0].clone().into();
+    let component: Component = repetition.components[0].clone().into();
+    let subcomponent: Subcomponent = component.subcomponents[0].clone().into();
+    let separators = Separators(message.separators);
+    let terminator = Terminator(er7::Terminator::CrLf);
+
+    let _: &er7::Message = &message;
+    let _: &er7::Segment = &segment;
+    let _: &er7::Field = &field;
+    let _: &er7::Repetition = &repetition;
+    let _: &er7::Component = &component;
+    let _: &er7::Subcomponent = &subcomponent;
+    let _: &er7::Separators = &separators;
+    let _: &er7::Terminator = &terminator;
+    assert_eq!(message.to_string(), "MSH|^~\\&|LAB");
+}
+
 /// The `[dependencies]` and `[dev-dependencies]` tables of this crate's
 /// own manifest, as raw lines.
 fn manifest_dependencies(table: &str) -> Vec<String> {
