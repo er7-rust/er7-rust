@@ -165,6 +165,22 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       this was a governance change rather than merely a credential
       substitution.
 
+### Work in progress — handoff 2026-11-20
+
+No implementation or documentation edit is left in flight. Every locally
+actionable workspace backlog item is complete, including 100% executable
+published-source line coverage and the enforced Trusted Publishing
+transition. The local close-out baseline is: all workspace tests, strict
+clippy, formatting, strict rustdoc for all three libraries, Rust 1.98 and
+1.99.1 workspace/fuzz-manifest checks, trademark rules, Svelte autofixer,
+site type-check/build, and `bin/check-coverage` at 4,078/4,078 lines.
+
+The resume point is the one unchecked item above: appoint a second security
+responder. It is intentionally waiting on a real person's informed consent
+and private reporting route. Do not close it with an invented identity or
+unowned alias; when a person accepts, update `SECURITY.md`, `MAINTAINERS.md`,
+and the conduct escalation path together, then repeat the close-out gates.
+
 ### In flight — land it first
 
 - [x] **Commit the trademark-compliance sweep** — landed 2026-08-26
