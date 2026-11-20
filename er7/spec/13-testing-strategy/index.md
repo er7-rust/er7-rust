@@ -14,36 +14,36 @@ enforces it. A rule with no test is a bug in this table.
 
 | Rule | Test | File |
 | ---- | ---- | ---- |
-| R1 | `reads_custom_delimiters`, `honors_a_message_that_chooses_its_own_delimiters` | `src/separators.rs`, `tests/integration.rs` |
+| R1 | `reads_custom_delimiters`, `honors_a_message_that_chooses_its_own_delimiters` | `src/separators.rs`, `tests/main.rs` |
 | R2 | `rejects_unusable_delimiters` | `src/separators.rs` |
 | R3 | `fills_in_omitted_encoding_characters`, `stops_reading_encoding_characters_at_the_field_separator` | `src/separators.rs` |
 | R4 | `accepts_every_terminator_and_drops_blank_lines` | `src/parse.rs` |
 | R5 | `rejects_input_without_a_header` | `src/parse.rs` |
-| R6 | `only_a_missing_or_broken_header_is_an_error` | `tests/integration.rs` |
+| R6 | `only_a_missing_or_broken_header_is_an_error` | `tests/main.rs` |
 | R7 | `an_empty_field_has_no_repetitions` | `src/parse.rs` |
 | R8 | `numbers_header_fields_the_way_hl7_does`, `queries_header_delimiters_literally` | `src/parse.rs`, `src/message.rs` |
-| R9 | `decodes_escape_sequences_only_on_request` | `tests/integration.rs` |
+| R9 | `decodes_escape_sequences_only_on_request` | `tests/main.rs` |
 | R10 | `distinguishes_absent_empty_and_null` | `src/message.rs` |
-| R11 | `distinguishes_absent_empty_and_null`, `carries_the_corners_through_unchanged` | `src/message.rs`, `tests/integration.rs` |
+| R11 | `distinguishes_absent_empty_and_null`, `carries_the_corners_through_unchanged` | `src/message.rs`, `tests/main.rs` |
 | R12 | `tokenizes_losslessly`, `classifies_every_sequence` | `src/escape.rs` |
 | R13 | `unescapes_delimiters_and_hex`, `keeps_undecodable_sequences_literal` | `src/escape.rs` |
 | R14 | `escapes_delimiters_and_segment_terminators` | `src/escape.rs` |
 | R15 | `escape_and_unescape_round_trip` | `src/escape.rs` |
-| R16 | `round_trips_a_canonical_message`, `round_trips_custom_delimiters`, `keeps_empty_positions`, `every_sample_round_trips_byte_for_byte` | `src/render.rs`, `tests/integration.rs` |
+| R16 | `round_trips_a_canonical_message`, `round_trips_custom_delimiters`, `keeps_empty_positions`, `every_sample_round_trips_byte_for_byte` | `src/render.rs`, `tests/main.rs` |
 | R17 | `decodes_only_the_leaves` | `src/render.rs` |
 | R18 | `rejects_malformed_paths` | `src/path.rs` |
-| R19 | `queries_repetitions_and_occurrences`, `reads_values_by_path` | `src/message.rs`, `tests/integration.rs` |
+| R19 | `queries_repetitions_and_occurrences`, `reads_values_by_path` | `src/message.rs`, `tests/main.rs` |
 | R20 | `a_missing_position_yields_no_value` | `src/message.rs` |
 | R21 | `splits_a_batch_file`, `does_not_mistake_a_local_segment_for_an_envelope`, `keeps_a_headerless_first_message_for_parse_to_reject` | `src/parse.rs` |
 | R22 | `reads_the_msh_conveniences`, `msh_conveniences_are_none_when_absent` | `src/message.rs` |
-| R23 | `only_a_missing_or_broken_header_is_an_error`, `cli_reports_errors_on_stderr` | `tests/integration.rs` |
+| R23 | `only_a_missing_or_broken_header_is_an_error`, `cli_reports_errors_on_stderr` | `tests/main.rs` |
 | R24 | *by review* — enforced by [`AGENTS/safety.md`](../../AGENTS/safety.md), not by a test; there is no way to assert the absence of a feature | — |
-| R25 | `the_crate_has_no_runtime_dependencies` | `tests/integration.rs` |
+| R25 | `the_crate_has_no_runtime_dependencies` | `tests/main.rs` |
 | R26 | `first_value_reads_a_leaf_scoped_to_one_segment` | `src/message.rs` |
 | R27 | `reads_messages_one_at_a_time_from_a_bufread`, `read_messages_matches_split_messages_on_every_batch_shape` | `src/parse.rs` |
 
 The table is **checked by `cargo test`**, not only by review:
-`every_rule_has_a_coverage_row` in `tests/integration.rs` reads this file
+`every_rule_has_a_coverage_row` in `tests/main.rs` reads this file
 and [§1.4](../01-purpose-and-scope/index.md) and fails if a rule is
 declared with no row here, or covered here without being declared. Its
 companion `every_spec_section_is_indexed_and_present` does the same for the
@@ -57,10 +57,10 @@ truth": the claim now costs a test run rather than a careful reader.
 | Kind of test | Home |
 | ------------ | ---- |
 | a rule about one module's own behaviour | `#[cfg(test)] mod tests` at the bottom of that module |
-| anything crossing module boundaries | `tests/integration.rs` |
-| anything a caller can observe through the public API only | `tests/integration.rs` |
-| the CLI contract ([§12](../12-command-line-interface/index.md)) | `tests/integration.rs`, `cli_*` prefix |
-| an invariant of the spec itself — the rule index, the section files | `tests/integration.rs` (§13.1) |
+| anything crossing module boundaries | `tests/main.rs` |
+| anything a caller can observe through the public API only | `tests/main.rs` |
+| the CLI contract ([§12](../12-command-line-interface/index.md)) | `tests/main.rs`, `cli_*` prefix |
+| an invariant of the spec itself — the rule index, the section files | `tests/main.rs` (§13.1) |
 | an illustration a reader should see in the docs | a rustdoc `Example:` block, which runs as a doc-test |
 
 ## 13.3 The four checks
@@ -91,7 +91,7 @@ The workspace also requires **100% executable-line coverage** across the
 three published crates' `src/` trees:
 
 ```sh
-bin/check-coverage
+bin/test-coverage
 ```
 
 The check runs all targets and reads cargo-llvm-cov's merged LCOV `DA`
@@ -115,7 +115,7 @@ Test messages are either written inline or taken from `samples/`:
 | `samples/batch.er7` | a batch file: `FHS`/`BHS`/`BTS`/`FTS` envelope, two `ACK` messages, an `ERR` segment |
 | `samples/multilingual.er7` | synthetic UTF-8 text in three scripts, including a decomposed accent, repetitions, an escaped delimiter, and an explicit null |
 
-Plus the `EDGES` constant in `tests/integration.rs`, which packs the
+Plus the `EDGES` constant in `tests/main.rs`, which packs the
 corners into one message: a v2.7 truncation character, an explicit null, a
 formatting escape, a decoded delimiter, and hex data.
 

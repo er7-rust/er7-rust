@@ -59,7 +59,7 @@ and file-I/O failure, redaction no-op, nested null, unrecognised-payload, and
 closed-pipe branch. Impossible indexing fallbacks were replaced by direct
 iteration, and an unreachable policy parser branch was removed. The merged
 LCOV result is **4,078/4,078 executable lines (100.00%)** across the three
-published `src/` trees. `bin/check-coverage` makes that result reproducible,
+published `src/` trees. `bin/test-coverage` makes that result reproducible,
 and CI pins cargo-llvm-cov 0.9.1 and fails if any executable published-source
 line returns to zero. The ordinary summary remains useful diagnostically but
 is not the gate: it double-counts generic and linked functions compiled into

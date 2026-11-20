@@ -23,7 +23,7 @@ fuzz/                 Its own Cargo workspace (nightly + libfuzzer-sys); never t
 help/releasing/       Release checklist
 samples/              Example ER7 messages, used by docs and tests
 src/                  The crate
-tests/integration.rs  Black-box tests through the public API and the CLI
+tests/main.rs  Black-box tests through the public API and the CLI
 ```
 
 ## Modules

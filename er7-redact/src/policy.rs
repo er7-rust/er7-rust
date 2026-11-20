@@ -499,7 +499,7 @@ impl Policy {
     /// Only if the table below is edited to hold something that is not an
     /// HL7 path — every entry is a literal, and
     /// `the_documented_positions_match_the_built_in_policy` in
-    /// `tests/integration.rs` checks the whole table against spec §5.1.
+    /// `tests/main.rs` checks the whole table against spec §5.1.
     #[must_use]
     pub fn patient_identifiers() -> Policy {
         // Spec §5.1 is the normative table; this list is its executable

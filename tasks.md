@@ -65,10 +65,10 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       commands before describing platform coverage in the install guide.
 
       **Linux verified 2026-11-19.** In a `rust:1.100.0-slim` Linux
-      container, `cargo test --locked -p er7 -p er7-redact --test integration`
+      container, `cargo test --locked -p er7 -p er7-redact --test main`
       passed all 22 parser and 29 redactor integration tests. The
       `windows-cli` job passed on `windows-latest` at commit `fe4a903`
-      using `cargo +stable test --locked -p er7 -p er7-redact --test integration`.
+      using `cargo +stable test --locked -p er7 -p er7-redact --test main`.
       [Windows job log](https://github.com/er7-rust/er7-rust/actions/runs/44499021467/job/135473563198)
 - [x] **Reconcile the conduct documents.** The Covenant 3.0 text includes
       the claim-accuracy clause required by professionalization rule 7.
@@ -91,8 +91,8 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       The follow-up pass completed executable-line coverage across all three
       published `src/` trees: 4,078/4,078 merged LCOV lines (100.00%) on
       2026-11-20. It added public/error/CLI edge cases, removed impossible
-      fallback branches, and introduced `bin/check-coverage`, `make
-      check-coverage`, and a pinned hosted CI gate. The gate uses merged
+      fallback branches, and introduced `bin/test-coverage`, `make
+      test-coverage`, and a pinned hosted CI gate. The gate uses merged
       source-line records because the ordinary summary double-counts linked
       and generic functions across zero-test example and integration binaries;
       no published source module is excluded. Hosted run
@@ -173,7 +173,7 @@ published-source line coverage and the enforced Trusted Publishing
 transition. The local close-out baseline is: all workspace tests, strict
 clippy, formatting, strict rustdoc for all three libraries, Rust 1.98 and
 1.99.1 workspace/fuzz-manifest checks, trademark rules, Svelte autofixer,
-site type-check/build, and `bin/check-coverage` at 4,078/4,078 lines.
+site type-check/build, and `bin/test-coverage` at 4,078/4,078 lines.
 
 The resume point is the one unchecked item above: appoint a second security
 responder. It is intentionally waiting on a real person's informed consent

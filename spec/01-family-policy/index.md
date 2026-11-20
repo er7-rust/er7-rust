@@ -47,7 +47,7 @@ the CI rustdoc step.
 CI also runs the supplemental workspace coverage gate:
 
 ```sh
-bin/check-coverage  # 100% merged executable lines in published src/ trees
+bin/test-coverage  # 100% merged executable lines in published src/ trees
 ```
 
 This is not renamed as a fifth member of the four checks: those four are

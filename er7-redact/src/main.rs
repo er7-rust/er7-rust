@@ -12,7 +12,7 @@
 //! anything it needs, a downstream crate can have too.
 //!
 //! The input/output contract — options, formats, exit codes — is specified
-//! by spec §10, and pinned by the `cli_*` tests in `tests/integration.rs`.
+//! by spec §10, and pinned by the `cli_*` tests in `tests/main.rs`.
 #![forbid(unsafe_code)]
 
 use std::fmt::Write as _;

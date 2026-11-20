@@ -5,7 +5,7 @@
 
 Implemented in `src/main.rs`. This is a contract, not an implementation
 detail: scripts depend on it, so it is specified here and pinned by the CLI
-tests in `tests/integration.rs`.
+tests in `tests/main.rs`.
 
 The CLI adds **no behaviour** of its own. Everything it prints is the
 library's output, formatted ([§1.1](../01-purpose-and-scope/index.md)).

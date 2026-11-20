@@ -36,7 +36,7 @@ must stay that way.
 
 ## Pitfalls
 
-- **The integration tests read `../er7/samples/`.** `tests/integration.rs`
+- **The integration tests read `../er7/samples/`.** `tests/main.rs`
   pulls the `er7` crate's own sample messages straight from the sibling
   workspace member via `include_str!`. That is deliberate — it tests this
   crate against the same fixtures `er7` tests itself against, rather than

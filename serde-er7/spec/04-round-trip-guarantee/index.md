@@ -52,13 +52,13 @@ automatically: an absent field has no repetitions and serializes as `[]`
 (S4); an empty field has repetitions holding empty subcomponents; a null
 field's one subcomponent serializes as the four-character string `"\"\""`
 (the ER7 null, written literally, since it is never decoded per §4.2).
-`tests/integration.rs`'s
+`tests/main.rs`'s
 `keeps_absent_empty_and_null_distinct_through_json` test pins this down
 directly.
 
 ## 4.5 Testing this guarantee
 
-Every fixture in `tests/integration.rs` follows the same shape: parse,
+Every fixture in `tests/main.rs` follows the same shape: parse,
 serialize, deserialize, assert the ER7 text is unchanged. New fixtures
 added for a bug fix or a new example message should follow the same
 pattern rather than asserting on the JSON's own shape, which is already

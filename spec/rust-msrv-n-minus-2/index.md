@@ -68,7 +68,7 @@ The `msrv` job reads the floor from the manifests, then runs
 that toolchain. The stable job runs separately.
 
 For a local check, install host toolchains for the MSRV and the following
-minor, then run `make test-minimum-supported-rust-version`. A minor alias
+minor, then run `make ci-minimum-supported-rust-version`. A minor alias
 or an installed patch release of the minor is sufficient. The checker
 probes each matching rustup entry before selecting it, so an incomplete
 minor-alias installation cannot hide a usable installed patch release. The

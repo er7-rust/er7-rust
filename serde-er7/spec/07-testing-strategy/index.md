@@ -9,17 +9,17 @@ enforces it. A rule with no test is a bug in this table.
 
 | Rule | Test | File |
 | ---- | ---- | ---- |
-| S1 | `the_crate_has_exactly_two_runtime_dependencies` | `tests/integration.rs` |
-| S2 | `no_format_crate_is_a_runtime_dependency` | `tests/integration.rs` |
-| S3 | `serializes_as_a_bare_string`, `keeps_escape_sequences_raw_through_json` | `src/subcomponent.rs`, `tests/integration.rs` |
+| S1 | `the_crate_has_exactly_two_runtime_dependencies` | `tests/main.rs` |
+| S2 | `no_format_crate_is_a_runtime_dependency` | `tests/main.rs` |
+| S3 | `serializes_as_a_bare_string`, `keeps_escape_sequences_raw_through_json` | `src/subcomponent.rs`, `tests/main.rs` |
 | S4 | `round_trips_several_subcomponents`, `round_trips_repeated_values`, `round_trips_nested_components` | `src/component.rs`, `src/field.rs`, `src/repetition.rs` |
 | S5 | `round_trips_a_full_message_through_json`, `round_trips_a_segment` | `src/message.rs`, `src/segment.rs` |
 | S6 | `round_trips_the_default_delimiters`, `round_trips_custom_delimiters_and_truncation` | `src/separators.rs` |
 | S7 | `round_trips_every_variant`, `rejects_an_unknown_variant` | `src/terminator.rs` |
 | S8 | `ignores_unknown_fields`, `treats_a_missing_truncation_key_as_none` | `src/segment.rs`, `src/separators.rs` |
-| S9 | `rejects_a_missing_name`, `rejects_a_missing_required_field`, `error_messages_still_name_the_missing_field` | `src/segment.rs`, `src/separators.rs`, `tests/integration.rs` |
-| S10 | `round_trips_through_json`, `pretty_json_keeps_the_tree_shape`, and every shape test above | `tests/integration.rs`, `src/message.rs` |
-| S11 | `every_wrapper_converts_and_mutates_through`, `deref_reaches_query`, `deref_reaches_the_inner_api` | `tests/integration.rs`, `src/message.rs`, `src/subcomponent.rs` |
+| S9 | `rejects_a_missing_name`, `rejects_a_missing_required_field`, `error_messages_still_name_the_missing_field` | `src/segment.rs`, `src/separators.rs`, `tests/main.rs` |
+| S10 | `round_trips_through_json`, `pretty_json_keeps_the_tree_shape`, and every shape test above | `tests/main.rs`, `src/message.rs` |
+| S11 | `every_wrapper_converts_and_mutates_through`, `deref_reaches_query`, `deref_reaches_the_inner_api` | `tests/main.rs`, `src/message.rs`, `src/subcomponent.rs` |
 | S12 | *by `cargo rustdoc --lib -- -W missing-docs`*, which is one of the four checks (§7.4) | — |
 | S13 | `strict_rejects_an_unknown_top_level_field`, `strict_rejects_an_unknown_field_inside_a_nested_segment`, `strict_rejects_an_unknown_field_inside_separators`, `strict_still_requires_every_field_the_plain_type_does`, `plain_deserialize_is_unaffected_by_strict_existing`, `strict_rejects_an_unknown_field` | `src/message.rs`, `src/segment.rs`, `src/separators.rs` |
 
@@ -43,7 +43,7 @@ the build rather than a habit.
    — one realistic, runnable use of that item, checked by `cargo test` like
    any other test. Every public item must have one; see
    [`AGENTS/conventions.md`](../../AGENTS/conventions.md).
-3. **Integration tests** (`tests/integration.rs`) — black-box, through the
+3. **Integration tests** (`tests/main.rs`) — black-box, through the
    public API only, exercising real message shapes: the `er7` crate's own
    `samples/*.er7` files (read via `include_str!` from the sibling
    workspace member, so this crate is tested against the same fixtures
@@ -74,7 +74,7 @@ the build rather than a habit.
 [the index](../index.md#required-checks)). This applies to struct fields
 and enum-like match arms as much as to the types and functions themselves.
 
-The workspace's separate `bin/check-coverage` gate requires **100% executable
+The workspace's separate `bin/test-coverage` gate requires **100% executable
 line coverage** across every published crate's `src/` tree, including this one.
 It consumes merged LCOV line records from an all-target cargo-llvm-cov run.
 This is intentionally a source-line contract: LLVM's summary counts generic
@@ -90,6 +90,6 @@ driver version.
 Where a test needs a literal message, prefer the shortest text that
 exercises the behaviour under test — a two-segment `MSH`/`PID` fragment for
 a delimiter edge case, not a full multi-segment ORU. Reach for `er7`'s
-`samples/*.er7` (via `tests/integration.rs`) specifically when the point of
+`samples/*.er7` (via `tests/main.rs`) specifically when the point of
 the test is "a real message, not one written to order," such as
 `round_trips_every_sample_from_the_er7_crate`.

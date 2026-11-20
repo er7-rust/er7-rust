@@ -26,7 +26,7 @@ cargo build --examples             # Compile every example without running
 
 cargo test                         # Everything
 cargo test --lib                   # Unit tests only, fastest inner loop
-cargo test --test integration      # Integration and CLI tests only
+cargo test --test main      # Integration and CLI tests only
 cargo test --doc                   # Doc-tests only
 cargo test round_trip              # Every test whose name contains "round_trip"
 cargo test -- --nocapture          # Show println!() output

@@ -23,7 +23,7 @@ feature, not an accident:
 There are no dev-dependencies and no build-dependencies either, so
 `cargo test` needs nothing but `std`.
 
-`the_crate_has_no_runtime_dependencies` in `tests/integration.rs` reads
+`the_crate_has_no_runtime_dependencies` in `tests/main.rs` reads
 `Cargo.toml` and asserts this, so the rule fails loudly rather than
 drifting.
 
@@ -80,7 +80,7 @@ See [`LICENSE.md`](../../LICENSE.md).
 | library | `src/lib.rs` | the contract |
 | binary `er7` | `src/main.rs` | the CLI ([§12](../12-command-line-interface/index.md)) |
 | examples | `examples/*.rs` | runnable tutorials ([`examples/README.md`](../../examples/README.md)) |
-| integration tests | `tests/integration.rs` | [§13](../13-testing-strategy/index.md) |
+| integration tests | `tests/main.rs` | [§13](../13-testing-strategy/index.md) |
 
 The binary depends on the library through its public API only, exactly as a
 downstream crate would. That is deliberate: if the CLI needs something the

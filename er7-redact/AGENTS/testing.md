@@ -10,8 +10,8 @@ This is how to write it.
 | Kind | Home |
 | ---- | ---- |
 | one module's own behaviour | `#[cfg(test)] mod tests` at the bottom of that module |
-| anything crossing modules, or observable only through the public API | `tests/integration.rs` |
-| the CLI contract | `tests/integration.rs`, `cli_*` prefix |
+| anything crossing modules, or observable only through the public API | `tests/main.rs` |
+| the CLI contract | `tests/main.rs`, `cli_*` prefix |
 | an illustration a reader should see | a rustdoc `Example:` block |
 
 Every rule `D<n>` names its test in the §11.1 coverage table. Adding a rule

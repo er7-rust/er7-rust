@@ -26,9 +26,9 @@ example that no longer compiles is a tutorial that lies.
 | Kind | Home |
 | ---- | ---- |
 | a rule about one module's own behaviour | `#[cfg(test)] mod tests` at the bottom of that module |
-| anything crossing module boundaries | `tests/integration.rs` |
-| anything observable only through the public API | `tests/integration.rs` |
-| the CLI contract | `tests/integration.rs`, `cli_*` prefix |
+| anything crossing module boundaries | `tests/main.rs` |
+| anything observable only through the public API | `tests/main.rs` |
+| the CLI contract | `tests/main.rs`, `cli_*` prefix |
 | an illustration a reader should see | a rustdoc `Example:` block |
 
 When in doubt, prefer the unit test: it fails closer to the cause.
@@ -110,7 +110,7 @@ the highest-leverage test in the crate. Requirements:
 
 ## CLI tests
 
-The `cli()` helper in `tests/integration.rs` spawns the built binary via
+The `cli()` helper in `tests/main.rs` spawns the built binary via
 `env!("CARGO_BIN_EXE_er7")` and returns `(success, stdout, stderr)`. Use it
 for anything in [§12](../spec/12-command-line-interface/index.md), and
 assert on:

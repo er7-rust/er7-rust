@@ -5,7 +5,7 @@ numbers (§10.x) are stable and cited from code, tests, and commit messages.
 
 Implemented in `src/main.rs`. This is a contract, not an implementation
 detail: scripts depend on it, so it is specified here and pinned by the
-`cli_*` tests in `tests/integration.rs`.
+`cli_*` tests in `tests/main.rs`.
 
 The CLI adds **no behaviour** of its own. Everything it writes is the
 library's output, formatted ([§1.1](../01-purpose-and-scope/index.md)).

@@ -14,7 +14,7 @@ enforces it. A rule with no test is a bug in this table.
 
 | Rule | Test | File |
 | ---- | ---- | ---- |
-| D1 | `preserves_the_shape`, `every_sample_keeps_its_shape`, `a_cleared_field_reads_back_as_an_empty_one` | `src/redact.rs`, `tests/integration.rs` |
+| D1 | `preserves_the_shape`, `every_sample_keeps_its_shape`, `a_cleared_field_reads_back_as_an_empty_one` | `src/redact.rs`, `tests/main.rs` |
 | D2 | `does_not_create_a_position` | `src/redact.rs` |
 | D3 | `leaves_an_empty_leaf_empty` | `src/redact.rs` |
 | D4 | `leaves_an_explicit_null_alone` | `src/redact.rs` |
@@ -24,19 +24,19 @@ enforces it. A rule with no test is a bug in this table.
 | D8 | `a_rule_that_matches_nothing_does_nothing` | `src/redact.rs` |
 | D9 | `rejecting_by_default_covers_what_no_rule_named`, `a_segment_wide_accept_is_not_narrowed` | `src/redact.rs` |
 | D10 | `every_action_but_pseudonym_is_idempotent` | `src/action.rs` |
-| D11 | `replacement_text_cannot_break_the_message` | `tests/integration.rs` |
-| D12 | `pseudonyms_are_stable_and_keyed`, `pseudonyms_link_across_messages` | `src/pseudonym.rs`, `tests/integration.rs` |
+| D11 | `replacement_text_cannot_break_the_message` | `tests/main.rs` |
+| D12 | `pseudonyms_are_stable_and_keyed`, `pseudonyms_link_across_messages` | `src/pseudonym.rs`, `tests/main.rs` |
 | D13 | `a_report_carries_no_values` | `src/redact.rs` |
-| D14 | `the_default_policy_names_the_documented_positions`, `the_documented_positions_match_the_built_in_policy` — and *by review* for the compliance claim itself, which no test can make | `src/policy.rs`, `tests/integration.rs` |
-| D15 | `reports_a_bad_policy_line`, `cli_reports_errors_on_stderr` | `src/policy.rs`, `tests/integration.rs` |
-| D16 | `the_crate_has_one_runtime_dependency` | `tests/integration.rs` |
-| D17 | `an_untouched_message_round_trips` | `tests/integration.rs` |
-| D18 | `a_policy_round_trips_through_display`, `parses_every_action`, `the_sample_policy_exercises_every_action` | `src/policy.rs`, `src/action.rs`, `tests/integration.rs` |
+| D14 | `the_default_policy_names_the_documented_positions`, `the_documented_positions_match_the_built_in_policy` — and *by review* for the compliance claim itself, which no test can make | `src/policy.rs`, `tests/main.rs` |
+| D15 | `reports_a_bad_policy_line`, `cli_reports_errors_on_stderr` | `src/policy.rs`, `tests/main.rs` |
+| D16 | `the_crate_has_one_runtime_dependency` | `tests/main.rs` |
+| D17 | `an_untouched_message_round_trips` | `tests/main.rs` |
+| D18 | `a_policy_round_trips_through_display`, `parses_every_action`, `the_sample_policy_exercises_every_action` | `src/policy.rs`, `src/action.rs`, `tests/main.rs` |
 | D19 | `reject_beats_accept_for_the_same_field`, `reject_segment_beats_a_narrower_accept` | `src/redact.rs` |
 | D20 | `appending_never_weakens_the_defaults` | `src/policy.rs` |
-| D21 | `an_unrecognised_payload_follows_the_policy`, `cli_masks_an_unrecognised_payload` | `src/redact.rs`, `tests/integration.rs` |
-| D22 | `uncovered_lists_every_position_no_rule_names`, `uncovered_ignores_empty_and_null_leaves`, `uncovered_uses_original_paths_for_null_rules`, `uncovered_never_calls_custom_actions`, `cli_uncovered_lists_the_documented_gaps` | `src/redact.rs`, `tests/integration.rs` |
-| D23 | `known_values_are_redacted_wherever_they_appear`, `known_values_matching_is_case_insensitive`, `multilingual_known_values_in_notes`, `known_values_matching_is_whole_word_only`, `known_values_below_the_minimum_length_are_ignored`, `keep_never_becomes_a_known_value`, `known_values_from_a_null_collapsed_field_are_still_learned`, `search_known_values_off_disables_the_sweep`, `known_values_line_parses_and_displays`, `appending_only_turns_known_values_on`, `cli_known_values_default_policy_catches_a_repeated_name` | `src/redact.rs`, `src/policy.rs`, `tests/integration.rs` |
+| D21 | `an_unrecognised_payload_follows_the_policy`, `cli_masks_an_unrecognised_payload` | `src/redact.rs`, `tests/main.rs` |
+| D22 | `uncovered_lists_every_position_no_rule_names`, `uncovered_ignores_empty_and_null_leaves`, `uncovered_uses_original_paths_for_null_rules`, `uncovered_never_calls_custom_actions`, `cli_uncovered_lists_the_documented_gaps` | `src/redact.rs`, `tests/main.rs` |
+| D23 | `known_values_are_redacted_wherever_they_appear`, `known_values_matching_is_case_insensitive`, `multilingual_known_values_in_notes`, `known_values_matching_is_whole_word_only`, `known_values_below_the_minimum_length_are_ignored`, `keep_never_becomes_a_known_value`, `known_values_from_a_null_collapsed_field_are_still_learned`, `search_known_values_off_disables_the_sweep`, `known_values_line_parses_and_displays`, `appending_only_turns_known_values_on`, `cli_known_values_default_policy_catches_a_repeated_name` | `src/redact.rs`, `src/policy.rs`, `tests/main.rs` |
 | D24 | `custom_action_runs_the_callers_closure`, `custom_action_equality_is_identity_not_behavior`, `custom_action_writes_a_placeholder_with_no_file_spelling`, `a_policy_mixing_built_in_and_custom_actions_redacts_correctly`, `a_custom_action_reports_instead_of_panicking` | `src/action.rs`, `src/redact.rs` |
 
 Further tests carry no single rule, because they assert the whole-message
@@ -71,10 +71,10 @@ checking the code.
 | Kind of test | Home |
 | ------------ | ---- |
 | a rule about one module's own behaviour | `#[cfg(test)] mod tests` at the bottom of that module |
-| anything crossing module boundaries | `tests/integration.rs` |
-| anything a caller can observe through the public API only | `tests/integration.rs` |
-| the CLI contract ([§10](../10-command-line-interface/index.md)) | `tests/integration.rs`, `cli_*` prefix |
-| an invariant of the spec itself — the rule index, the section files, the §5.1 table | `tests/integration.rs` (§11.1) |
+| anything crossing module boundaries | `tests/main.rs` |
+| anything a caller can observe through the public API only | `tests/main.rs` |
+| the CLI contract ([§10](../10-command-line-interface/index.md)) | `tests/main.rs`, `cli_*` prefix |
+| an invariant of the spec itself — the rule index, the section files, the §5.1 table | `tests/main.rs` (§11.1) |
 | an illustration a reader should see in the docs | a rustdoc `Example:` block, which runs as a doc-test |
 
 ## 11.3 The four checks
@@ -91,7 +91,7 @@ cargo rustdoc --lib -- -W missing-docs    # every public item documented
 `--all-targets` matters: it is what compiles `examples/` and so keeps the
 tutorials from rotting.
 
-At workspace level, `bin/check-coverage` additionally requires **100%
+At workspace level, `bin/test-coverage` additionally requires **100%
 executable-line coverage** for every `src/` file in all three published crates.
 It runs all targets and checks merged LCOV line records, so a line executed in
 one test target is covered even though LLVM may also compile a zero-count copy

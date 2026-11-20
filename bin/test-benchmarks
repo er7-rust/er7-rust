@@ -1,0 +1,5 @@
+#!/bin/sh
+# Run the criterion benchmarks in er7-bench and er7-redact-bench.
+set -eu
+cd "$(dirname "$0")/.."
+cargo bench -p er7-bench -p er7-redact-bench

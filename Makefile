@@ -11,8 +11,8 @@ SITE := er7-rust.github.io
 .PHONY: help
 help:
 	@echo 'check-trademarks  enforce the HL7 fair-use rules across the tree'
-	@echo 'check-coverage    require 100% published-source line coverage'
-	@echo 'test-minimum-supported-rust-version  check the two supported older Rust minors'
+	@echo 'test-coverage    require 100% published-source line coverage'
+	@echo 'ci-minimum-supported-rust-version  check the two supported older Rust minors'
 	@echo 'github-pages  push the monorepo, then publish the site (publish: same thing)'
 	@echo 'site-dev    run the site locally at http://localhost:5173'
 	@echo 'site-check  type-check the site, as CI does'
@@ -25,9 +25,9 @@ check-trademarks:
 
 # Merged executable-line coverage across the published crates. Requires
 # cargo-llvm-cov and the llvm-tools-preview rustup component; CI installs both.
-.PHONY: check-coverage
-check-coverage:
-	@bin/check-coverage
+.PHONY: test-coverage
+test-coverage:
+	@bin/test-coverage
 
 # The remote is named github-pages (git@github.com:er7-rust/er7-rust.github.io.git),
 # matching the sibling repositories' own convention rather than this one's
@@ -54,6 +54,11 @@ site-check:
 	cd $(SITE) && pnpm check
 
 # Check and test on the minimum supported Rust version (N-2) and on N-1.
-.PHONY: test-minimum-supported-rust-version
-test-minimum-supported-rust-version:
-	bin/test-minimum-supported-rust-version
+.PHONY: ci-minimum-supported-rust-version
+ci-minimum-supported-rust-version:
+	bin/make-ci-minimum-supported-rust-version
+
+# Run the criterion benchmarks.
+.PHONY: test-benchmarks
+test-benchmarks:
+	bin/test-benchmarks

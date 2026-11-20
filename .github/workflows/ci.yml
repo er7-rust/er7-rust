@@ -91,7 +91,7 @@ jobs:
           components: llvm-tools-preview
       - name: install the pinned coverage driver
         run: cargo +stable install cargo-llvm-cov --version 0.9.1 --locked
-      - run: bin/check-coverage
+      - run: bin/test-coverage
 
   # The workspace checks above exercise path dependencies and files that do
   # not ship. Packaging applies each crate's include list, replaces path
@@ -124,7 +124,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
-      - run: cargo +stable test --locked -p er7 -p er7-redact --test integration
+      - run: cargo +stable test --locked -p er7 -p er7-redact --test main
 
   # The declared floor (rust-version in every publishable crate's own
   # Cargo.toml) actually builds and tests, so the pin cannot silently

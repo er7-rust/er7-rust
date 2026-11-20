@@ -13,7 +13,7 @@
 //!
 //! The input/output contract — options, outline format, exit codes — is
 //! specified by spec §12, and pinned by the `cli_*` tests in
-//! `tests/integration.rs`.
+//! `tests/main.rs`.
 #![forbid(unsafe_code)]
 
 use std::fmt::Write as _;

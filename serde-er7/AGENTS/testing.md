@@ -11,7 +11,7 @@ for the normative version of this page; this is the practical how-to.
 ```sh
 cargo test                    # unit + integration + doc tests, everything
 cargo test --lib              # unit tests only (fastest inner loop)
-cargo test --test integration # integration tests only
+cargo test --test main # integration tests only
 cargo test --doc              # doctests only
 cargo test -- --nocapture     # show println!() output from tests/examples
 ```
@@ -33,7 +33,7 @@ cargo rustdoc --lib -- -W missing-docs
    malformed input) → a unit test in that module's `#[cfg(test)] mod
    tests`.
 2. **A new round-trip guarantee, or a regression in one** → an integration
-   test in `tests/integration.rs`, following the existing
+   test in `tests/main.rs`, following the existing
    parse-serialize-deserialize-assert pattern.
 3. **A new realistic message shape worth demonstrating** → consider
    whether it belongs as a new `examples/*.rs` (if it teaches a concept) or
@@ -42,7 +42,7 @@ cargo rustdoc --lib -- -W missing-docs
 
 ## The sibling fixtures
 
-`tests/integration.rs` reads `er7`'s own `samples/*.er7` files directly via
+`tests/main.rs` reads `er7`'s own `samples/*.er7` files directly via
 `include_str!("../../er7/samples/...")`. This means:
 
 - These tests **require the sibling workspace member** to exist at
@@ -50,7 +50,7 @@ cargo rustdoc --lib -- -W missing-docs
   dependency in `Cargo.toml` already requires. Both crates live in the
   same workspace, so this is automatic; nothing to check out separately.
 - The sample files end with a trailing segment terminator that `er7`
-  itself normalizes away at parse time; `tests/integration.rs`'s `sample()`
+  itself normalizes away at parse time; `tests/main.rs`'s `sample()`
   helper trims it before comparing, so the round-trip assertion tests this
   crate's own behaviour, not `er7`'s terminator normalization (which
   `er7`'s own test suite already covers).
