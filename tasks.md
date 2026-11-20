@@ -93,7 +93,17 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       check-coverage`, and a pinned hosted CI gate. The gate uses merged
       source-line records because the ordinary summary double-counts linked
       and generic functions across zero-test example and integration binaries;
-      no published source module is excluded.
+      no published source module is excluded. Hosted run
+      [44684724056](https://github.com/er7-rust/er7-rust/actions/runs/44684724056)
+      passed the new coverage job and every existing CI job.
+- [x] **Finish the SvelteKit 3 migration audit.** Reviewed the generated
+      migration findings on 2026-11-20: `page.url` is only read, never
+      mutated, and the static site does not depend on cross-origin asset
+      access during development. No `@migration-task` comments remain.
+      `pnpm check` completed with zero errors and warnings, and `pnpm build`
+      prerendered the complete static site successfully. The generated
+      `er7-rust.github.io/MIGRATION_TASKS.md` was then removed as its own
+      final instruction requires.
 
 ### Remaining declared gaps
 
