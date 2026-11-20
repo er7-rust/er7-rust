@@ -20,6 +20,21 @@ readers rather than for a repository, is at <https://er7-rust.github.io/news/>.
 | Rust | Current stable minus two releases; today 1.98 |
 | License | MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only |
 
+## 2026-11-20 — Releases no longer depend on a long-lived registry token
+
+All three crates now require crates.io Trusted Publishing. A release is a
+manual, exact dispatch of a protected GitHub workflow for one crate,
+version, and signed commit; a maintainer must approve its `release`
+environment before crates.io issues a short-lived OIDC credential. No push,
+tag, schedule, or other workflow completion can publish.
+
+The three trusted-publisher mappings and non-publishing exchanges were
+verified first. The crates.io owner then enabled Trusted-Publishing-only
+mode for `er7`, `er7-redact`, and `serde-er7`; their public records report
+that enforcement active, and the legacy local token has been removed. The
+full authority boundary and evidence are in
+[`spec/trusted-publishing/`](spec/trusted-publishing/index.md).
+
 ## 2026-08-29 — `er7-redact` now catches a repeated identifier wherever it appears
 
 Three releases today: `er7` 0.2.0, `serde-er7` 0.2.0, `er7-redact` 0.3.0.

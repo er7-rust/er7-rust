@@ -45,9 +45,9 @@ negotiable in a release without editing that section first.
 5. Version bumped in `Cargo.toml`, `CITATION.cff`, and the spec index's
    "Applies to" line.
 
-## Who may run `cargo publish`
+## Who may dispatch publishing
 
 The maintainer alone scopes and names a release; once he has, he may
-direct an agent to judge readiness against the checklist above and run
-`cargo publish` — see [`GOVERNANCE.md`](../../GOVERNANCE.md)'s "Release
-authority" section.
+direct an agent to judge readiness against the checklist above and
+dispatch the protected manual OIDC workflow — see
+[`GOVERNANCE.md`](../../GOVERNANCE.md)'s "Release authority" section.

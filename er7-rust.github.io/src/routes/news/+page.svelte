@@ -50,6 +50,25 @@ Henderson. https://er7-rust.github.io`;
 </section>
 
 <section class="section">
+  <h2 class="section-heading-eyebrow">2026-11-20</h2>
+  <h2 class="section-heading">Releases no longer depend on a long-lived registry token</h2>
+  <div class="prose">
+    <p>
+      All three crates now require crates.io Trusted Publishing. A release is a manual, exact
+      dispatch of a protected GitHub workflow for one crate, version, and signed commit; a
+      maintainer must approve its release environment before crates.io issues a short-lived OIDC
+      credential. No push, tag, schedule, or other workflow completion can publish.
+    </p>
+    <p>
+      The three publisher mappings and non-publishing exchanges were verified first. The public
+      crate records now report Trusted-Publishing-only enforcement active for <code>er7</code>,
+      <code>er7-redact</code>, and <code>serde-er7</code>, and the legacy local token has been
+      removed.
+    </p>
+  </div>
+</section>
+
+<section class="section">
   <h2 class="section-heading-eyebrow">2026-09-02 · serde-er7 0.3.0</h2>
   <h2 class="section-heading">A typo in a hand-written JSON fixture can now name itself</h2>
   <div class="prose">

@@ -11,8 +11,8 @@ authority](../../../GOVERNANCE.md#release-authority) refers to.** As of
 changes, what version), an agent working in this repository may work
 through §§1–4 below, decide the release meets them, and carry out §5
 itself — the maintainer no longer has to confirm every step personally
-before `cargo publish` runs. Scoping and naming the release in the first
-place stays the maintainer's alone; see
+before the protected publish workflow runs. Scoping and naming the release
+in the first place stays the maintainer's alone; see
 [`AI_STATEMENT.md`](../../../AI_STATEMENT.md#6-human-oversight) for the full
 disclosure.
 
@@ -58,11 +58,19 @@ the other three documents describe different build surfaces (workspace spec
 ## 5. Publish
 
 ```sh
-cargo publish --dry-run
-cargo publish
-git tag -a er7-redact-v0.1.1 -m "er7-redact 0.1.1"   # prefixed: this repo holds 3 crates
-git push --tags
+git add -A
+git commit -m "Release x.y.z"
+git tag -a er7-redact-vx.y.z -m "er7-redact x.y.z"   # prefixed: this repo holds 3 crates
+git push && git push --tags
+release_commit="$(git rev-parse HEAD)"
+gh workflow run publish.yml -f operation=publish -f crate=er7-redact \
+  -f version=x.y.z -f commit="$release_commit" \
+  -f confirmation='publish er7-redact x.y.z'
 ```
+
+Approve the protected `release` environment and retain the successful run
+URL. The workflow repeats the checks, normalized-package build, and Cargo
+publish dry-run before obtaining its short-lived crates.io credential.
 
 ## 6. Release notes
 

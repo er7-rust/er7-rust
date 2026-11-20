@@ -85,10 +85,11 @@ The questions an evaluation asks, answered in one place each:
 **On AI oversight, specifically:** the maintainer alone decides what a
 crate does and what a released version claims — an agent scopes nothing
 on its own. As of 2026-09-02, an agent working in this repository (this
-project uses Claude Code) may, once the maintainer has scoped and named a
-release, judge whether it meets this project's own stated readiness
-criteria and run `cargo publish` for it, without a further per-release
-checkpoint. See [`GOVERNANCE.md`'s Release authority](GOVERNANCE.md#release-authority)
+project uses Claude Code and Codex) may, once the maintainer has scoped and
+named a release, judge whether it meets this project's own stated readiness
+criteria and dispatch the protected manual publish workflow, without a
+further per-release checkpoint. See
+[`GOVERNANCE.md`'s Release authority](GOVERNANCE.md#release-authority)
 for the rule and [`AI_STATEMENT.md`](AI_STATEMENT.md#6-human-oversight)
 for the full disclosure.
 

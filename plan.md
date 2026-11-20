@@ -76,18 +76,19 @@ table, and `bin/check-trademarks` enforces the fair-use rules mechanically.
 The trademark-compliance sweep — 100+ files extending compliance into
 crate doc-comments, manifests, and the site copy — landed 2026-08-26.
 
-The honest part of the document set is that it still names the gaps that
-remain — no second security responder and no Trusted Publishing — rather
-than implying they are covered. The gaps this sentence used to name here,
-"no CI", "unsigned commits", and "no SBOM", are closed and are not
+The honest part of the document set is that it still names the gap that
+remains — no second security responder — rather than implying it is
+covered. The gaps this sentence used to name here, "no CI", "unsigned
+commits", "no SBOM", and "no Trusted Publishing", are closed and are not
 restated as open.
 The Trusted Publishing support matrix was re-evaluated 2026-11-19: source
 mirrors do not each need registry publishing authority, so Codeberg's lack
 of crates.io OIDC support is not a blocker. The project selected and
 implemented a protected, manually dispatched GitHub release workflow. The
-three crates.io mappings and non-publishing OIDC proofs now pass. The
-remaining work is enabling Trusted-Publishing-only mode in each crate's
-owner settings, then removing the local API token.
+three crates.io mappings and non-publishing OIDC proofs pass. On 2026-11-20
+the owner enabled Trusted-Publishing-only mode for every crate, the public
+API independently reported all three flags true, and `cargo logout`
+removed the legacy local token.
 This plan closes what is still open the same deliberate way, instead of
 leaving it as a standing confession.
 

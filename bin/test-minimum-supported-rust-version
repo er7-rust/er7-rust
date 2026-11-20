@@ -22,8 +22,12 @@ for minor_version in "$msrv" "$n_minus_1"; do
   while read -r name _; do
     version=${name%-"$host"}
     if [[ "$version" != "$name" && ( "$version" == "$minor_version" || "${version%.*}" == "$minor_version" ) ]]; then
-      tc=$name
-      break
+      # rustup can retain an entry for an interrupted installation. Do not
+      # let a broken minor alias hide a healthy installed patch release.
+      if rustc +"$name" -vV >/dev/null 2>&1; then
+        tc=$name
+        break
+      fi
     fi
   done <<< "$installed"
   if [ -z "$tc" ]; then

@@ -11,10 +11,10 @@ Instead of storing a long-lived API token, Trusted Publishing allows the
 selected release workflow to authenticate directly with crates.io using a
 cryptographically signed token that proves the workflow's identity.
 
-The project intends to adopt Trusted Publishing if it explicitly changes
-the release-authority rule described below. Support on source-code mirrors
-is not a prerequisite: crates are published once to crates.io, not once
-per forge.
+The project adopted Trusted Publishing on 2026-11-20 after explicitly
+changing the release-authority rule described below. Support on source-code
+mirrors is not a prerequisite: crates are published once to crates.io, not
+once per forge.
 
 ## §7.1 The release-authority prerequisite
 
@@ -95,7 +95,7 @@ Option 2 was selected 2026-11-19. It preserves the existing
 rule that no push, merge, tag, or schedule autonomously publishes, while
 removing a credential that remains useful between releases.
 
-## §7.3 Activation requirements
+## §7.3 Activation and verification
 
 The repository side is implemented in
 [`.github/workflows/publish.yml`](../../.github/workflows/publish.yml).
@@ -120,12 +120,16 @@ revocation:
 - [`er7-redact`](https://github.com/er7-rust/er7-rust/actions/runs/44564934596)
 - [`serde-er7`](https://github.com/er7-rust/er7-rust/actions/runs/44564934930)
 
-One registry setting remains before the local credential can be removed:
-enable crates.io's Trusted-Publishing-only mode for all three crates. The
-existing legacy API token cannot change that setting; crates.io correctly
-returned HTTP 403 and requires either its owner settings UI or a new token
-scoped specifically to `trusted-publishing`. Creating another durable
-secret solely to disable durable-secret publishing would be perverse, so
-the owner UI is the preferred final step. During this transition, release
-documentation must state which credential path is actually active rather
-than implying configuration that has not been verified.
+The owner enabled crates.io's Trusted-Publishing-only mode for all three
+crates on 2026-11-20. The public crate records independently reported
+`trustpub_only: true` for `er7`, `er7-redact`, and `serde-er7`; publishing
+with an API token is therefore rejected rather than merely discouraged.
+`cargo logout` then removed the legacy token from the maintainer's local
+Cargo credential file.
+
+The active release path is now only the protected manual workflow. A
+release operator dispatches `publish.yml` with one exact crate, version,
+full signed commit SHA, and the matching confirmation phrase. The workflow
+repeats the checks and package dry-run before the protected `release`
+environment can issue a short-lived OIDC credential. No push, tag,
+schedule, or other workflow completion can publish a crate.

@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| Version | 1.8.0 |
-| Effective date | 2026-09-02 |
+| Version | 1.9.0 |
+| Effective date | 2026-11-20 |
 | Status | Active |
 | Author and owner | Joel Parker Henderson, maintainer |
 | Canonical location | `AI_STATEMENT.md` at the workspace root |
@@ -84,12 +84,12 @@ maintainer.
 
 ## 5. Where AI is used, and at what level
 
-The tooling is agentic AI coding assistance — Claude Code, by Anthropic —
-in sessions the maintainer directs and reviews. The repository carries
-`AGENTS.md` at the workspace root and in each crate, with a `CLAUDE.md`
-beside it pointing at it: those files are the standing instructions given
-to the tools, they are committed, and they are readable by anyone
-evaluating this claim.
+The tooling is agentic AI coding assistance — Claude Code, by Anthropic,
+and Codex, by OpenAI — in sessions the maintainer directs and reviews. The
+repository carries `AGENTS.md` at the workspace root and in each crate,
+with a `CLAUDE.md` beside it pointing at it: those files are the standing
+instructions given to the tools, they are committed, and they are readable
+by anyone evaluating this claim.
 
 Levels below use the §3 vocabulary. Deliberately, no percentage appears
 anywhere in this document: no defensible method exists for measuring one.
@@ -102,7 +102,7 @@ anywhere in this document: no defensible method exists for measuring one.
 | Documentation, the website, and this statement | ai-generated | Held to the repository's own prose rules |
 | What the crates do and do not do — scope, non-goals, what a release claims | none | Decided by the maintainer. This is the one release-related row that stayed `none` through both changes below: an agent scopes nothing on its own |
 | Whether a specific, already-scoped release is ready to publish | ai-assisted | As of 2026-09-02, an agent may judge this against the project's own stated readiness criteria — the four checks, spec/code/test agreement, correct SemVer classification, a clean `cargo package --list` — once the maintainer has scoped and named the release. See [`GOVERNANCE.md`'s Release authority](GOVERNANCE.md#release-authority) |
-| Running `cargo publish` for a release already decided ready | ai-assisted | As of 2026-09-02, an agent may run the command itself. Same section |
+| Dispatching the protected publish workflow for a release already decided ready | ai-assisted | An agent may dispatch the exact crate, version, signed commit, and confirmation phrase. A maintainer must approve the protected `release` environment before its short-lived OIDC credential is issued. Same section |
 | Accepting a contribution from someone else | none | Prohibited use; see §11 |
 
 **autonomous** appears in no row, and that is the point of the next
@@ -119,17 +119,22 @@ decision that exists only inside a tool session is not a decision this
 project made.
 
 **Publishing has three parts: scoping a release, judging it ready, and
-running the command — and only the first is unconditionally the
-maintainer's.** Before 2026-09-02, all three were his alone. That day, the
-keystroke moved: he could direct an agent to run `cargo publish` for a
-release he had already decided on and named, but the readiness judgment
-stayed his. Later the same day, the readiness judgment moved too: given a
+dispatching the protected workflow — and only the first is unconditionally
+the maintainer's.** Before 2026-09-02, all three were his alone. That day,
+the keystroke moved: he could direct an agent to run `cargo publish`
+locally for a release he had already decided on and named, but the
+readiness judgment stayed his. Later the same day, the readiness judgment
+moved too: given a
 release the maintainer has already scoped and named — what changes, what
 version — an agent may work through this project's own stated readiness
 criteria (the four checks, spec/code/test agreement, correct SemVer
 classification, a clean `cargo package --list`) and decide the release
-meets them, then run `cargo publish` for it, without a further per-release
-checkpoint from the maintainer.
+meets them, then perform the publishing step without a further per-release
+readiness checkpoint from the maintainer. Since 2026-11-20 that step is a
+manual dispatch of `.github/workflows/publish.yml`, not local
+`cargo publish`; crates.io issues the workflow a short-lived OIDC
+credential only after a maintainer approves the protected `release`
+environment.
 
 What did not move, either time: an agent never decides that a crate
 should release *at all* — scoping and naming a release is the maintainer's
@@ -262,9 +267,9 @@ a gate to make something pass.
 
 **Permitted, not prohibited, once the maintainer has scoped and named a
 release:** judging whether it meets this project's own stated readiness
-criteria, and running `cargo publish` for it — per [§6](#6-human-oversight),
-as of 2026-09-02. Stated here so the boundary reads as one list, not two
-documents that have to be reconciled by a reader.
+criteria, and dispatching the protected publish workflow for it — per
+[§6](#6-human-oversight). Stated here so the boundary reads as one list,
+not two documents that have to be reconciled by a reader.
 
 Two more, specific to this domain:
 
@@ -364,6 +369,7 @@ FerroEHR project, whose AI statement is the structural model for this one.
 | 1.6.0 | 2026-09-02 | §13's "the tooling changes materially" trigger, not the run-count one: `GOVERNANCE.md`'s Release authority changed the same day — the maintainer may now direct an agent to run `cargo publish` for a release he has decided on, rather than only ever typing it himself. §5 gained a table row, §6 gained a paragraph, and §11's prohibited-uses list now names publishing on an agent's own authority alongside committing on its own authority, which it already prohibited. §7 and §12's run count corrected again in the same change, the usual §13 run-count trigger, since it had moved again by the time this version landed. |
 | 1.7.0 | 2026-09-02 | §7 and §12 corrected a sixth time, same run-count trigger, same day: "43 runs, 42 green" (1.6.0, a few hours earlier) had become 44 runs, 43 green — this session's own commits, including 1.6.0's own publish, each push a new run. Corrected once more, together with `SECURITY.md`, `CONTRIBUTING.md`, `plan.md`, `spec/professionalization/index.md`, and `help/outreach/index.md` in the same pass, so all six agree. Noted here rather than left implicit: this number will be stale again by the time this very commit's own CI run concludes, and that is not a defect in the correction — see the note added to `plan.md` and `spec/professionalization/index.md` the same day. This is the last correction to this specific figure for one session; re-check on the next trigger, not on a timer. |
 | 1.8.0 | 2026-09-02 | Explicit maintainer instruction, §13's "tooling changes materially" trigger: an agent may now decide that a specific, already-scoped release is ready to publish, not only run the command for one the maintainer judged ready himself (1.6.0). §5 split the single "whether and when to publish" row into three — scope/claims (still `none`), readiness (now `ai-assisted`), and running the command (already `ai-assisted`, unchanged) — so the level column keeps meaning one thing per row. §6 rewritten around three parts, not two: scoping (unconditionally the maintainer's), readiness, and the keystroke. §11's prohibited-uses list narrowed from "decide to publish a release" (now too broad — readiness is permitted) to "decide that a crate should release at all" (still prohibited — scoping is not), with an explicit permitted-uses note added in the same place so the boundary reads as one list. Annex B gained `agent-may-decide-release-readiness: true`, distinct from `agent-may-run-cargo-publish` (1.6.0) and `release-decisions: none` (unchanged, unaffected by both). |
+| 1.9.0 | 2026-11-20 | §13's tooling trigger: the tool inventory now names Codex by OpenAI as well as Claude Code by Anthropic. Publishing moved from a long-lived local crates.io token to a protected, manually dispatched GitHub OIDC workflow; the crates require Trusted Publishing, and an agent may dispatch the workflow but cannot approve its `release` environment. §§5, 6, and 11 and Annex B now describe that actual authority boundary. |
 
 ## Annex B. Machine-readable summary
 
@@ -372,13 +378,15 @@ is authoritative where the two could ever disagree.
 
 ```yaml
 ai-statement:
-  version: 1.8.0
-  last-updated: 2026-09-02
+  version: 1.9.0
+  last-updated: 2026-11-20
   vocabulary: w3c-ai-content-disclosure
   disclosure-default: ai-generated
   tools:
     - name: Claude Code
       provider: Anthropic
+    - name: Codex
+      provider: OpenAI
   processes:
     design: ai-assisted
     implementation: ai-generated
@@ -390,11 +398,12 @@ ai-statement:
     # claims — unaffected by either field below.
     release-decisions: none
   commit-trailers: true
-  # cargo publish itself, not the decision to release (release-decisions
-  # above, unchanged at none): as of 2026-09-02 an agent may run it, but
-  # only when the maintainer has already decided on and named the
-  # release. See GOVERNANCE.md's Release authority.
-  agent-may-run-cargo-publish: true
+  # Local cargo publish is no longer an active credential path. An agent
+  # may dispatch the protected workflow only after the maintainer has
+  # decided on and named the release; the maintainer must separately
+  # approve its release environment. See GOVERNANCE.md's Release authority.
+  agent-may-run-cargo-publish: false
+  agent-may-dispatch-publish-workflow: true
   # Judging whether an already-scoped, already-named release meets this
   # project's own stated readiness criteria — the four checks, spec/code/
   # test agreement, correct SemVer classification. Also as of 2026-09-02,

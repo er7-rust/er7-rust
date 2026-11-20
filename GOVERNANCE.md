@@ -153,7 +153,7 @@ releases independently — there is no workspace version — and every crate
 follows [Semantic Versioning](https://semver.org/).
 
 **As of 2026-11-19, the maintainer may direct the protected manual release
-workflow to perform the `cargo publish` step.** The maintainer still scopes
+workflow to publish a crate.** The maintainer still scopes
 and names every release. Either the maintainer or an agent he directs may
 judge that named release ready against the repository's checklist, then
 dispatch `.github/workflows/publish.yml` with the exact crate, version,

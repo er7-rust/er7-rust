@@ -39,15 +39,15 @@
   <h2 class="section-heading">Where AI is used, and who is accountable</h2>
   <div class="prose">
     <p>
-      The tooling is agentic AI coding assistance &mdash; Claude Code, by Anthropic &mdash; in
-      sessions the maintainer directs and reviews. Crate code, tests, specifications, and
-      documentation are <strong>ai-generated</strong> in the W3C AI Content Disclosure
+      The tooling is agentic AI coding assistance &mdash; Claude Code, by Anthropic, and Codex, by
+      OpenAI &mdash; in sessions the maintainer directs and reviews. Crate code, tests,
+      specifications, and documentation are <strong>ai-generated</strong> in the W3C AI Content Disclosure
       vocabulary&rsquo;s sense: AI-generated with human prompting and review. What the crates do
       and do not do &mdash; scope, non-goals, what a release claims &mdash; is decided by the
       maintainer, with no AI involvement &mdash; deciding that a crate should release
       <em>at all</em> stays his alone, unconditionally. As of 2026-09-02, once he has scoped and
       named a release, an agent may judge whether it is ready against this project&rsquo;s own
-      stated criteria and run <code>cargo publish</code> for it; that is
+      stated criteria and dispatch the protected manual publish workflow for it; that is
       <strong>ai-assisted</strong>, not <strong>autonomous</strong> &mdash; the document&rsquo;s
       term for AI-generated without meaningful human oversight. Nothing is autonomous: no commit is
       automated, no agent publishes as a standing job or on its own initiative, and nothing lands on
@@ -82,8 +82,9 @@
       <li>
         deciding that a crate should release <em>at all</em>, or publishing as a standing job or on
         its own initiative outside a session the maintainer is directing &mdash; judging whether an
-        already-scoped, maintainer-named release is ready, and running <code>cargo publish</code>
-        for it, is the one exception, permitted as of 2026-09-02;
+        already-scoped, maintainer-named release is ready, and dispatching the protected publish
+        workflow for it, is the one exception; a maintainer must still approve its release
+        environment;
       </li>
       <li>weakening a test, an expectation, a spec rule, or a gate to make something pass;</li>
       <li>adding a dependency to any of the three crates;</li>

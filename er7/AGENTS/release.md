@@ -57,8 +57,8 @@ cargo fmt --check
 cargo rustdoc --lib -- -W missing-docs
 cargo package --list              # Check what will ship
 
-# 3. Dry run
-cargo publish --dry-run
+# 3. Build the normalized package
+cargo package --locked
 
 # 4. Commit and tag
 git add -A
@@ -66,16 +66,23 @@ git commit -m "Release x.y.z"
 git tag -a er7-vx.y.z -m "Release x.y.z"   # prefixed: this repo holds 3 crates
 git push && git push --tags
 
-# 5. Publish
-cargo publish
+# 5. Publish through the protected, manual OIDC workflow
+release_commit="$(git rev-parse HEAD)"
+gh workflow run publish.yml -f operation=publish -f crate=er7 \
+  -f version=x.y.z -f commit="$release_commit" \
+  -f confirmation='publish er7 x.y.z'
 ```
 
-**Who may run step 5.** Scoping and naming a release — what changes go
+Approve the `release` environment, then retain the successful workflow URL
+as release evidence. The workflow repeats all checks and Cargo's publish
+dry-run before it obtains a short-lived crates.io credential.
+
+**Who may dispatch step 5.** Scoping and naming a release — what changes go
 in it, what version number it gets — is the maintainer's decision alone,
 unconditionally. Once he has made that decision, he may direct an AI
 coding agent to judge whether the release is ready (steps 1-2 above,
-`cargo package --list`, correct SemVer classification) and to run
-`cargo publish` for it, without a further per-release checkpoint. See
+`cargo package --list`, correct SemVer classification) and to dispatch the
+protected publish workflow, without a further per-release checkpoint. See
 [`GOVERNANCE.md`](../../GOVERNANCE.md)'s "Release authority" section for
 the full policy, and [`AI_STATEMENT.md`](../../AI_STATEMENT.md) §5, §6,
 and §11 for what oversight this still requires and what remains outside
@@ -91,7 +98,8 @@ and `index.md`. `samples/` ships because the integration tests
 `include_str!` them; `target/` never does.
 
 The published crate must build with **no network and no dependencies**
-(R25). `cargo publish --dry-run` verifies that.
+(R25). `cargo package --locked` verifies that locally, and the protected
+workflow repeats Cargo's publish dry-run before authentication.
 
 ## After releasing
 

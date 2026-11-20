@@ -235,18 +235,15 @@ question:
   own. Commits and tags are signed and GitHub-verified as of 2026-08-27;
   see [`MAINTAINERS.md`](MAINTAINERS.md) for the key and the verification
   evidence.
-- **No Trusted Publishing.** Every crate still publishes with a long-lived
-  crates.io API token sitting on the maintainer's own machine, not a
-  short-lived OIDC credential issued per CI run. The intent to adopt it is
-  recorded, not silently deferred — see
+- **No long-lived crates.io publishing token.** All three crates require
+  Trusted Publishing. The protected, manually dispatched GitHub workflow
+  receives a short-lived OIDC credential only after its checks and release-
+  environment approval; all three public crate records report
+  `trustpub_only: true`, and the legacy local token was removed on
+  2026-11-20. See
   [`spec/trusted-publishing/index.md`](spec/trusted-publishing/index.md)
-  and [`MAINTAINERS.md`](MAINTAINERS.md). The 2026-11-19 support-matrix
-  review established that source mirrors do not block adoption, governance
-  now permits the protected manual workflow, and the repository-side
-  implementation exists. All three trusted publishers and hosted OIDC
-  exchanges are verified. The gap remains until the owner enables
-  Trusted-Publishing-only mode for all three crates and removes the local
-  token.
+  and [`MAINTAINERS.md`](MAINTAINERS.md) for the evidence and residual
+  single-owner risk.
 - **No bug bounty, and no security budget.**
 - **No second responder.** One email address, one person.
 - **No third-party audit.** Nobody has reviewed this code but its author

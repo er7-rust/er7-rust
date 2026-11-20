@@ -27,12 +27,14 @@
    `cyclonedx-sboms` artifact. Attach it if a GitHub Release is created;
    workspace spec §15 explains its target and assurance boundaries.
 
-## Who may run `cargo publish`
+## Who may dispatch publishing
 
 The maintainer alone scopes and names a release; once he has, he may
-direct an agent to judge readiness against the checklist above and run
-`cargo publish` — see [`GOVERNANCE.md`](../../GOVERNANCE.md)'s "Release
-authority" section.
+direct an agent to judge readiness against the checklist above and
+dispatch the protected manual OIDC workflow with `crate=serde-er7`,
+the exact version, full signed release-commit SHA, and confirmation phrase
+`publish serde-er7 <version>` — see
+[`GOVERNANCE.md`](../../GOVERNANCE.md)'s "Release authority" section.
 
 ## Versioning
 

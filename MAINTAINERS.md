@@ -40,37 +40,36 @@ down is an inventory nobody can hand over.
 | Identity | What it publishes | Held by | Recovery if the holder is unavailable |
 |---|---|---|---|
 | The GitHub organisation `er7-rust` and its owner account | The repository, its issues, its settings | The maintainer's GitHub account, as sole owner | None. GitHub's account-recovery process is the only route, and it is between GitHub and the account holder. |
-| A crates.io API token | `er7`, `er7-redact`, `serde-er7` | The maintainer, on his own machine | The crates.io owner list is the recovery surface, and it is the maintainer's account. |
+| The crates.io Trusted Publisher identity `er7-rust/er7-rust`, workflow `publish.yml`, environment `release` | `er7`, `er7-redact`, `serde-er7` | GitHub Actions receives a short-lived crates.io credential only after the protected environment is approved | The crates.io owner list and GitHub organisation are the recovery surfaces; both terminate at the maintainer's accounts. |
 | An SSH key | Pushes to GitHub, and to the GitLab and Codeberg mirrors, which `origin` fans out to on one `git push` | The maintainer, on his own hardware | None; the key is not escrowed. A successor would use their own. |
 | The same SSH key, via `make github-pages` (`make publish`) | <https://er7-rust.github.io> — pushed by `git subtree push` into the `er7-rust.github.io` repository (the `github-pages` remote), whose own workflow builds and deploys it | The maintainer | As above. Deliberately *not* a CI credential: a workflow doing this would need a token able to write another repository's workflow file, and GitHub refuses that. |
 | A separate, dedicated code-signing SSH key (`SHA256:Ah1MPQNTLGuOy0JwLcU7LbnhSa7cRVqMaDggXwllRXc`) | Signs every commit and tag made from 2026-08-27 onward | The maintainer, passphrase-protected — deliberately not the same key as push authentication above, so a compromise of one does not silently compromise the other | None; not escrowed. A successor generates their own and this table, `git config user.signingkey`, and the `allowed_signers` file all change together. |
 
 **The honest reading of that table:** every publishing identity terminates
 at one person's GitHub account or one person's hardware. There is no
-Trusted Publishing, no signing key escrow, and no second holder anywhere.
+signing key escrow and no second holder anywhere. Trusted Publishing
+removes the durable registry secret, but not the sole-owner dependency.
 That is the residual risk, and it is stated rather than mitigated, because
 no mitigation is available to a one-person project without a legal entity
 behind it.
 
-**Trusted Publishing would remove the crates.io API token row above** —
-OIDC-based, short-lived credentials issued per CI run instead of one
-long-lived token sitting on the maintainer's machine indefinitely. It is
-not adopted yet, and [`spec/trusted-publishing/index.md`](spec/trusted-publishing/index.md)
-records the remaining governance choice. As of 2026-11-19, crates.io
-supports GitHub Actions and GitLab.com CI/CD (the latter in public beta),
-but not Codeberg/Forgejo. That does not require waiting for Codeberg: the
-GitLab and Codeberg repositories are source mirrors, not separate package
-publishers. The project selected a single protected GitHub release workflow
-on 2026-11-19. All three trusted-publisher configurations and OIDC exchanges
-are verified; the long-lived crates.io token will be removed after the
-owner enables Trusted-Publishing-only mode for all three crates.
+**Trusted Publishing replaced the crates.io API token on 2026-11-20** —
+OIDC-based, short-lived credentials are issued per approved CI run instead
+of one long-lived token sitting on the maintainer's machine indefinitely.
+All three trusted-publisher configurations and OIDC exchanges are verified,
+all three public crate records report `trustpub_only: true`, and
+`cargo logout` removed the legacy local token. GitLab and Codeberg remain
+source mirrors, not separate package publishers; they need no registry
+credential. [`spec/trusted-publishing/index.md`](spec/trusted-publishing/index.md)
+records the support matrix, governance decision, and verification evidence.
 
 **The release-authority prerequisite is now resolved:**
 [`GOVERNANCE.md`](GOVERNANCE.md) permits the manually dispatched,
 environment-protected workflow for one already-scoped release, while still
 forbidding publishing on any automatic trigger. The repository workflow
 and GitHub environment exist, and all three hosted OIDC proofs pass. The
-registry's Trusted-Publishing-only toggles and local-token removal remain.
+registry's Trusted-Publishing-only toggles and local-token removal were
+completed and verified 2026-11-20.
 
 **Commits and tags are cryptographically signed as of 2026-08-27**, with
 the dedicated code-signing key in the publishing-identities table above —

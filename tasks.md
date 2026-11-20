@@ -46,7 +46,9 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
 - [x] **Repair local toolchain verification.** The Make target now finds
       the installed script and accepts a patch-specific toolchain. The
       workspace tests and fuzz-manifest compile checks passed locally on
-      Rust 1.98 and 1.99.1.
+      Rust 1.98 and 1.99.1. A 2026-11-20 follow-up made selection probe
+      matching rustup entries, so an interrupted `1.99` alias no longer
+      hides the healthy installed `1.99.1` toolchain.
 - [x] **Verify the stable CI changes on a hosted runner.** The stable job
       passed at `fe4a903`, including both benchmark crates and all three
       strict rustdoc commands. The MSRV job also passed using Rust 1.98.
@@ -135,7 +137,7 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       cannot be closed by adding an unowned alias or naming somebody without
       consent. Update `SECURITY.md`, `MAINTAINERS.md`, and the conduct
       escalation path together when that person exists.
-- [ ] **Activate and verify Trusted Publishing.** Re-evaluate
+- [x] **Activate and verify Trusted Publishing.** Re-evaluate
       the forge/destination support matrix, then decide explicitly whether
       releases may move from the local, maintainer-scoped workflow into a
       manually dispatched OIDC-authenticated CI job. Matrix re-evaluation
@@ -154,16 +156,14 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       and
       [`serde-er7`](https://github.com/er7-rust/er7-rust/actions/runs/44564934930)
       each passed the protected gate, checks, package build, OIDC exchange,
-      token assertion, and revocation without publishing. Complete the
-      external transition in the crates.io owner UI: enable
-      Trusted-Publishing-only mode for all three crates. The legacy token
-      correctly received HTTP 403 for this setting because it lacks the
-      `trusted-publishing` scope. The public crate records were rechecked
-      2026-11-20 and still report `trustpub_only: false` for all three.
-      After the toggles are verified, remove
-      the local token and update the credential inventory and release guides
-      to describe only the active path. §7.1 records why this is not merely
-      a credential substitution.
+      token assertion, and revocation without publishing. The crates.io
+      owner settings were completed 2026-11-20. Public API records then
+      independently reported `trustpub_only: true` for all three crates,
+      so API-token publishing is rejected. `cargo logout` removed the
+      legacy local token, and the credential inventory and release guides
+      now describe only the protected manual OIDC path. §7.1 records why
+      this was a governance change rather than merely a credential
+      substitution.
 
 ### In flight — land it first
 

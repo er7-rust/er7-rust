@@ -12,8 +12,8 @@ authority](../../../GOVERNANCE.md#release-authority) refers to.** As of
 changes, what version), an agent working in this repository may work
 through §§1–4 below, decide the release meets them, and carry out §5
 itself — the maintainer no longer has to tick every box personally before
-`cargo publish` runs. Scoping and naming the release in the first place
-stays the maintainer's alone; see
+the protected publish workflow runs. Scoping and naming the release in the
+first place stays the maintainer's alone; see
 [`AI_STATEMENT.md`](../../../AI_STATEMENT.md#6-human-oversight) for the full
 disclosure.
 
@@ -55,8 +55,9 @@ disclosure.
 
 - [ ] `cargo package --list` — shows `src/`, `Cargo.toml`, `README.md`,
       `LICENSE.md`, `index.md`, and nothing surprising.
-- [ ] `cargo publish --dry-run` — succeeds. This also confirms the crate
-      builds with no dependencies (R25).
+- [ ] `cargo package --locked` — succeeds. This also confirms the crate
+      builds with no dependencies (R25); the protected workflow repeats
+      Cargo's publish dry-run against the normalized package.
 - [ ] From the green CI run for this release commit, retain
       `er7-<version>-x86_64-unknown-linux-gnu.cdx.json` from the
       `cyclonedx-sboms` artifact. Attach that file if a GitHub Release is
@@ -72,7 +73,10 @@ disclosure.
       `vx.y.z` tag would collide with a release of `er7-redact` or
       `serde-er7`.
 - [ ] `git push && git push --tags`
-- [ ] `cargo publish`
+- [ ] Dispatch `.github/workflows/publish.yml` with `operation=publish`,
+      `crate=er7`, the exact version and full release-commit SHA, and the
+      confirmation phrase `publish er7 x.y.z`; approve the protected
+      `release` environment and retain the successful run URL.
 
 ## 6. Afterwards
 

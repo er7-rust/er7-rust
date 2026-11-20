@@ -45,10 +45,11 @@
       accept a pull request or change a repository setting. Publishing a release is similar but not
       identical: the maintainer alone still decides <em>whether</em> a crate releases at all
       &mdash; scoping and naming a release is his, unconditionally &mdash; but as of 2026-09-02 he
-      may direct an AI coding agent to judge whether an already-scoped release is ready and run
-      <code>cargo publish</code> for it. No second maintainer exists, no organisation stands behind
-      the project, and no legal entity is a party to it. Nothing elsewhere in the repository should
-      be read as softening that sentence.
+      may direct an AI coding agent to judge whether an already-scoped release is ready and dispatch
+      its protected manual publish workflow. The crates require short-lived OIDC credentials, but
+      the same sole maintainer owns and approves that path. No second maintainer exists, no
+      organisation stands behind the project, and no legal entity is a party to it. Nothing
+      elsewhere in the repository should be read as softening that sentence.
     </p>
   </div>
 </section>
