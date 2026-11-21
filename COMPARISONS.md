@@ -79,7 +79,7 @@ Where this workspace differs, stated as trade-offs rather than wins:
 | Dependency tree | Substantial, and audited as such | Zero, one, and two crates respectively |
 | Round trip | Varies by parser and options | Byte for byte, as a tested guarantee |
 | Track record | Two decades of production traffic | First published 2026-08-15. New. |
-| License | MPL 1.1 or GPL 2.0 for HAPI | MIT, Apache-2.0, BSD-3-Clause, GPL-2.0-only, or GPL-3.0-only, at your option |
+| License | MPL 1.1 or GPL 2.0 for HAPI | MIT, Apache-2.0, BSD-3-Clause, GPL-2.0-only, GPL-3.0-only, OGL-UK-3.0, or CC-BY-NC-SA-4.0, at your option |
 
 The license row decides some evaluations outright. A permissive option
 matters if you are linking into a closed-source product; a copyleft option
@@ -132,7 +132,7 @@ hedges:
 - **Specification-first development.** Every behaviour is a numbered rule
   in `spec/`, and each rule names the test that enforces it. That is a
   claim you can check by reading the tree rather than trusting a README.
-- **Five licenses.** The alternatives above are Apache-2.0 or MIT.
+- **Seven licenses.** The alternatives above are Apache-2.0 or MIT.
 
 ## The sibling projects
 

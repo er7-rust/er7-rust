@@ -40,7 +40,7 @@
         <tr><th>Layer</th><td>Encoding only — no dictionary, no validation, no transport</td></tr>
         <tr><th>Language</th><td>Rust, edition 2024, MSRV 1.98 — current stable minus two</td></tr>
         <tr><th>Runtime dependencies</th><td>none, and that is a guarantee</td></tr>
-        <tr><th>License</th><td>MIT, Apache-2.0, BSD-3-Clause, GPL-2.0-only, or GPL-3.0-only</td></tr>
+        <tr><th>License</th><td>MIT, Apache-2.0, BSD-3-Clause, GPL-2.0-only, GPL-3.0-only, OGL-UK-3.0, or CC-BY-NC-SA-4.0</td></tr>
         <tr><th>Source</th><td><a href="{links.repository}/tree/main/er7">github.com/er7-rust/er7-rust/tree/main/er7</a></td></tr>
         <tr><th>Crate</th><td><a href={links.crate}>crates.io/crates/er7</a></td></tr>
         <tr><th>API docs</th><td><a href={links.docs}>docs.rs/er7</a></td></tr>
@@ -146,8 +146,8 @@
   <div class="prose">
     <p>
       Multi-licensed. Use it under <strong>any one</strong> of MIT, Apache-2.0, BSD-3-Clause,
-      GPL-2.0-only, or GPL-3.0-only, at your option. Pick the one that fits your project and comply
-      with that one; you do not need to comply with all five, and you do not need to say which you
+      GPL-2.0-only, GPL-3.0-only, OGL-UK-3.0, or CC-BY-NC-SA-4.0, at your option. Pick the one that fits your project and comply
+      with that one; you do not need to comply with all seven, and you do not need to say which you
       chose.
     </p>
     <p>

@@ -40,7 +40,7 @@ keywords:
   - interoperability
   - de-identification
   - Rust
-# CFF's license field takes SPDX identifiers; the five below are this
+# CFF's license field takes SPDX identifiers; the seven below are this
 # workspace's OR-choice, stated in full in LICENSE.md and LICENSES/.
 license:
   - MIT
@@ -48,6 +48,8 @@ license:
   - BSD-3-Clause
   - GPL-2.0-only
   - GPL-3.0-only
+  - OGL-UK-3.0
+  - CC-BY-NC-SA-4.0
 # The workspace has no single version number — three crates version
 # independently on crates.io (see CHANGELOG.md). The version below names
 # all three as of the release date.

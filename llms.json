@@ -55,7 +55,7 @@
         { "title": "INSTALL.md", "url": "INSTALL.md", "description": "Installing all three crates and both binaries, building from source." },
         { "title": "CHANGELOG.md", "url": "CHANGELOG.md", "description": "What changed, dated and versioned, across all three crates." },
         { "title": "NEWS.md", "url": "NEWS.md", "description": "Announcements, project status, press contacts." },
-        { "title": "LICENSE.md", "url": "LICENSE.md", "description": "The five licenses this workspace is offered under." },
+        { "title": "LICENSE.md", "url": "LICENSE.md", "description": "The seven licenses this workspace is offered under." },
         { "title": "CITATION.cff", "url": "CITATION.cff", "description": "How to cite this project." }
       ]
     },

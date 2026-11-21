@@ -21,7 +21,7 @@ identifiers:
 repository-code: 'https://github.com/er7-rust/er7-rust/tree/main/er7-redact/'
 abstract: >-
   ER7 Redact: Remove patient detail from HL7 v2 messages in the ER7 pipe-hat encoding, without changing the shape of the message.
-# CFF's license field takes SPDX identifiers; the five below are this
+# CFF's license field takes SPDX identifiers; the seven below are this
 # crate's OR-choice, stated in full in LICENSE.md and the root LICENSES/.
 license:
   - MIT
@@ -29,5 +29,7 @@ license:
   - BSD-3-Clause
   - GPL-2.0-only
   - GPL-3.0-only
+  - OGL-UK-3.0
+  - CC-BY-NC-SA-4.0
 version: 0.4.0
 date-released: '2026-08-30'

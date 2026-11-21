@@ -259,7 +259,7 @@ lists. Email.
 ## Licensing your contribution
 
 Everything here is offered under MIT, Apache-2.0, BSD-3-Clause,
-GPL-2.0-only, or GPL-3.0-only, at the user's option
+GPL-2.0-only, GPL-3.0-only, OGL-UK-3.0, or CC-BY-NC-SA-4.0, at the user's option
 ([`LICENSE.md`](LICENSE.md)). A contribution is offered on the same terms,
 so that the choice stays available to everyone downstream. **There is no
 CLA** and no copyright assignment.

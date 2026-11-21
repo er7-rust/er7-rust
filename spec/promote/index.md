@@ -38,7 +38,7 @@ outreach below names which audience it is for.
 | **A. HL7 interface analysts and integration engineers** | Mirth/NextGen Connect discussions, InterSystems Developer Community, employer Slack, LinkedIn | Getting a feed live this week; not breaking a production interface | A CLI that shows them every value with the path that names it, and a redactor that lets them paste a real-looking message into a ticket |
 | **B. Platform and infrastructure engineers at health-tech vendors** | Hacker News, r/rust, lobste.rs, docs.rs | Supply chain, audit surface, memory safety, throughput | "Zero dependencies" and a benchmark number |
 | **C. Rust developers who have landed in healthcare** | This Week in Rust, r/rust, users.rust-lang.org, Rust conferences | Whether a crate is real and maintained | Spec-driven development, a visible test-to-rule mapping, an MSRV policy |
-| **D. Standards, research, and public-sector people** | HL7 work groups, chat.fhir.org, INTEROPen, NHS England digital, academic informatics | Correctness against the standard; citability; licence compatibility | `CITATION.cff` with an ORCID, the five-licence choice, and the spec directory |
+| **D. Standards, research, and public-sector people** | HL7 work groups, chat.fhir.org, INTEROPen, NHS England digital, academic informatics | Correctness against the standard; citability; licence compatibility | `CITATION.cff` with an ORCID, the seven-licence choice, and the spec directory |
 
 The single most under-served of the four is **A**. There are a lot of
 people whose job is HL7 v2 all day, and almost none of the open-source
@@ -59,7 +59,7 @@ travel:
 | **Zero runtime dependencies** | B, C | A `[dependencies]` table that is empty on purpose, with a test that enforces it, is unusual enough to be the headline for the Rust audience |
 | **Byte-for-byte round-trip** | A, B | "What went in comes back out" is the property an interface engineer actually needs and rarely gets |
 | **Spec-driven development, rules bound to tests** | C, D | The `spec/` tree, the rule IDs, and the coverage table are the credibility argument |
-| **Five-licence choice** (`MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only`) | D | Removes a procurement conversation before it starts |
+| **Seven-licence choice** (`MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only OR OGL-UK-3.0 OR CC-BY-NC-SA-4.0`) | D | Removes a procurement conversation before it starts |
 | **MSRV of stable minus two** | A, B | Speaks directly to organisations on quarterly toolchain approvals |
 
 Assets that support these live in the repository root and should be kept
@@ -269,7 +269,7 @@ or the crates.io page.
 > escape sequences intact, so a redacted message still exercises the same
 > parser path as the original. That makes it safe to attach to a ticket.
 >
-> <link>. It is open source under a choice of five licences. I would
+> <link>. It is open source under a choice of seven licences. I would
 > genuinely like to know where it gets HL7 wrong — the specification it is
 > built from is in the repository, and corrections from this group would
 > improve it.

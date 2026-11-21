@@ -10,9 +10,11 @@ use it under **any one** of the following licenses, at your option:
 | BSD 3-Clause License | `BSD-3-Clause` | <https://opensource.org/license/bsd-3-clause/> |
 | GNU General Public License v2.0 only | `GPL-2.0-only` | <https://www.gnu.org/licenses/old-licenses/gpl-2.0.html> |
 | GNU General Public License v3.0 only | `GPL-3.0-only` | <https://www.gnu.org/licenses/gpl-3.0.html> |
+| UK Open Government Licence v3.0 | `OGL-UK-3.0` | <https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/> |
+| Creative Commons Attribution Non Commercial Share Alike 4.0 International | `CC-BY-NC-SA-4.0` | <https://creativecommons.org/licenses/by-nc-sa/4.0/> |
 
 Pick the one that fits your project and comply with that one. You do not
-need to comply with all five, and you do not need to tell anyone which you
+need to comply with all seven, and you do not need to tell anyone which you
 chose.
 
 Copyright © Joel Parker Henderson <joel@joelparkerhenderson.com>

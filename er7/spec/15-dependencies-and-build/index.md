@@ -61,7 +61,7 @@ and R25 exists to stop exactly that. Task T6 closed on this basis.
 | version | `0.2.1` |
 | edition | `2024` |
 | rust-version | `1.98` (the N-2 MSRV — see [§14.4](../14-compatibility-and-versioning/index.md)) |
-| license | `MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only` |
+| license | `MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only OR OGL-UK-3.0 OR CC-BY-NC-SA-4.0` |
 | repository | <https://github.com/er7-rust/er7-rust> |
 | crate | <https://crates.io/crates/er7> |
 | docs | <https://docs.rs/er7> |
@@ -70,7 +70,7 @@ and R25 exists to stop exactly that. Task T6 closed on this basis.
 | categories | `parser-implementations`, `encoding`, `command-line-utilities` |
 
 The multi-license expression matches the rest of this author's crates, and
-lets a downstream project pick whichever of the five fits its own licensing.
+lets a downstream project pick whichever of the seven fits its own licensing.
 See [`LICENSE.md`](../../LICENSE.md).
 
 ## 15.5 Targets

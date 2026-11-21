@@ -77,7 +77,7 @@ The questions an evaluation asks, answered in one place each:
 | [`BENCHMARKS.md`](BENCHMARKS.md) | How fast is it, measured how, on what? |
 | [`MAINTAINERS.md`](MAINTAINERS.md) | Who is behind this, and what happens if they are unavailable? |
 | [`AI_STATEMENT.md`](AI_STATEMENT.md) | How is this software built, and what oversight is on it? |
-| [`LICENSE.md`](LICENSE.md) | Under which of the five licenses may I use it? |
+| [`LICENSE.md`](LICENSE.md) | Under which of the seven licenses may I use it? |
 | [`CITATION.cff`](CITATION.cff) | How do I cite it? |
 | [`TRADEMARKS.md`](TRADEMARKS.md) | Whose trademarks are these, and what does this project claim about them? |
 | [`spec/`](spec/index.md) | What policy do the three crates share, and why? |
@@ -96,9 +96,9 @@ for the full disclosure.
 ## License
 
 This workspace is multi-licensed: **MIT OR Apache-2.0 OR BSD-3-Clause OR
-GPL-2.0-only OR GPL-3.0-only**, at your option. See
+GPL-2.0-only OR GPL-3.0-only OR OGL-UK-3.0 OR CC-BY-NC-SA-4.0**, at your option. See
 [`LICENSE.md`](LICENSE.md). Each published crate also carries its own
-`LICENSE.md` with the same five licenses, because a crate published to
+`LICENSE.md` with the same seven licenses, because a crate published to
 crates.io must carry its license with it.
 
 Copyright © Joel Parker Henderson <joel@joelparkerhenderson.com>

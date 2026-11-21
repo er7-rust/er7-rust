@@ -60,7 +60,7 @@ endorsement by HL7.
 - [INSTALL.md](INSTALL.md): Installing all three crates and both binaries, building from source.
 - [CHANGELOG.md](CHANGELOG.md): What changed, dated and versioned, across all three crates.
 - [NEWS.md](NEWS.md): Announcements, project status, press contacts.
-- [LICENSE.md](LICENSE.md): The five licenses this workspace is offered under.
+- [LICENSE.md](LICENSE.md): The seven licenses this workspace is offered under.
 - [CITATION.cff](CITATION.cff): How to cite this project.
 
 ## Site

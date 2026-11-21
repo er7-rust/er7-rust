@@ -172,7 +172,7 @@ One-time setup in the sibling repository's settings: **Settings → Pages
 ## License
 
 The site content is free open source under the same terms as the crate:
-MIT, Apache-2.0, BSD-3-Clause, GPL-2.0-only, or GPL-3.0-only, at your
+MIT, Apache-2.0, BSD-3-Clause, GPL-2.0-only, GPL-3.0-only, OGL-UK-3.0, or CC-BY-NC-SA-4.0, at your
 option. See [LICENSE.md](LICENSE.md).
 
 Lily Design System™ is a trademark of its authors, and is itself free open

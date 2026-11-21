@@ -84,7 +84,7 @@
   <div class="site-footer-inner">
     <p>
       <code>er7</code> — parse, query, edit, and write HL7® v2 messages in the ER7 pipe-hat
-      encoding. Free open source: MIT, Apache-2.0, BSD-3-Clause, GPL-2.0, or GPL-3.0.
+      encoding. Free open source: MIT, Apache-2.0, BSD-3-Clause, GPL-2.0, GPL-3.0, OGL-UK-3.0, or CC-BY-NC-SA-4.0.
     </p>
     <p class="site-footer-trademark">
       Built with SvelteKit and the

@@ -175,7 +175,7 @@ and
 ## License
 
 Multi-licensed, so a downstream project can pick whichever fits: MIT,
-Apache-2.0, BSD-3-Clause, GPL-2.0-only, or GPL-3.0-only. See
+Apache-2.0, BSD-3-Clause, GPL-2.0-only, GPL-3.0-only, OGL-UK-3.0, or CC-BY-NC-SA-4.0. See
 [LICENSE.md](LICENSE.md).
 
 ---

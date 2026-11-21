@@ -180,9 +180,9 @@ and it is the kind of thing that is set once by guesswork and never
 revisited unless somebody says something. Spec:
 [§2](spec/rust-msrv-n-minus-2/index.md).
 
-### Q9. Are five licences useful, or just confusing?
+### Q9. Are seven licences useful, or just confusing?
 
-MIT, Apache-2.0, BSD-3-Clause, GPL-2.0-only, and GPL-3.0-only, at your
+MIT, Apache-2.0, BSD-3-Clause, GPL-2.0-only, GPL-3.0-only, OGL-UK-3.0, and CC-BY-NC-SA-4.0, at your
 option. The theory is that a proprietary vendor and a public-sector project
 can both adopt it without asking.
 

@@ -18,7 +18,7 @@ readers rather than for a repository, is at <https://er7-rust.github.io/news/>.
 | Scope | The ER7 pipe-hat *encoding*: parse, query, edit, write, redact, and Serde. Not validation, not a typed segment model, not a transport, not the HL7® FHIR® standard |
 | Runtime dependencies | `er7` zero, `er7-redact` one, `serde-er7` two |
 | Rust | Current stable minus two releases; today 1.98 |
-| License | MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only |
+| License | MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only OR OGL-UK-3.0 OR CC-BY-NC-SA-4.0 |
 
 ## 2026-11-20 — Releases no longer depend on a long-lived registry token
 
@@ -305,7 +305,7 @@ design decision in the project, all of which is written down in the specs.
 > patient detail without changing the shape of the message; and `serde-er7`
 > carries a message tree through JSON, YAML, or any other Serde data
 > format. It is multi-licensed under MIT, Apache-2.0, BSD-3-Clause,
-> GPL-2.0-only, or GPL-3.0-only, at the user's option, and is maintained by
+> GPL-2.0-only, GPL-3.0-only, OGL-UK-3.0, or CC-BY-NC-SA-4.0, at the user's option, and is maintained by
 > Joel Parker Henderson. <https://er7-rust.github.io>
 
 ### Facts a story might need, all checkable
@@ -322,7 +322,7 @@ design decision in the project, all of which is written down in the specs.
   reproduce the bug the original caused.
 - **`er7-redact --report` prints paths and actions with no values**, so the
   report itself is safe to paste into a ticket.
-- **Five licenses at the user's option**, chosen so that a proprietary
+- **Seven licenses at the user's option**, chosen so that a proprietary
   vendor and a public-sector project can both adopt it without asking.
 - **A minimum supported Rust version of current stable minus two**,
   chosen because hospital toolchains are approved on a cycle measured in

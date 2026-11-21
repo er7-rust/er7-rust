@@ -104,7 +104,7 @@
     </p>
     <p>
       <strong>Forking is legitimate continuity, not a hostile act</strong>, and the project is
-      arranged to make it cheap: five licences at your option, near-zero dependencies, a
+      arranged to make it cheap: seven licences at your option, near-zero dependencies, a
       specification with numbered rules bound to tests, no CLA and no copyright assignment. If the
       maintainer becomes unavailable, a fork is the intended answer.
     </p>

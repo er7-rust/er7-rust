@@ -50,7 +50,7 @@
     },
     {
       id: 'Q9',
-      title: 'Are five licences useful, or just confusing?',
+      title: 'Are seven licences useful, or just confusing?',
       detail: 'Did the choice help, or did your legal review treat an unusual expression as a red flag?'
     },
     {

@@ -16,7 +16,7 @@ drives changes.
 | Purpose      | Parse, query, edit, and write HL7® v2 messages in the ER7 pipe-hat encoding.  |
 | Layer        | Encoding only — no dictionary, no validation, no transport.                  |
 | Language     | Rust (edition 2024, MSRV 1.98)                                               |
-| License      | MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only            |
+| License      | MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only OR OGL-UK-3.0 OR CC-BY-NC-SA-4.0            |
 | Runtime deps | **none**, and that is a guarantee (R25)                                      |
 | Workspace    | one of three members in this repository — see [`../AGENTS.md`](../AGENTS.md) |
 | Repository   | https://github.com/er7-rust/er7-rust (shared with `er7-redact`, `serde-er7`) |
