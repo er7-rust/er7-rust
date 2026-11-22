@@ -257,7 +257,14 @@ impl Action {
             Action::Mask(mask) => Some(value.chars().map(|_| *mask).collect()),
             Action::First(n) => Some(value.chars().take(*n).collect()),
             Action::Last(n) => {
-                let skip = value.chars().count().saturating_sub(*n);
+                // Fallback: 0 — asking for more trailing characters than there are
+                // keeps the whole value, so nothing is skipped (see the doc example above).
+                const SKIP_NOTHING: usize = 0;
+                let skip = value
+                    .chars()
+                    .count()
+                    .checked_sub(*n)
+                    .unwrap_or(SKIP_NOTHING);
                 Some(value.chars().skip(skip).collect())
             }
             Action::Pseudonym => Some(pseudonym(key, value)),
@@ -359,6 +366,19 @@ impl Eq for CustomAction {}
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn last_fallback_keeps_the_whole_value() {
+        // Last input where the count minus n is exact: n == len.
+        assert_eq!(Action::Last(2).apply("MR", 0).as_deref(), Some("MR"));
+        // First failing input: n == len + 1 falls back to skipping 0.
+        assert_eq!(Action::Last(3).apply("MR", 0).as_deref(), Some("MR"));
+        assert_eq!(
+            Action::Last(usize::MAX).apply("MR", 0).as_deref(),
+            Some("MR")
+        );
+        assert_eq!(Action::Last(1).apply("MR", 0).as_deref(), Some("R"));
+    }
 
     #[test]
     fn parses_every_action() {

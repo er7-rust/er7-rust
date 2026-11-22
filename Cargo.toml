@@ -22,3 +22,7 @@ split-debuginfo = "unpacked"
 
 [profile.dev.package."*"]
 debug = false
+
+# RCA-ENF-4: overflow checks are a backstop in release builds.
+[profile.release]
+overflow-checks = true

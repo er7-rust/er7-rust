@@ -65,14 +65,36 @@ pub fn pseudonym(key: u64, value: &str) -> String {
     let mut hash = OFFSET;
     for byte in key.to_be_bytes().iter().chain(value.as_bytes()) {
         hash ^= u64::from(*byte);
-        hash = hash.wrapping_mul(PRIME);
+        hash = mul_mod_2_64(hash, PRIME);
     }
     format!("{hash:016x}")
+}
+
+/// Multiplies modulo 2^64, as the FNV-1a construction defines (spec §13.2), without
+/// wrapping arithmetic (RCA-INT-4).
+///
+/// The product of two `u64` values always fits `u128` (RCA-WIDE-1), so it is computed
+/// exactly, and the result is its low eight bytes. Destructuring the byte array has no
+/// failure path, so there is nothing to recover from.
+fn mul_mod_2_64(a: u64, b: u64) -> u64 {
+    let product = u128::from(a) * u128::from(b); // cannot overflow: (2^64 - 1)^2 < 2^128
+    let [b0, b1, b2, b3, b4, b5, b6, b7, ..] = product.to_le_bytes();
+    u64::from_le_bytes([b0, b1, b2, b3, b4, b5, b6, b7])
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn multiplication_keeps_only_the_low_sixty_four_bits() {
+        // First input whose exact product no longer fits a u64: 2^63 * 2 = 2^64 -> 0.
+        assert_eq!(mul_mod_2_64(1 << 63, 2), 0);
+        // Last input that still fits.
+        assert_eq!(mul_mod_2_64(u64::MAX, 1), u64::MAX);
+        // (2^64 - 1)^2 = 2^128 - 2^65 + 1, whose low 64 bits are 1.
+        assert_eq!(mul_mod_2_64(u64::MAX, u64::MAX), 1);
+    }
 
     #[test]
     fn pseudonyms_are_stable_and_keyed() {
