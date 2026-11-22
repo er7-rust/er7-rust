@@ -141,11 +141,12 @@ use std::fmt;
 
 /// What can go wrong.
 ///
-/// Two variants, arising from exactly two situations: a policy that cannot
-/// be read, and a path that is not a path (D15, spec §9). Redaction itself
-/// cannot fail — a rule that matches nothing does nothing, and a position
-/// that is not there is not created — so [`Redactor::redact`] returns a
-/// [`Report`] rather than a `Result`.
+/// Three variants, arising from three situations: a policy that cannot be
+/// read, a path that is not a path (D15, spec §9), and an unrecognised-payload
+/// action that writes nothing (spec §9.1). Redacting a parsed message cannot
+/// fail — a rule that matches nothing does nothing, and a position that is
+/// not there is not created — so [`Redactor::redact`] returns a [`Report`]
+/// rather than a `Result`.
 ///
 /// Example:
 ///
@@ -169,6 +170,17 @@ pub enum Error {
     /// A path handed to the API is not a path. Carries `er7`'s own error,
     /// so that the message reads the same whichever crate reported it.
     Er7(er7::Error),
+    /// The policy's `unrecognised` disposition is `Apply(action)` and the
+    /// action writes nothing (`keep`, `null`, or a custom action returning
+    /// `None`), so there is nothing to put in the payload's place.
+    /// [`Redactor::unrecognised`] fails closed rather than return the
+    /// payload unredacted (RCA-IN-2, RCA-IN-6). `Policy::on_unrecognised`
+    /// and policy files normalise `keep` and `null` to `pass`, so only the
+    /// public field or a custom action reaches this.
+    NoReplacement {
+        /// The action as it displays (`keep`, `null`, `<custom>`).
+        action: String,
+    },
 }
 
 impl fmt::Display for Error {
@@ -179,6 +191,11 @@ impl fmt::Display for Error {
         match self {
             Error::BadPolicy(detail) => write!(f, "{detail}"),
             Error::Er7(e) => write!(f, "{e}"),
+            Error::NoReplacement { action } => write!(
+                f,
+                "the unrecognised-payload action {action:?} writes nothing, \
+                 so the payload cannot be redacted"
+            ),
         }
     }
 }
@@ -186,7 +203,7 @@ impl fmt::Display for Error {
 impl std::error::Error for Error {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {
-            Error::BadPolicy(_) => None,
+            Error::BadPolicy(_) | Error::NoReplacement { .. } => None,
             Error::Er7(e) => Some(e),
         }
     }
@@ -212,5 +229,14 @@ mod tests {
         let wrapped = Error::from(er7::Error::Empty);
         assert_eq!(wrapped.to_string(), "input contains no HL7 segments");
         assert!(wrapped.source().is_some());
+
+        let none = Error::NoReplacement {
+            action: "keep".into(),
+        };
+        assert_eq!(
+            none.to_string(),
+            "the unrecognised-payload action \"keep\" writes nothing, so the payload cannot be redacted"
+        );
+        assert!(none.source().is_none());
     }
 }

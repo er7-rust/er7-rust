@@ -25,6 +25,13 @@ and never lands in a patch
   takes the standard delimiters for the absent ones (RCA-IN-3).
 - `er7-redact`: `Action::Last` no longer uses a subtraction fallback;
   behaviour is unchanged.
+- `er7-redact` (breaking): `Redactor::unrecognised` now returns
+  `Result<Option<String>, Error>`. A policy whose `unrecognised` is
+  `Apply(action)` with an action that writes nothing (`keep`, `null`, a
+  custom action returning `None`; reachable only via the public field) used
+  to return the payload unredacted; it now fails closed with the new
+  `Error::NoReplacement { action }` (RCA-IN-2, RCA-IN-6). The CLI reports it
+  and exits 1. `Error` gains a variant, so exhaustive matches must add it.
 
 ## 2026-11-17 — `er7` 0.3.0, `serde-er7` 0.4.0, `er7-redact` 0.5.0
 

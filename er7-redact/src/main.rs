@@ -240,8 +240,10 @@ fn redact_payloads(redactor: &Redactor, sources: &[&str]) -> Result<Vec<Payload>
             // D21: what a payload that is not ER7 gets is the policy's to
             // say, and only refusing it fails the run (spec §2.8).
             Err(e) => match redactor.unrecognised(source) {
-                Some(text) => payloads.push(Payload::Unrecognised(text)),
-                None => return fail(format!("message {}: {e}", index + 1)),
+                Ok(Some(text)) => payloads.push(Payload::Unrecognised(text)),
+                Ok(None) => return fail(format!("message {}: {e}", index + 1)),
+                // Fail closed: nothing of the payload is written.
+                Err(policy) => return fail(format!("message {}: {policy}", index + 1)),
             },
         }
     }

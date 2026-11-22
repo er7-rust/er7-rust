@@ -54,13 +54,13 @@ fn main() -> Result<(), er7_redact::Error> {
     // becomes of it. The curated policy above refuses one, which is what
     // makes the CLI exit non-zero rather than write it out.
     let redactor = Redactor::new(Policy::all_but_the_header());
-    assert_eq!(redactor.unrecognised("{\"name\": \"EVERYWOMAN\"}"), None);
+    assert_eq!(redactor.unrecognised("{\"name\": \"EVERYWOMAN\"}")?, None);
 
     // `Policy::reject_all` masks it whole instead — nothing routable
     // survives, and neither does anything else.
     let redactor = Redactor::new(Policy::reject_all());
     assert_eq!(
-        redactor.unrecognised("EVERYWOMAN").as_deref(),
+        redactor.unrecognised("EVERYWOMAN")?.as_deref(),
         Some("**********")
     );
     Ok(())

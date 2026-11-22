@@ -28,7 +28,7 @@ The only thing that edits a message.
 | `with_key` | `fn with_key(self, key: u64) -> Redactor` | builder |
 | `redact` | `fn redact(&self, message: &mut er7::Message) -> Report` | edits in place; cannot fail |
 | `uncovered` | `fn uncovered(&self, message: &er7::Message) -> Vec<er7::Path>` | inspect the original leaf positions using rule paths alone, without invoking action callbacks |
-| `unrecognised` | `fn unrecognised(&self, payload: &str) -> Option<String>` | what to write for a payload that is not ER7; `None` means the policy refuses it |
+| `unrecognised` | `fn unrecognised(&self, payload: &str) -> Result<Option<String>, Error>` | what to write for a payload that is not ER7; `Ok(None)` means the policy refuses it; `Err(NoReplacement)` if its action writes nothing |
 | `policy` | `fn policy(&self) -> &Policy` | |
 | `key` | `fn key(&self) -> u64` | |
 | `Default` | `Redactor::default()` | `patient_identifiers()`, key `0` |
@@ -153,14 +153,15 @@ in every release of this crate. Not a cryptographic guarantee — read
 pub enum Error {
     BadPolicy(String),
     Er7(er7::Error),
+    NoReplacement { action: String },
 }
 ```
 
-Two variants, two situations
+Three variants, three situations
 ([spec §9](../../spec/09-error-handling/index.md)). `From<er7::Error>`
 converts; `Display` is one sentence with no prefix; `source()` returns the
-`er7` error for the `Er7` variant. Redaction itself returns a `Report`, not
-a `Result`.
+`er7` error for the `Er7` variant. `Redactor::redact` returns a `Report`, not
+a `Result`; `Redactor::unrecognised` fails closed with `NoReplacement`.
 
 ## Types from `er7`
 

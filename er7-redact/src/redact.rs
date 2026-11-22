@@ -14,7 +14,7 @@ use std::fmt;
 use er7::message::NULL;
 use er7::{Component, Field, Message, Path, Repetition, Segment, Separators, Subcomponent};
 
-use crate::{Action, Policy, Posture, Unrecognised};
+use crate::{Action, Error, Policy, Posture, Unrecognised};
 
 /// One leaf's coordinates: the segment's index in the message, then the
 /// 1-based field, repetition, component, and subcomponent numbers.
@@ -168,11 +168,19 @@ impl Redactor {
     /// What to write in place of `payload`, which did not parse as ER7
     /// (D21, spec §2.8).
     ///
-    /// `None` means the policy **refuses** it: nothing should be written,
-    /// and the caller reports that the payload did not parse. That is not
-    /// an error this crate raises — [`Redactor::redact`] cannot fail — so
-    /// the caller decides what a refusal costs. The CLI makes it a
-    /// diagnostic and exit 1 (spec §10.4).
+    /// `Ok(None)` means the policy **refuses** it: nothing should be
+    /// written, and the caller reports that the payload did not parse. That
+    /// is not an error this crate raises, so the caller decides what a
+    /// refusal costs. The CLI makes it a diagnostic and exit 1 (spec
+    /// §10.4).
+    ///
+    /// # Errors
+    ///
+    /// [`Error::NoReplacement`] if the policy applies an action that
+    /// writes nothing (`Keep`, `Null`, or a custom action returning
+    /// `None`). Such a policy can only be built through the public
+    /// `unrecognised` field. The payload is never returned in that case:
+    /// writing it would be a silent fail-open (RCA-IN-2, RCA-IN-6).
     ///
     /// `Some(text)` is the payload itself where the policy passes it
     /// through, or the policy's action applied to the whole payload as if
@@ -186,38 +194,40 @@ impl Redactor {
     /// let junk = "not a message";
     ///
     /// // The curated policies refuse a payload they cannot read.
-    /// assert_eq!(Redactor::default().unrecognised(junk), None);
+    /// assert_eq!(Redactor::default().unrecognised(junk).unwrap(), None);
     ///
     /// // The bare postures each do what their name says.
     /// assert_eq!(
-    ///     Redactor::new(Policy::accept_all()).unrecognised(junk).as_deref(),
+    ///     Redactor::new(Policy::accept_all()).unrecognised(junk).unwrap().as_deref(),
     ///     Some("not a message"),
     /// );
     /// assert_eq!(
-    ///     Redactor::new(Policy::reject_all()).unrecognised(junk).as_deref(),
+    ///     Redactor::new(Policy::reject_all()).unrecognised(junk).unwrap().as_deref(),
     ///     Some("*************"),
     /// );
     ///
     /// // And any of it is overridable.
     /// let policy = Policy::accept_all().on_unrecognised(Unrecognised::Apply(Action::redacted()));
     /// assert_eq!(
-    ///     Redactor::new(policy).unrecognised(junk).as_deref(),
+    ///     Redactor::new(policy).unrecognised(junk).unwrap().as_deref(),
     ///     Some("REDACTED"),
     /// );
     /// ```
-    #[must_use]
-    pub fn unrecognised(&self, payload: &str) -> Option<String> {
+    pub fn unrecognised(&self, payload: &str) -> Result<Option<String>, Error> {
         match &self.policy.unrecognised {
-            Unrecognised::Refuse => None,
-            Unrecognised::Pass => Some(payload.to_string()),
-            // An action that writes nothing leaves the payload as it is:
-            // `Policy::on_unrecognised` normalises those away, so this
-            // arm is only reachable through the public field.
-            Unrecognised::Apply(action) => Some(
-                action
-                    .apply(payload, self.key)
-                    .unwrap_or_else(|| payload.to_string()),
-            ),
+            Unrecognised::Refuse => Ok(None),
+            Unrecognised::Pass => Ok(Some(payload.to_string())),
+            // An action that writes nothing cannot stand in for the
+            // payload, and keeping the payload would leak it: fail
+            // closed (RCA-IN-2, RCA-IN-6). `Policy::on_unrecognised`
+            // normalises `Keep` and `Null` to `Pass`, so this is
+            // reachable only through the public field or a custom action.
+            Unrecognised::Apply(action) => match action.apply(payload, self.key) {
+                Some(text) => Ok(Some(text)),
+                None => Err(Error::NoReplacement {
+                    action: action.to_string(),
+                }),
+            },
         }
     }
 
@@ -1007,11 +1017,15 @@ mod tests {
         // The curated policies refuse: nothing is written, and the caller
         // decides what that costs.
         assert_eq!(
-            Redactor::new(Policy::patient_identifiers()).unrecognised(junk),
+            Redactor::new(Policy::patient_identifiers())
+                .unrecognised(junk)
+                .unwrap(),
             None
         );
         assert_eq!(
-            Redactor::new(Policy::all_but_the_header()).unrecognised(junk),
+            Redactor::new(Policy::all_but_the_header())
+                .unrecognised(junk)
+                .unwrap(),
             None
         );
 
@@ -1019,11 +1033,13 @@ mod tests {
         assert_eq!(
             Redactor::new(Policy::accept_all())
                 .unrecognised(junk)
+                .unwrap()
                 .as_deref(),
             Some(junk)
         );
         let masked = Redactor::new(Policy::reject_all())
             .unrecognised(junk)
+            .unwrap()
             .expect("reject_all writes something");
         assert_eq!(masked, "*".repeat(junk.chars().count()));
         assert!(!masked.contains("EVERYWOMAN"));
@@ -1031,14 +1047,14 @@ mod tests {
         // And every one of them is overridable, in either direction.
         let policy = Policy::patient_identifiers().on_unrecognised(Unrecognised::Pass);
         assert_eq!(
-            Redactor::new(policy).unrecognised(junk).as_deref(),
+            Redactor::new(policy).unrecognised(junk).unwrap().as_deref(),
             Some(junk)
         );
         let policy = Policy::accept_all().on_unrecognised(Unrecognised::Refuse);
-        assert_eq!(Redactor::new(policy).unrecognised(junk), None);
+        assert_eq!(Redactor::new(policy).unrecognised(junk).unwrap(), None);
         let policy = Policy::accept_all().on_unrecognised(Unrecognised::Apply(Action::Clear));
         assert_eq!(
-            Redactor::new(policy).unrecognised(junk).as_deref(),
+            Redactor::new(policy).unrecognised(junk).unwrap().as_deref(),
             Some("")
         );
     }
@@ -1306,14 +1322,44 @@ mod tests {
     }
 
     #[test]
-    fn unrecognised_keep_falls_back_to_the_original_payload() {
-        // Public fields allow callers to construct this state directly even
-        // though the builder normalizes no-op actions to `Pass`.
-        let mut policy = Policy::accept_all();
-        policy.unrecognised = Unrecognised::Apply(Action::Keep);
+    fn unrecognised_action_that_writes_nothing_is_an_error_not_the_payload() {
+        // RCA-TEST-8. Public fields allow callers to construct this state
+        // directly even though the builder normalises no-op actions to
+        // `Pass`. It must fail closed: the payload is never returned.
+        let payload = "SECRET-PAYLOAD";
+        let cases = [
+            (Action::Keep, "keep"),
+            (Action::Null, "null"),
+            (Action::custom(|_, _| None), "<custom>"),
+        ];
+        for (action, name) in cases {
+            let mut policy = Policy::accept_all();
+            policy.unrecognised = Unrecognised::Apply(action);
+            let result = Redactor::new(policy).unrecognised(payload);
+            assert_eq!(
+                result,
+                Err(Error::NoReplacement {
+                    action: name.to_string()
+                })
+            );
+            let message = result.unwrap_err().to_string();
+            assert_eq!(
+                message,
+                format!(
+                    "the unrecognised-payload action \"{name}\" writes nothing, \
+                     so the payload cannot be redacted"
+                )
+            );
+            assert!(!message.contains(payload));
+        }
+    }
+
+    #[test]
+    fn builder_still_normalises_no_op_actions_to_pass() {
+        let policy = Policy::accept_all().on_unrecognised(Unrecognised::Apply(Action::Keep));
         assert_eq!(
-            Redactor::new(policy).unrecognised("payload").as_deref(),
-            Some("payload")
+            Redactor::new(policy).unrecognised("payload"),
+            Ok(Some("payload".to_string()))
         );
     }
 

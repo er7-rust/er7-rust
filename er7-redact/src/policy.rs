@@ -227,14 +227,14 @@ impl fmt::Display for Posture {
 /// let junk = "{\"patient\": \"EVERYWOMAN\"}";
 ///
 /// // The curated policies refuse: nothing is written, and the caller says so.
-/// assert_eq!(Redactor::default().unrecognised(junk), None);
+/// assert_eq!(Redactor::default().unrecognised(junk).unwrap(), None);
 ///
 /// // `accept_all` passes it through, because it redacts nothing at all.
-/// let passed = Redactor::new(Policy::accept_all()).unrecognised(junk);
+/// let passed = Redactor::new(Policy::accept_all()).unrecognised(junk).unwrap();
 /// assert_eq!(passed.as_deref(), Some(junk));
 ///
 /// // `reject_all` masks it whole, because it rejects everything else.
-/// let masked = Redactor::new(Policy::reject_all()).unrecognised(junk);
+/// let masked = Redactor::new(Policy::reject_all()).unrecognised(junk).unwrap();
 /// assert_eq!(masked.as_deref(), Some("*************************"));
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq)]

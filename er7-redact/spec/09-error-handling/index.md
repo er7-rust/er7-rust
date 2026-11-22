@@ -5,7 +5,7 @@ numbers (§9.x) are stable and cited from code, tests, and commit messages.
 
 Implemented in `src/lib.rs`.
 
-## 9.1 Two variants, two situations [D15]
+## 9.1 Three variants, three situations [D15]
 
 ```rust
 pub enum Error {
@@ -14,6 +14,9 @@ pub enum Error {
     BadPolicy(String),
     /// A path is not a path. Carries the `er7` error.
     Er7(er7::Error),
+    /// The `unrecognised` disposition applies an action that writes
+    /// nothing (`keep`, `null`, or a custom action returning `None`).
+    NoReplacement { action: String },
 }
 ```
 
@@ -22,6 +25,14 @@ pub enum Error {
 | a policy file with an unknown action, a missing action, or a malformed count | `BadPolicy` |
 | a **policy line** naming something that is not an HL7® path | `BadPolicy`, wrapping `er7`'s wording and naming the line number |
 | a `Policy::with`, `Rule::new` **call** naming something that is not an HL7 path | `Er7(er7::Error::BadPath(_))` |
+| `Redactor::unrecognised` with `Unrecognised::Apply(action)` where `action` writes nothing | `NoReplacement { action }` |
+
+`NoReplacement` fails closed (spec/rust-checked-arithmetic RCA-IN-2,
+RCA-IN-6). `Policy::on_unrecognised` and policy files normalise `keep` and
+`null` to `pass`, so it is reachable only by assigning the public
+`Policy::unrecognised` field or through a custom action. Returning the
+payload instead would write unredacted input under a policy that asked for
+redaction. The CLI reports it as `message N: ...` and exits 1.
 
 The split follows what the caller can act on. A bad path in a file needs
 the line number to be findable at all; a bad path in a function call is
@@ -30,7 +41,7 @@ match on `er7`'s own variant.
 
 `From<er7::Error>` converts, so `?` works in a function returning either.
 
-## 9.2 Redaction itself cannot fail
+## 9.2 Redacting a parsed message cannot fail
 
 `Redactor::redact` returns a `Report`, not a `Result`. Once a policy has
 been read and a message parsed, there is nothing left that can go wrong:
