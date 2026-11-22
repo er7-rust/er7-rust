@@ -152,6 +152,7 @@ impl<'de> Visitor<'de> for SeparatorsVisitor {
         // `truncation` is genuinely optional in ER7 itself (spec: v2.7+
         // only), so a message that omits the key gets `None` rather than an
         // error — unlike the five delimiters above, which every message has.
+        // RCA-IN-3: absent only (key missing; a present value is used as given).
         let truncation = truncation.unwrap_or(None);
 
         Ok(Separators(er7::Separators {

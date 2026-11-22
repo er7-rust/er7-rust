@@ -257,15 +257,12 @@ impl Action {
             Action::Mask(mask) => Some(value.chars().map(|_| *mask).collect()),
             Action::First(n) => Some(value.chars().take(*n).collect()),
             Action::Last(n) => {
-                // Fallback: 0 — asking for more trailing characters than there are
-                // keeps the whole value, so nothing is skipped (see the doc example above).
-                const SKIP_NOTHING: usize = 0;
-                let skip = value
-                    .chars()
-                    .count()
-                    .checked_sub(*n)
-                    .unwrap_or(SKIP_NOTHING);
-                Some(value.chars().skip(skip).collect())
+                // "The last n characters" of a shorter value is the whole
+                // value (documented, not an error); no subtraction, so no
+                // fallback is needed.
+                let mut tail: Vec<char> = value.chars().rev().take(*n).collect();
+                tail.reverse();
+                Some(tail.into_iter().collect())
             }
             Action::Pseudonym => Some(pseudonym(key, value)),
             Action::Custom(custom) => custom.apply(value, key),

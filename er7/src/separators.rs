@@ -148,14 +148,24 @@ impl Separators {
     /// # Errors
     ///
     /// [`Error::BadHeader`] when the header carries no field separator, or
-    /// when the set it declares fails [`Separators::validate`].
+    /// when MSH-2 carries more than five characters, or when the set it
+    /// declares fails [`Separators::validate`].
     pub fn from_header(line: &str) -> Result<Separators, Error> {
         let mut chars = line.chars().skip(3);
         let field = chars
             .next()
             .ok_or_else(|| Error::BadHeader("no field separator after the segment name".into()))?;
-        let encoding: Vec<char> = chars.take_while(|&c| c != field).take(5).collect();
+        let encoding: Vec<char> = chars.take_while(|&c| c != field).collect();
+        if encoding.len() > 5 {
+            return Err(Error::BadHeader(format!(
+                "MSH-2 carries {} encoding characters; at most 5 are defined",
+                encoding.len()
+            )));
+        }
         let default = Separators::default();
+        // RCA-IN-3: absent only. A delimiter missing from a short MSH-2 takes
+        // the HL7 standard one (v2 ch. 2); a present one is used as given
+        // and then checked by `validate`.
         let separators = Separators {
             field,
             component: encoding.first().copied().unwrap_or(default.component),
@@ -360,6 +370,8 @@ mod tests {
         // The same character cannot mean two things.
         assert!(Separators::from_header(r"MSH|^^\&|LAB").is_err());
         assert!(Separators::from_header("MSH|^~&&|LAB").is_err());
+        // RCA-TEST-8: more than five encoding characters is rejected, not truncated.
+        assert!(Separators::from_header(r"MSH|^~\&#X|LAB").is_err());
         // A delimiter that ends a segment would make the message unreadable.
         assert!(
             Separators {

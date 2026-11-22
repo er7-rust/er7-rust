@@ -15,6 +15,17 @@ raised minimum supported Rust version, which is always a breaking change
 and never lands in a patch
 ([`spec/rust-msrv-n-minus-2/index.md`](spec/rust-msrv-n-minus-2/index.md)).
 
+## Unreleased
+
+### Changed
+
+- `er7`: `Separators::from_header` (and so message parsing) now rejects an
+  MSH-2 with more than five encoding characters with `Error::BadHeader`
+  instead of silently ignoring the extras (RCA-IN-1). A short MSH-2 still
+  takes the standard delimiters for the absent ones (RCA-IN-3).
+- `er7-redact`: `Action::Last` no longer uses a subtraction fallback;
+  behaviour is unchanged.
+
 ## 2026-11-17 — `er7` 0.3.0, `serde-er7` 0.4.0, `er7-redact` 0.5.0
 
 ### Changed
