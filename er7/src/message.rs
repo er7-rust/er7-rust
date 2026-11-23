@@ -1050,6 +1050,29 @@ mod tests {
     }
 
     #[test]
+    fn index_zero_and_bad_paths_find_nothing() {
+        let mut message = message();
+        assert!(message.segment_at("OBX", 0).is_none());
+        assert!(message.segment_at_mut("OBX", 0).is_none());
+        let separators = message.separators;
+        let pid = message.segment_at_mut("PID", 1).unwrap();
+        assert!(pid.first_value(5, 0, &separators).is_none());
+        assert!(pid.field(0).is_none());
+        assert!(pid.field_mut(0).is_none());
+        let field = pid.field_mut(5).unwrap();
+        assert!(field.repetition(0).is_none());
+        assert!(field.repetition_mut(0).is_none());
+        let rep = field.repetition_mut(1).unwrap();
+        assert!(rep.component(0).is_none());
+        assert!(rep.component_mut(0).is_none());
+        let comp = rep.component_mut(1).unwrap();
+        assert!(comp.subcomponent(0).is_none());
+        assert!(comp.subcomponent_mut(0).is_none());
+        assert!(message.query("not a path").is_err());
+        assert!(message.query_all("not a path").is_err());
+    }
+
+    #[test]
     fn reads_the_msh_conveniences() {
         let message = message();
         assert_eq!(message.message_code().as_deref(), Some("ADT"));
