@@ -63,6 +63,17 @@ cargo fmt --check                                  # workspace-wide
 cargo test -p er7-redact                           # one crate only
 ```
 
+Faster local runs with cargo-nextest (optional; `.config/nextest.toml`):
+
+```sh
+cargo nextest run --workspace    # one process per test, parallel across binaries
+cargo test --workspace --doc     # nextest skips doctests, so run these too
+```
+
+`cargo test --workspace` stays the documented gate. Ignored tests stay ignored
+(`--run-ignored only` runs them). The `ci` profile (`-P ci`) is the same without
+retries; retries are off by default so a flaky test is never hidden.
+
 ## Benchmarks and fuzzing
 
 All of it lives outside the crates it measures, so `er7` and `er7-redact`
