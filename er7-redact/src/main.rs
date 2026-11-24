@@ -510,17 +510,15 @@ mod tests {
             )
             .unwrap();
         let redactor = Redactor::new(policy);
-        // An empty message on any other outcome fails the assertion below.
-        let message = match redact_payloads(&redactor, &[first, second]).err() {
-            Some(Exit::Failed(message)) => message,
-            _ => String::new(),
-        };
-        assert_eq!(
-            message,
-            "message 2: the action \"<custom>\" writes nothing at PID[1]-5[1].1.1, \
-             so the value cannot be redacted"
-        );
-        assert!(!message.contains("JONES") && !message.contains("SMITH"));
+        let result = redact_payloads(&redactor, &[first, second]);
+        assert!(matches!(
+            result,
+            Err(Exit::Failed(message))
+                if message == "message 2: the action \"<custom>\" writes nothing at \
+                   PID[1]-5[1].1.1, so the value cannot be redacted"
+                    && !message.contains("JONES")
+                    && !message.contains("SMITH")
+        ));
     }
 
     #[test]
@@ -530,16 +528,14 @@ mod tests {
         let mut policy = Policy::accept_all();
         policy.unrecognised = Unrecognised::Apply(Action::custom(|_, _| None));
         let redactor = Redactor::new(policy);
-        let message = match redact_payloads(&redactor, &["SECRET-PAYLOAD"]).err() {
-            Some(Exit::Failed(message)) => message,
-            _ => String::new(),
-        };
-        assert_eq!(
-            message,
-            "message 1: the unrecognised-payload action \"<custom>\" writes nothing, \
-             so the payload cannot be redacted"
-        );
-        assert!(!message.contains("SECRET"));
+        let result = redact_payloads(&redactor, &["SECRET-PAYLOAD"]);
+        assert!(matches!(
+            result,
+            Err(Exit::Failed(message))
+                if message == "message 1: the unrecognised-payload action \"<custom>\" \
+                   writes nothing, so the payload cannot be redacted"
+                    && !message.contains("SECRET")
+        ));
     }
 
     #[test]
