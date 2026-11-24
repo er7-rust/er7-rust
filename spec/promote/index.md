@@ -59,7 +59,7 @@ travel:
 | **Zero runtime dependencies** | B, C | A `[dependencies]` table that is empty on purpose, with a test that enforces it, is unusual enough to be the headline for the Rust audience |
 | **Byte-for-byte round-trip** | A, B | "What went in comes back out" is the property an interface engineer actually needs and rarely gets |
 | **Spec-driven development, rules bound to tests** | C, D | The `spec/` tree, the rule IDs, and the coverage table are the credibility argument |
-| **Seven-licence choice** (`MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only OR OGL-UK-3.0 OR CC-BY-NC-SA-4.0`) | D | Removes a procurement conversation before it starts |
+| **Seven-licence choice** (`MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only OR OGL-UK-3.0 OR CC-BY-SA-4.0`) | D | Removes a procurement conversation before it starts |
 | **MSRV of stable minus two** | A, B | Speaks directly to organisations on quarterly toolchain approvals |
 
 Assets that support these live in the repository root and should be kept

@@ -19,6 +19,9 @@ and never lands in a patch
 
 ### Changed
 
+- All crates: the license option `CC-BY-NC-SA-4.0` is replaced by
+  `CC-BY-SA-4.0` in the SPDX expression, `LICENSE.md` files, `LICENSES/`,
+  and the documentation.
 - `er7`: `Separators::from_header` (and so message parsing) now rejects an
   MSH-2 with more than five encoding characters with `Error::BadHeader`
   instead of silently ignoring the extras (RCA-IN-1). A short MSH-2 still

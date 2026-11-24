@@ -198,7 +198,7 @@ rechecked, `MAINTAINERS.md` no longer did.
 ## 8. Licensing and provenance of AI output
 
 The project is multi-licensed — MIT, Apache-2.0, BSD-3-Clause,
-GPL-2.0-only, GPL-3.0-only, OGL-UK-3.0, or CC-BY-NC-SA-4.0, at the user's option. The position taken
+GPL-2.0-only, GPL-3.0-only, OGL-UK-3.0, or CC-BY-SA-4.0, at the user's option. The position taken
 here follows the Apache Software Foundation's and LLVM's published
 reasoning rather than wishful shortcuts: an AI tool's output does not
 launder anyone's copyright, the full provenance of generated text is

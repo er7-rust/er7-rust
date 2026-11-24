@@ -11,7 +11,7 @@ following licenses, at your option:
 | GNU General Public License v2.0 only | `GPL-2.0-only` | [`LICENSES/gpl-2.0-only/index.md`](LICENSES/gpl-2.0-only/index.md) — also <https://www.gnu.org/licenses/old-licenses/gpl-2.0.html> |
 | GNU General Public License v3.0 only | `GPL-3.0-only` | [`LICENSES/gpl-3.0-only/index.md`](LICENSES/gpl-3.0-only/index.md) — also <https://www.gnu.org/licenses/gpl-3.0.html> |
 | UK Open Government Licence v3.0 | `OGL-UK-3.0` | [`LICENSES/ogl-uk-3.0/index.md`](LICENSES/ogl-uk-3.0/index.md) · <https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/> |
-| Creative Commons Attribution Non Commercial Share Alike 4.0 International | `CC-BY-NC-SA-4.0` | [`LICENSES/cc-by-nc-sa-4.0/index.md`](LICENSES/cc-by-nc-sa-4.0/index.md) · <https://creativecommons.org/licenses/by-nc-sa/4.0/> |
+| Creative Commons Attribution Share Alike 4.0 International | `CC-BY-SA-4.0` | [`LICENSES/cc-by-sa-4.0/index.md`](LICENSES/cc-by-sa-4.0/index.md) · <https://creativecommons.org/licenses/by-sa/4.0/> |
 
 The full text of every option is in [`LICENSES/`](LICENSES/), one directory per
 license, named by the lowercase SPDX identifier, each holding the full text in
@@ -25,7 +25,7 @@ The SPDX license expression for every published crate in this workspace,
 as it appears in each crate's `Cargo.toml`, is:
 
 ```
-MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only OR OGL-UK-3.0 OR CC-BY-NC-SA-4.0
+MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only OR OGL-UK-3.0 OR CC-BY-SA-4.0
 ```
 
 Pick the one that fits your project and comply with that one. You do not
@@ -63,7 +63,7 @@ file governs that crate, and the disagreement is a bug worth reporting.
 ## Machine-readable summary
 
 ```yaml
-spdx-license-expression: MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only OR OGL-UK-3.0 OR CC-BY-NC-SA-4.0
+spdx-license-expression: MIT OR Apache-2.0 OR BSD-3-Clause OR GPL-2.0-only OR GPL-3.0-only OR OGL-UK-3.0 OR CC-BY-SA-4.0
 copyright-holder: Joel Parker Henderson
 contact: joel@joelparkerhenderson.com
 ```
