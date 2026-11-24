@@ -131,7 +131,7 @@ Stated plainly, so nobody has to guess:
   issues. This is the case [`SECURITY.md`](SECURITY.md)'s ninety-day
   disclosure clause is written for: report privately, and disclose anyway
   if nobody answers.
-- **Forking is legitimate continuity.** The license is a choice of five,
+- **Forking is legitimate continuity.** The license is a choice of seven,
   including permissive and copyleft options, specifically so that a fork is
   straightforward under whichever terms suit the forker. See
   [`LICENSE.md`](LICENSE.md).

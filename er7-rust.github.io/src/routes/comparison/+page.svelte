@@ -285,7 +285,7 @@
         <strong>Specification-first development.</strong> Every behaviour is a numbered rule, and
         each rule names the test that enforces it — checkable by reading the tree.
       </li>
-      <li><strong>Five licenses</strong>, where the alternatives above are Apache-2.0 or MIT.</li>
+      <li><strong>Seven licenses</strong>, where the alternatives above are Apache-2.0 or MIT.</li>
     </ul>
   </div>
 </section>

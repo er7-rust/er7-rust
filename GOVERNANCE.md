@@ -272,7 +272,7 @@ and the public record of an interaction is available to anyone.
 **Forking is legitimate continuity, not a hostile act**, and this project
 is arranged to make it cheap:
 
-- Five licences, at your option, including permissive and copyleft ones, so
+- Seven licences, at your option, including permissive and copyleft ones, so
   a fork can be relicensed to suit whoever maintains it.
 - Zero, one, and two runtime dependencies, so a fork inherits an auditable
   artefact rather than a tree.
