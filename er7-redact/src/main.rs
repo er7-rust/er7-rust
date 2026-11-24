@@ -510,8 +510,10 @@ mod tests {
             )
             .unwrap();
         let redactor = Redactor::new(policy);
-        let Err(Exit::Failed(message)) = redact_payloads(&redactor, &[first, second]) else {
-            panic!("expected the run to fail");
+        // An empty message on any other outcome fails the assertion below.
+        let message = match redact_payloads(&redactor, &[first, second]).err() {
+            Some(Exit::Failed(message)) => message,
+            _ => String::new(),
         };
         assert_eq!(
             message,
@@ -519,6 +521,25 @@ mod tests {
              so the value cannot be redacted"
         );
         assert!(!message.contains("JONES") && !message.contains("SMITH"));
+    }
+
+    #[test]
+    fn an_unrecognised_action_that_writes_nothing_fails_the_run() {
+        // RCA-TEST-8. The payload is not ER7, and its action writes
+        // nothing: the run fails closed rather than writing the payload.
+        let mut policy = Policy::accept_all();
+        policy.unrecognised = Unrecognised::Apply(Action::custom(|_, _| None));
+        let redactor = Redactor::new(policy);
+        let message = match redact_payloads(&redactor, &["SECRET-PAYLOAD"]).err() {
+            Some(Exit::Failed(message)) => message,
+            _ => String::new(),
+        };
+        assert_eq!(
+            message,
+            "message 1: the unrecognised-payload action \"<custom>\" writes nothing, \
+             so the payload cannot be redacted"
+        );
+        assert!(!message.contains("SECRET"));
     }
 
     #[test]
