@@ -51,7 +51,9 @@ fn bench_redact(c: &mut Criterion) {
     group.bench_function("small", |b| {
         b.iter(|| {
             let mut message = black_box(&small).clone();
-            Redactor::new(Policy::patient_identifiers()).redact(&mut message)
+            Redactor::new(Policy::patient_identifiers())
+                .redact(&mut message)
+                .expect("redacts")
         });
     });
     group.bench_function("batch_of_50", |b| {
@@ -59,7 +61,7 @@ fn bench_redact(c: &mut Criterion) {
             let redactor = Redactor::new(Policy::patient_identifiers());
             for message in black_box(&batch) {
                 let mut message = message.clone();
-                let _ = redactor.redact(&mut message);
+                let _ = redactor.redact(&mut message).expect("redacts");
             }
         });
     });
@@ -76,13 +78,17 @@ fn bench_posture(c: &mut Criterion) {
     group.bench_function("accept_by_default", |b| {
         b.iter(|| {
             let mut message = black_box(&small).clone();
-            Redactor::new(Policy::patient_identifiers()).redact(&mut message)
+            Redactor::new(Policy::patient_identifiers())
+                .redact(&mut message)
+                .expect("redacts")
         });
     });
     group.bench_function("reject_by_default", |b| {
         b.iter(|| {
             let mut message = black_box(&small).clone();
-            Redactor::new(Policy::all_but_the_header()).redact(&mut message)
+            Redactor::new(Policy::all_but_the_header())
+                .redact(&mut message)
+                .expect("redacts")
         });
     });
     group.finish();

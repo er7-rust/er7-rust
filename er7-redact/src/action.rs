@@ -127,7 +127,11 @@ impl Action {
     /// `f` receives the leaf's decoded text and the redactor's pseudonym
     /// key — the same two things [`Action::apply`] always receives — and
     /// returns the replacement the same way every other action does:
-    /// `Some(text)` to write `text`, `None` to leave the leaf as it is.
+    /// `Some(text)` to write `text`. `None` means the action has nothing to
+    /// write, and [`Redactor::redact`](crate::Redactor::redact) fails
+    /// closed with [`Error::NoOutput`] rather than
+    /// leave the leaf's text in the message. Use [`Action::Keep`] to leave
+    /// a position alone on purpose.
     ///
     /// Example:
     ///
@@ -225,15 +229,17 @@ impl Action {
         }
     }
 
-    /// The text this action writes in place of `value`, or `None` to leave
-    /// the value alone.
+    /// The text this action writes in place of `value`, or `None` when it
+    /// writes nothing.
     ///
     /// `value` is the leaf's decoded text, and `key` is the redactor's
     /// pseudonym key, used only by [`Action::Pseudonym`].
     ///
     /// [`Action::Keep`] returns `None` because it writes nothing, and so
     /// does [`Action::Null`], which the redactor applies structurally
-    /// rather than as text (spec §3.4).
+    /// rather than as text (spec §3.4). A [`Action::Custom`] returning
+    /// `None` is a failure, not a keep: `Redactor::redact` returns
+    /// `Error::NoOutput` for it (spec §9.2).
     ///
     /// Example:
     ///
@@ -335,7 +341,8 @@ impl CustomAction {
 
     /// Run the wrapped closure. Same signature and meaning as
     /// [`Action::apply`]: the decoded value and the pseudonym key in,
-    /// `Some(text)` to write `text` or `None` to leave the leaf as it is,
+    /// `Some(text)` to write `text` or `None` for nothing to write (which
+    /// [`Redactor::redact`](crate::Redactor::redact) treats as an error),
     /// out.
     fn apply(&self, value: &str, key: u64) -> Option<String> {
         (self.0)(value, key)
@@ -478,7 +485,7 @@ mod tests {
         let shout = Action::custom(|value, _key| Some(value.to_uppercase()));
         assert_eq!(shout.apply("everywoman", 0).as_deref(), Some("EVERYWOMAN"));
 
-        // `None` leaves the leaf as it is, same as `Keep`.
+        // `None` writes nothing; `Redactor::redact` rejects it.
         let never = Action::custom(|_value, _key| None);
         assert_eq!(never.apply("EVERYWOMAN", 0), None);
 

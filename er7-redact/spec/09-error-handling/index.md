@@ -5,7 +5,7 @@ numbers (§9.x) are stable and cited from code, tests, and commit messages.
 
 Implemented in `src/lib.rs`.
 
-## 9.1 Three variants, three situations [D15]
+## 9.1 Four variants, four situations [D15]
 
 ```rust
 pub enum Error {
@@ -17,6 +17,10 @@ pub enum Error {
     /// The `unrecognised` disposition applies an action that writes
     /// nothing (`keep`, `null`, or a custom action returning `None`).
     NoReplacement { action: String },
+    /// An action wrote nothing for a leaf that carries text (a custom
+    /// action returning `None`), so `Redactor::redact` refuses to leave
+    /// the text in place.
+    NoOutput { action: String, path: String },
 }
 ```
 
@@ -26,6 +30,7 @@ pub enum Error {
 | a **policy line** naming something that is not an HL7® path | `BadPolicy`, wrapping `er7`'s wording and naming the line number |
 | a `Policy::with`, `Rule::new` **call** naming something that is not an HL7 path | `Er7(er7::Error::BadPath(_))` |
 | `Redactor::unrecognised` with `Unrecognised::Apply(action)` where `action` writes nothing | `NoReplacement { action }` |
+| `Redactor::redact` where an action writes nothing for a leaf that carries text | `NoOutput { action, path }` |
 
 `NoReplacement` fails closed (spec/rust-checked-arithmetic RCA-IN-2,
 RCA-IN-6). `Policy::on_unrecognised` and policy files normalise `keep` and
@@ -41,20 +46,40 @@ match on `er7`'s own variant.
 
 `From<er7::Error>` converts, so `?` works in a function returning either.
 
-## 9.2 Redacting a parsed message cannot fail
+## 9.2 Redacting a parsed message fails closed
 
-`Redactor::redact` returns a `Report`, not a `Result`. Once a policy has
-been read and a message parsed, there is nothing left that can go wrong:
+`Redactor::redact` returns `Result<Report, Error>`. This replaces an earlier
+rule, "redaction itself cannot fail", which returned a bare `Report`. It was
+a breaking change, made so that no input can leave text in a message that a
+policy asked to redact (spec/rust-checked-arithmetic RCA-IN-2, RCA-IN-6).
+
+The one failure is an action that **writes nothing** for a leaf that
+carries text. Only a custom action returning `None` does this: `Keep` and
+`Null` are handled before an action is asked for text, and `Keep` is the
+deliberate way to leave a position alone. Leaving the text in place would
+look exactly like success and keep possible PHI, so `redact` returns
+`Error::NoOutput` naming the action and the fully qualified path of the
+leaf (never its value). The action may be a rule's, the rejecting posture's,
+or a known value's in the sweep (§2.10).
+
+`redact` is atomic: it works on a copy and replaces the caller's message
+only on success. On `Err` the message is exactly as it was passed in, with
+nothing half-redacted, and **it is unredacted**, so the caller must not
+write it out. The CLI aborts the run before writing anything and exits 1,
+reporting `message N: ...` (§10.4).
+
+Everything else below the policy is still a no-op, not an error:
 
 - a rule that matches nothing does nothing (D8);
 - a position that does not exist is not created (D2);
-- an empty or null leaf is skipped (D3, D4);
+- an empty or null leaf is skipped, whatever the action (D3, D4);
 - a delimiter field is skipped (D5);
 - replacement text that contains a delimiter is escaped (D11).
 
-This mirrors the `er7` spec's R6 — below the header, nothing fails — for
-the same reason: a redactor that refuses a message leaves the caller
-holding the unredacted original, which is the worse outcome.
+This departs from the `er7` spec's R6, below the header nothing fails, on
+purpose: a redactor that silently keeps what it was told to remove is the
+worse outcome, and a refusal here costs the caller nothing but the
+message it must not publish anyway.
 
 ## 9.3 Strictness is at the edges
 

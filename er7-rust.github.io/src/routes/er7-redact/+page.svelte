@@ -137,7 +137,7 @@
   <pre><code>{`use er7_redact::{Policy, Redactor};
 
 let mut message = er7::parse(text)?;
-let report = Redactor::new(Policy::patient_identifiers()).redact(&mut message);
+let report = Redactor::new(Policy::patient_identifiers()).redact(&mut message)?;
 
 println!("{}", message.to_er7());`}</code></pre>
   <div class="prose">

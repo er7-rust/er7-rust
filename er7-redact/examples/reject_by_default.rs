@@ -26,7 +26,7 @@ fn main() -> Result<(), er7_redact::Error> {
         .with("OBX-6", Action::Keep)?; // units
 
     let mut message = er7::parse(text)?;
-    let report = Redactor::new(policy).redact(&mut message);
+    let report = Redactor::new(policy).redact(&mut message)?;
     println!("{}\n", message.to_er7().replace('\r', "\n"));
 
     // The header is untouched, so the message still routes and still says

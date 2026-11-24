@@ -13,7 +13,7 @@ fn main() -> Result<(), er7_redact::Error> {
                 NK1|1|EVERYMAN^ADAM|SPO";
 
     let mut message = er7::parse(text)?;
-    let report = Redactor::new(Policy::patient_identifiers()).redact(&mut message);
+    let report = Redactor::new(Policy::patient_identifiers()).redact(&mut message)?;
 
     for change in &report.changes {
         println!("{:<18} {}", change.path.to_string(), change.action);

@@ -19,7 +19,7 @@ A `Redactor` is the only thing that touches a message:
 
 ```rust
 let mut message = er7::parse(text)?;
-let report = Redactor::new(Policy::patient_identifiers()).redact(&mut message);
+let report = Redactor::new(Policy::patient_identifiers()).redact(&mut message)?;
 ```
 
 It edits in place and returns a [`Report`](../08-report/index.md) of what
@@ -244,7 +244,8 @@ Any of them is overridden with `Policy::on_unrecognised`, or the
 ([§6.3](../06-policy-file-format/index.md)).
 
 Refusing is not an error the *library* raises: `Redactor::redact` takes a
-parsed message and cannot fail ([§9.2](../09-error-handling/index.md)), and
+parsed message and fails only when an action writes nothing for a leaf with
+text ([§9.2](../09-error-handling/index.md)), and
 `Redactor::unrecognised` returns the text to write in the payload's place,
 or `None` when the policy refuses it. Turning that `None` into a
 diagnostic and a non-zero exit is the caller's job, and is what the CLI

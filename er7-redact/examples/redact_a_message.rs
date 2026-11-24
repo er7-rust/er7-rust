@@ -12,7 +12,7 @@ fn main() -> Result<(), er7_redact::Error> {
                 OBX|1|NM|2093-3^Cholesterol^LN||187|mg/dL|100-199|H|||F";
 
     let mut message = er7::parse(text)?;
-    let report = Redactor::new(Policy::patient_identifiers()).redact(&mut message);
+    let report = Redactor::new(Policy::patient_identifiers()).redact(&mut message)?;
 
     println!("{}\n", message.to_er7().replace('\r', "\n"));
     println!("{} positions changed:\n{report}", report.len());

@@ -234,7 +234,12 @@ fn redact_payloads(redactor: &Redactor, sources: &[&str]) -> Result<Vec<Payload>
                 // otherwise report fewer gaps than a caller who checked
                 // before running the redaction that answered them.
                 let uncovered = redactor.uncovered(&message);
-                let report = redactor.redact(&mut message);
+                // Fail closed: an action that wrote nothing for a leaf
+                // aborts the run before anything is written (spec §9.2).
+                let report = match redactor.redact(&mut message) {
+                    Ok(report) => report,
+                    Err(e) => return fail(format!("message {}: {e}", index + 1)),
+                };
                 payloads.push(Payload::Message(Box::new(message), report, uncovered));
             }
             // D21: what a payload that is not ER7 gets is the policy's to
@@ -463,6 +468,7 @@ fn uncovered_report(payloads: &[Payload], policy: &Policy) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use er7_redact::Action;
 
     struct FailingWriter(std::io::ErrorKind);
 
@@ -486,6 +492,33 @@ mod tests {
         let error = write_to(FailingWriter(std::io::ErrorKind::PermissionDenied), "text")
             .expect_err("permission errors must be reported");
         assert!(matches!(error, Exit::Failed(message) if message.contains("standard output")));
+    }
+
+    #[test]
+    fn an_action_that_writes_nothing_fails_the_run_with_no_output() {
+        // RCA-TEST-8. The policy language cannot express such an action,
+        // but a library caller embedding this code path can, and the run
+        // must fail closed. The failure is in the *second* message, and
+        // `redact_payloads` returns nothing for the first either: every
+        // payload is redacted before any is written (spec §10.1).
+        let first = "MSH|^~\\&|LAB\rPID|1||9||SMITH^JOHN";
+        let second = "MSH|^~\\&|LAB\rPID|1||9||JONES^BARBARA";
+        let policy = Policy::accept_all()
+            .with(
+                "PID-5",
+                Action::custom(|v, _| (!v.starts_with("JON")).then(|| "X".into())),
+            )
+            .unwrap();
+        let redactor = Redactor::new(policy);
+        let Err(Exit::Failed(message)) = redact_payloads(&redactor, &[first, second]) else {
+            panic!("expected the run to fail");
+        };
+        assert_eq!(
+            message,
+            "message 2: the action \"<custom>\" writes nothing at PID[1]-5[1].1.1, \
+             so the value cannot be redacted"
+        );
+        assert!(!message.contains("JONES") && !message.contains("SMITH"));
     }
 
     #[test]

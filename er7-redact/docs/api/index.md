@@ -26,7 +26,7 @@ The only thing that edits a message.
 | ---- | --------- | ----- |
 | `new` | `fn new(policy: Policy) -> Redactor` | pseudonym key defaults to `0` |
 | `with_key` | `fn with_key(self, key: u64) -> Redactor` | builder |
-| `redact` | `fn redact(&self, message: &mut er7::Message) -> Report` | edits in place; cannot fail |
+| `redact` | `fn redact(&self, message: &mut er7::Message) -> Result<Report, Error>` | edits in place; `Err(NoOutput)` if an action writes nothing for a leaf with text, and then leaves `message` untouched and unredacted |
 | `uncovered` | `fn uncovered(&self, message: &er7::Message) -> Vec<er7::Path>` | inspect the original leaf positions using rule paths alone, without invoking action callbacks |
 | `unrecognised` | `fn unrecognised(&self, payload: &str) -> Result<Option<String>, Error>` | what to write for a payload that is not ER7; `Ok(None)` means the policy refuses it; `Err(NoReplacement)` if its action writes nothing |
 | `policy` | `fn policy(&self) -> &Policy` | |
@@ -154,14 +154,16 @@ pub enum Error {
     BadPolicy(String),
     Er7(er7::Error),
     NoReplacement { action: String },
+    NoOutput { action: String, path: String },
 }
 ```
 
-Three variants, three situations
+Four variants, four situations
 ([spec §9](../../spec/09-error-handling/index.md)). `From<er7::Error>`
 converts; `Display` is one sentence with no prefix; `source()` returns the
-`er7` error for the `Er7` variant. `Redactor::redact` returns a `Report`, not
-a `Result`; `Redactor::unrecognised` fails closed with `NoReplacement`.
+`er7` error for the `Er7` variant. `Redactor::redact` and
+`Redactor::unrecognised` fail closed with `NoOutput` and `NoReplacement`
+when an action writes nothing.
 
 ## Types from `er7`
 

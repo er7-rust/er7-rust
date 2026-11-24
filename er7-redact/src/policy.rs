@@ -153,8 +153,8 @@ const DEFAULT_WIDTH: usize = UNRECOGNISED.len();
 /// let text = "MSH|^~\\&|LAB\rPID|1||9||SMITH";
 /// let mut one = er7::parse(text)?;
 /// let mut two = er7::parse(text)?;
-/// Redactor::new(listed).redact(&mut one);
-/// Redactor::new(all_but).redact(&mut two);
+/// Redactor::new(listed).redact(&mut one)?;
+/// Redactor::new(all_but).redact(&mut two)?;
 ///
 /// assert_eq!(one.to_er7(), "MSH|^~\\&|LAB\rPID|1||9||REDACTED");
 /// assert_eq!(two.to_er7(), "MSH|^~\\&|REDACTED\rPID|REDACTED||REDACTED||SMITH");
@@ -249,8 +249,8 @@ pub enum Unrecognised {
     Apply(Action),
     /// Write nothing, and tell the caller the payload did not parse.
     ///
-    /// The library does not raise this as an error — [`crate::Redactor`]
-    /// cannot fail (spec §9.2). It returns `None`, and the caller decides
+    /// The library does not raise this as an error —
+    /// [`crate::Redactor::unrecognised`] returns `Ok(None)`, and the caller decides
     /// what a refusal costs; the CLI makes it a diagnostic and exit 1
     /// (spec §10.4).
     Refuse,
@@ -353,7 +353,7 @@ fn parse_known_values(argument: &str) -> Result<bool, Error> {
 /// let everything_else = Policy::reject_all().with("MSH", Action::Keep)?;
 ///
 /// let mut message = er7::parse("MSH|^~\\&|LAB\rPID|1||9||SMITH^JOHN||19610615")?;
-/// Redactor::new(listed).redact(&mut message);
+/// Redactor::new(listed).redact(&mut message)?;
 /// assert_eq!(message.to_er7(), "MSH|^~\\&|LAB\rPID|1||9||REDACTED^REDACTED||1961");
 /// # Ok(())
 /// # }
@@ -402,7 +402,7 @@ impl Policy {
     ///
     /// // It changes nothing, and reports nothing.
     /// let mut message = er7::parse("MSH|^~\\&|LAB\rPID|1||9||SMITH")?;
-    /// let report = Redactor::new(policy).redact(&mut message);
+    /// let report = Redactor::new(policy).redact(&mut message)?;
     /// assert_eq!(message.to_er7(), "MSH|^~\\&|LAB\rPID|1||9||SMITH");
     /// assert!(report.is_empty());
     /// # Ok(())
@@ -438,7 +438,7 @@ impl Policy {
     ///
     /// let policy = Policy::reject_all().with("OBX-2", Action::Keep)?;
     /// let mut message = er7::parse("MSH|^~\\&|LAB\rOBX|1|NM|2093-3||187")?;
-    /// Redactor::new(policy).redact(&mut message);
+    /// Redactor::new(policy).redact(&mut message)?;
     ///
     /// assert_eq!(
     ///     message.to_er7(),
@@ -480,7 +480,7 @@ impl Policy {
     /// let mut message = er7::parse(
     ///     "MSH|^~\\&|LAB\rPID|1||PATID1234||EVERYWOMAN^EVE||19610615|F|||12 ELM ST^^BOSTON",
     /// )?;
-    /// let report = Redactor::new(Policy::patient_identifiers()).redact(&mut message);
+    /// let report = Redactor::new(Policy::patient_identifiers()).redact(&mut message)?;
     ///
     /// assert_eq!(message.query("PID-5.1")?.as_deref(), Some("REDACTED"));
     /// assert_eq!(message.query("PID-7")?.as_deref(), Some("1961"));
@@ -592,7 +592,7 @@ impl Policy {
     ///
     /// let policy = Policy::all_but_the_header().with("OBX-2", Action::Keep)?;
     /// let mut message = er7::parse("MSH|^~\\&|LAB\rOBX|1|NM|2093-3||187")?;
-    /// Redactor::new(policy).redact(&mut message);
+    /// Redactor::new(policy).redact(&mut message)?;
     ///
     /// assert_eq!(
     ///     message.to_er7(),

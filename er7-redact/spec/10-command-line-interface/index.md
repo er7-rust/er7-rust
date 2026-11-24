@@ -195,6 +195,13 @@ such a payload through, or masks it whole, exits 0 and writes it — the run
 did what the policy said. This is the one place a CLI diagnostic depends on
 the policy rather than the input.
 
+**An action that writes nothing for a leaf with text fails the run**
+([§9.2](../09-error-handling/index.md)). The policy language cannot express
+one, so this guards a policy built through the library; the run exits 1
+with `message N: the action "<custom>" writes nothing at PID[1]-5[1].1.1,
+so the value cannot be redacted`, and writes no output at all, because
+every payload is redacted before any is written.
+
 **A policy that changes nothing is not an error.** The message is written
 out unchanged and the run exits 0 — the message simply carried none of the
 positions the policy names (D8). A script that needs to know should use

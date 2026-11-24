@@ -7,12 +7,12 @@ Implemented in `src/redact.rs`.
 
 ## 8.1 What it is
 
-`Redactor::redact` returns a `Report`: the list of positions it changed,
+`Redactor::redact` returns a `Report` (inside a `Result`, [§9.2](../09-error-handling/index.md)): the list of positions it changed,
 each with the action that changed it, in the order the changes were made —
 rule by rule, and in message order within each rule.
 
 ```rust
-let report = redactor.redact(&mut message);
+let report = redactor.redact(&mut message)?;
 
 for change in &report.changes {
     println!("{} {}", change.path, change.action);

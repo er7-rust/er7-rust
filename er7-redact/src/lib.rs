@@ -36,7 +36,7 @@
 //!             12 ELM ST^^BOSTON^MA^02101|||555-555-1111";
 //!
 //! let mut message = er7::parse(text)?;
-//! let report = Redactor::new(Policy::patient_identifiers()).redact(&mut message);
+//! let report = Redactor::new(Policy::patient_identifiers()).redact(&mut message)?;
 //!
 //! // The name is a placeholder, the birth date is a year, the address and
 //! // the phone number are gone, and the record number is a pseudonym.
@@ -141,12 +141,13 @@ use std::fmt;
 
 /// What can go wrong.
 ///
-/// Three variants, arising from three situations: a policy that cannot be
-/// read, a path that is not a path (D15, spec §9), and an unrecognised-payload
-/// action that writes nothing (spec §9.1). Redacting a parsed message cannot
-/// fail — a rule that matches nothing does nothing, and a position that is
-/// not there is not created — so [`Redactor::redact`] returns a [`Report`]
-/// rather than a `Result`.
+/// Four variants, arising from four situations: a policy that cannot be
+/// read, a path that is not a path (D15, spec §9), and an action that writes
+/// nothing, for an unrecognised payload or for a leaf (spec §9.1, §9.2). A
+/// rule that matches nothing does nothing, and a position that is not there
+/// is not created; neither is an error. But an action that writes nothing
+/// where text must be redacted fails closed, so [`Redactor::redact`] returns
+/// a `Result<Report, Error>`.
 ///
 /// Example:
 ///
@@ -181,6 +182,17 @@ pub enum Error {
         /// The action as it displays (`keep`, `null`, `<custom>`).
         action: String,
     },
+    /// An action wrote nothing for a leaf that carries text (a custom
+    /// action returning `None`), so [`Redactor::redact`] fails closed
+    /// rather than leave the text, possibly PHI, in the message (spec
+    /// §9.2; RCA-IN-2, RCA-IN-6). `Keep` is not this: it leaves the text
+    /// on purpose.
+    NoOutput {
+        /// The action as it displays (`<custom>`).
+        action: String,
+        /// The leaf's fully qualified path, such as `PID[1]-5[1].1.1`.
+        path: String,
+    },
 }
 
 impl fmt::Display for Error {
@@ -196,6 +208,11 @@ impl fmt::Display for Error {
                 "the unrecognised-payload action {action:?} writes nothing, \
                  so the payload cannot be redacted"
             ),
+            Error::NoOutput { action, path } => write!(
+                f,
+                "the action {action:?} writes nothing at {path}, \
+                 so the value cannot be redacted"
+            ),
         }
     }
 }
@@ -203,7 +220,7 @@ impl fmt::Display for Error {
 impl std::error::Error for Error {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {
-            Error::BadPolicy(_) | Error::NoReplacement { .. } => None,
+            Error::BadPolicy(_) | Error::NoReplacement { .. } | Error::NoOutput { .. } => None,
             Error::Er7(e) => Some(e),
         }
     }
@@ -238,5 +255,15 @@ mod tests {
             "the unrecognised-payload action \"keep\" writes nothing, so the payload cannot be redacted"
         );
         assert!(none.source().is_none());
+
+        let nothing = Error::NoOutput {
+            action: "<custom>".into(),
+            path: "PID[1]-5[1].1.1".into(),
+        };
+        assert_eq!(
+            nothing.to_string(),
+            "the action \"<custom>\" writes nothing at PID[1]-5[1].1.1, so the value cannot be redacted"
+        );
+        assert!(nothing.source().is_none());
     }
 }

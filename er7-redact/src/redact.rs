@@ -60,7 +60,7 @@ impl fmt::Display for Change {
 ///
 /// let mut message = er7::parse("MSH|^~\\&|LAB\rPID|1||9||SMITH^JOHN")?;
 /// let policy = Policy::accept_all().with("PID-5", Action::redacted())?;
-/// let report = Redactor::new(policy).redact(&mut message);
+/// let report = Redactor::new(policy).redact(&mut message)?;
 ///
 /// // One row per leaf that actually changed.
 /// let rows: Vec<String> = report.changes.iter().map(|c| c.to_string()).collect();
@@ -115,7 +115,7 @@ impl fmt::Display for Report {
 /// let mut message = er7::parse(text)?;
 ///
 /// let redactor = Redactor::new(Policy::patient_identifiers()).with_key(42);
-/// let report = redactor.redact(&mut message);
+/// let report = redactor.redact(&mut message)?;
 ///
 /// assert_eq!(message.query("PID-5")?.as_deref(), Some("REDACTED^REDACTED"));
 /// assert_eq!(message.query("PID-7")?.as_deref(), Some("1961"));
@@ -123,7 +123,7 @@ impl fmt::Display for Report {
 ///
 /// // The same key maps the same identifier the same way, in every message.
 /// let mut other = er7::parse("MSH|^~\\&|LAB\rPID|1||PATID1234")?;
-/// redactor.redact(&mut other);
+/// redactor.redact(&mut other)?;
 /// assert_eq!(other.query("PID-3")?, message.query("PID-3")?);
 /// # Ok(())
 /// # }
@@ -233,10 +233,29 @@ impl Redactor {
 
     /// Redact `message` in place, and report what changed.
     ///
-    /// This cannot fail (spec §9.2): a rule that matches nothing does
-    /// nothing, a position that is not there is not created, and an empty
-    /// or null leaf is left alone.
-    pub fn redact(&self, message: &mut Message) -> Report {
+    /// A rule that matches nothing does nothing, a position that is not
+    /// there is not created, and an empty or null leaf is left alone.
+    ///
+    /// # Errors
+    ///
+    /// [`Error::NoOutput`] if an action writes nothing for a leaf that
+    /// carries text and is not a `Keep` (a custom action returning
+    /// `None`). Leaving the text in place would be a silent fail-open, so
+    /// the whole call fails closed (spec §9.2; RCA-IN-2, RCA-IN-6). On
+    /// error `message` is left exactly as it was passed in: unredacted, so
+    /// the caller must not write it out.
+    pub fn redact(&self, message: &mut Message) -> Result<Report, Error> {
+        // Work on a copy, so that a failure part-way through never leaves
+        // a half-redacted message that looks finished.
+        let mut work = message.clone();
+        let report = self.redact_in_place(&mut work)?;
+        *message = work;
+        Ok(report)
+    }
+
+    /// The pass behind [`Redactor::redact`], which may leave `message`
+    /// part-redacted when it fails.
+    fn redact_in_place(&self, message: &mut Message) -> Result<Report, Error> {
         // The segment name and occurrence of every segment, taken before
         // anything is borrowed mutably, so that a change can be labelled
         // with the path that names it.
@@ -261,7 +280,7 @@ impl Redactor {
                     index,
                     occurrence: counts[index],
                 };
-                pass.segment(&mut message.segments[index], at, &rule.path, &rule.action);
+                pass.segment(&mut message.segments[index], at, &rule.path, &rule.action)?;
             }
         }
 
@@ -272,7 +291,7 @@ impl Redactor {
                     index,
                     occurrence: counts[index],
                 };
-                pass.reject_the_rest(&mut message.segments[index], at, action);
+                pass.reject_the_rest(&mut message.segments[index], at, action)?;
             }
         }
 
@@ -288,11 +307,11 @@ impl Redactor {
                     index,
                     occurrence: counts[index],
                 };
-                pass.sweep_known_values(&mut message.segments[index], at);
+                pass.sweep_known_values(&mut message.segments[index], at)?;
             }
         }
 
-        pass.report
+        Ok(pass.report)
     }
 
     /// Every leaf that carries text and is named by no rule in this
@@ -442,7 +461,13 @@ struct Pass {
 
 impl Pass {
     /// Apply one rule to one segment.
-    fn segment(&mut self, segment: &mut Segment, at: At, path: &Path, action: &Action) {
+    fn segment(
+        &mut self,
+        segment: &mut Segment,
+        at: At,
+        path: &Path,
+        action: &Action,
+    ) -> Result<(), Error> {
         let header = segment.is_header();
         let numbers: Vec<usize> = match path.field {
             Some(number) => vec![number],
@@ -483,9 +508,10 @@ impl Pass {
                     }
                     continue;
                 }
-                self.repetition(node, at, (number, repetition), path, action);
+                self.repetition(node, at, (number, repetition), path, action)?;
             }
         }
+        Ok(())
     }
 
     /// Apply one rule below a repetition.
@@ -496,7 +522,7 @@ impl Pass {
         (field, index): (usize, usize),
         path: &Path,
         action: &Action,
-    ) {
+    ) -> Result<(), Error> {
         let numbers: Vec<usize> = match path.component {
             Some(number) => vec![number],
             None => (1..=repetition.components.len()).collect(),
@@ -524,16 +550,22 @@ impl Pass {
                 let position = (at.index, field, index, number, subcomponent);
                 self.named.insert(position);
                 self.learn(leaf, action);
-                if self.leaf(leaf, action) {
+                if self.leaf(leaf, action, (at, field, index, number, subcomponent))? {
                     self.record(at, field, index, number, subcomponent, action);
                 }
             }
         }
+        Ok(())
     }
 
     /// Apply a rejecting posture's action to every leaf of one segment
     /// that no rule named (D9, spec §2.6).
-    fn reject_the_rest(&mut self, segment: &mut Segment, at: At, action: &Action) {
+    fn reject_the_rest(
+        &mut self,
+        segment: &mut Segment,
+        at: At,
+        action: &Action,
+    ) -> Result<(), Error> {
         let header = segment.is_header();
         for (field_index, node) in segment.fields.iter_mut().enumerate() {
             let field = field_index + 1;
@@ -551,13 +583,15 @@ impl Pass {
                         if self.named.contains(&position) {
                             continue;
                         }
-                        if self.leaf(leaf, action) {
+                        let place = (at, field, repetition, component, subcomponent);
+                        if self.leaf(leaf, action, place)? {
                             self.record(at, field, repetition, component, subcomponent, action);
                         }
                     }
                 }
             }
         }
+        Ok(())
     }
 
     /// Apply an action to one leaf. Returns whether anything changed.
@@ -566,30 +600,52 @@ impl Pass {
     /// redact, and writing into it would invent a value; a null leaf is an
     /// instruction to the receiver rather than patient data, and
     /// overwriting it would turn "clear this" into a value (D3, D4).
-    fn leaf(&mut self, leaf: &mut Subcomponent, action: &Action) -> bool {
+    ///
+    /// `Keep` is the one action that writes nothing on purpose. Any other
+    /// action that writes nothing for a leaf with text (a custom action
+    /// returning `None`) is an [`Error::NoOutput`]: leaving the text in
+    /// place would keep possible PHI under a policy that asked for its
+    /// redaction (RCA-IN-2, RCA-IN-6).
+    fn leaf(
+        &mut self,
+        leaf: &mut Subcomponent,
+        action: &Action,
+        (at, field, repetition, component, subcomponent): (At, usize, usize, usize, usize),
+    ) -> Result<bool, Error> {
         if action == &Action::Null {
             if leaf.is_null() {
-                return false;
+                return Ok(false);
             }
             leaf.raw = NULL.to_string();
-            return true;
+            return Ok(true);
         }
-        if leaf.is_empty() || leaf.is_null() {
-            return false;
+        if leaf.is_empty() || leaf.is_null() || action == &Action::Keep {
+            return Ok(false);
         }
         let value = leaf.value(&self.separators).into_owned();
         let Some(replacement) = action.apply(&value, self.key) else {
-            return false;
+            return Err(Error::NoOutput {
+                action: action.to_string(),
+                path: Path {
+                    segment: at.name.to_string(),
+                    segment_occurrence: Some(at.occurrence),
+                    field: Some(field),
+                    repetition: Some(repetition),
+                    component: Some(component),
+                    subcomponent: Some(subcomponent),
+                }
+                .to_string(),
+            });
         };
         if replacement == value {
             // Nothing to do, and nothing to report — and leaving the raw
             // text alone keeps the sender's own spelling of it (D17).
-            return false;
+            return Ok(false);
         }
         // `set` encodes any delimiter in the replacement, so a redaction
         // can never break the message (D11).
         leaf.set(&replacement, &self.separators);
-        true
+        Ok(true)
     }
 
     /// Collect one leaf's decoded value as a known value, before its own
@@ -644,9 +700,9 @@ impl Pass {
     /// a whole word, case-insensitively, applies that value's own action
     /// to the **whole leaf**, through the same [`Pass::leaf`] every other
     /// action in this crate already goes through.
-    fn sweep_known_values(&mut self, segment: &mut Segment, at: At) {
+    fn sweep_known_values(&mut self, segment: &mut Segment, at: At) -> Result<(), Error> {
         if self.known.is_empty() {
-            return;
+            return Ok(());
         }
         let header = segment.is_header();
         for (field_index, node) in segment.fields.iter_mut().enumerate() {
@@ -677,13 +733,15 @@ impl Pass {
                         let Some(action) = found else {
                             continue;
                         };
-                        if self.leaf(leaf, &action) {
+                        let place = (at, field, repetition, component, subcomponent);
+                        if self.leaf(leaf, &action, place)? {
                             self.record(at, field, repetition, component, subcomponent, &action);
                         }
                     }
                 }
             }
         }
+        Ok(())
     }
 
     /// Add a row to the report, with the path fully qualified (spec §8.3).
@@ -776,7 +834,7 @@ mod tests {
     }
 
     fn redact(policy: Policy, message: &mut Message) -> Report {
-        Redactor::new(policy).redact(message)
+        Redactor::new(policy).redact(message).expect("redacts")
     }
 
     fn policy(rules: &[&str]) -> Policy {
@@ -1114,7 +1172,7 @@ mod tests {
 
         // Read-only: redact() still finds PID-5 to change afterward, so
         // uncovered() did not consume or alter anything.
-        let report = redactor.redact(&mut message);
+        let report = redactor.redact(&mut message).unwrap();
         assert!(!report.is_empty());
     }
 
@@ -1352,6 +1410,83 @@ mod tests {
             );
             assert!(!message.contains(payload));
         }
+    }
+
+    /// A message whose PID-5 and PID-7 carry text, for the no-output tests.
+    const SECRET: &str = "MSH|^~\\&|LAB\rPID|1||9||SMITH^JOHN||19610615\rNK1|1|JONES^BARBARA";
+
+    #[test]
+    fn leaf_action_that_writes_nothing_is_an_error_not_the_original_text() {
+        // RCA-TEST-8. A custom action returning `None` used to leave the
+        // leaf, and so possible PHI, in the message. It must fail closed,
+        // name the position, and leave the message exactly as passed in.
+        let mut message = er7::parse(SECRET).unwrap();
+        let before = message.clone();
+        let policy = Policy::accept_all()
+            .with("NK1-2", Action::Clear)
+            .unwrap()
+            .with("PID-5", Action::custom(|_, _| None))
+            .unwrap();
+        let error = Redactor::new(policy).redact(&mut message).unwrap_err();
+        assert_eq!(
+            error,
+            Error::NoOutput {
+                action: "<custom>".into(),
+                path: "PID[1]-5[1].1.1".into(),
+            }
+        );
+        let text = error.to_string();
+        assert!(!text.contains("SMITH") && !text.contains("JOHN"));
+        // Atomic: not even the earlier, well-behaved NK1 rule is applied
+        // to the caller's message, so nothing half-redacted can be written.
+        assert_eq!(message, before);
+    }
+
+    #[test]
+    fn rejecting_posture_action_that_writes_nothing_is_an_error() {
+        // RCA-TEST-8, through `reject_the_rest` rather than a named rule.
+        let mut message = er7::parse(SECRET).unwrap();
+        let before = message.clone();
+        let policy = Policy::reject_all();
+        let mut policy = policy;
+        policy.posture = Posture::Reject(Action::custom(|_, _| None));
+        let error = Redactor::new(policy).redact(&mut message).unwrap_err();
+        assert!(matches!(error, Error::NoOutput { .. }));
+        assert_eq!(message, before);
+    }
+
+    #[test]
+    fn known_value_sweep_action_that_writes_nothing_is_an_error() {
+        // RCA-TEST-8, through the sweep: a custom action that handles the
+        // named leaf but returns `None` for the value elsewhere.
+        let text = "MSH|^~\\&|LAB\rPID|1||9||SMITHSON\rNTE|1||SMITHSON was here";
+        let mut message = er7::parse(text).unwrap();
+        let before = message.clone();
+        let action = Action::custom(|value, _| (value == "SMITHSON").then(|| "X".to_string()));
+        let mut policy = Policy::accept_all().with("PID-5", action).unwrap();
+        policy.search_known_values = true;
+        let error = Redactor::new(policy).redact(&mut message).unwrap_err();
+        assert!(matches!(error, Error::NoOutput { ref path, .. } if path == "NTE[1]-3[1].1.1"));
+        assert_eq!(message, before);
+    }
+
+    #[test]
+    fn keep_and_empty_and_null_leaves_are_still_not_errors() {
+        // The fail-closed rule is for text an action was asked to redact
+        // and did not: `Keep` is deliberate, and an empty or null leaf has
+        // nothing to redact (D3, D4), whatever the action.
+        let text = "MSH|^~\\&|LAB\rPID|1||9||SMITH||\"\"";
+        let mut message = er7::parse(text).unwrap();
+        let policy = Policy::accept_all()
+            .with("PID-5", Action::Keep)
+            .unwrap()
+            .with("PID-6", Action::custom(|_, _| None))
+            .unwrap()
+            .with("PID-7", Action::custom(|_, _| None))
+            .unwrap();
+        let report = Redactor::new(policy).redact(&mut message).unwrap();
+        assert!(report.is_empty());
+        assert_eq!(message.to_er7(), text);
     }
 
     #[test]

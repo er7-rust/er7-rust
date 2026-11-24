@@ -23,8 +23,8 @@ fn main() -> Result<(), er7_redact::Error> {
 
     let mut admit = er7::parse(admit)?;
     let mut result = er7::parse(result)?;
-    redactor.redact(&mut admit);
-    redactor.redact(&mut result);
+    redactor.redact(&mut admit)?;
+    redactor.redact(&mut result)?;
 
     // The record number is gone from both...
     let one = admit.query("PID-3.1")?.expect("a value");
@@ -41,7 +41,7 @@ fn main() -> Result<(), er7_redact::Error> {
     let mut other = er7::parse("MSH|^~\\&|ADT1|MCM\rPID|1||PATID1234^^^ADT1^MR")?;
     Redactor::new(Policy::patient_identifiers())
         .with_key(1)
-        .redact(&mut other);
+        .redact(&mut other)?;
     assert_ne!(other.query("PID-3.1")?.expect("a value"), one);
 
     // The function is available directly, for building an expected value
@@ -56,7 +56,7 @@ fn main() -> Result<(), er7_redact::Error> {
     // for data leaving it, clear the value instead.
     let mut leaving = er7::parse("MSH|^~\\&|ADT1|MCM\rPID|1||PATID1234^^^ADT1^MR")?;
     let policy = Policy::patient_identifiers().with("PID-3.1", Action::Clear)?;
-    Redactor::new(policy).redact(&mut leaving);
+    Redactor::new(policy).redact(&mut leaving)?;
     assert_eq!(leaving.query("PID-3.1")?.as_deref(), Some(""));
 
     Ok(())

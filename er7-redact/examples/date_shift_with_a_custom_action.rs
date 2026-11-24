@@ -56,7 +56,7 @@ fn main() -> Result<(), er7_redact::Error> {
             .with("EVN-2", Action::custom(move |v, _k| shift_date(v, offset)))?
             .with("OBX-14", Action::custom(move |v, _k| shift_date(v, offset)))?;
 
-        Redactor::new(policy).redact(&mut message);
+        Redactor::new(policy).redact(&mut message)?;
 
         let birth = message.query("PID-7")?;
         let event = message.query("EVN-2")?.or(message.query("OBX-14")?);
@@ -106,15 +106,17 @@ fn main() -> Result<(), er7_redact::Error> {
     assert_eq!(before, after);
 
     // What happens to a timestamp the action cannot parse: this example's
-    // closure returns `None`, which leaves the leaf exactly as it was
-    // sent — the same choice `Keep` makes, and the caller's to change. A
-    // caller who wants the opposite default writes `Some(String::new())`
-    // in the `None` branch instead, which clears it like `Action::Clear`.
+    // closure returns `None`, and `redact` fails closed with
+    // `Error::NoOutput` rather than leave the unshifted date in the
+    // message (spec §9.2). A caller who wants a default writes
+    // `Some(String::new())` in the `None` branch instead, which clears it
+    // like `Action::Clear`. On error the message is left as it was passed
+    // in, so it must not be written out.
     assert_eq!(shift_date("not a date", 5), None);
     let mut garbled = er7::parse("MSH|^~\\&|LAB\rPID|1||9||SMITH||not-a-date")?;
     let policy = Policy::accept_all().with("PID-7", Action::custom(|v, _k| shift_date(v, 5)))?;
-    Redactor::new(policy).redact(&mut garbled);
-    assert_eq!(garbled.query("PID-7")?.as_deref(), Some("not-a-date"));
+    let refused = Redactor::new(policy).redact(&mut garbled);
+    assert!(matches!(refused, Err(er7_redact::Error::NoOutput { .. })));
 
     // `shift_date` keeps whatever precision it was given.
     assert_eq!(shift_date("20260815", 1).as_deref(), Some("20260816"));

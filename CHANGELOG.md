@@ -32,6 +32,16 @@ and never lands in a patch
   to return the payload unredacted; it now fails closed with the new
   `Error::NoReplacement { action }` (RCA-IN-2, RCA-IN-6). The CLI reports it
   and exits 1. `Error` gains a variant, so exhaustive matches must add it.
+- `er7-redact` (breaking): `Redactor::redact` now returns
+  `Result<Report, Error>` instead of `Report`. An action that writes nothing
+  for a leaf that carries text (a custom action returning `None`; `Keep`
+  and `Null` are unaffected) used to leave the original, possibly PHI, text
+  in the message; it now fails closed with the new
+  `Error::NoOutput { action, path }` (RCA-IN-2, RCA-IN-6). The call is
+  atomic: on `Err` the message is untouched and unredacted, so do not write
+  it out. The CLI reports `message N: ...`, writes nothing and exits 1.
+  Callers add `?` or `.unwrap()`; exhaustive matches on `Error` must add the
+  variant. Spec §9.2 ("redaction itself cannot fail") is rewritten to match.
 
 ## 2026-11-17 — `er7` 0.3.0, `serde-er7` 0.4.0, `er7-redact` 0.5.0
 

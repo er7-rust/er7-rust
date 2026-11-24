@@ -63,7 +63,7 @@ fn multilingual_known_values_in_notes() {
         ("示例甲", "«示例甲後»", false),
     ] {
         let mut message = parse(&format!("MSH|^~\\&\rZTX|{field}\rNTE|1||{note}"));
-        redactor.redact(&mut message);
+        redactor.redact(&mut message).unwrap();
         let expected_note = if swept { "REDACTED" } else { note };
         assert_eq!(
             message.to_er7(),
@@ -81,7 +81,7 @@ fn masking_one_multilingual_leaf_preserves_the_surrounding_wire_text() {
     let policy = Policy::accept_all()
         .with("ZTX-2[1].2", Action::Mask('*'))
         .unwrap();
-    let report = Redactor::new(policy).redact(&mut message);
+    let report = Redactor::new(policy).redact(&mut message).unwrap();
     assert_eq!(report.changes.len(), 1);
     assert_eq!(report.changes[0].path.to_string(), "ZTX[1]-2[1].2.1");
     let wire = message.to_er7();
@@ -104,7 +104,7 @@ fn every_sample_keeps_its_shape() {
             let mut message = parse(sample);
             let before = shape(&message);
             let numbers = numbering(&message);
-            Redactor::new(policy).redact(&mut message);
+            Redactor::new(policy).redact(&mut message).unwrap();
             assert_eq!(shape(&message), before);
 
             // Written out and read back, the field numbering every path
@@ -130,7 +130,7 @@ fn a_cleared_field_reads_back_as_an_empty_one() {
         .unwrap()
         .with("PID-4", Action::Clear)
         .unwrap();
-    Redactor::new(policy).redact(&mut message);
+    Redactor::new(policy).redact(&mut message).unwrap();
     assert_eq!(message.to_er7(), "MSH|^~\\&|LAB\rPID|1|||^");
 
     let again = parse(&message.to_er7());
@@ -156,7 +156,7 @@ fn redacts_the_identifiers_a_sample_carries() {
     // parses, the shape holds, and the value is gone from the *whole*
     // message rather than merely from the position that was named.
     let mut message = parse(ADT);
-    let report = Redactor::default().redact(&mut message);
+    let report = Redactor::default().redact(&mut message).unwrap();
     let text = message.to_er7();
 
     for value in [
@@ -200,7 +200,7 @@ fn an_untouched_message_round_trips() {
         .unwrap();
     for sample in [ADT, ORU] {
         let mut message = parse(sample);
-        let report = Redactor::new(policy.clone()).redact(&mut message);
+        let report = Redactor::new(policy.clone()).redact(&mut message).unwrap();
         assert!(report.is_empty());
         assert_eq!(message.to_er7(), sample);
     }
@@ -209,7 +209,9 @@ fn an_untouched_message_round_trips() {
     // sequences included, rather than being decoded and re-encoded.
     let text = "MSH|^~\\&|LAB\rOBX|3|ST|X||Sample hemolysed \\T\\ redrawn";
     let mut message = parse(text);
-    Redactor::new(Policy::patient_identifiers()).redact(&mut message);
+    Redactor::new(Policy::patient_identifiers())
+        .redact(&mut message)
+        .unwrap();
     assert_eq!(message.to_er7(), text);
 }
 
@@ -222,7 +224,7 @@ fn replacement_text_cannot_break_the_message() {
     let policy = Policy::accept_all()
         .with("PID-5", Action::Replace("A|B^C~D&E".to_string()))
         .unwrap();
-    Redactor::new(policy).redact(&mut message);
+    Redactor::new(policy).redact(&mut message).unwrap();
 
     let text = message.to_er7();
     assert_eq!(
@@ -246,7 +248,7 @@ fn replacement_text_cannot_break_the_message() {
     let policy = Policy::accept_all()
         .with("PID-1", Action::Mask('|'))
         .unwrap();
-    Redactor::new(policy).redact(&mut message);
+    Redactor::new(policy).redact(&mut message).unwrap();
     assert_eq!(message.to_er7(), "MSH|^~\\&|LAB\rPID|\\F\\\\F\\");
     assert_eq!(
         parse(&message.to_er7()).query("PID-1").unwrap().as_deref(),
@@ -262,7 +264,7 @@ fn pseudonyms_link_across_messages() {
     let redactor = Redactor::new(Policy::patient_identifiers()).with_key(42);
     let one = {
         let mut message = parse("MSH|^~\\&|LAB\rPID|1||PATID1234^^^ACME^MR");
-        redactor.redact(&mut message);
+        redactor.redact(&mut message).unwrap();
         message.query("PID-3.1").unwrap().expect("a value")
     };
     let two = {
@@ -276,7 +278,8 @@ fn pseudonyms_link_across_messages() {
                 .unwrap(),
         )
         .with_key(42)
-        .redact(&mut message);
+        .redact(&mut message)
+        .unwrap();
         message.query("PV1-19.1").unwrap().expect("a value")
     };
     assert_eq!(one, two);
@@ -285,7 +288,8 @@ fn pseudonyms_link_across_messages() {
         let mut message = parse("MSH|^~\\&|LAB\rPID|1||PATID1234^^^ACME^MR");
         Redactor::new(Policy::patient_identifiers())
             .with_key(43)
-            .redact(&mut message);
+            .redact(&mut message)
+            .unwrap();
         message.query("PID-3.1").unwrap().expect("a value")
     };
     assert_ne!(one, other);
@@ -298,7 +302,7 @@ fn redaction_is_reproducible() {
     // — which is what makes a redacted message diffable in a repository.
     let run = || {
         let mut message = parse(ADT);
-        let report = Redactor::default().redact(&mut message);
+        let report = Redactor::default().redact(&mut message).unwrap();
         (message.to_er7(), report.to_string())
     };
     assert_eq!(run(), run());
@@ -312,7 +316,7 @@ fn the_sample_policy_exercises_every_action() {
     assert_eq!(Policy::parse(&policy.to_string()).unwrap(), policy);
 
     let mut message = parse(ORU);
-    Redactor::new(policy).redact(&mut message);
+    Redactor::new(policy).redact(&mut message).unwrap();
 
     assert_eq!(
         message.query("PID-5.1").unwrap().as_deref(),

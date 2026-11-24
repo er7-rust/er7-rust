@@ -21,7 +21,7 @@ fn main() -> Result<(), er7_redact::Error> {
         .with("PID-9", Action::redacted())?;
 
     let mut message = er7::parse(text)?;
-    let report = Redactor::new(policy).redact(&mut message);
+    let report = Redactor::new(policy).redact(&mut message)?;
 
     // Only the field that carried a value changed.
     assert_eq!(message.to_er7(), "MSH|^~\\&|LAB\rPID|REDACTED||\"\"");
@@ -48,13 +48,13 @@ fn main() -> Result<(), er7_redact::Error> {
     // message, because an HL7 null is a single `""`.
     let mut message = er7::parse("MSH|^~\\&|LAB\rPID|1||9||SMITH^JOHN")?;
     let policy = Policy::accept_all().with("PID-5", Action::Null)?;
-    Redactor::new(policy).redact(&mut message);
+    Redactor::new(policy).redact(&mut message)?;
     assert_eq!(message.to_er7(), "MSH|^~\\&|LAB\rPID|1||9||\"\"");
 
     // Compare with `clear`, which says nothing rather than saying "delete".
     let mut message = er7::parse("MSH|^~\\&|LAB\rPID|1||9||SMITH^JOHN")?;
     let policy = Policy::accept_all().with("PID-5", Action::Clear)?;
-    Redactor::new(policy).redact(&mut message);
+    Redactor::new(policy).redact(&mut message)?;
     assert_eq!(message.to_er7(), "MSH|^~\\&|LAB\rPID|1||9||^");
 
     println!("absent, empty, and null all survived redaction unchanged");

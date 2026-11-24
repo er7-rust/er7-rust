@@ -65,7 +65,7 @@ fn main() -> Result<(), er7_redact::Error> {
 
     let text = "MSH|^~\\&|LAB\rPID|1||PATID1234||EVERYWOMAN^EVE||19610615|F";
     let mut message = er7::parse(text)?;
-    Redactor::new(built).redact(&mut message);
+    Redactor::new(built).redact(&mut message)?;
     assert_eq!(message.query("PID-5.1")?.as_deref(), Some("REDACTED"));
 
     // A malformed policy is rejected at load time, with the line number:
