@@ -8,48 +8,68 @@
 set -eu
 
 root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-report=$(mktemp "${TMPDIR:-/tmp}/er7-coverage.XXXXXX")
-trap 'rm -f "$report"' EXIT HUP INT TERM
+tmp_report=$(mktemp "${TMPDIR:-/tmp}/er7-coverage.XXXXXX")
+trap 'rm -f "$tmp_report"' EXIT HUP INT TERM
+report=$tmp_report
 
-cd "$root"
-cargo llvm-cov \
-    --workspace \
-    --exclude er7-bench \
-    --exclude er7-redact-bench \
-    --all-targets \
-    --lcov \
-    --output-path "$report"
+# `bin/test-coverage --check FILE.lcov` skips the build and only checks an
+# existing LCOV report; bin/test-coverage-selftest uses it.
+if [ "${1:-}" = "--check" ]; then
+    report=${2:?usage: bin/test-coverage --check FILE.lcov}
+else
+    cd "$root"
+    cargo llvm-cov \
+        --workspace \
+        --exclude er7-bench \
+        --exclude er7-redact-bench \
+        --all-targets \
+        --lcov \
+        --output-path "$report"
+fi
 
 awk '
-function published_source(path) {
-    return path ~ /\/(er7|er7-redact|serde-er7)\/src\//
+function crate_of(path) {
+    if (path ~ /\/er7-redact\/src\//) return "er7-redact"
+    if (path ~ /\/serde-er7\/src\//) return "serde-er7"
+    if (path ~ /\/er7\/src\//) return "er7"
+    return ""
 }
 
 /^SF:/ {
     source = substr($0, 4)
+    crate = crate_of(source)
     next
 }
 
-/^DA:/ && published_source(source) {
+/^DA:/ && crate != "" {
     split(substr($0, 4), fields, ",")
-    total++
+    total[crate]++
     if (fields[2] > 0) {
-        covered++
+        covered[crate]++
     } else {
-        missed++
+        missed[crate]++
         print source ":" fields[1] ": uncovered executable line" > "/dev/stderr"
     }
 }
 
 END {
-    if (total == 0) {
-        print "coverage report contained no published source lines" > "/dev/stderr"
-        exit 1
+    n = split("er7 er7-redact serde-er7", crates, " ")
+    bad = 0
+    for (i = 1; i <= n; i++) {
+        c = crates[i]
+        if (total[c] == 0) {
+            print "coverage report contained no source lines for " c > "/dev/stderr"
+            bad = 1
+        } else {
+            printf "%s line coverage: %d/%d\n", c, covered[c], total[c]
+            if (missed[c] > 0) bad = 1
+            all += total[c]; allcov += covered[c]
+        }
     }
-    printf "published source line coverage: %d/%d (%.2f%%)\n", \
-        covered, total, 100 * covered / total
-    if (missed > 0) {
-        exit 1
+    if (all > 0) {
+        printf "published source line coverage: %d/%d (%.2f%%)\n", \
+            allcov, all, 100 * allcov / all
     }
+    exit bad
 }
 ' "$report"

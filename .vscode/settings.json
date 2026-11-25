@@ -1,0 +1,6 @@
+{
+  "files.readonlyInclude": {
+    "er7/samples/*.er7": true,
+    "er7-redact/samples/*.er7": true
+  }
+}

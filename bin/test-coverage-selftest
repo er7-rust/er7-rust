@@ -1,0 +1,28 @@
+#!/bin/sh
+# Pin bin/test-coverage's LCOV checking with tiny reports: a missing crate,
+# an uncovered line, and all three crates covered.
+set -eu
+
+root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+dir=$(mktemp -d "${TMPDIR:-/tmp}/er7-coverage-selftest.XXXXXX")
+trap 'rm -rf "$dir"' EXIT HUP INT TERM
+
+rec() { printf 'SF:/w/%s/src/lib.rs\nDA:1,%s\nend_of_record\n' "$1" "$2"; }
+
+{ rec er7 1; } > "$dir/missing.lcov"
+{ rec er7 1; rec er7-redact 0; rec serde-er7 1; } > "$dir/uncovered.lcov"
+{ rec er7 1; rec er7-redact 3; rec serde-er7 2; } > "$dir/ok.lcov"
+
+fail=0
+expect() { # expected-status file
+    if "$root/bin/test-coverage" --check "$2" >/dev/null 2>&1; then got=0; else got=1; fi
+    if [ "$got" != "$1" ]; then
+        echo "FAIL: $2 expected status $1, got $got" >&2
+        fail=1
+    fi
+}
+expect 1 "$dir/missing.lcov"
+expect 1 "$dir/uncovered.lcov"
+expect 0 "$dir/ok.lcov"
+[ "$fail" = 0 ] && echo "test-coverage selftest: ok"
+exit "$fail"

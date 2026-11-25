@@ -13,7 +13,7 @@ See [`index.md`](index.md) for the human-oriented overview, and
 | Package | `er7-rust.github.io` |
 | Purpose | The public site for the `er7` Rust crate family, documenting every subproject in full |
 | Live at | https://er7-rust.github.io/ |
-| Stack | SvelteKit 2 + Svelte 5 (runes), `@sveltejs/adapter-static`, TypeScript |
+| Stack | SvelteKit 3 + Svelte 5 (runes), `@sveltejs/adapter-static`, TypeScript |
 | Design system | Lily Design System™ |
 | Package manager | pnpm |
 | Deploy | `make github-pages` (from the monorepo root; delegates to `bin/make-github-pages`, `git subtree push`; `make publish` still works as an alias) exports this directory to the sibling `er7-rust/er7-rust.github.io` repo; GitHub Actions there builds and deploys on push to *its* `main` — [`index.md`](index.md)'s "Deployment" section, policy in [`spec/monorepo-github-pages/index.md`](../spec/monorepo-github-pages/index.md) |

@@ -1,0 +1,85 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "test: workspace",
+      "type": "process",
+      "command": "cargo",
+      "args": ["test", "--locked", "--workspace"],
+      "group": { "kind": "test", "isDefault": true },
+      "problemMatcher": ["$rustc"]
+    },
+    {
+      "label": "test: parser round-trip contract",
+      "type": "process",
+      "command": "cargo",
+      "args": ["test", "--locked", "-p", "er7", "--test", "main",
+               "every_sample_round_trips_byte_for_byte", "--", "--exact"],
+      "group": "test",
+      "problemMatcher": ["$rustc"]
+    },
+    {
+      "label": "check: clippy (warnings denied)",
+      "type": "process",
+      "command": "cargo",
+      "args": ["clippy", "--locked", "--workspace", "--all-targets", "--", "-D", "warnings"],
+      "group": "build",
+      "problemMatcher": ["$rustc"]
+    },
+    {
+      "label": "check: fmt",
+      "type": "process",
+      "command": "cargo",
+      "args": ["fmt", "--check"],
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "check: public docs (er7)",
+      "type": "process",
+      "command": "cargo",
+      "args": ["rustdoc", "--locked", "-p", "er7", "--lib", "--", "-D", "missing-docs"],
+      "problemMatcher": ["$rustc"]
+    },
+    {
+      "label": "check: public docs (er7-redact)",
+      "type": "process",
+      "command": "cargo",
+      "args": ["rustdoc", "--locked", "-p", "er7-redact", "--lib", "--", "-D", "missing-docs"],
+      "problemMatcher": ["$rustc"]
+    },
+    {
+      "label": "check: public docs (serde-er7)",
+      "type": "process",
+      "command": "cargo",
+      "args": ["rustdoc", "--locked", "-p", "serde-er7", "--lib", "--", "-D", "missing-docs"],
+      "problemMatcher": ["$rustc"]
+    },
+    {
+      "label": "check: public docs (all three)",
+      "dependsOn": [
+        "check: public docs (er7)",
+        "check: public docs (er7-redact)",
+        "check: public docs (serde-er7)"
+      ],
+      "dependsOrder": "sequence",
+      "problemMatcher": []
+    },
+    {
+      "label": "site: type-check",
+      "type": "process",
+      "command": "pnpm",
+      "args": ["check"],
+      "options": { "cwd": "${workspaceFolder}/er7-rust.github.io" },
+      "problemMatcher": []
+    },
+    {
+      "label": "site: build",
+      "type": "process",
+      "command": "pnpm",
+      "args": ["build"],
+      "options": { "cwd": "${workspaceFolder}/er7-rust.github.io" },
+      "problemMatcher": []
+    }
+  ]
+}

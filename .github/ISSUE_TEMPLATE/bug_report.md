@@ -24,7 +24,7 @@ private channels.
 **What you expected**
 
 
-**How to reproduce** (synthetic data only)
+**How to reproduce** (a named synthetic fixture plus the one change that shows the problem, and the command you ran; no real or redacted records)
 
 ```rust
 ```

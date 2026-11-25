@@ -91,11 +91,16 @@ None of these need permission, and none need Rust.
 
 1. **The crate and its version** — `cargo tree -p er7` if you are not sure
    what resolved.
-2. **A minimal redacted message that reproduces it.** One segment is often
-   enough.
-3. **What you expected and what you got.** `er7 message.er7` on the message
-   is usually the clearest way to show both, because it prints every value
-   with the path that names it.
+2. **A minimal synthetic message that reproduces it.** Start from a named
+   fixture (for example `er7/samples/adt_a08.er7`) and change only the
+   delimiter, field position, or invented value that shows the problem. One
+   segment is often enough. Never attach a transformed real record: redaction
+   leaves identifiers in free text and sender-specific fields
+   ([`PHI.md`](PHI.md)).
+3. **The command, what you expected, and what you got.** `cargo run --locked
+   -p er7 -- message.er7` prints every value with the path that names it;
+   `cargo run --locked -p er7-redact -- --report er7-redact/samples/adt_a08.er7`
+   shows paths and actions with no values.
 4. **The spec section, if you can find it.** Every rule carries a stable
    ID — `R<n>` for `er7`, `D<n>` for `er7-redact`, `S<n>` for `serde-er7` —
    and every section is numbered. "R13 says an unrecognised sequence stays
@@ -109,11 +114,13 @@ are the bug.
 ## Before you open a pull request
 
 ```sh
-cargo test --workspace
-cargo clippy --workspace --all-targets -- -D warnings
+cargo test --locked --workspace
+cargo clippy --locked --workspace --all-targets -- -D warnings
 cargo fmt --check
-cargo rustdoc -p er7 --lib -- -W missing-docs
-cargo +1.98 check --workspace --all-targets   # the MSRV floor
+for c in er7 er7-redact serde-er7; do
+    cargo rustdoc --locked -p "$c" --lib -- -D missing-docs
+done
+make ci-minimum-supported-rust-version         # the MSRV floor, read from the manifest
 bin/check-trademarks                           # or: make check-trademarks
 ```
 
@@ -125,8 +132,13 @@ checks on your machine first anyway: CI catches what you missed, it is not
 a substitute for running them yourself before you push.
 
 The MSRV floor is current stable minus two releases, so the exact
-toolchain in that fifth line moves; the rule is
+toolchain moves; `make ci-minimum-supported-rust-version` reads it from the
+manifest (it needs Bash, Make, and the two toolchains). The rule is
 [§2](spec/rust-msrv-n-minus-2/index.md).
+
+VS Code users: the root `.vscode/` folder has tasks for these checks, a
+read-only guard on the byte-exact `.er7` fixtures, and a parser debug launch;
+see [`.vscode/README.md`](.vscode/README.md).
 
 ## Conventions a reviewer will otherwise ask about
 

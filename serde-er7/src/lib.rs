@@ -106,7 +106,7 @@
 //! spec-driven process [`er7`] itself uses. A tutorial is in
 //! `docs/usage/index.md`, and runnable programs are in `examples/`.
 #![forbid(unsafe_code)]
-#![warn(missing_docs)]
+#![deny(missing_docs)]
 
 mod component;
 mod field;

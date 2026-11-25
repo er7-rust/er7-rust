@@ -125,7 +125,7 @@
 //! the absent/empty/null distinction — see the [`er7`] crate, which is
 //! this crate's only dependency.
 #![forbid(unsafe_code)]
-#![warn(missing_docs)]
+#![deny(missing_docs)]
 
 pub mod action;
 pub mod policy;

@@ -96,7 +96,7 @@
 //! (`docs/escapes/`), an FAQ (`docs/faq/`), and runnable programs
 //! (`examples/`).
 #![forbid(unsafe_code)]
-#![warn(missing_docs)]
+#![deny(missing_docs)]
 
 pub mod escape;
 pub mod message;

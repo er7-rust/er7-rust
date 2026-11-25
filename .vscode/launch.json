@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug parser with synthetic message",
+      "type": "lldb",
+      "request": "launch",
+      "cargo": {
+        "args": ["build", "--locked", "-p", "er7", "--bin", "er7",
+                 "--config", "profile.dev.debug=\"full\""],
+        "filter": { "name": "er7", "kind": "bin" }
+      },
+      "args": ["er7/samples/multilingual.er7"],
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}

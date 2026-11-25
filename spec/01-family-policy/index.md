@@ -37,7 +37,7 @@ posture, and the same four commands as its definition of "done":
 cargo test                                # unit, integration, and doc tests
 cargo clippy --all-targets -- -D warnings # lints, including examples and tests
 cargo fmt --check                         # formatting
-cargo rustdoc --lib -- -W missing-docs    # every public item documented
+cargo rustdoc --lib -- -D missing-docs    # every public item documented
 ```
 
 Stable CI runs tests and all-target Clippy for both benchmark crates

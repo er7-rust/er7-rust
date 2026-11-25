@@ -107,6 +107,79 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
       `er7-rust.github.io/MIGRATION_TASKS.md` was then removed as its own
       final instruction requires.
 
+### Audit backlog, 2026-11-25
+
+From the two archived audits (`docs/audits/`, now removed; their content is
+carried here). The Mistral audit's proposal to collect redacted real messages
+is declined: family policy §1.4 requires synthetic data only.
+
+#### VS Code contributor audit (gpt-6-2-astra-high)
+
+- [x] **Protect wire-format fixtures during editor saves.** Root
+      `.vscode/settings.json` marks `er7/samples/*.er7` and
+      `er7-redact/samples/*.er7` read-only. Verified only by inspection;
+      confirm in VS Code that each crate's `adt_a08.er7` shows the read-only
+      indicator and a scratch fixture elsewhere is editable.
+- [x] **One reproduction recipe.** `CONTRIBUTING.md` and the bug template
+      now ask for a named synthetic fixture, the one change that shows the
+      problem, and the command, and no redacted real records.
+- [x] **Align contributor checks with CI.** Checklist uses `--locked`,
+      `-D missing-docs` for all three libraries, and
+      `make ci-minimum-supported-rust-version` instead of a hard-coded MSRV;
+      `.vscode/tasks.json` mirrors the commands.
+- [x] **Coverage checker counts each crate.** `bin/test-coverage` fails when
+      any of `er7`, `er7-redact`, `serde-er7` has no records; pinned by
+      `bin/test-coverage-selftest` (missing crate, uncovered line, all
+      covered), which CI runs. Passed locally; hosted run pending.
+- [x] **Build the site on pull requests.** `site` job in
+      `.github/workflows/ci.yml` runs frozen install, `pnpm check`,
+      `pnpm build`. Site `AGENTS.md` now says SvelteKit 3. Hosted run pending.
+- [ ] **Verify the parser debug launch (F5).** "Debug parser with synthetic
+      message" in `.vscode/launch.json` (CodeLLDB, macOS/Linux) must stop in
+      `parse`, show `first`, and print the outline on continue. Record the OS
+      and debugger used.
+- [ ] **Windows MSVC debug launch.** Document and verify on Windows before
+      advertising it.
+- [x] **Strict docs check was a no-op; fixed 2026-11-25.** Each library's
+      `#![warn(missing_docs)]` overrode CI's `-D missing-docs`, so an
+      undocumented `pub fn` passed. All three now `#![deny(missing_docs)]`;
+      a probe `pub fn` fails `cargo rustdoc --lib -- -D missing-docs` in
+      each crate, and the real trees pass. Family policy §1.2 updated.
+- [ ] **Negative tests for the new checks.** A site-only PR with a broken
+      component must fail the `site` job; a Clippy task
+      must navigate to the source.
+- [ ] **Walkthrough from a fresh checkout.** A first-time contributor
+      completes a bug report using only the checkout and the VS Code tasks.
+
+#### Workspace audit (mistral-medium-3-5-high), synthetic-data-compatible items
+
+Open, unprioritized beyond the order given; many overlap tasks elsewhere in
+this file, so check before starting one.
+
+- [ ] Promotion: execute the 90-day sequence in `spec/promote`; Crate of the
+      Week nomination; awesome-list PRs (`awesome-rust`, healthcare, and lists for the HL7® FHIR® standard).
+- [ ] Onboarding docs: "parse your first message in 5 minutes" tutorial;
+      HL7® v2 primer for Rust developers; "which crate do I need?" decision
+      tree; FAQ on repeating fields and custom delimiters; Rust-oriented
+      glossary.
+- [ ] Trusted Publishing for crates.io (check the existing entry below
+      before duplicating).
+- [ ] Testing: more fuzz targets (invalid escapes, malformed MSH, repeating
+      fields); `proptest` round-trip and path-consistency properties; CLI
+      snapshot tests; `cargo-mutants` run on the suite.
+- [ ] Errors and API: more granular error variants; streaming parser for
+      very large batches; opt-in parse logging. Note the VS Code audit found
+      full debug symbols already expose parser state, so logging is low
+      priority.
+- [ ] Security: documented review of parsing for allocation/DoS vectors;
+      per-crate `SECURITY.md`; input-size limits in the CLIs.
+- [ ] Site: in-browser demo (WASM), documentation search, unified API hub.
+- [ ] Measurement: download and site analytics, adoption dashboard.
+- [ ] Roadmap IDs from crate specs: D24, D25, S10, R26, R27.
+- Not adopted: SOC 2 / HIPAA whitepapers (overclaims for this project's
+  scope; see `PHI.md`), opt-in error telemetry, an `er7` `serde` feature
+  (the independent `serde-er7` adapter covers it), and a real-message corpus.
+
 ### Remaining declared gaps
 
 - [x] **Generate standards-based SBOMs without conflating build surfaces.**
