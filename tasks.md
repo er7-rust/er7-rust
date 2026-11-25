@@ -109,7 +109,7 @@ Grouped by `plan.md` workstream. Order within a group is priority order.
 
 ### Audit backlog, 2026-11-25
 
-From the two archived audits (`docs/audits/`, now removed; their content is
+From the three archived audits (`docs/audits/`, now removed; their content is
 carried here). The Mistral audit's proposal to collect redacted real messages
 is declined: family policy §1.4 requires synthetic data only.
 
@@ -179,6 +179,93 @@ this file, so check before starting one.
 - Not adopted: SOC 2 / HIPAA whitepapers (overclaims for this project's
   scope; see `PHI.md`), opt-in error telemetry, an `er7` `serde` feature
   (the independent `serde-er7` adapter covers it), and a real-message corpus.
+
+#### Project audit (gpt-6-2-astra, 2026-11-25, commit 9ad74d8)
+
+From `docs/audits/gpt-6-2-astra/` (now removed). All 344 workspace tests
+passed while the first four findings below failed focused checks; checks
+were clippy, fmt, rustdoc, `pnpm check`/`build`, coverage self-test and
+trademarks, all passing. Each finding needs a regression test written
+first. File references are to the audited checkout.
+
+- [ ] **High: text can acquire explicit-null semantics.** `Action::Mask('"')`
+      on `ZXX|AB` renders `ZXX|""`, which reparses with `field(1).is_null()`
+      true, so a receiver may clear a stored value. Fix at the core text
+      setter (`er7/src/message.rs`, `er7/src/escape.rs`) so every text-writing
+      action benefits, for example by hex-escaping the two quote bytes. Keep
+      a deliberate way to write an explicit null and document migration.
+      Test decoded text **and** raw null status after a full wire round
+      trip, including a non-default escape character.
+- [ ] **High: CLI overrides a standalone policy's `known-values off`.**
+      `known-values off` plus `ZXX-1 clear` shows `known-values  on` under
+      `--show-policy` and turns `ZXX|SAMPLE|SAMPLE` into `ZXX||` instead of
+      `ZXX||SAMPLE`. Every CLI starting policy enables the sweep and append
+      ORs the flags (`er7-redact/src/main.rs`, `policy.rs`, spec §6.3). Use
+      the first file's parsed settings as the initial policy; keep the
+      stricter combination for later files and built-in policies. Tests: no
+      files, one file off, two files off, both on/off orders; assert shown
+      policy and output.
+- [ ] **High: known-value sweep learns intermediate replacements.**
+      `replace TOKEN` then `clear` on field 1 of `ZXX|ORIGINAL|TOKEN` also
+      clears field 2. Collect known values from the original message already
+      held by the transactional redactor (`er7-redact/src/redact.rs`, spec
+      §2.10); preserve first-match order; skip collection when the sweep is
+      off. Fixture includes an unrelated occurrence of the intermediate
+      replacement and a second occurrence of the original; assert final
+      values and report rows.
+- [ ] **High for binary consumers: `serde-er7` fails a bincode round trip.**
+      Bincode 1.3.3 serializes (190 bytes) but `Message` deserialization
+      fails with `invalid type: sequence, expected a Message object ...`.
+      Add `visit_seq` to the `Message`, `Segment` and `Separators` visitors
+      (`serde-er7/src/{message,segment,separators}.rs`), sharing
+      construction with the map path; cover ordinary and `Strict<Message>`
+      reads. Keep bincode test-only; reuse the multilingual fixture, compare
+      rendered ER7 bytes, add optional-truncation and explicit-null cases;
+      JSON wire shape and unknown-key behavior unchanged. Update the
+      roadmap rationale in `serde-er7/spec/09-...` that JSON covers every
+      shape.
+- [ ] **Before next release: sibling packages can resolve different parser
+      behavior.** `er7-redact` and `serde-er7` declare `er7` as path plus
+      version `"0"`; on the checkout six MSH-2 encoding characters give
+      `BadHeader`, on registry `er7` 0.3.0 the header is accepted (the
+      changelog lists the change as unreleased). Release core first and
+      declare its first compatible version in each sibling manifest. Add a
+      consumer fixture run against the normalized package and the minimum
+      core version covering the header decision and a round trip, in
+      `.github/workflows/ci.yml`/`publish.yml`. Keep the archive-build job
+      and independent releases.
+- [ ] **Before next site deploy: site mixes three release states.** Built
+      home page shows `v0.2.1` while the manifest says `er7` 0.3.0; the
+      redaction tutorial uses `redact(&mut message)?` (Result signature is
+      unreleased; 0.5.0 returned a plain `Report`) and `er7::parse` without
+      saying `er7` must be a direct dependency. Give each crate a
+      documented release version in site data (`src/lib/site.ts`), compile
+      the displayed tutorial in a consumer using exactly the advertised
+      install instructions, compare rendered versions with the intended
+      release, keep unreleased examples under a clearly identified version,
+      and make sure the metadata travels with `bin/make-github-pages`.
+- [ ] **Redaction tutorial and pseudonym wording.** State the scope of
+      positional editing before the tutorial's first "share the message"
+      step. In `er7-redact/spec/07-pseudonyms/` and `src/pseudonym.rs`,
+      replace the categorical claim that differently keyed datasets cannot
+      be joined with: deterministic output for a given key and decoded
+      value; a changed key gives no assurance about linkage through other
+      retained fields. Frozen algorithm unchanged.
+- [ ] **Feature-combination tests.** Beyond the four regressions above, add
+      a property that the sweep's learned set depends only on the original
+      named leaves and the policy, and make the map and positional codecs
+      part of one `serde-er7` round-trip test. Record the obligations in the
+      rule indexes.
+- [ ] **Measure allocation on user paths.** The CLI computes and retains an
+      uncovered-path list for every message even when only writing ER7;
+      Serde serialization deep-clones segments and fields and clones
+      descendants again. Benchmarks predate the November transactional copy
+      and omit Serde. Record peak memory and time for a synthetic batch and
+      a large repeated-field message, compare normal CLI output with
+      `--uncovered`, compute gap lists only in the mode that consumes them,
+      and measure private borrowing serializers before adding public
+      wrapper types. Acceptance: all-or-nothing batch output and the public
+      wire shape unchanged. Update `BENCHMARKS.md`.
 
 ### Remaining declared gaps
 
