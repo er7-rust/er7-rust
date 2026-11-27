@@ -18,7 +18,7 @@ export const links = {
 } as const;
 
 /** The crate version this site documents. */
-export const version = '0.2.1';
+export const version = '0.4.0';
 
 /**
  * The header ThemePicker's catalog, attribute-based

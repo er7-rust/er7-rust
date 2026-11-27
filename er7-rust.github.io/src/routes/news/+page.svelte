@@ -50,6 +50,21 @@ Henderson. https://er7-rust.github.io`;
 </section>
 
 <section class="section">
+  <h2 class="section-heading-eyebrow">2026-11-27 · er7 0.4.0 · er7-redact 0.6.0 · serde-er7 0.5.0</h2>
+  <h2 class="section-heading">Fail-closed nulls, a faster known-value sweep, and positional Serde formats</h2>
+  <div class="prose">
+    <p>
+      <code>er7</code> now writes the exact text <code>""</code> as an escape sequence, so ordinary
+      text can never become the explicit null by accident. <code>er7-redact</code> fails closed
+      when a null cannot be carried, never copies a non-standard segment ID into a report or an
+      error, and sweeps known values in linear time: a 100,000-repetition message went from about
+      nine minutes to 0.17 seconds. <code>serde-er7</code> also reads positional sequences, so
+      bincode and postcard round-trip. The siblings now require <code>er7</code> 0.4.
+    </p>
+  </div>
+</section>
+
+<section class="section">
   <h2 class="section-heading-eyebrow">2026-11-20</h2>
   <h2 class="section-heading">Releases no longer depend on a long-lived registry token</h2>
   <div class="prose">
