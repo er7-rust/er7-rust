@@ -141,8 +141,7 @@ Performance work is only safe next to correctness work. The crate carries
 cargo +nightly fuzz run parse_roundtrip -- -max_total_time=60
 ```
 
-Four targets: `parse_roundtrip`, `parse_with_total`, `escape_roundtrip`,
-and `query_paths`. See [`er7/fuzz/`](er7/fuzz/) and
+Seven targets: `parse_roundtrip`, `parse_with_total`, `escape_roundtrip`, `query_paths`, `malformed_header`, `escape_custom_delimiters`, and `repeating_fields`. See [`er7/fuzz/`](er7/fuzz/) and
 [`er7/spec/13-testing-strategy/index.md`](er7/spec/13-testing-strategy/index.md)
 §13.6, which cites the actual run counts.
 
@@ -201,6 +200,56 @@ qualification — see above. One addition specific to this crate:
 up de-identified is a property of the policy you write, not of how fast
 this crate applies it — see
 [`er7-redact` §5.5](er7-redact/spec/05-built-in-policies/index.md).
+
+
+## Peak memory and time on large inputs
+
+Measured 2026-11-26 on macOS arm64, release build, with `/usr/bin/time -l`
+(peak resident set size) on two synthetic inputs. The inputs are a batch of
+10,000 four-segment ADT messages (2.0 MB), and one message whose `PID-3`
+has 100,000 repetitions (1.7 MB). Single runs, so read these as rough
+figures, not confidence intervals.
+
+### `er7-redact` CLI, built-in policy
+
+| Input, mode | Before | After |
+| ----------- | ------ | ----- |
+| batch, normal output | 0.19 s, 115 MiB | 0.14 s, 73 MiB |
+| batch, `--uncovered` | 0.20 s, 118 MiB | 0.30 s, 118 MiB |
+| 100,000 repetitions, normal output | **≈ 9 min** (533–559 s), 161 MiB | 0.17 s, 160 MiB |
+| 100,000 repetitions, `--uncovered` | ≈ 8–9.5 min, 160 MiB | 0.18 s, 183 MiB |
+
+Two changes made the difference:
+
+- **The known-value sweep was quadratic.** Every unnamed leaf was compared
+  with every collected value, and every new value was checked against the
+  whole list. With 5,000, 10,000, and 20,000 repetitions it took 1.05 s,
+  4.31 s, and 19.2 s; with the sweep off, under 0.1 s. Because the sweep is
+  on by default and the input is untrusted, this was a denial-of-service
+  vector. Values are now indexed by their first word, so a leaf is only
+  checked against values that could start at one of its word boundaries
+  (`er7-redact` spec §2.10). The same three sizes now take 0.01–0.02 s.
+  The index costs about 20 MiB on the 100,000-repetition message.
+- **The uncovered list is only computed for `--uncovered`.** Normal output
+  no longer builds and keeps a list of every gap in every message, which
+  is the 115 → 73 MiB drop on the batch.
+
+The remaining worst case: many collected values that share one first word
+(`x 1`, `x 2`, …) are all checked against any leaf holding that word.
+That is still quadratic in the number of such values, and is recorded in
+`tasks.md` under the allocation/DoS review.
+
+### `serde-er7`, five JSON serializations of a parsed message
+
+| Input | Parse only | Before: + 5× `serde_json::to_vec` | After |
+| ----- | ---------- | ---------------------------------- | ----- |
+| 100,000 repetitions | 77 MiB | 298 ms, 154 MiB | 13 ms, 81 MiB |
+| batch of 10,000 | 95 MiB | 315 ms, 160 MiB | 24 ms, 124 MiB |
+
+Every level used to clone its children into wrapper types before
+serializing them. A private borrowing serializer now writes the same
+shape from the `er7` tree directly (`serde-er7` spec §6.4). The output was
+byte-identical before and after: 19,446,325 and 27,372,875 bytes.
 
 ---
 

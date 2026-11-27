@@ -158,20 +158,34 @@ this file, so check before starting one.
 
 - [ ] Promotion: execute the 90-day sequence in `spec/promote`; Crate of the
       Week nomination; awesome-list PRs (`awesome-rust`, healthcare, and lists for the HL7® FHIR® standard).
-- [ ] Onboarding docs: "parse your first message in 5 minutes" tutorial;
+- [x] Onboarding docs, done 2026-11-26 in the workspace `docs/`:
+      `getting-started` (every output captured from a real run),
+      `which-crate`, `hl7-v2-for-rust-developers` (with a typed-view example
+      that was run), and a Rust-oriented `glossary`. A new `er7` FAQ entry
+      covers reading and adding repetitions; custom delimiters were already
+      covered. Linked from the root README. Not yet on the site. Original:
+      "parse your first message in 5 minutes" tutorial;
       HL7® v2 primer for Rust developers; "which crate do I need?" decision
       tree; FAQ on repeating fields and custom delimiters; Rust-oriented
       glossary.
 - [ ] Trusted Publishing for crates.io (check the existing entry below
       before duplicating).
-- [ ] Testing: more fuzz targets (invalid escapes, malformed MSH, repeating
-      fields); `proptest` round-trip and path-consistency properties; CLI
-      snapshot tests; `cargo-mutants` run on the suite.
+- [ ] Testing: ~~more fuzz targets (invalid escapes, malformed MSH, repeating
+      fields)~~ done 2026-11-26 (`escape_custom_delimiters`, `malformed_header`,
+      `repeating_fields`; er7 spec §13.6); still open: `proptest` round-trip and path-consistency properties; CLI
+      snapshot tests; ~~`cargo-mutants` run on the suite~~ done for `er7`
+      2026-11-26 (er7 spec §13.6: 8 gaps closed, 2 equivalent mutants left);
+      `er7-redact` done the same day (its spec §11.6: 9 gaps closed, 9
+      equivalent mutants left), and `serde-er7` too (its spec §7.6: 3 gaps
+      closed, none left).
 - [ ] Errors and API: more granular error variants; streaming parser for
       very large batches; opt-in parse logging. Note the VS Code audit found
       full debug symbols already expose parser state, so logging is low
       priority.
-- [ ] Security: documented review of parsing for allocation/DoS vectors;
+- [ ] Security: documented review of parsing for allocation/DoS vectors
+      (one found and fixed 2026-11-26: the quadratic known-value sweep. The
+      remaining worst case is many collected values sharing one first word;
+      see BENCHMARKS.md);
       per-crate `SECURITY.md`; input-size limits in the CLIs.
 - [ ] Site: in-browser demo (WASM), documentation search, unified API hub.
 - [ ] Measurement: download and site analytics, adoption dashboard.
@@ -188,7 +202,13 @@ were clippy, fmt, rustdoc, `pnpm check`/`build`, coverage self-test and
 trademarks, all passing. Each finding needs a regression test written
 first. File references are to the audited checkout.
 
-- [ ] **High: text can acquire explicit-null semantics.** `Action::Mask('"')`
+- [x] **High: text can acquire explicit-null semantics.** Done
+      2026-11-26: `er7::escape` writes the exact text `""` as `\X2222\`
+      (R14); `escapes_the_null_text_so_it_stays_text` and
+      `masking_with_quotes_never_writes_an_explicit_null` check the wire
+      round trip with `\` and `?` as escape character. A null is still
+      written by assigning `NULL`; the migration note is in CHANGELOG.md.
+      Original finding: `Action::Mask('"')`
       on `ZXX|AB` renders `ZXX|""`, which reparses with `field(1).is_null()`
       true, so a receiver may clear a stored value. Fix at the core text
       setter (`er7/src/message.rs`, `er7/src/escape.rs`) so every text-writing
@@ -196,7 +216,12 @@ first. File references are to the audited checkout.
       a deliberate way to write an explicit null and document migration.
       Test decoded text **and** raw null status after a full wire round
       trip, including a non-default escape character.
-- [ ] **High: CLI overrides a standalone policy's `known-values off`.**
+- [x] **High: CLI overrides a standalone policy's `known-values off`.**
+      Done 2026-11-26: spec §10.2 says the first file decides when there
+      is no built-in start. `cli_follows_the_first_policy_files_known_values_line`
+      checks the shown policy and the output for no files, one file off,
+      two files off, both on/off orders, `--accept-all`, and
+      `--all-but-the-header`. Original finding:
       `known-values off` plus `ZXX-1 clear` shows `known-values  on` under
       `--show-policy` and turns `ZXX|SAMPLE|SAMPLE` into `ZXX||` instead of
       `ZXX||SAMPLE`. Every CLI starting policy enables the sweep and append
@@ -205,7 +230,12 @@ first. File references are to the audited checkout.
       stricter combination for later files and built-in policies. Tests: no
       files, one file off, two files off, both on/off orders; assert shown
       policy and output.
-- [ ] **High: known-value sweep learns intermediate replacements.**
+- [x] **High: known-value sweep learns intermediate replacements.** Done
+      2026-11-26: `Pass` collects from the original message by position,
+      and skips collection when the sweep is off.
+      `known_values_are_learned_from_the_original_message` covers rule-after-rule
+      and a null collapse, with exact output and report rows. Original
+      finding:
       `replace TOKEN` then `clear` on field 1 of `ZXX|ORIGINAL|TOKEN` also
       clears field 2. Collect known values from the original message already
       held by the transactional redactor (`er7-redact/src/redact.rs`, spec
@@ -213,7 +243,16 @@ first. File references are to the audited checkout.
       off. Fixture includes an unrelated occurrence of the intermediate
       replacement and a second occurrence of the original; assert final
       values and report rows.
-- [ ] **High for binary consumers: `serde-er7` fails a bincode round trip.**
+- [x] **High for binary consumers: `serde-er7` fails a bincode round trip.**
+      Done 2026-11-26: rule S14. Each of the three visitors has a `visit_seq`
+      that shares how the value is built with the map form, and passes strict
+      mode down. `round_trips_through_bincode` covers four samples, a
+      truncation character, and an explicit null, read plainly and
+      strictly, comparing ER7 bytes. `strict_reads_positional_sequences_too`
+      and `short_sequences_are_invalid_length_errors` cover the edges. The
+      roadmap entry in spec §9 is corrected. The sibling-resolution half of
+      the audit's "downstream round trips" entry is still open. Original
+      finding:
       Bincode 1.3.3 serializes (190 bytes) but `Message` deserialization
       fails with `invalid type: sequence, expected a Message object ...`.
       Add `visit_seq` to the `Message`, `Segment` and `Separators` visitors
@@ -224,7 +263,14 @@ first. File references are to the audited checkout.
       JSON wire shape and unknown-key behavior unchanged. Update the
       roadmap rationale in `serde-er7/spec/09-...` that JSON covers every
       shape.
-- [ ] **Before next release: sibling packages can resolve different parser
+- [x] **Before next release: sibling packages can resolve different parser
+      behavior.** Done 2026-11-26. The versions are bumped to `er7` 0.4.0,
+      `er7-redact` 0.6.0, and `serde-er7` 0.5.0, and both siblings require
+      `er7 = "0.4"`. CI packages all three in one call, then runs
+      `bin/check-packaged-consumer`: the normalized packages against the
+      packaged `er7`, checking the header decision and a round trip.
+      Family-policy §1.6 and both sibling release guides say to publish
+      `er7` first. Original finding ("Before next release: sibling packages can resolve different parser
       behavior.** `er7-redact` and `serde-er7` declare `er7` as path plus
       version `"0"`; on the checkout six MSH-2 encoding characters give
       `BadHeader`, on registry `er7` 0.3.0 the header is accepted (the
@@ -244,19 +290,39 @@ first. File references are to the audited checkout.
       install instructions, compare rendered versions with the intended
       release, keep unreleased examples under a clearly identified version,
       and make sure the metadata travels with `bin/make-github-pages`.
-- [ ] **Redaction tutorial and pseudonym wording.** State the scope of
+- [x] **Redaction tutorial and pseudonym wording.** Done 2026-11-26.
+      A "What this covers" paragraph comes before the first sharing step
+      in `docs/usage` §1 and in the site tutorial's step 1. The categorical
+      claim is replaced in spec §7.2, `Redactor::with_key`, `pseudonym.rs`,
+      the linkage example, the usage guide, and the site. `pnpm check` and
+      `pnpm build` are clean. Original finding: State the scope of
       positional editing before the tutorial's first "share the message"
       step. In `er7-redact/spec/07-pseudonyms/` and `src/pseudonym.rs`,
       replace the categorical claim that differently keyed datasets cannot
       be joined with: deterministic output for a given key and decoded
       value; a changed key gives no assurance about linkage through other
       retained fields. Frozen algorithm unchanged.
-- [ ] **Feature-combination tests.** Beyond the four regressions above, add
+- [x] **Feature-combination tests.** Done 2026-11-26:
+      `the_swept_positions_depend_only_on_original_named_values` (D23) varies
+      the earlier rules' replacements over 64 generated combinations and
+      requires the same swept rows. `map_and_positional_codecs_compose_in_one_round_trip`
+      (S10 with S14) chains JSON and bincode over every sample. Both are
+      recorded in the rule tables (er7-redact §11.1, serde-er7 §7). Original
+      finding: Beyond the four regressions above, add
       a property that the sweep's learned set depends only on the original
       named leaves and the policy, and make the map and positional codecs
       part of one `serde-er7` round-trip test. Record the obligations in the
       rule indexes.
-- [ ] **Measure allocation on user paths.** The CLI computes and retains an
+- [x] **Measure allocation on user paths.** Done 2026-11-26; numbers in
+      BENCHMARKS.md ("Peak memory and time on large inputs"). Measuring
+      found a quadratic known-value sweep. With the default policy, a
+      message with 100,000 repetitions took about 9 minutes, which made
+      it a DoS vector. It is fixed with a first-word index: 0.17 s now.
+      `the_known_value_index_matches_what_a_full_scan_would` checks the
+      index against a full scan. The uncovered list is only computed for
+      `--uncovered`. Serde serialization borrows through the private
+      `src/borrow.rs`, with no new public types and byte-identical output.
+      All-or-nothing batch output is unchanged. Original finding: The CLI computes and retains an
       uncovered-path list for every message even when only writing ER7;
       Serde serialization deep-clones segments and fields and clones
       descendants again. Benchmarks predate the November transactional copy
@@ -266,6 +332,101 @@ first. File references are to the audited checkout.
       and measure private borrowing serializers before adding public
       wrapper types. Acceptance: all-or-nothing batch output and the public
       wire shape unchanged. Update `BENCHMARKS.md`.
+
+#### Release audit (gpt-6-2-astra-high, 2026-11-26, commit 9bb5794)
+
+From `docs/audits/gpt-6-2-astra-high.md` (now removed). That file was a
+summary only; the full report it linked to was not in the tree, so the
+original reproduction inputs are lost. Each finding below was re-checked
+on 2026-11-26 against the debug `er7-redact` CLI with synthetic input
+(`H` = `MSH|^~\&|A`), and is marked reproduced or not. The audit
+recommends holding the next `er7-redact` release on the first three.
+Write each regression test first.
+
+- [x] **Release blocker: an explicit null cannot be written when `"` is a
+      delimiter.** Done 2026-11-26: `er7` spec §5.3 says such a message
+      cannot carry a null. `er7-redact` checks before each of its four
+      null-writing sites and returns `Error::NullUnrepresentable` (D25).
+      `a_null_fails_closed_when_quote_is_a_delimiter` covers field,
+      repetition, component, and subcomponent, and the CLI exits 1.
+      Original finding: *Reproduced.* `MSH"^~\&"A` + `ZXX"X"Y` with
+      `-r 'ZXX-1 null'` writes `ZXX""""Y`: the null's two quotes are field
+      separators, so on reparse `Y` moves from field 2 to field 4.
+      Writing `NULL` into `raw` (`er7-redact/src/redact.rs` `leaf`, and
+      every `raw = NULL` caller) assumes `"` is not structural. In `er7`,
+      decide and specify (§5.3, §3.3) what null means under such a delimiter
+      set; in `er7-redact`, fail the message transactionally with a typed
+      error when null cannot be represented rather than emit a shifted
+      message. Tests: render, reparse, assert field positions, decoded text,
+      and null status. This finding and the next share one fix site and
+      should land together.
+- [x] **Release blocker: masking text can produce an explicit null.**
+      Done 2026-11-26 with the entry above.
+      *Reproduced* (already tracked above as "text can acquire explicit-null
+      semantics"; this audit confirms it): `H` + `ZXX|AB` with
+      `-r 'ZXX-1 mask "'` writes `ZXX|""`. Close both entries together.
+- [x] **Release blocker: `--report` and `--uncovered` copy segment labels
+      verbatim.** Done 2026-11-26: rule D26 (spec §10.3). The CLI writes a
+      non-standard ID as `<segment-label-N>`; see
+      `segment_labels_are_standard_ids_or_placeholders` and
+      `cli_report_and_uncovered_never_copy_a_nonstandard_segment_id`. The
+      wording in the usage guide, `index.md`, SECURITY.md, and spec §8.2 now
+      says that `Change::path` keeps the ID as sent. Follow-up below.
+      Original finding: *Reproduced.* `H` + `ZSMITHJOHN|x` prints
+      `ZSMITHJOHN[1]-1[1].1.1` under both flags. A segment ID is arbitrary
+      sender text (R6 keeps unknown segments as data), so a crafted or
+      malformed message can carry patient detail into output that
+      `er7-redact/docs/usage/index.md:185` and `SECURITY.md:171` call safe
+      to paste into a ticket. Define a support-safe label format (for
+      example, pass through only `[A-Z][A-Z0-9]{2}` and replace anything
+      else with a placeholder plus its ordinal), test with synthetic marker
+      text in the label, and correct both documents' wording.
+- [x] **Follow-up to D26: error messages still print the segment ID as
+      sent.** Done 2026-11-26: the new public `shareable_path` is used by
+      both error variants and by the CLI;
+      `errors_never_copy_a_nonstandard_segment_id` covers it. Original
+      finding: `Error::NoOutput` and `Error::NullUnrepresentable` build
+      their `path` from the raw ID, and the CLI prints it on stderr, which
+      also ends up in tickets and CI logs. Apply the same placeholder rule
+      when building those paths, or in the CLI's error formatter, and add a
+      test with a synthetic marker in the segment ID.
+- [ ] **Release blocker: known-value sweep interactions.** Three parts:
+      - *Learns intermediate replacements.* **Fixed 2026-11-26** (see the
+        entry above). Reproduced: `ZXX|ORIGINAL|TOKEN`
+        with `replace TOKEN` then `clear` on field 1 gives `ZXX||`. Already
+        tracked above; close it with this entry.
+      - *Revisits fields the default policy already handled.* Not
+        reproduced with `ZXX|SECRET|SECRET` + `replace X` +
+        `--reject-all` (report shows one change per field). Find an input
+        that shows it, or close this part as not reproducible.
+      - *Misses an eligible overlapping match.* Not reproduced. `ANA` in
+        `BANANA` is not matched, which is the documented word-boundary
+        behaviour, not this bug. Needs the audit's input; until then, add a
+        property test that two known values sharing characters (`AB`,
+        `ABC`, `BC`) are each found wherever the spec says they should be.
+      Acceptance for all three: exact output and ordered report rows.
+- [x] **Before promising safe retries: redaction is not idempotent.**
+      Done 2026-11-26 with the second option: the sweep skips a value its
+      own action leaves unchanged (spec §2.10, §3.6).
+      `a_second_pass_changes_nothing_with_the_sweep_on` replays six
+      built-in actions on their own output. §3.6 states the remaining
+      limit, two rules on one position. Original finding:
+      *Reproduced.* `-r 'ZXX-1 first 4'` on `ZXX|ABCDEFGH|ABCD WXYZ` gives
+      `ZXX|ABCD|ABCD WXYZ`; running the same policy on that output gives
+      `ZXX|ABCD|ABCD`. The second pass learns `ABCD` as a known value and
+      its sweep truncates the neighbouring field. Either document that a
+      policy must be applied to original input only (spec §2.10, CLI usage,
+      the redaction tutorial), or make the sweep skip a value its own
+      action leaves unchanged. Test replay from both original and
+      previously redacted input.
+- [x] **Before dependent releases: downstream round trips.** Done
+      2026-11-26: bincode with S14, and the packaged consumer with
+      family-policy §1.6. Bincode
+      `Message` reads and siblings resolving a registry `er7` with
+      different MSH-2 behaviour. Both are already tracked above. The audit's
+      completion criterion adds that both are tested against the
+      *normalized packages* (`cargo package` output) and the *minimum
+      declared* `er7` version, not the workspace path dependency.
 
 ### Remaining declared gaps
 

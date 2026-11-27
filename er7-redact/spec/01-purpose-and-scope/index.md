@@ -89,8 +89,10 @@ test that enforces it.
 | D22 | `uncovered` reports every leaf that carries text and is named by no rule, independent of posture and without invoking actions. | [§2.9](../02-redaction-model/index.md) |
 | D23 | By default, a qualifying whole-word repeat of a collected value receives its rule’s action. §2.10 defines eligibility, Unicode lowercasing, the length threshold, and boundaries. | [§2.10](../02-redaction-model/index.md) |
 | D24 | A caller-supplied action runs the same way a built-in one does; `Action` keeps `Debug`, `Clone`, `PartialEq`, and `Eq`; it has no policy-file spelling. | [§3.8](../03-actions/index.md) |
+| D25 | A `null` that the message's delimiters cannot represent fails the redaction closed, and no action's text ever becomes an explicit null. | [§3.4](../03-actions/index.md), [§9.2](../09-error-handling/index.md) |
+| D26 | Output meant to be shared never copies a segment ID that is not the standard three-character shape: the CLI's `--report` and `--uncovered`, and every error's path. Such an ID is sender text, and is written as a numbered placeholder (`shareable_path`). | [§10.3](../10-command-line-interface/index.md) |
 
-The next rule ID is **D25**.
+The next rule ID is **D27**.
 
 ## 1.5 Design priorities, in order
 

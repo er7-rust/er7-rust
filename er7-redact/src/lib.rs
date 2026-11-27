@@ -135,7 +135,7 @@ pub mod redact;
 pub use crate::action::{Action, CustomAction};
 pub use crate::policy::{Policy, Posture, Rule, Unrecognised};
 pub use crate::pseudonym::pseudonym;
-pub use crate::redact::{Change, Redactor, Report};
+pub use crate::redact::{Change, Redactor, Report, is_standard_segment_id, shareable_path};
 
 use std::fmt;
 
@@ -193,6 +193,16 @@ pub enum Error {
         /// The leaf's fully qualified path, such as `PID[1]-5[1].1.1`.
         path: String,
     },
+    /// A `null` action would write the explicit null `""` into a message
+    /// that uses `"` as one of its delimiters. There the two quotes are
+    /// structure, so writing them would split the position and shift every
+    /// value after it. [`Redactor::redact`] fails closed instead (D25,
+    /// spec §9.2).
+    NullUnrepresentable {
+        /// The position the null would have been written to, fully
+        /// qualified, such as `ZXX[1]-1[1].1.1`.
+        path: String,
+    },
 }
 
 impl fmt::Display for Error {
@@ -213,6 +223,11 @@ impl fmt::Display for Error {
                 "the action {action:?} writes nothing at {path}, \
                  so the value cannot be redacted"
             ),
+            Error::NullUnrepresentable { path } => write!(
+                f,
+                "a null cannot be written at {path}, because the message \
+                 uses \" as a delimiter"
+            ),
         }
     }
 }
@@ -220,7 +235,10 @@ impl fmt::Display for Error {
 impl std::error::Error for Error {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {
-            Error::BadPolicy(_) | Error::NoReplacement { .. } | Error::NoOutput { .. } => None,
+            Error::BadPolicy(_)
+            | Error::NoReplacement { .. }
+            | Error::NoOutput { .. }
+            | Error::NullUnrepresentable { .. } => None,
             Error::Er7(e) => Some(e),
         }
     }
@@ -265,5 +283,14 @@ mod tests {
             "the action \"<custom>\" writes nothing at PID[1]-5[1].1.1, so the value cannot be redacted"
         );
         assert!(nothing.source().is_none());
+
+        let unrepresentable = Error::NullUnrepresentable {
+            path: "ZXX[1]-1[1].1.1".into(),
+        };
+        assert_eq!(
+            unrepresentable.to_string(),
+            "a null cannot be written at ZXX[1]-1[1].1.1, because the message uses \" as a delimiter"
+        );
+        assert!(unrepresentable.source().is_none());
     }
 }

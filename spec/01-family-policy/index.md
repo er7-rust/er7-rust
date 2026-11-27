@@ -161,7 +161,7 @@ before passing text to the crates. MSH-18 alone does not perform that step.
 `er7`, `er7-redact`, and `serde-er7` are members of one Cargo workspace,
 sharing one root `Cargo.toml`, one workspace `Cargo.lock`, and one
 `target/`. `er7-redact` and `serde-er7` depend on `er7` via a **path**
-dependency (`er7 = { path = "../er7", version = "0" }`) so that local
+dependency (`er7 = { path = "../er7", version = "0.4" }`) so that local
 changes to `er7` are picked up immediately across the workspace without a
 crates.io round-trip — the `version` requirement is kept alongside the
 path so the manifest is still valid once each crate is packaged and
@@ -183,13 +183,35 @@ each manifest's `include` list, strips the path part of a published
 dependency, resolves its version requirement from the registry, and builds
 from the resulting archive.
 
-CI therefore runs the following for every publishable crate:
+CI therefore packages every publishable crate in **one** invocation, then
+builds a consumer against the result:
 
 ```sh
-cargo package --locked -p er7
-cargo package --locked -p er7-redact
-cargo package --locked -p serde-er7
+cargo package --locked -p er7 -p er7-redact -p serde-er7
+bin/check-packaged-consumer
 ```
+
+**Each sibling declares the first `er7` version whose behaviour it
+relies on** (`version = "0.4"` beside the path), not `"0"`. With `"0"`, a
+sibling published while the workspace `er7` held unreleased changes would
+resolve to an older registry `er7` with different behaviour. The audit of
+2026-11-25 found exactly that: six MSH-2 characters gave `BadHeader` in the
+workspace and were accepted by registry `er7` 0.3.0. A real minimum means
+crates.io cannot hand a downstream user that combination.
+
+That is also why the packaging is one invocation. Until the new `er7` is
+published, crates.io does not have the version the siblings require, and
+packaging a sibling alone fails to resolve it. Packaging all three together
+lets Cargo verify each sibling against the packaged `er7`.
+`bin/check-packaged-consumer` then unpacks the three archives and builds a
+throwaway crate against them, with `er7` patched to the packaged one, so the
+siblings' normalized manifests are tested against the minimum core version
+they declare. It checks the MSH-2 header decision and a round trip through
+each crate.
+
+The release order follows: **publish `er7` first**. The publish workflow
+packages one crate at a time, so it refuses a sibling until the `er7` it
+requires is on crates.io.
 
 This is deliberately a package-build invariant, not a substitute for the
 four checks. The integration suites are not part of the published archives;

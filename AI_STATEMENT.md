@@ -174,8 +174,9 @@ cargo +1.98 check --workspace --all-targets       # the MSRV floor
   `the_crate_has_no_runtime_dependencies` fails if anything is added to
   `er7`'s `[dependencies]`. A supply-chain rule that only lives in prose is
   a rule a future session can talk itself out of.
-- **Fuzz targets** — `parse_roundtrip`, `escape_roundtrip`, `query_paths`
-  in [`er7/fuzz/`](er7/fuzz/) — on the surface that takes untrusted input.
+- **Fuzz targets** — seven of them, listed in
+  [`er7/spec/13-testing-strategy`](er7/spec/13-testing-strategy/index.md)
+  §13.6, in [`er7/fuzz/`](er7/fuzz/) — on the surface that takes untrusted input.
 - **Benchmarks with a published method and machine**
   ([`BENCHMARKS.md`](BENCHMARKS.md)), so a performance claim is a
   measurement rather than an impression.

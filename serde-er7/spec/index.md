@@ -51,6 +51,7 @@ when the two are discussed together.
 | S11 | Every wrapper type implements `Deref`, `DerefMut`, and `From` both ways | [§6](06-ergonomics/index.md) |
 | S12 | Every public item carries a doc comment; `cargo rustdoc --lib -- -W missing-docs` stays clean | [§7](07-testing-strategy/index.md) |
 | S13 | `Strict<T>` (`T` in `Message`, `Segment`, `Separators`) rejects an unknown field instead of ignoring it; `T::deserialize` alone stays tolerant (S8) | [§11](11-strict-mode/index.md) |
+| S14 | `Message`, `Segment`, and `Separators` also deserialize from a positional sequence, in the order they serialize their fields, so a format that writes structs as sequences (bincode, postcard) round-trips; strict mode carries down the same way | [§2.3](02-wire-shapes/index.md) |
 
 ## Which goal wins when two conflict
 

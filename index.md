@@ -40,6 +40,14 @@ development, the four checks, and the safety rules, packaged from this
 repository's own `AGENTS.md` files rather than duplicating them. Drop
 either into a project's own `.claude/skills/` to use it there.
 
+## New here?
+
+[`docs/`](docs/index.md) is the on-ramp:
+[your first message in 5 minutes](docs/getting-started/index.md),
+[which crate do I need?](docs/which-crate/index.md),
+[HL7 v2 for Rust developers](docs/hl7-v2-for-rust-developers/index.md),
+and a [glossary](docs/glossary/index.md) mapping HL7 terms to Rust types.
+
 ## Install
 
 ```sh

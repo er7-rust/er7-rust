@@ -16,6 +16,88 @@ use er7::{Component, Field, Message, Path, Repetition, Segment, Separators, Subc
 
 use crate::{Action, Error, Policy, Posture, Unrecognised};
 
+/// True when `id` has the standard segment-ID shape: an uppercase ASCII
+/// letter, then two uppercase ASCII letters or digits (`PID`, `OBX`,
+/// `ZP1`).
+///
+/// Any other ID is sender text, which `er7` keeps as data, so a crafted or
+/// broken message can carry patient detail in it. [`shareable_path`]
+/// uses this to decide which IDs it may copy (D26, spec §10.3).
+///
+/// Example:
+///
+/// ```
+/// use er7_redact::is_standard_segment_id;
+///
+/// assert!(is_standard_segment_id("PID"));
+/// assert!(is_standard_segment_id("ZP1"));
+/// assert!(!is_standard_segment_id("ZSMITHJOHN"));
+/// assert!(!is_standard_segment_id("pid"));
+/// ```
+#[must_use]
+pub fn is_standard_segment_id(id: &str) -> bool {
+    match id.as_bytes() {
+        [first, rest @ ..] if rest.len() == 2 => {
+            first.is_ascii_uppercase()
+                && rest
+                    .iter()
+                    .all(|b| b.is_ascii_uppercase() || b.is_ascii_digit())
+        }
+        _ => false,
+    }
+}
+
+/// `path`, written so that it is safe to share: a standard segment ID is
+/// kept, and any other becomes `<segment-label-N>`, where `N` numbers the
+/// distinct non-standard IDs of `message` in order of first appearance
+/// (D26, spec §10.3).
+///
+/// Use this before putting a [`Change::path`] or a
+/// [`Redactor::uncovered`] path into a ticket or a log. Those keep the ID
+/// as sent, so that they name the segment the caller holds. A path whose
+/// non-standard ID is not in `message` is written as `<segment-label>`.
+///
+/// Example:
+///
+/// ```
+/// use er7::Path;
+/// use er7_redact::shareable_path;
+///
+/// let message = er7::parse("MSH|^~\\&|LAB\rZSMITHJOHN|x\rPID|1")?;
+/// let path = Path::parse("ZSMITHJOHN[1]-1[1].1.1")?;
+/// assert_eq!(shareable_path(&path, &message), "<segment-label-1>[1]-1[1].1.1");
+/// let path = Path::parse("PID[1]-1[1].1.1")?;
+/// assert_eq!(shareable_path(&path, &message), "PID[1]-1[1].1.1");
+/// # Ok::<(), er7::Error>(())
+/// ```
+#[must_use]
+pub fn shareable_path(path: &Path, message: &Message) -> String {
+    shareable(path.clone(), &nonstandard_ids(message))
+}
+
+/// The distinct non-standard segment IDs of `message`, in order of first
+/// appearance.
+fn nonstandard_ids(message: &Message) -> Vec<String> {
+    let mut ids: Vec<String> = Vec::new();
+    for segment in &message.segments {
+        if !is_standard_segment_id(&segment.name) && !ids.contains(&segment.name) {
+            ids.push(segment.name.clone());
+        }
+    }
+    ids
+}
+
+/// `path` with a non-standard segment ID replaced by its label in `ids`.
+fn shareable(mut path: Path, ids: &[String]) -> String {
+    if !is_standard_segment_id(&path.segment) {
+        path.segment = match ids.iter().position(|id| id == &path.segment) {
+            Some(index) => format!("<segment-label-{}>", index + 1),
+            None => "<segment-label>".to_string(),
+        };
+    }
+    path.to_string()
+}
+
 /// One leaf's coordinates: the segment's index in the message, then the
 /// 1-based field, repetition, component, and subcomponent numbers.
 type Position = (usize, usize, usize, usize, usize);
@@ -143,8 +225,10 @@ impl Redactor {
 
     /// Set the pseudonym key (spec §7.2).
     ///
-    /// Two data sets redacted under different keys share no pseudonyms and
-    /// so cannot be joined; two under the same key can. The key is a
+    /// Pseudonyms are deterministic for a given key and decoded value, so
+    /// two data sets redacted under the same key can be joined on them. A
+    /// different key changes every pseudonym, but that is no assurance the
+    /// data sets cannot be linked through the fields left in place. The key is a
     /// number in a configuration file, not a managed secret — read spec
     /// §7.3 before treating it as one.
     #[must_use]
@@ -241,21 +325,25 @@ impl Redactor {
     /// [`Error::NoOutput`] if an action writes nothing for a leaf that
     /// carries text and is not a `Keep` (a custom action returning
     /// `None`). Leaving the text in place would be a silent fail-open, so
-    /// the whole call fails closed (spec §9.2; RCA-IN-2, RCA-IN-6). On
+    /// the whole call fails closed (spec §9.2; RCA-IN-2, RCA-IN-6).
+    ///
+    /// [`Error::NullUnrepresentable`] if a `null` would be written into
+    /// a message that uses `"` as a delimiter, where the two quotes would
+    /// be structure and shift every later value (D25). On
     /// error `message` is left exactly as it was passed in: unredacted, so
     /// the caller must not write it out.
     pub fn redact(&self, message: &mut Message) -> Result<Report, Error> {
         // Work on a copy, so that a failure part-way through never leaves
         // a half-redacted message that looks finished.
         let mut work = message.clone();
-        let report = self.redact_in_place(&mut work)?;
+        let report = self.redact_in_place(message, &mut work)?;
         *message = work;
         Ok(report)
     }
 
     /// The pass behind [`Redactor::redact`], which may leave `message`
     /// part-redacted when it fails.
-    fn redact_in_place(&self, message: &mut Message) -> Result<Report, Error> {
+    fn redact_in_place(&self, original: &Message, message: &mut Message) -> Result<Report, Error> {
         // The segment name and occurrence of every segment, taken before
         // anything is borrowed mutably, so that a change can be labelled
         // with the path that names it.
@@ -267,7 +355,10 @@ impl Redactor {
             separators: message.separators,
             named: HashSet::new(),
             report: Report::default(),
-            known: Vec::new(),
+            known: KnownValues::default(),
+            labels: nonstandard_ids(message),
+            original,
+            collect: self.policy.search_known_values,
         };
 
         for rule in &self.policy.rules {
@@ -444,7 +535,7 @@ struct At<'a> {
 
 /// One run of a policy over one message: the state that outlives a single
 /// rule, and the descent that every rule shares.
-struct Pass {
+struct Pass<'m> {
     key: u64,
     separators: Separators,
     /// Every leaf position some rule named, so that a rejecting posture
@@ -456,10 +547,19 @@ struct Pass {
     /// Every value a rule found at a named position, lowercase, paired
     /// with that rule's own action — first occurrence wins on a repeat.
     /// A `Keep` rule contributes none (D23, spec §2.10).
-    known: Vec<(String, Action)>,
+    known: KnownValues,
+    /// The message's non-standard segment IDs, so that an error names a
+    /// position without copying one (D26).
+    labels: Vec<String>,
+    /// The message as it arrived. Known values are collected from here,
+    /// not from the copy being redacted, so a later rule never learns an
+    /// earlier rule's replacement (D23, spec §2.10).
+    original: &'m Message,
+    /// Whether to collect known values at all: only when the sweep is on.
+    collect: bool,
 }
 
-impl Pass {
+impl Pass<'_> {
     /// Apply one rule to one segment.
     fn segment(
         &mut self,
@@ -486,7 +586,8 @@ impl Pass {
             };
             if action == &Action::Null && path.repetition.is_none() && path.component.is_none() {
                 if !field.is_null() {
-                    self.learn_field(field, action);
+                    self.null_is_writable(at, number, 1, 1, 1)?;
+                    self.learn_original(at.index, (number, None, None, None), action);
                     *field = null_field();
                     self.record(at, number, 1, 1, 1, action);
                 }
@@ -502,7 +603,9 @@ impl Pass {
                 };
                 if action == &Action::Null && path.component.is_none() {
                     if !node.is_null() {
-                        self.learn_repetition(node, action);
+                        self.null_is_writable(at, number, repetition, 1, 1)?;
+                        let place = (number, Some(repetition), None, None);
+                        self.learn_original(at.index, place, action);
                         *node = null_repetition();
                         self.record(at, number, repetition, 1, 1, action);
                     }
@@ -533,7 +636,9 @@ impl Pass {
             };
             if action == &Action::Null && path.subcomponent.is_none() {
                 if !component.is_null() {
-                    self.learn_component(component, action);
+                    self.null_is_writable(at, field, index, number, 1)?;
+                    let place = (field, Some(index), Some(number), None);
+                    self.learn_original(at.index, place, action);
                     *component = null_component();
                     self.record(at, field, index, number, 1, action);
                 }
@@ -549,7 +654,8 @@ impl Pass {
                 };
                 let position = (at.index, field, index, number, subcomponent);
                 self.named.insert(position);
-                self.learn(leaf, action);
+                let place = (field, Some(index), Some(number), Some(subcomponent));
+                self.learn_original(at.index, place, action);
                 if self.leaf(leaf, action, (at, field, index, number, subcomponent))? {
                     self.record(at, field, index, number, subcomponent, action);
                 }
@@ -616,6 +722,7 @@ impl Pass {
             if leaf.is_null() {
                 return Ok(false);
             }
+            self.null_is_writable(at, field, repetition, component, subcomponent)?;
             leaf.raw = NULL.to_string();
             return Ok(true);
         }
@@ -626,15 +733,17 @@ impl Pass {
         let Some(replacement) = action.apply(&value, self.key) else {
             return Err(Error::NoOutput {
                 action: action.to_string(),
-                path: Path {
-                    segment: at.name.to_string(),
-                    segment_occurrence: Some(at.occurrence),
-                    field: Some(field),
-                    repetition: Some(repetition),
-                    component: Some(component),
-                    subcomponent: Some(subcomponent),
-                }
-                .to_string(),
+                path: shareable(
+                    Path {
+                        segment: at.name.to_string(),
+                        segment_occurrence: Some(at.occurrence),
+                        field: Some(field),
+                        repetition: Some(repetition),
+                        component: Some(component),
+                        subcomponent: Some(subcomponent),
+                    },
+                    &self.labels,
+                ),
             });
         };
         if replacement == value {
@@ -658,16 +767,63 @@ impl Pass {
     /// already known keeps the action that was collected first, matching
     /// the order [`Change`] rows already follow.
     fn learn(&mut self, leaf: &Subcomponent, action: &Action) {
-        if action == &Action::Keep || leaf.is_empty() || leaf.is_null() {
+        if !self.collect || action == &Action::Keep || leaf.is_empty() || leaf.is_null() {
             return;
         }
-        let value = leaf.value(&self.separators).to_lowercase();
+        let decoded = leaf.value(&self.separators);
+        // A value its own action leaves as it is stays at the named
+        // position, so hunting it elsewhere would be inconsistent. It is
+        // also what keeps a replay idempotent: a second pass over redacted
+        // output would otherwise learn the first pass's output (`ABCD`
+        // after `first 4`) and truncate unrelated text (D10, spec §3.6).
+        if action.apply(&decoded, self.key).as_deref() == Some(&*decoded) {
+            return;
+        }
+        let value = decoded.to_lowercase();
         if value.chars().count() < MIN_KNOWN_VALUE_LENGTH {
             return;
         }
-        if !self.known.iter().any(|(known, _)| *known == value) {
-            self.known.push((value, action.clone()));
-        }
+        self.known.insert(value, action);
+    }
+
+    /// [`Pass::learn`] over the node at one position of the **original**
+    /// message: the field, or the repetition, component, or leaf below it
+    /// when those are given. Collecting from the original rather than the
+    /// copy being redacted is what keeps a later rule from learning an
+    /// earlier rule's replacement (D23, spec §2.10).
+    ///
+    /// Every position the copy still has exists in the original too, since
+    /// redaction never creates one (D2) and a null collapse keeps the first
+    /// position. A missing one is skipped all the same.
+    fn learn_original(
+        &mut self,
+        segment: usize,
+        (field, repetition, component, subcomponent): (
+            usize,
+            Option<usize>,
+            Option<usize>,
+            Option<usize>,
+        ),
+        action: &Action,
+    ) -> Option<()> {
+        let original = self.original;
+        let field = original.segments.get(segment)?.field(field)?;
+        let Some(repetition) = repetition else {
+            self.learn_field(field, action);
+            return Some(());
+        };
+        let repetition = field.repetition(repetition)?;
+        let Some(component) = component else {
+            self.learn_repetition(repetition, action);
+            return Some(());
+        };
+        let component = repetition.component(component)?;
+        let Some(subcomponent) = subcomponent else {
+            self.learn_component(component, action);
+            return Some(());
+        };
+        self.learn(component.subcomponent(subcomponent)?, action);
+        Some(())
     }
 
     /// [`Pass::learn`] over every leaf below a component.
@@ -725,11 +881,7 @@ impl Pass {
                             continue;
                         }
                         let value = leaf.value(&self.separators).to_lowercase();
-                        let found = self
-                            .known
-                            .iter()
-                            .find(|(known, _)| contains_whole_word(&value, known))
-                            .map(|(_, action)| action.clone());
+                        let found = self.known.find(&value).cloned();
                         let Some(action) = found else {
                             continue;
                         };
@@ -742,6 +894,36 @@ impl Pass {
             }
         }
         Ok(())
+    }
+
+    /// Fail closed when the explicit null cannot be written: a message
+    /// using `"` as a delimiter would read the two quotes as structure,
+    /// splitting the position and shifting every value after it (D25,
+    /// spec §9.2).
+    fn null_is_writable(
+        &self,
+        at: At,
+        field: usize,
+        repetition: usize,
+        component: usize,
+        subcomponent: usize,
+    ) -> Result<(), Error> {
+        if !self.separators.is_delimiter('"') {
+            return Ok(());
+        }
+        Err(Error::NullUnrepresentable {
+            path: shareable(
+                Path {
+                    segment: at.name.to_string(),
+                    segment_occurrence: Some(at.occurrence),
+                    field: Some(field),
+                    repetition: Some(repetition),
+                    component: Some(component),
+                    subcomponent: Some(subcomponent),
+                },
+                &self.labels,
+            ),
+        })
     }
 
     /// Add a row to the report, with the path fully qualified (spec §8.3).
@@ -805,6 +987,73 @@ const MIN_KNOWN_VALUE_LENGTH: usize = 3;
 ///
 /// A surname `wood` matches standalone `wood` but not the `wood` inside
 /// `woodward`, whichever side of the match the extra letters are on.
+/// The values the sweep looks for, in the order they were collected, with
+/// two indexes that keep the sweep linear in the size of the message
+/// rather than quadratic (D23, spec §2.10).
+///
+/// A whole-word occurrence of a value starts where the leaf has a word
+/// boundary, so it starts at one of the leaf's alphanumeric runs. When the
+/// value itself starts with an alphanumeric character, that run is exactly
+/// the value's own first run. So a leaf only needs checking against the
+/// values filed under its own runs, plus the few values that start with
+/// something else, which are always checked.
+#[derive(Default)]
+struct KnownValues {
+    /// Every value and its action, first-collected first.
+    values: Vec<(String, Action)>,
+    /// The values already collected, so a repeat is found in O(1).
+    seen: HashSet<String>,
+    /// Indexes into `values`, by each value's first alphanumeric run.
+    by_first_word: HashMap<String, Vec<usize>>,
+    /// Indexes into `values` whose first character is not alphanumeric.
+    unindexed: Vec<usize>,
+}
+
+impl KnownValues {
+    fn is_empty(&self) -> bool {
+        self.values.is_empty()
+    }
+
+    /// Add `value` with `action`, unless it is already known: then the
+    /// action collected first is kept (spec §2.10).
+    fn insert(&mut self, value: String, action: &Action) {
+        if !self.seen.insert(value.clone()) {
+            return;
+        }
+        let index = self.values.len();
+        let first: String = value.chars().take_while(|c| c.is_alphanumeric()).collect();
+        if first.is_empty() {
+            self.unindexed.push(index);
+        } else {
+            self.by_first_word.entry(first).or_default().push(index);
+        }
+        self.values.push((value, action.clone()));
+    }
+
+    /// The action of the first-collected value that `leaf` (lowercased)
+    /// contains as a whole word.
+    fn find(&self, leaf: &str) -> Option<&Action> {
+        let mut best: Option<usize> = None;
+        let mut consider = |index: usize| {
+            if best.is_none_or(|b| index < b) && contains_whole_word(leaf, &self.values[index].0) {
+                best = Some(index);
+            }
+        };
+        for word in leaf
+            .split(|c: char| !c.is_alphanumeric())
+            .filter(|w| !w.is_empty())
+        {
+            for &index in self.by_first_word.get(word).into_iter().flatten() {
+                consider(index);
+            }
+        }
+        for &index in &self.unindexed {
+            consider(index);
+        }
+        best.map(|index| &self.values[index].1)
+    }
+}
+
 fn contains_whole_word(haystack: &str, needle: &str) -> bool {
     for (start, _) in haystack.match_indices(needle) {
         let end = start + needle.len();
@@ -1468,6 +1717,333 @@ mod tests {
         let error = Redactor::new(policy).redact(&mut message).unwrap_err();
         assert!(matches!(error, Error::NoOutput { ref path, .. } if path == "NTE[1]-3[1].1.1"));
         assert_eq!(message, before);
+    }
+
+    #[test]
+    fn a_null_fails_closed_when_quote_is_a_delimiter() {
+        // D25. With `"` as the field separator, writing `""` would add two
+        // field breaks: `ZXX"X"Y` would become `ZXX""""Y`, moving `Y` from
+        // field 2 to field 4. Every level a null can be written at must
+        // refuse, name the position, and leave the message as passed in.
+        let text = "MSH\"^~\\&\"A\rZXX\"X^Y&W~Z\"Q";
+        for (path, at) in [
+            ("ZXX-1", "ZXX[1]-1[1].1.1"),
+            ("ZXX-1[2]", "ZXX[1]-1[2].1.1"),
+            ("ZXX-1.2", "ZXX[1]-1[1].2.1"),
+            ("ZXX-1.2.2", "ZXX[1]-1[1].2.2"),
+        ] {
+            let mut message = er7::parse(text).unwrap();
+            let before = message.clone();
+            let policy = Policy::accept_all().with(path, Action::Null).unwrap();
+            let error = Redactor::new(policy).redact(&mut message).unwrap_err();
+            assert_eq!(
+                error,
+                Error::NullUnrepresentable { path: at.into() },
+                "{path}"
+            );
+            assert_eq!(message, before, "{path}");
+        }
+        // A null rule that finds nothing to write is still not an error (D8).
+        let mut message = er7::parse(text).unwrap();
+        let policy = Policy::accept_all().with("ZXX-9", Action::Null).unwrap();
+        let report = Redactor::new(policy).redact(&mut message).unwrap();
+        assert_eq!(report.changes.len(), 0);
+    }
+
+    #[test]
+    fn masking_with_quotes_never_writes_an_explicit_null() {
+        // D25, D4: `mask "` on a two-character value used to write `""`,
+        // which a receiver reads as "clear this value". After a full wire
+        // round trip the field must hold two quote characters, not a null,
+        // with the default escape character and a custom one.
+        for (header, escaped) in [("MSH|^~\\&|A", r"\X2222\"), ("MSH|^~?&|A", "?X2222?")] {
+            let mut message = er7::parse(&format!("{header}\rZXX|AB")).unwrap();
+            let policy = Policy::accept_all()
+                .with("ZXX-1", Action::Mask('"'))
+                .unwrap();
+            Redactor::new(policy).redact(&mut message).unwrap();
+            let wire = message.to_er7();
+            assert_eq!(wire, format!("{header}\rZXX|{escaped}"));
+            let reread = er7::parse(&wire).unwrap();
+            let field = reread.segment("ZXX").unwrap().field(1).unwrap();
+            assert!(!field.is_null());
+            let value = reread
+                .segment("ZXX")
+                .unwrap()
+                .first_value(1, 1, &reread.separators);
+            assert_eq!(value.as_deref(), Some(NULL));
+        }
+    }
+
+    #[test]
+    fn known_values_are_learned_from_the_original_message() {
+        // D23, spec §2.10: collecting happens against the message as it
+        // arrived. A later rule on the same position must not learn an
+        // earlier rule's replacement: `TOKEN` in field 2 is unrelated and
+        // stays, while the second `ORIGINAL` gets the first-collected
+        // action.
+        let mut message = er7::parse("MSH|^~\\&|A\rZXX|ORIGINAL|TOKEN|ORIGINAL").unwrap();
+        let policy = Policy::accept_all()
+            .with("ZXX-1", Action::Replace("TOKEN".into()))
+            .unwrap()
+            .with("ZXX-1", Action::Clear)
+            .unwrap();
+        let report = Redactor::new(policy).redact(&mut message).unwrap();
+        assert_eq!(message.to_er7(), "MSH|^~\\&|A\rZXX||TOKEN|TOKEN");
+        let rows: Vec<String> = report
+            .changes
+            .iter()
+            .map(|change| format!("{} {}", change.path, change.action))
+            .collect();
+        assert_eq!(
+            rows,
+            [
+                "ZXX[1]-1[1].1.1 replace TOKEN",
+                "ZXX[1]-1[1].1.1 clear",
+                "ZXX[1]-3[1].1.1 replace TOKEN",
+            ]
+        );
+
+        // The same through a null collapse: a field-level null learns the
+        // field's original leaves, not an earlier rule's replacement.
+        let mut message = er7::parse("MSH|^~\\&|A\rZXX|ORIGINAL^ALPHA|TOKEN|ALPHA").unwrap();
+        let policy = Policy::accept_all()
+            .with("ZXX-1.2", Action::Replace("TOKEN".into()))
+            .unwrap()
+            .with("ZXX-1", Action::Null)
+            .unwrap();
+        Redactor::new(policy).redact(&mut message).unwrap();
+        assert_eq!(message.to_er7(), "MSH|^~\\&|A\rZXX|\"\"|TOKEN|TOKEN");
+    }
+
+    #[test]
+    fn a_second_pass_changes_nothing_with_the_sweep_on() {
+        // D10 with D23: replaying a policy on its own output must be a
+        // no-op. The second pass used to learn the first pass's output
+        // (`ABCD`) as a known value and truncate field 2 as well.
+        let input = "MSH|^~\\&|A\rZXX|ABCDEFGH|ABCD WXYZ|abcdefgh note";
+        for action in [
+            Action::Clear,
+            Action::redacted(),
+            Action::Mask('*'),
+            Action::First(4),
+            Action::Last(4),
+            Action::Null,
+        ] {
+            let policy = Policy::accept_all().with("ZXX-1", action.clone()).unwrap();
+            let redactor = Redactor::new(policy);
+            let mut once = er7::parse(input).unwrap();
+            redactor.redact(&mut once).unwrap();
+            // Field 2 never held the original value, so it is untouched.
+            assert_eq!(
+                once.segment("ZXX")
+                    .unwrap()
+                    .first_value(2, 1, &once.separators)
+                    .as_deref(),
+                Some("ABCD WXYZ"),
+                "{action}"
+            );
+            let mut twice = once.clone();
+            let report = redactor.redact(&mut twice).unwrap();
+            assert_eq!(twice, once, "{action} changed a redacted message");
+            assert_eq!(report.changes.len(), 0, "{action}");
+        }
+    }
+
+    #[test]
+    fn a_swept_leaf_its_action_leaves_unchanged_is_not_reported() {
+        // D23 with D17: the sweep found the known value, but the action
+        // writes the leaf back as it was, so there is no change and no row.
+        let action = Action::custom(|value, _| {
+            Some(if value == "SECRET" {
+                "X".into()
+            } else {
+                value.into()
+            })
+        });
+        let mut message = er7::parse("MSH|^~\\&|A\rZXX|SECRET|SECRET here").unwrap();
+        let policy = Policy::accept_all().with("ZXX-1", action).unwrap();
+        let report = Redactor::new(policy).redact(&mut message).unwrap();
+        assert_eq!(message.to_er7(), "MSH|^~\\&|A\rZXX|X|SECRET here");
+        assert_eq!(report.changes.len(), 1);
+    }
+
+    #[test]
+    fn the_swept_positions_depend_only_on_original_named_values() {
+        // D23 property: what an earlier rule writes at a named position
+        // must not change which unnamed leaves the sweep reaches. Vary the
+        // earlier rule's replacement over every word the unnamed leaves
+        // hold (and some that no leaf holds), with a small deterministic
+        // generator for the combinations, and require the same swept rows.
+        let text =
+            "MSH|^~\\&|A\rZXX|ORIGINAL|TOKEN alpha|beta ORIGINAL|gamma\rNTE|1||delta TOKEN beta";
+        let words = [
+            "TOKEN", "alpha", "beta", "gamma", "delta", "ORIGINAL", "unused", "zeta",
+        ];
+        let swept = |first: &str, second: &str| -> Vec<String> {
+            let mut message = er7::parse(text).unwrap();
+            let policy = Policy::accept_all()
+                .with("ZXX-1", Action::Replace(first.into()))
+                .unwrap()
+                .with("ZXX-1", Action::Replace(second.into()))
+                .unwrap()
+                .with("ZXX-1", Action::Clear)
+                .unwrap();
+            let report = Redactor::new(policy).redact(&mut message).unwrap();
+            report
+                .changes
+                .iter()
+                .map(|change| change.path.to_string())
+                .filter(|path| !path.starts_with("ZXX[1]-1["))
+                .collect()
+        };
+        let expected = swept("X", "Y");
+        assert_eq!(expected, ["ZXX[1]-3[1].1.1"]);
+        let mut state: u32 = 0x2545_f491;
+        for _ in 0..64 {
+            state = state.wrapping_mul(1_664_525).wrapping_add(1_013_904_223);
+            let first = words[(state >> 8) as usize % words.len()];
+            let second = words[(state >> 20) as usize % words.len()];
+            assert_eq!(swept(first, second), expected, "{first} then {second}");
+        }
+    }
+
+    #[test]
+    fn the_known_value_index_matches_what_a_full_scan_would() {
+        // D23: the index is an optimisation, so it must find exactly what
+        // checking every known value would. A value starting with a
+        // non-alphanumeric character, a multi-word value, a value sharing
+        // its first word with another, and first-collected precedence
+        // across two buckets.
+        let mut known = KnownValues::default();
+        for value in [
+            "#4471",
+            "mrs smith",
+            "mrs jones",
+            "jones",
+            "o'brien",
+            "smith",
+        ] {
+            known.insert(value.to_string(), &Action::Replace(value.to_uppercase()));
+        }
+        // A repeat keeps the first action.
+        known.insert("jones".into(), &Action::Clear);
+        let found = |leaf: &str| known.find(leaf).map(ToString::to_string);
+        assert_eq!(found("ref #4471 seen"), Some("replace #4471".into()));
+        // A letter right before the `#` is not a word boundary.
+        assert_eq!(found("ref x#4471"), None);
+        assert_eq!(
+            found("spoke with mrs smith today"),
+            Some("replace MRS SMITH".into())
+        );
+        assert_eq!(
+            found("mrs jones and smith"),
+            Some("replace MRS JONES".into())
+        );
+        assert_eq!(found("jones"), Some("replace JONES".into()));
+        assert_eq!(found("dear o'brien,"), Some("replace O'BRIEN".into()));
+        assert_eq!(found("smithson and mrs"), None);
+        assert_eq!(found(""), None);
+        // Precedence across buckets: "mrs smith" was collected before
+        // "smith", whichever word of the leaf is looked at first.
+        assert_eq!(found("smith, mrs smith"), Some("replace MRS SMITH".into()));
+        let scan = |leaf: &str| {
+            known
+                .values
+                .iter()
+                .find(|(value, _)| contains_whole_word(leaf, value))
+                .map(|(_, action)| action.to_string())
+        };
+        for leaf in [
+            "a mrs smith b",
+            "jones",
+            "#4471",
+            "x o'brien y",
+            "nothing here",
+            "smith jones",
+        ] {
+            assert_eq!(found(leaf), scan(leaf), "{leaf}");
+        }
+    }
+
+    #[test]
+    fn uncovered_reaches_the_header_after_msh_2_and_single_subcomponents() {
+        // D22: MSH-3 onward is data like any other field, and a rule naming
+        // one subcomponent covers only that one (found by cargo-mutants,
+        // 2026-11-26).
+        let message = er7::parse("MSH|^~\\&|LAB\rZXX|A&B&C").unwrap();
+        let policy = Policy::accept_all()
+            .with("ZXX-1.1.2", Action::Clear)
+            .unwrap();
+        let gaps: Vec<String> = Redactor::new(policy)
+            .uncovered(&message)
+            .iter()
+            .map(ToString::to_string)
+            .collect();
+        assert_eq!(
+            gaps,
+            ["MSH[1]-3[1].1.1", "ZXX[1]-1[1].1.1", "ZXX[1]-1[1].1.3"]
+        );
+    }
+
+    #[test]
+    fn the_sweep_reaches_the_header_after_msh_2() {
+        // D23 with D5: the sweep skips only MSH-1 and MSH-2, not the rest of
+        // the header (found by cargo-mutants, 2026-11-26).
+        let mut message = er7::parse("MSH|^~\\&|SMITHSON\rPID|1||9||SMITHSON").unwrap();
+        let policy = Policy::accept_all().with("PID-5", Action::Clear).unwrap();
+        Redactor::new(policy).redact(&mut message).unwrap();
+        assert_eq!(message.to_er7(), "MSH|^~\\&|\rPID|1||9||");
+    }
+
+    #[test]
+    fn shareable_paths_copy_only_standard_segment_ids() {
+        // D26: only the standard shape is copied; every other ID gets a
+        // placeholder numbered by first appearance in the message.
+        for id in ["PID", "OBX", "ZP1", "Z99"] {
+            assert!(is_standard_segment_id(id), "{id}");
+        }
+        for id in ["", "PI", "PIDX", "pid", "1AB", "ZP-", "ZÉ1", "ZSMITHJOHN"] {
+            assert!(!is_standard_segment_id(id), "{id}");
+        }
+        let message = er7::parse("MSH|^~\\&|A\rzjones|1\rZSMITH|2\rzjones|3\rPID|4").unwrap();
+        let shared = |text: &str| shareable_path(&Path::parse(text).unwrap(), &message);
+        assert_eq!(shared("PID[1]-1[1].1.1"), "PID[1]-1[1].1.1");
+        assert_eq!(
+            shared("zjones[2]-1[1].1.1"),
+            "<segment-label-1>[2]-1[1].1.1"
+        );
+        assert_eq!(
+            shared("ZSMITH[1]-1[1].1.1"),
+            "<segment-label-2>[1]-1[1].1.1"
+        );
+        // A non-standard ID the message does not hold is still not copied.
+        assert_eq!(shared("ZOTHER[1]-1"), "<segment-label>[1]-1");
+    }
+
+    #[test]
+    fn errors_never_copy_a_nonstandard_segment_id() {
+        // D26 for errors: their text reaches stderr, logs, and tickets.
+        let mut message = er7::parse("MSH\"^~\\&\"A\rZSMITHJOHN\"X").unwrap();
+        let policy = Policy::accept_all()
+            .with("ZSMITHJOHN-1", Action::Null)
+            .unwrap();
+        let error = Redactor::new(policy).redact(&mut message).unwrap_err();
+        assert_eq!(
+            error,
+            Error::NullUnrepresentable {
+                path: "<segment-label-1>[1]-1[1].1.1".into()
+            }
+        );
+        let mut message = er7::parse("MSH|^~\\&|A\rZSMITHJOHN|X").unwrap();
+        let policy = Policy::accept_all()
+            .with("ZSMITHJOHN-1", Action::custom(|_, _| None))
+            .unwrap();
+        let error = Redactor::new(policy).redact(&mut message).unwrap_err();
+        assert!(!error.to_string().contains("SMITHJOHN"), "{error}");
+        assert!(
+            matches!(error, Error::NoOutput { ref path, .. } if path == "<segment-label-1>[1]-1[1].1.1")
+        );
     }
 
     #[test]

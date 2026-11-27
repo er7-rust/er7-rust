@@ -47,6 +47,119 @@ fn round_trips_every_sample_from_the_er7_crate() {
 }
 
 #[test]
+fn map_and_positional_codecs_compose_in_one_round_trip() {
+    // S10 with S14: the named form (JSON objects) and the positional form
+    // (bincode sequences) are two encodings of one value. Chain them,
+    // JSON -> value -> bincode -> value -> JSON, and require the same ER7
+    // bytes and the same JSON text at the end.
+    for text in [
+        sample(ORU),
+        sample(ADT),
+        sample(BATCH),
+        sample(MULTILINGUAL),
+    ] {
+        let message = Message::parse(text).unwrap();
+        let json = serde_json::to_string(&message).unwrap();
+        let from_json: Message = serde_json::from_str(&json).unwrap();
+        let bytes = bincode::serialize(&from_json).unwrap();
+        let from_bincode: Strict<Message> = bincode::deserialize(&bytes).unwrap();
+        assert_eq!(from_bincode.to_er7(), text);
+        assert_eq!(serde_json::to_string(&*from_bincode).unwrap(), json);
+    }
+}
+
+#[test]
+fn round_trips_through_bincode() {
+    // S14: bincode writes every struct as a positional sequence, which JSON
+    // never does. Each sample, plus a declared truncation character and an
+    // explicit null, must come back as the same ER7 bytes, read plainly or
+    // strictly.
+    let truncation = "MSH|^~\\&#|LAB\rZXX|A#B";
+    let null = "MSH|^~\\&|LAB\rPID|1||\"\"||X";
+    for text in [
+        sample(ORU),
+        sample(ADT),
+        sample(BATCH),
+        sample(MULTILINGUAL),
+        truncation,
+        null,
+    ] {
+        let message = Message::parse(text).expect("parses");
+        let bytes = bincode::serialize(&message).expect("serializes");
+        let back: Message = bincode::deserialize(&bytes).expect("deserializes");
+        assert_eq!(back.to_er7(), text);
+        let strict: Strict<Message> = bincode::deserialize(&bytes).expect("deserializes strictly");
+        assert_eq!(strict.to_er7(), text);
+    }
+    let message = Message::parse(null).unwrap();
+    let back: Message = bincode::deserialize(&bincode::serialize(&message).unwrap()).unwrap();
+    assert!(back.segment("PID").unwrap().field(3).unwrap().is_null());
+    let message = Message::parse(truncation).unwrap();
+    let back: Message = bincode::deserialize(&bincode::serialize(&message).unwrap()).unwrap();
+    assert_eq!(back.separators.truncation, Some('#'));
+}
+
+#[test]
+fn strict_reads_positional_sequences_too() {
+    // S14 with S13: positional input is read through the same seeds, so a
+    // strict message still rejects an unknown key in a nested object.
+    let separators = r#"{"field":"|","component":"^","repetition":"~","escape":"\\","subcomponent":"&","truncation":null}"#;
+    let positional = format!(r#"[{separators},[["MSH",[[[["|"]]],[[["^~\\&"]]]]]]]"#);
+    let message: Strict<Message> = serde_json::from_str(&positional).expect("positional input");
+    assert_eq!(message.to_er7(), "MSH|^~\\&");
+    let separators_array = r#"["|","^","~","\\","&",null]"#;
+    let all_positional = format!(r#"[{separators_array},[["MSH",[]]]]"#);
+    let message: Message = serde_json::from_str(&all_positional).expect("all positional");
+    assert_eq!(message.separators.escape, '\\');
+    let typo = positional.replace(r#""truncation":null"#, r#""truncation":null,"oops":1"#);
+    let error = serde_json::from_str::<Strict<Message>>(&typo).unwrap_err();
+    assert!(error.to_string().contains("oops"), "{error}");
+    let segment_typo = format!(r#"[{separators},[{{"name":"MSH","fields":[],"oops":1}}]]"#);
+    let error = serde_json::from_str::<Strict<Message>>(&segment_typo).unwrap_err();
+    assert!(error.to_string().contains("oops"), "{error}");
+    // The plain type still ignores it.
+    let plain: Message = serde_json::from_str(&typo).expect("tolerant");
+    assert_eq!(plain.separators.field, '|');
+}
+
+#[test]
+fn short_sequences_are_invalid_length_errors() {
+    // S14: positional input has no way to omit a field, so every one is
+    // required, `truncation` included.
+    for (error, expected) in [
+        (
+            serde_json::from_str::<Message>("[]").unwrap_err(),
+            "Message",
+        ),
+        (
+            serde_json::from_str::<Message>(r#"[["|","^","~","\\","&",null]]"#).unwrap_err(),
+            "Message",
+        ),
+        (
+            serde_json::from_str::<Segment>("[]").unwrap_err(),
+            "segment",
+        ),
+        (
+            serde_json::from_str::<Segment>(r#"["PID"]"#).unwrap_err(),
+            "segment",
+        ),
+        (
+            serde_json::from_str::<Separators>(r#"["|","^","~","\\","&"]"#).unwrap_err(),
+            "Separators",
+        ),
+    ] {
+        let text = error.to_string();
+        assert!(text.contains("invalid length"), "{text}");
+        assert!(text.contains(expected), "{text}");
+    }
+    for count in 0..5 {
+        let values = ["\"|\"", "\"^\"", "\"~\"", "\"\\\\\"", "\"&\""][..count].join(",");
+        let error = serde_json::from_str::<Separators>(&format!("[{values}]")).unwrap_err();
+        assert!(error.to_string().contains("invalid length"), "{error}");
+    }
+}
+
+#[test]
 fn round_trips_pretty_printed_json_too() {
     // Pretty-printing changes only whitespace between JSON tokens, never
     // the values, so this must round-trip exactly like compact JSON.
@@ -200,12 +313,25 @@ fn every_wrapper_converts_and_mutates_through() {
     let inner_subcomponent: er7::Subcomponent = subcomponent.into();
     assert_eq!(inner_subcomponent.raw, "AB");
 
-    let mut separators: Separators = er7::Separators::default().into();
+    // Non-default values throughout: a `From` that returned
+    // `Default::default()` would otherwise pass (found by cargo-mutants,
+    // 2026-11-26).
+    let custom = er7::Separators {
+        field: '#',
+        component: '*',
+        repetition: '!',
+        escape: '?',
+        subcomponent: '@',
+        truncation: Some('%'),
+    };
+    let mut separators: Separators = custom.into();
+    assert_eq!(*separators, custom);
     separators.field = '#';
     let inner_separators: er7::Separators = separators.into();
     assert_eq!(inner_separators.field, '#');
 
-    let mut terminator: Terminator = er7::Terminator::Cr.into();
+    let mut terminator: Terminator = er7::Terminator::Lf.into();
+    assert_eq!(*terminator, er7::Terminator::Lf);
     *terminator = er7::Terminator::CrLf;
     let inner_terminator: er7::Terminator = terminator.into();
     assert_eq!(inner_terminator, er7::Terminator::CrLf);
@@ -249,6 +375,12 @@ fn every_wrapper_dereferences_immutably() {
     let _: &er7::Separators = &separators;
     let _: &er7::Terminator = &terminator;
     assert_eq!(message.to_string(), "MSH|^~\\&|LAB");
+    // And each one reaches the value it wraps, not merely a value of the
+    // right type.
+    assert_eq!(&*segment, &message.segments[0]);
+    assert_eq!(field.repetitions.len(), 1);
+    assert_eq!(*separators, message.separators);
+    assert_eq!(*terminator, er7::Terminator::CrLf);
 }
 
 /// The `[dependencies]` and `[dev-dependencies]` tables of this crate's
@@ -281,7 +413,7 @@ fn the_crate_has_exactly_two_runtime_dependencies() {
         manifest_dependencies("[dependencies]"),
         [
             r#"serde = "1""#,
-            r#"er7 = { path = "../er7", version = "0" }"#
+            r#"er7 = { path = "../er7", version = "0.4" }"#
         ]
     );
 }
@@ -325,7 +457,7 @@ fn every_rule_has_a_coverage_row() {
     let declared = rule_ids(include_str!("../spec/index.md"));
     let covered = rule_ids(include_str!("../spec/07-testing-strategy/index.md"));
 
-    assert_eq!(declared.len(), 13, "the rule index should hold S1–S13");
+    assert_eq!(declared.len(), 14, "the rule index should hold S1–S14");
     let missing: Vec<&String> = declared.iter().filter(|s| !covered.contains(s)).collect();
     assert!(missing.is_empty(), "no row in §7.1 for {missing:?}");
     let orphan: Vec<&String> = covered.iter().filter(|s| !declared.contains(s)).collect();

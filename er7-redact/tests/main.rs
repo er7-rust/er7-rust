@@ -360,7 +360,7 @@ fn the_crate_has_one_runtime_dependency() {
     }
     assert_eq!(
         dependencies,
-        [r#"er7 = { path = "../er7", version = "0" }"#]
+        [r#"er7 = { path = "../er7", version = "0.4" }"#]
     );
 }
 
@@ -472,6 +472,47 @@ fn cli_accept_all_switches_off_a_policy_files_reject() {
 }
 
 #[test]
+fn cli_follows_the_first_policy_files_known_values_line() {
+    // Spec §10.2: the CLI's neutral start must not force the sweep on over
+    // a file that says `known-values off`; later files and built-in
+    // starting policies may still only turn it on (D20).
+    let directory = cli_support::TestDirectory::new();
+    let write = |name: &str, text: &str| {
+        let path = directory.path().join(name);
+        std::fs::write(&path, text).expect("writes the policy");
+        path.to_string_lossy().into_owned()
+    };
+    let off = write("off.policy", "known-values off\nZXX-1 clear\n");
+    let on = write("on.policy", "known-values on\nZXX-1 clear\n");
+    let input = "MSH|^~\\&|A\rZXX|SAMPLE|SAMPLE\r";
+    let swept = "MSH|^~\\&|A\rZXX||\r";
+    let kept = "MSH|^~\\&|A\rZXX||SAMPLE\r";
+    for (args, shown, output) in [
+        (vec!["-r", "ZXX-1 clear"], "on", swept),
+        (vec!["-p", off.as_str()], "off", kept),
+        (vec!["-p", off.as_str(), "-p", off.as_str()], "off", kept),
+        (vec!["-p", off.as_str(), "-p", on.as_str()], "on", swept),
+        (vec!["-p", on.as_str(), "-p", off.as_str()], "on", swept),
+        (vec!["--accept-all", "-p", off.as_str()], "off", kept),
+        (vec!["--all-but-the-header", "-p", off.as_str()], "on", ""),
+    ] {
+        let mut show = args.clone();
+        show.push("--show-policy");
+        let (ok, policy, _) = cli(&show, "");
+        assert!(ok);
+        assert!(
+            policy.contains(&format!("known-values  {shown}\n")),
+            "{args:?}: {policy}"
+        );
+        if !output.is_empty() {
+            let (ok, stdout, _) = cli(&args, input);
+            assert!(ok);
+            assert_eq!(stdout, output, "{args:?}");
+        }
+    }
+}
+
+#[test]
 fn cli_masks_an_unrecognised_payload() {
     // D21: what a payload that is not ER7 gets is the policy's to say,
     // and only refusing it fails the run (spec §2.8, §10.4).
@@ -533,6 +574,64 @@ fn cli_writes_a_report_instead_of_the_message() {
     }
     // A dry run: the message itself is not written.
     assert!(!stdout.contains("MSH|"), "{stdout}");
+}
+
+#[test]
+fn cli_report_and_uncovered_never_copy_a_nonstandard_segment_id() {
+    // D26: a segment ID is sender text. A crafted one carrying a synthetic
+    // name must not reach output that is meant to be pasted into a ticket.
+    let input = "MSH|^~\\&|LAB\rZSMITHJOHN|x\rZXX|y\rZSMITHJOHN|z\r";
+    let (ok, report, _) = cli(&["--reject-all", "--report"], input);
+    assert!(ok);
+    assert!(!report.contains("SMITHJOHN"), "{report}");
+    assert!(report.contains("<segment-label-1>[1]-1[1].1.1"), "{report}");
+    assert!(report.contains("<segment-label-1>[2]-1[1].1.1"), "{report}");
+    assert!(report.contains("ZXX[1]-1[1].1.1"), "{report}");
+    let (ok, uncovered, _) = cli(&["--uncovered"], input);
+    assert!(ok);
+    assert!(!uncovered.contains("SMITHJOHN"), "{uncovered}");
+    assert!(
+        uncovered.contains("<segment-label-1>[1]-1[1].1.1\n"),
+        "{uncovered}"
+    );
+}
+
+#[test]
+fn cli_report_and_uncovered_are_exact_over_two_messages() {
+    // Spec §10.3, exactly: a heading per message and one blank line
+    // between them, but no heading for a single message (found by
+    // cargo-mutants, 2026-11-26).
+    let two = "MSH|^~\\&|LAB\rPID|1||9||SMITH\rMSH|^~\\&|LAB2\rPID|1||8||JONES\r";
+    let (ok, report, _) = cli(&["--report"], two);
+    assert!(ok);
+    assert_eq!(
+        report,
+        "# message 1\nPID[1]-3[1].1.1  pseudonym\nPID[1]-5[1].1.1  replace REDACTED\n\n\
+         # message 2\nPID[1]-3[1].1.1  pseudonym\nPID[1]-5[1].1.1  replace REDACTED\n"
+    );
+    let (ok, gaps, _) = cli(&["--uncovered", "-r", "PID-5 clear"], two);
+    assert!(ok);
+    assert_eq!(
+        gaps,
+        "# message 1\nMSH[1]-3[1].1.1\nPID[1]-1[1].1.1\nPID[1]-3[1].1.1\n\n\
+         # message 2\nMSH[1]-3[1].1.1\nPID[1]-1[1].1.1\nPID[1]-3[1].1.1\n"
+    );
+    let one = "MSH|^~\\&|LAB\rPID|1||9||SMITH\r";
+    let (ok, gaps, _) = cli(&["--uncovered", "-r", "PID-5 clear"], one);
+    assert!(ok);
+    assert_eq!(gaps, "MSH[1]-3[1].1.1\nPID[1]-1[1].1.1\nPID[1]-3[1].1.1\n");
+}
+
+#[test]
+fn cli_reads_standard_input_given_as_a_dash() {
+    // Spec §10.1: "-" is standard input, and only a second input is an
+    // error (found by cargo-mutants, 2026-11-26).
+    let (ok, stdout, stderr) = cli(
+        &["-r", "PID-5 clear", "-"],
+        "MSH|^~\\&|LAB\rPID|1||9||SMITH",
+    );
+    assert!(ok, "{stderr}");
+    assert_eq!(stdout, "MSH|^~\\&|LAB\rPID|1||9||\r");
 }
 
 #[test]
@@ -623,6 +722,11 @@ fn cli_reports_errors_on_stderr() {
         (vec!["-p", "no/such/policy"], ADT, "reading no/such/policy"),
         (vec!["--key", "many"], ADT, "--key wants a number"),
         (vec!["--nope"], ADT, "unknown option"),
+        (
+            vec!["-r", "ZXX-1 null"],
+            "MSH\"^~\\&\"A\rZXX\"X\"Y\r",
+            "a null cannot be written at ZXX[1]-1[1].1.1",
+        ),
     ] {
         let (ok, stdout, stderr) = cli(&args, input);
         assert!(!ok, "expected {args:?} to fail");
@@ -756,7 +860,7 @@ fn every_rule_has_a_coverage_row() {
     let declared = rule_ids(include_str!("../spec/01-purpose-and-scope/index.md"));
     let covered = rule_ids(include_str!("../spec/11-testing-strategy/index.md"));
 
-    assert_eq!(declared.len(), 24, "§1.4 should index D1–D24");
+    assert_eq!(declared.len(), 26, "§1.4 should index D1–D26");
     let missing: Vec<&String> = declared.iter().filter(|d| !covered.contains(d)).collect();
     assert!(missing.is_empty(), "no row in §11.1 for {missing:?}");
     let orphan: Vec<&String> = covered.iter().filter(|d| !declared.contains(d)).collect();

@@ -4,7 +4,6 @@ use std::fmt;
 use std::ops::{Deref, DerefMut};
 
 use serde::de::{SeqAccess, Visitor};
-use serde::ser::SerializeSeq;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use crate::Repetition;
@@ -68,19 +67,12 @@ impl DerefMut for Field {
 }
 
 impl Serialize for Field {
-    /// Write each repetition as one array element. See
-    /// [`Component::serialize`](crate::Component#impl) for the cost of the
-    /// clone this involves.
+    /// Serialize without cloning the tree; see the private `borrow` module.
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        let repetitions = &self.0.repetitions;
-        let mut seq = serializer.serialize_seq(Some(repetitions.len()))?;
-        for repetition in repetitions {
-            seq.serialize_element(&Repetition(repetition.clone()))?;
-        }
-        seq.end()
+        crate::borrow::Ref(&self.0).serialize(serializer)
     }
 }
 

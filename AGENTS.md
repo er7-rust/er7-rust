@@ -11,7 +11,7 @@ workspace `Cargo.toml` and one `Cargo.lock`.
 | [`serde-er7`](serde-er7/) | Serialize and deserialize ER7 message trees with Serde | [`serde-er7/AGENTS.md`](serde-er7/AGENTS.md) |
 
 `er7-redact` and `serde-er7` depend on `er7` via a path dependency
-(`{ path = "../er7", version = "0" }`), so a change to `er7` in this
+(`{ path = "../er7", version = "0.4" }`), so a change to `er7` in this
 workspace is picked up by its siblings immediately, without publishing.
 
 Three directories here are **not** crates:
@@ -92,7 +92,7 @@ the crate it measures. Full figures for both are
 [`BENCHMARKS.md`](BENCHMARKS.md).
 
 ```sh
-cd er7 && cargo +nightly fuzz list                # parse_roundtrip, parse_with_total, escape_roundtrip, query_paths
+cd er7 && cargo +nightly fuzz list                # seven targets; see er7/spec §13.6
 cd er7 && cargo +nightly fuzz run parse_roundtrip -- -max_total_time=60
 ```
 

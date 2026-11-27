@@ -5,7 +5,7 @@ numbers (§9.x) are stable and cited from code, tests, and commit messages.
 
 Implemented in `src/lib.rs`.
 
-## 9.1 Four variants, four situations [D15]
+## 9.1 Five variants, five situations [D15]
 
 ```rust
 pub enum Error {
@@ -21,6 +21,9 @@ pub enum Error {
     /// action returning `None`), so `Redactor::redact` refuses to leave
     /// the text in place.
     NoOutput { action: String, path: String },
+    /// A `null` would be written into a message that uses `"` as a
+    /// delimiter, where the explicit null cannot be represented.
+    NullUnrepresentable { path: String },
 }
 ```
 
@@ -31,6 +34,7 @@ pub enum Error {
 | a `Policy::with`, `Rule::new` **call** naming something that is not an HL7 path | `Er7(er7::Error::BadPath(_))` |
 | `Redactor::unrecognised` with `Unrecognised::Apply(action)` where `action` writes nothing | `NoReplacement { action }` |
 | `Redactor::redact` where an action writes nothing for a leaf that carries text | `NoOutput { action, path }` |
+| `Redactor::redact` where a `null` would be written into a message using `"` as a delimiter | `NullUnrepresentable { path }` |
 
 `NoReplacement` fails closed (spec/rust-checked-arithmetic RCA-IN-2,
 RCA-IN-6). `Policy::on_unrecognised` and policy files normalise `keep` and
@@ -53,7 +57,7 @@ rule, "redaction itself cannot fail", which returned a bare `Report`. It was
 a breaking change, made so that no input can leave text in a message that a
 policy asked to redact (spec/rust-checked-arithmetic RCA-IN-2, RCA-IN-6).
 
-The one failure is an action that **writes nothing** for a leaf that
+The first failure is an action that **writes nothing** for a leaf that
 carries text. Only a custom action returning `None` does this: `Keep` and
 `Null` are handled before an action is asked for text, and `Keep` is the
 deliberate way to leave a position alone. Leaving the text in place would
@@ -61,6 +65,18 @@ look exactly like success and keep possible PHI, so `redact` returns
 `Error::NoOutput` naming the action and the fully qualified path of the
 leaf (never its value). The action may be a rule's, the rejecting posture's,
 or a known value's in the sweep (§2.10).
+
+The second failure is a **null that cannot be represented** (D25). When
+the message uses `"` as one of its delimiters, the explicit null `""`
+would be structure rather than a value, and writing it would shift every
+value after it ([§3.4](../03-actions/index.md)). `redact` returns
+`Error::NullUnrepresentable` naming the position the null was meant for.
+A `null` rule that finds nothing to write there is still a no-op (D8).
+
+Both errors' `path` go through `shareable_path`
+([§10.3](../10-command-line-interface/index.md), D26). An error's text
+ends up on stderr, in CI logs, and in tickets, so a non-standard segment
+ID is written as `<segment-label-N>` there too.
 
 `redact` is atomic: it works on a copy and replaces the caller's message
 only on success. On `Err` the message is exactly as it was passed in, with

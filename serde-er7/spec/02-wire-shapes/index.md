@@ -75,6 +75,17 @@ change (see [§8](../08-versioning-and-compatibility/index.md), rule S10).
   hand-written fixture — opts into it per call with
   [`Strict<T>`](../11-strict-mode/index.md) (S13); nothing above changes
   for a caller who does not.
+- **Positional sequences (S14).** Some formats write a struct as a
+  sequence of its field values, without keys (bincode, postcard). So
+  `Message`, `Segment`, and `Separators` also accept a sequence holding
+  their fields in the order they serialize them: `[separators, segments]`,
+  `[name, fields]`, and `[field, component, repetition, escape,
+  subcomponent, truncation]`. All of them are required in that form,
+  `truncation` included, since a positional format has no way to omit one.
+  A short sequence is an `invalid_length` error. `Strict<Message>` reads
+  nested segments and separators strictly in this form too. Because
+  `serde_json` hands an array to the same visitor, a JSON array of field
+  values is accepted as well. What this crate *writes* is unchanged (S10).
 
 ## 2.4 Why not derive
 

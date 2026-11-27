@@ -20,7 +20,7 @@ use std::io::{Read, Write};
 use std::process::ExitCode;
 
 use er7::{Message, Path, RenderOptions, Terminator};
-use er7_redact::{Policy, Posture, Redactor, Report, Rule, Unrecognised};
+use er7_redact::{Policy, Posture, Redactor, Report, Rule, Unrecognised, shareable_path};
 
 const USAGE: &str = "\
 Redact patient detail from HL7® v2 messages in the ER7 pipe-hat encoding.
@@ -180,7 +180,7 @@ fn run() -> Result<(), Exit> {
     let sources = split_input(&text, which)?;
 
     let redactor = Redactor::new(policy).with_key(key);
-    let payloads = redact_payloads(&redactor, &sources)?;
+    let payloads = redact_payloads(&redactor, &sources, uncovered_only)?;
 
     let options = RenderOptions {
         terminator,
@@ -223,7 +223,11 @@ fn split_input(text: &str, which: Option<usize>) -> Result<Vec<&str>, Exit> {
 /// All of them are parsed before any is written, so one the policy refuses
 /// fails the run rather than producing a half-redacted output, however
 /// late in a batch it is.
-fn redact_payloads(redactor: &Redactor, sources: &[&str]) -> Result<Vec<Payload>, Exit> {
+fn redact_payloads(
+    redactor: &Redactor,
+    sources: &[&str],
+    want_uncovered: bool,
+) -> Result<Vec<Payload>, Exit> {
     let mut payloads = Vec::with_capacity(sources.len());
     for (index, source) in sources.iter().enumerate() {
         match er7::parse(source) {
@@ -233,7 +237,12 @@ fn redact_payloads(redactor: &Redactor, sources: &[&str]) -> Result<Vec<Payload>
                 // make it look covered (spec §2.9): --uncovered would
                 // otherwise report fewer gaps than a caller who checked
                 // before running the redaction that answered them.
-                let uncovered = redactor.uncovered(&message);
+                // Only --uncovered prints the list, so only it pays for it.
+                let uncovered = if want_uncovered {
+                    redactor.uncovered(&message)
+                } else {
+                    Vec::new()
+                };
                 // Fail closed: an action that wrote nothing for a leaf
                 // aborts the run before anything is written (spec §9.2).
                 let report = match redactor.redact(&mut message) {
@@ -331,6 +340,13 @@ fn policy(
         Some(Start::AllButTheHeader) => Policy::all_but_the_header(),
         Some(Start::Neutral) | None => neutral(),
     };
+    // The neutral start has no sweep setting of its own to defend, so the
+    // first policy file's `known-values` line decides it. Appending then
+    // only ever turns it on (D20, spec §10.2). A built-in start keeps its
+    // sweep on whatever a file says.
+    if matches!(start, Some(Start::Neutral) | None) && !policies.is_empty() {
+        policy.search_known_values = false;
+    }
     for path in policies {
         let text = match std::fs::read_to_string(path) {
             Ok(text) => text,
@@ -401,8 +417,8 @@ fn report(payloads: &[Payload], policy: &Policy) -> String {
         if payloads.len() > 1 {
             let _ = writeln!(out, "# message {}", index + 1);
         }
-        let report = match payload {
-            Payload::Message(_, report, _) => report,
+        let (message, report) = match payload {
+            Payload::Message(message, report, _) => (message, report),
             // A payload with no positions in it has no rows to write. It
             // gets a comment instead, which no reader can mistake for a
             // change (spec §10.3).
@@ -419,15 +435,18 @@ fn report(payloads: &[Payload], policy: &Policy) -> String {
                 continue;
             }
         };
-        let width = report
+        let paths: Vec<String> = report
             .changes
             .iter()
-            .map(|change| change.path.to_string().len())
+            .map(|change| shareable_path(&change.path, message))
+            .collect();
+        let width = paths
+            .iter()
+            .map(String::len)
             .max()
             .unwrap_or(0)
             .clamp(8, 28);
-        for change in &report.changes {
-            let path = change.path.to_string();
+        for (path, change) in paths.iter().zip(&report.changes) {
             let _ = writeln!(out, "{path:<width$}  {}", change.action);
         }
     }
@@ -444,8 +463,8 @@ fn uncovered_report(payloads: &[Payload], policy: &Policy) -> String {
         if payloads.len() > 1 {
             let _ = writeln!(out, "# message {}", index + 1);
         }
-        let gaps = match payload {
-            Payload::Message(_, _, gaps) => gaps,
+        let (message, gaps) = match payload {
+            Payload::Message(message, _, gaps) => (message, gaps),
             // Same reasoning as `report`: nothing parsed, so there are no
             // positions to name, and a comment says so instead.
             Payload::Unrecognised(_) => {
@@ -459,7 +478,7 @@ fn uncovered_report(payloads: &[Payload], policy: &Policy) -> String {
             }
         };
         for path in gaps {
-            let _ = writeln!(out, "{path}");
+            let _ = writeln!(out, "{}", shareable_path(path, message));
         }
     }
     out
@@ -510,7 +529,7 @@ mod tests {
             )
             .unwrap();
         let redactor = Redactor::new(policy);
-        let result = redact_payloads(&redactor, &[first, second]);
+        let result = redact_payloads(&redactor, &[first, second], false);
         assert!(matches!(
             result,
             Err(Exit::Failed(message))
@@ -528,7 +547,7 @@ mod tests {
         let mut policy = Policy::accept_all();
         policy.unrecognised = Unrecognised::Apply(Action::custom(|_, _| None));
         let redactor = Redactor::new(policy);
-        let result = redact_payloads(&redactor, &["SECRET-PAYLOAD"]);
+        let result = redact_payloads(&redactor, &["SECRET-PAYLOAD"], true);
         assert!(matches!(
             result,
             Err(Exit::Failed(message))

@@ -146,6 +146,14 @@ println!("{}", message.to_er7());`}</code></pre>
       <code>PV1</code>, <code>GT1</code>, and <code>IN1</code> — the fields that carry a patient
       identifier in every HL7 v2 release from 2.3 to 2.9.
     </p>
+    <p>
+      <strong>What this covers.</strong> Redaction is positional. It changes the positions a rule
+      names, plus repeats of their values elsewhere while the known-value sweep is on. Everything
+      else passes through unchanged: free text in <code>NTE-3</code> or <code>OBX-5</code>, a site's
+      own <code>Z</code> segments, an identifier in a field no rule names. That holds unless the
+      policy rejects by default. Before sharing, read what is left with
+      <code>er7-redact --uncovered message.er7</code>.
+    </p>
   </div>
 
   <h3>2. Check what it did, before sharing anything</h3>
@@ -159,7 +167,8 @@ PID[1]-7[1].1.1  first 4`}</code></pre>
     <p>
       One row per position that actually changed, each a fully qualified path you can paste into
       <code>er7 --query</code> to see what is there now. A report carries <strong>no values</strong>
-      — not the old text, not the new — so it is safe to paste into a ticket. An empty report means
+      — not the old text, not the new — and the CLI replaces a non-standard segment ID with a
+      placeholder, so it is safe to paste into a ticket. An empty report means
       nothing was found to redact, which is either good news or a wrong policy.
     </p>
   </div>
@@ -335,7 +344,9 @@ known-values on             # sweep every repeat of a value already redacted`}</
       Clearing an identifier destroys the message as test data: nothing ties the patient here to the
       same patient in the next message. <code>pseudonym</code> replaces it with a stable stand-in
       instead, so every message redacted with the same key maps
-      <code>PATID1234</code> the same way, and different keys produce unrelated mappings.
+      <code>PATID1234</code> the same way. A different key changes every pseudonym, but that is no
+      assurance two data sets cannot be linked: the fields left in place, such as dates, codes, and
+      free text, can still join them.
     </p>
   </div>
   <div class="callout">

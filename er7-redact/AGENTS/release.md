@@ -44,6 +44,9 @@ negotiable in a release without editing that section first.
    synthetic.
 5. Version bumped in `Cargo.toml`, `CITATION.cff`, and the spec index's
    "Applies to" line.
+6. The `er7` requirement in `Cargo.toml` names the first `er7` release this
+   crate relies on (now `0.4`), and that `er7` is already on crates.io:
+   publish `er7` first (workspace family-policy §1.6).
 
 ## Who may dispatch publishing
 

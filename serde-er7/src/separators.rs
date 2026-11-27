@@ -4,7 +4,7 @@
 use std::fmt;
 use std::ops::{Deref, DerefMut};
 
-use serde::de::{self, MapAccess, Visitor};
+use serde::de::{self, MapAccess, SeqAccess, Visitor};
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
@@ -155,6 +155,34 @@ impl<'de> Visitor<'de> for SeparatorsVisitor {
         // RCA-IN-3: absent only (key missing; a present value is used as given).
         let truncation = truncation.unwrap_or(None);
 
+        Ok(Separators(er7::Separators {
+            field,
+            component,
+            repetition,
+            escape,
+            subcomponent,
+            truncation,
+        }))
+    }
+
+    /// The positional form: all six fields in serialization order. Unlike
+    /// the map form, `truncation` is required here, because a positional
+    /// format has no way to omit one (S14, spec §2.3).
+    fn visit_seq<A>(self, mut seq: A) -> Result<Separators, A::Error>
+    where
+        A: SeqAccess<'de>,
+    {
+        let mut delimiters = ['\0'; 5];
+        for (index, slot) in delimiters.iter_mut().enumerate() {
+            let Some(c) = seq.next_element()? else {
+                return Err(de::Error::invalid_length(index, &self));
+            };
+            *slot = c;
+        }
+        let Some(truncation) = seq.next_element()? else {
+            return Err(de::Error::invalid_length(5, &self));
+        };
+        let [field, component, repetition, escape, subcomponent] = delimiters;
         Ok(Separators(er7::Separators {
             field,
             component,

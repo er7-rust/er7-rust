@@ -105,9 +105,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
-      - run: cargo +stable package --locked -p er7
-      - run: cargo +stable package --locked -p er7-redact
-      - run: cargo +stable package --locked -p serde-er7
+      # One invocation, not three: the siblings require the workspace's own
+      # er7 version, which crates.io does not have until it is published.
+      # Packaging them together lets Cargo verify each sibling against the
+      # packaged er7 instead (family-policy §1.6).
+      - run: cargo +stable package --locked -p er7 -p er7-redact -p serde-er7
+      - name: build a consumer against the packaged crates
+        run: bin/check-packaged-consumer
       - name: install the pinned SBOM generator
         run: cargo +stable install cargo-cyclonedx --version 0.5.10 --locked
       - name: generate and check CycloneDX SBOMs
@@ -168,7 +172,7 @@ jobs:
       - run: cargo +${{ steps.msrv.outputs.version }} check --workspace --all-targets
       - run: cargo +${{ steps.msrv.outputs.version }} test --workspace
 
-  # The three fuzz targets under er7/fuzz/ — a build plus a brief smoke
+  # Every fuzz target under er7/fuzz/ — a build plus a brief smoke
   # run over each, not a fuzzing campaign: it proves the targets still
   # compile and run. er7/fuzz/ is deliberately its own workspace (its
   # Cargo.toml explains why), so the jobs above never touch it.

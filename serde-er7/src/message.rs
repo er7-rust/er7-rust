@@ -4,7 +4,6 @@ use std::fmt;
 use std::ops::{Deref, DerefMut};
 
 use serde::de::{self, DeserializeSeed, MapAccess, SeqAccess, Visitor};
-use serde::ser::SerializeStruct;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use crate::{Segment, Separators, Strict};
@@ -122,15 +121,12 @@ impl fmt::Display for Message {
 }
 
 impl Serialize for Message {
+    /// Serialize without cloning the tree; see the private `borrow` module.
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        let segments: Vec<Segment> = self.0.segments.iter().map(|s| Segment(s.clone())).collect();
-        let mut state = serializer.serialize_struct("Message", 2)?;
-        state.serialize_field("separators", &Separators(self.0.separators))?;
-        state.serialize_field("segments", &segments)?;
-        state.end()
+        crate::borrow::Ref(&self.0).serialize(serializer)
     }
 }
 
@@ -197,11 +193,33 @@ impl<'de> Visitor<'de> for MessageVisitor {
 
         let separators = separators.ok_or_else(|| de::Error::missing_field("separators"))?;
         let segments = segments.ok_or_else(|| de::Error::missing_field("segments"))?;
-        Ok(Message(er7::Message {
-            separators: separators.0,
-            segments: segments.into_iter().map(|s| s.0).collect(),
-        }))
+        Ok(build(separators, segments))
     }
+
+    /// The positional form a format such as bincode writes: the fields in
+    /// serialization order, each required (S14, spec §2.3). The same seeds
+    /// as the map form carry `strict` down.
+    fn visit_seq<A>(self, mut seq: A) -> Result<Message, A::Error>
+    where
+        A: SeqAccess<'de>,
+    {
+        let strict = self.strict;
+        let Some(separators) = seq.next_element_seed(SeparatorsSeed { strict })? else {
+            return Err(de::Error::invalid_length(0, &self));
+        };
+        let Some(segments) = seq.next_element_seed(SegmentsSeed { strict })? else {
+            return Err(de::Error::invalid_length(1, &self));
+        };
+        Ok(build(separators, segments))
+    }
+}
+
+/// The one place a `Message` is put together, from either form.
+fn build(separators: Separators, segments: Vec<Segment>) -> Message {
+    Message(er7::Message {
+        separators: separators.0,
+        segments: segments.into_iter().map(|s| s.0).collect(),
+    })
 }
 
 /// Deserializes one [`Segment`], strictly or not — used from

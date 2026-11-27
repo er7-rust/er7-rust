@@ -3,8 +3,7 @@
 use std::fmt;
 use std::ops::{Deref, DerefMut};
 
-use serde::de::{self, MapAccess, Visitor};
-use serde::ser::SerializeStruct;
+use serde::de::{self, MapAccess, SeqAccess, Visitor};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use crate::{Field, Strict};
@@ -64,15 +63,12 @@ impl DerefMut for Segment {
 }
 
 impl Serialize for Segment {
+    /// Serialize without cloning the tree; see the private `borrow` module.
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        let fields: Vec<Field> = self.0.fields.iter().map(|f| Field(f.clone())).collect();
-        let mut state = serializer.serialize_struct("Segment", 2)?;
-        state.serialize_field("name", &self.0.name)?;
-        state.serialize_field("fields", &fields)?;
-        state.end()
+        crate::borrow::Ref(&self.0).serialize(serializer)
     }
 }
 
@@ -127,11 +123,30 @@ impl<'de> Visitor<'de> for SegmentVisitor {
 
         let name = name.ok_or_else(|| de::Error::missing_field("name"))?;
         let fields = fields.ok_or_else(|| de::Error::missing_field("fields"))?;
-        Ok(Segment(er7::Segment {
-            name,
-            fields: fields.into_iter().map(|f| f.0).collect(),
-        }))
+        Ok(build(name, fields))
     }
+
+    /// The positional form: `[name, fields]`, both required (S14).
+    fn visit_seq<A>(self, mut seq: A) -> Result<Segment, A::Error>
+    where
+        A: SeqAccess<'de>,
+    {
+        let Some(name) = seq.next_element()? else {
+            return Err(de::Error::invalid_length(0, &self));
+        };
+        let Some(fields) = seq.next_element()? else {
+            return Err(de::Error::invalid_length(1, &self));
+        };
+        Ok(build(name, fields))
+    }
+}
+
+/// The one place a `Segment` is put together, from either form.
+fn build(name: String, fields: Vec<Field>) -> Segment {
+    Segment(er7::Segment {
+        name,
+        fields: fields.into_iter().map(|f| f.0).collect(),
+    })
 }
 
 impl<'de> Deserialize<'de> for Segment {

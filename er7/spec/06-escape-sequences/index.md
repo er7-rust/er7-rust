@@ -83,6 +83,12 @@ The inverse of §6.2 for text containing no sequences of its own.
 | field, component, repetition, subcomponent separators | `\F\ \S\ \R\ \T\` | they would otherwise split the value |
 | `\r` | `\X0D\` | it would otherwise end the segment |
 | `\n` | `\X0A\` | many readers treat it as a terminator too |
+| the whole text `""` | `\X2222\` | it would otherwise read back as the explicit null ([§5.3](../05-value-tree/index.md)), turning a value into an instruction to clear one |
+
+The last row applies only to text that is exactly two quotes and nothing
+else: `say ""` is unchanged, because only the exact raw text `""` is null.
+When `"` is itself one of the delimiters, the delimiter rows already encode
+it, so the row does not apply.
 
 The **truncation character is deliberately not encoded**: it is structural
 only inside MSH-2, so a `#` in a value is just a `#`. It appears in

@@ -22,6 +22,14 @@ Three lines, and the two things you get back are the redacted message and
 a record of what changed. `Redactor::default()` is the same policy with the
 default pseudonym key, for when there is nothing to configure.
 
+**What this covers.** Redaction is positional. It changes the positions a
+rule names, plus repeats of their values elsewhere while the known-value
+sweep is on (§8). Everything else passes through unchanged: free text in
+`NTE-3` or `OBX-5`, a site's own `Z` segments, an identifier in a field no
+rule names. That holds unless the policy rejects by default (§5). Before
+sharing a redacted message, read what is left with
+`er7-redact --uncovered message.er7` (§7).
+
 On the command line, the same thing:
 
 ```sh
@@ -160,8 +168,10 @@ let redactor = Redactor::new(Policy::patient_identifiers()).with_key(20260815);
 ```
 
 Every message redacted with that key maps `PATID1234` to the same token.
-Different keys produce unrelated mappings, so two data sets redacted under
-different keys cannot be joined.
+Pseudonyms are deterministic for a given key and decoded value. A
+different key changes every pseudonym, but that gives no assurance that two
+data sets cannot be linked: the fields left in place, such as dates,
+codes, and free text, can still join them.
 
 The cost is real and is worth reading before relying on it
 ([spec §7.3](../../spec/07-pseudonyms/index.md)): a pseudonym preserves
@@ -182,7 +192,13 @@ for change in &report.changes {
 
 Every path is fully qualified, so a row can be pasted straight into
 `er7 --query` to see what is there now. And a report holds **no values** —
-neither the old text nor the new — so it is safe to paste into a ticket.
+neither the old text nor the new. One part of a path is sender text,
+though: the segment ID. A standard ID (`PID`, `ZP1`) is safe to share, but
+a message can carry any ID, such as `ZSMITHJOHN`. The `er7-redact` CLI's
+`--report` writes such an ID as `<segment-label-N>`
+([spec §10.3](../../spec/10-command-line-interface/index.md), D26). Do the
+same before pasting `change.path` from your own code into a ticket:
+`er7_redact::shareable_path(&change.path, &message)` does it for you.
 
 An empty report means nothing was found to redact. That is either good news
 or a wrong policy, and the crate does not presume to say which; read it

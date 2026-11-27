@@ -433,6 +433,16 @@ mod tests {
     }
 
     #[test]
+    fn an_empty_action_says_one_is_missing() {
+        // D18: "expected an action" rather than "unknown action \"\"" (found
+        // by cargo-mutants, 2026-11-26).
+        assert_eq!(
+            Action::parse("   ").unwrap_err(),
+            Error::BadPolicy("expected an action".into())
+        );
+    }
+
+    #[test]
     fn every_action_but_pseudonym_is_idempotent() {
         // D10: applying a policy twice is the same as applying it once,
         // except for `Pseudonym`, which hashes whatever text it finds

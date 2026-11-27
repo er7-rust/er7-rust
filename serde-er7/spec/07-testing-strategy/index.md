@@ -22,6 +22,7 @@ enforces it. A rule with no test is a bug in this table.
 | S11 | `every_wrapper_converts_and_mutates_through`, `deref_reaches_query`, `deref_reaches_the_inner_api` | `tests/main.rs`, `src/message.rs`, `src/subcomponent.rs` |
 | S12 | *by `cargo rustdoc --lib -- -W missing-docs`*, which is one of the four checks (§7.4) | — |
 | S13 | `strict_rejects_an_unknown_top_level_field`, `strict_rejects_an_unknown_field_inside_a_nested_segment`, `strict_rejects_an_unknown_field_inside_separators`, `strict_still_requires_every_field_the_plain_type_does`, `plain_deserialize_is_unaffected_by_strict_existing`, `strict_rejects_an_unknown_field` | `src/message.rs`, `src/segment.rs`, `src/separators.rs` |
+| S14 | `round_trips_through_bincode`, `map_and_positional_codecs_compose_in_one_round_trip`, `strict_reads_positional_sequences_too`, `short_sequences_are_invalid_length_errors` | `tests/main.rs` |
 
 The table is **checked by `cargo test`**, not only by review:
 `every_rule_has_a_coverage_row` reads this file and the rule index and
@@ -93,3 +94,16 @@ a delimiter edge case, not a full multi-segment ORU. Reach for `er7`'s
 `samples/*.er7` (via `tests/main.rs`) specifically when the point of
 the test is "a real message, not one written to order," such as
 `round_trips_every_sample_from_the_er7_crate`.
+
+## 7.6 Mutation testing
+
+`cargo mutants -p serde-er7` (cargo-mutants 27.1.0, 2026-11-26): 115
+mutants. 65 were caught, 47 did not compile (most `Serialize` and visitor
+bodies cannot be replaced by a default), and 3 survived. All three were the
+same gap: the S11 conformance tests built `Separators` and `Terminator`
+from default values, so a `From` or `Deref` that returned
+`Default::default()` passed. `every_wrapper_converts_and_mutates_through`
+now starts from non-default values, and
+`every_wrapper_dereferences_immutably` compares each wrapper's value with
+what it wraps. A re-run catches all three.
+

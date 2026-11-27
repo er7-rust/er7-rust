@@ -43,7 +43,7 @@ must stay that way.
   against literals written to order — and it is why `tests/` is excluded
   from the published package.
 - **`er7` is a path dependency, not a registry dependency.** `Cargo.toml`
-  says `er7 = { path = "../er7", version = "0" }`, so a local change to
+  says `er7 = { path = "../er7", version = "0.4" }`, so a local change to
   `er7` is picked up immediately — no `[patch.crates-io]` needed. Only
   when this crate is published on its own does the `version` requirement
   take over.

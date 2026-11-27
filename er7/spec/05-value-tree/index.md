@@ -66,6 +66,20 @@ to `Field`:
   therefore null only for the precise shape `|""|`, never for
   `|""^X|`.
 
+**Writing a null.** Assign the constant: `subcomponent.raw =
+NULL.to_string()` (or `Subcomponent::new(NULL)`). `Subcomponent::set` never
+writes a null. It takes text, and the text `""` is encoded as `\X2222\`
+([§6.3](../06-escape-sequences/index.md), R14), so a value that happens to
+be two quotes cannot turn into "clear this". Code that used
+`set(NULL, ..)` to write a null must switch to assigning `raw`.
+
+When a message uses `"` as one of its delimiters, it cannot carry the
+explicit null at all. The two quotes would be structure, so assigning
+`NULL` there splits the node and shifts every value after it. Assign
+`NULL` only when `!separators.is_delimiter('"')`. A layer that writes nulls
+for its callers must refuse in that case rather than emit the shifted
+message (as `er7-redact` does, its D25).
+
 `Subcomponent::value` reports the explicit null as the empty string, since
 that is the value being conveyed. Ask `is_null` when the difference
 matters — for a database write, it always does.

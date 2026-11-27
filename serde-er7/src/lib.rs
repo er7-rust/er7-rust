@@ -108,6 +108,7 @@
 #![forbid(unsafe_code)]
 #![deny(missing_docs)]
 
+mod borrow;
 mod component;
 mod field;
 mod message;

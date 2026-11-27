@@ -15,9 +15,76 @@ raised minimum supported Rust version, which is always a breaking change
 and never lands in a patch
 ([`spec/rust-msrv-n-minus-2/index.md`](spec/rust-msrv-n-minus-2/index.md)).
 
-## Unreleased
+## 2026-11-27 — `er7` 0.4.0, `serde-er7` 0.5.0, `er7-redact` 0.6.0
+
+**`er7` is published first**: both
+siblings now require `er7 = "0.4"`, so neither can be published (or
+resolved by a downstream user) against an older `er7` with different
+behaviour (family-policy §1.6).
 
 ### Changed
+
+- `er7` (behaviour change): `escape`, and so `Subcomponent::set`, now
+  encodes text that is exactly `""` as `\X2222\` (with the message's own
+  escape character), so it reads back as two quote characters rather than
+  the explicit null (R14). **Migration:** code that wrote a null with
+  `set(NULL, ..)` must assign `raw = NULL.to_string()` instead, and only
+  when `"` is not one of the message's delimiters (spec §5.3).
+- `er7-redact` (breaking): `mask "` (or any action producing the text
+  `""`) no longer writes an explicit null that a receiver would act on as
+  "clear this value". A `null` action on a message that uses `"` as a
+  delimiter used to write two field or component breaks and shift every
+  later value; `Redactor::redact` now fails closed with the new
+  `Error::NullUnrepresentable { path }` and leaves the message as passed
+  in (D25). The CLI reports it and exits 1. `Error` gains a variant, so
+  exhaustive matches must add it.
+- `er7-redact` CLI: `--report` and `--uncovered` no longer copy a segment
+  ID that is not the standard three-character shape (`ZSMITHJOHN`, a
+  lowercase name, non-ASCII text). Such an ID is sender text and could carry
+  patient detail, so it is written as `<segment-label-N>` (D26, spec §10.3).
+  The library's `Change::path` is unchanged.
+- `er7-redact`: new `shareable_path(&path, &message)` and
+  `is_standard_segment_id(id)` apply the same rule for callers. The `path`
+  in `Error::NoOutput` and `Error::NullUnrepresentable` now uses it too, so
+  an error message never copies a non-standard segment ID.
+- `er7-redact`: the known-value sweep collects values from the message as
+  it arrived, as spec §2.10 always said. A later rule naming the same
+  position used to learn an earlier rule's replacement (`replace TOKEN`
+  then `clear` also cleared an unrelated `TOKEN` elsewhere). Nothing is
+  collected when the sweep is off.
+- `er7-redact` CLI: a policy file's `known-values off` is honoured. The
+  CLI's neutral start used to force the sweep on for every run, so
+  `known-values off` showed as `on` in `--show-policy` and swept anyway.
+  The first `--policy` file now decides. Later files and the built-in
+  starting policies can still only turn it on (spec §10.2).
+- `er7-redact`: the known-value sweep no longer collects a value that its
+  own action leaves unchanged. Running a policy over its own output used
+  to learn the first run's output (`ABCD` after `first 4`) and truncate
+  unrelated text. A replay is now a no-op (D10, spec §3.6). A custom
+  action may be called once more per named leaf, to check whether it
+  changes the value.
+- `serde-er7`: `Message`, `Segment`, and `Separators` now also deserialize
+  from a positional sequence (S14, spec §2.3). A format that writes structs
+  as sequences, such as bincode, now round-trips; it used to fail with
+  `invalid type: sequence, expected a Message object`. `Strict<Message>`
+  reads nested values strictly in that form too. The serialized shape is
+  unchanged. A JSON array of field values is now accepted as input as well.
+  `bincode 1.3.3` is a dev-dependency only.
+- `er7-redact` docs: the pseudonym docs no longer claim that data sets
+  redacted under different keys "cannot be joined". They now say a
+  pseudonym is deterministic for a key and value, and that a changed key is
+  no assurance against linkage through the fields left in place (spec
+  §7.2). The algorithm is unchanged. The usage guide and the site tutorial
+  now say what positional redaction covers before their first step about
+  sharing.
+- `er7-redact` (security, performance): the known-value sweep is no longer
+  quadratic. A message with 100,000 repetitions of `PID-3` took about
+  9 minutes under the default policy; it now takes 0.17 s. The CLI only
+  computes the uncovered list for `--uncovered` (batch peak memory
+  115 → 73 MiB). See BENCHMARKS.md.
+- `serde-er7` (performance): serialization borrows the tree instead of
+  cloning every level, which halves peak memory and is about 20× faster on
+  a large message. The output is byte-identical.
 
 - All crates: the license option `CC-BY-NC-SA-4.0` is replaced by
   `CC-BY-SA-4.0` in the SPDX expression, `LICENSE.md` files, `LICENSES/`,

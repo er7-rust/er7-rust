@@ -4,7 +4,6 @@ use std::fmt;
 use std::ops::{Deref, DerefMut};
 
 use serde::de::{SeqAccess, Visitor};
-use serde::ser::SerializeSeq;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use crate::Subcomponent;
@@ -70,22 +69,12 @@ impl DerefMut for Component {
 }
 
 impl Serialize for Component {
-    /// Write each subcomponent as one array element.
-    ///
-    /// This clones every subcomponent to borrow it as a [`Subcomponent`],
-    /// which is the price of keeping one owning wrapper type per tree level
-    /// instead of a second, borrowing family — a fair trade for an HL7®
-    /// message, which is kilobytes, not gigabytes.
+    /// Serialize without cloning the tree; see the private `borrow` module.
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        let subcomponents = &self.0.subcomponents;
-        let mut seq = serializer.serialize_seq(Some(subcomponents.len()))?;
-        for subcomponent in subcomponents {
-            seq.serialize_element(&Subcomponent(subcomponent.clone()))?;
-        }
-        seq.end()
+        crate::borrow::Ref(&self.0).serialize(serializer)
     }
 }
 

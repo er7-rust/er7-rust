@@ -75,6 +75,17 @@ subcomponent — is replaced by exactly one subcomponent whose text is `""`.
 Everything beneath it is discarded. A path that names a whole segment
 nulls each of that segment's fields.
 
+**When the null cannot be written [D25].** A message that uses `"` as one
+of its delimiters cannot carry the explicit null: the two quotes would be
+structure, so `ZXX"X"Y` would become `ZXX""""Y` and `Y` would move from
+field 2 to field 4. Before writing a null, `redact` checks for this and fails
+closed with `Error::NullUnrepresentable` naming the position (§9.2).
+
+The converse holds too. Text written by any other action goes through
+`er7::Subcomponent::set` (§3.5), which encodes text that is exactly `""` as
+`\X2222\`. So `mask "` on a two-character value writes two quote
+characters that read back as text, not as "clear this value" (`er7` R14).
+
 Every other action leaves the shape untouched (D1,
 [§4.1](../04-what-redaction-preserves/index.md)).
 
@@ -103,6 +114,22 @@ every action except `Pseudonym`:
   so a second pass hashes the first pass's output and produces a different
   one. Redact once; if a message must be redacted again, redact the
   original.
+
+**With the known-value sweep on**, the guarantee covers the whole policy
+run, not just each action. A second run over redacted output learns no
+known values, because every named value is already what its action
+writes, and an unchanged value is never collected
+([§2.10](../02-redaction-model/index.md)). Without that rule, `first 4`
+on `ZXX|ABCDEFGH|ABCD WXYZ` gives `ZXX|ABCD|ABCD WXYZ`, and a second run
+learned `ABCD` and truncated field 2 to `ABCD`.
+
+One limit, stated rather than hidden: when **two rules name the same
+position**, the first rule's action may change the second's output on a
+replay (`replace TOKEN` then `first 2` writes `TO`; a second run's
+`replace TOKEN` changes `TO` again). The final value at that position is
+still the same, but a value the replay learns there may be swept
+elsewhere. Redact the original rather than redacted output whenever you
+can.
 
 This is a guarantee about the eight built-ins, provable because this crate
 wrote all eight. It is not extended to
@@ -145,6 +172,12 @@ replacement the same way every other action does: `Some(text)` to write
 says about decoded text and [D11](#35-replacement-text-cannot-corrupt-the-message-d11)'s
 encoding-on-the-way-in applies unchanged — a custom action cannot break
 the message any more than a built-in one can.
+
+**It may run more than once per leaf.** With the known-value sweep on, a
+named leaf's action is also asked whether it would change the value
+before that value is collected ([§2.10](../02-redaction-model/index.md)).
+So a custom action should be a pure function of its two arguments, which a
+pseudonym-like action already is.
 
 **`Action` keeps its ordinary `Debug`, `Clone`, `PartialEq`, and `Eq`.**
 None of the four is meaningful for a bare closure, so `CustomAction`

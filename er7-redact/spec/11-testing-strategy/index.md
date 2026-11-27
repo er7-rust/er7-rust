@@ -23,7 +23,7 @@ enforces it. A rule with no test is a bug in this table.
 | D7 | `applies_rules_in_order` | `src/redact.rs` |
 | D8 | `a_rule_that_matches_nothing_does_nothing` | `src/redact.rs` |
 | D9 | `rejecting_by_default_covers_what_no_rule_named`, `a_segment_wide_accept_is_not_narrowed` | `src/redact.rs` |
-| D10 | `every_action_but_pseudonym_is_idempotent` | `src/action.rs` |
+| D10 | `every_action_but_pseudonym_is_idempotent`, `a_second_pass_changes_nothing_with_the_sweep_on` | `src/action.rs`, `src/redact.rs` |
 | D11 | `replacement_text_cannot_break_the_message` | `tests/main.rs` |
 | D12 | `pseudonyms_are_stable_and_keyed`, `pseudonyms_link_across_messages` | `src/pseudonym.rs`, `tests/main.rs` |
 | D13 | `a_report_carries_no_values` | `src/redact.rs` |
@@ -31,13 +31,15 @@ enforces it. A rule with no test is a bug in this table.
 | D15 | `reports_a_bad_policy_line`, `cli_reports_errors_on_stderr` | `src/policy.rs`, `tests/main.rs` |
 | D16 | `the_crate_has_one_runtime_dependency` | `tests/main.rs` |
 | D17 | `an_untouched_message_round_trips` | `tests/main.rs` |
-| D18 | `a_policy_round_trips_through_display`, `parses_every_action`, `the_sample_policy_exercises_every_action` | `src/policy.rs`, `src/action.rs`, `tests/main.rs` |
+| D18 | `a_policy_round_trips_through_display`, `parses_every_action`, `the_sample_policy_exercises_every_action`, `an_empty_action_says_one_is_missing` | `src/policy.rs`, `src/action.rs`, `tests/main.rs` |
 | D19 | `reject_beats_accept_for_the_same_field`, `reject_segment_beats_a_narrower_accept` | `src/redact.rs` |
-| D20 | `appending_never_weakens_the_defaults` | `src/policy.rs` |
+| D20 | `appending_never_weakens_the_defaults`, `cli_follows_the_first_policy_files_known_values_line` | `src/policy.rs`, `tests/main.rs` |
 | D21 | `an_unrecognised_payload_follows_the_policy`, `cli_masks_an_unrecognised_payload` | `src/redact.rs`, `tests/main.rs` |
-| D22 | `uncovered_lists_every_position_no_rule_names`, `uncovered_ignores_empty_and_null_leaves`, `uncovered_uses_original_paths_for_null_rules`, `uncovered_never_calls_custom_actions`, `cli_uncovered_lists_the_documented_gaps` | `src/redact.rs`, `tests/main.rs` |
-| D23 | `known_values_are_redacted_wherever_they_appear`, `known_values_matching_is_case_insensitive`, `multilingual_known_values_in_notes`, `known_values_matching_is_whole_word_only`, `known_values_below_the_minimum_length_are_ignored`, `keep_never_becomes_a_known_value`, `known_values_from_a_null_collapsed_field_are_still_learned`, `search_known_values_off_disables_the_sweep`, `known_values_line_parses_and_displays`, `appending_only_turns_known_values_on`, `cli_known_values_default_policy_catches_a_repeated_name` | `src/redact.rs`, `src/policy.rs`, `tests/main.rs` |
+| D22 | `uncovered_lists_every_position_no_rule_names`, `uncovered_ignores_empty_and_null_leaves`, `uncovered_uses_original_paths_for_null_rules`, `uncovered_never_calls_custom_actions`, `cli_uncovered_lists_the_documented_gaps`, `uncovered_reaches_the_header_after_msh_2_and_single_subcomponents`, `cli_report_and_uncovered_are_exact_over_two_messages` | `src/redact.rs`, `tests/main.rs` |
+| D23 | `known_values_are_redacted_wherever_they_appear`, `known_values_are_learned_from_the_original_message`, `a_swept_leaf_its_action_leaves_unchanged_is_not_reported`, `the_swept_positions_depend_only_on_original_named_values`, `the_sweep_reaches_the_header_after_msh_2`, `known_values_matching_is_case_insensitive`, `multilingual_known_values_in_notes`, `known_values_matching_is_whole_word_only`, `known_values_below_the_minimum_length_are_ignored`, `keep_never_becomes_a_known_value`, `known_values_from_a_null_collapsed_field_are_still_learned`, `search_known_values_off_disables_the_sweep`, `known_values_line_parses_and_displays`, `appending_only_turns_known_values_on`, `cli_known_values_default_policy_catches_a_repeated_name` | `src/redact.rs`, `src/policy.rs`, `tests/main.rs` |
 | D24 | `custom_action_runs_the_callers_closure`, `custom_action_equality_is_identity_not_behavior`, `custom_action_writes_a_placeholder_with_no_file_spelling`, `a_policy_mixing_built_in_and_custom_actions_redacts_correctly`, `a_custom_action_reports_instead_of_panicking` | `src/action.rs`, `src/redact.rs` |
+| D25 | `a_null_fails_closed_when_quote_is_a_delimiter`, `masking_with_quotes_never_writes_an_explicit_null`, `cli_reports_errors_on_stderr` | `src/redact.rs`, `tests/main.rs` |
+| D26 | `shareable_paths_copy_only_standard_segment_ids`, `errors_never_copy_a_nonstandard_segment_id`, `cli_report_and_uncovered_never_copy_a_nonstandard_segment_id` | `src/redact.rs`, `tests/main.rs` |
 
 Further tests carry no single rule, because they assert the whole-message
 properties every rule exists to produce, or a contract that is a table
@@ -156,6 +158,25 @@ that was redacted will never notice.
   exist.
 - **Nothing else.** Performance used to be listed here as untested
   (recorded as T4); see [§11.7](#117-benchmarks) for why it no longer is.
+
+**Mutation testing.** `cargo mutants -p er7-redact` (cargo-mutants
+27.1.0, 2026-11-26): 323 mutants. 277 were caught, 28 did not compile, and
+none timed out. 18 survived. Nine were real gaps:
+- a lone `-` as input;
+- the exact multi-message layout of `--report` and `--uncovered`;
+- the wording for an empty action;
+- `uncovered` on `MSH-3` and on a single-subcomponent rule;
+- the sweep reaching header fields after `MSH-2`.
+
+Tests named after each close them, and a re-run of the affected functions
+catches 93 of 94. The rest are equivalent, meaning no output can tell them
+apart:
+- the guards at the top of `Pass::learn`: an empty or null leaf decodes to
+  `""`, below the length threshold; `keep` leaves its value unchanged, so it
+  is never collected; with the sweep off, nothing collected is ever used;
+- the sweep's empty/null skip: `""` matches no known value;
+- `KnownValues::is_empty` returning `false`: the sweep then finds nothing;
+- `<` versus `<=` in `KnownValues::find`: each value has one index.
 
 ## 11.7 Benchmarks
 

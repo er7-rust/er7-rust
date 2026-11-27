@@ -2,7 +2,8 @@
 
 # Generate the four CycloneDX documents specified by
 # spec/software-bills-of-materials/index.md. Run from anywhere after the
-# three `cargo package` commands in family-policy §1.6 have completed.
+# `cargo package -p er7 -p er7-redact -p serde-er7` of family-policy §1.6
+# has completed.
 
 set -eu
 

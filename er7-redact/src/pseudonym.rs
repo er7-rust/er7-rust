@@ -54,7 +54,8 @@ const PRIME: u64 = 0x0000_0100_0000_01b3;
 /// assert_eq!(pseudonym(0, "PATID1234"), pseudonym(0, "PATID1234"));
 /// assert_eq!(pseudonym(0, "PATID1234").len(), 16);
 ///
-/// // Keyed: two data sets redacted under different keys cannot be joined.
+/// // Keyed: a different key gives a different pseudonym. That alone is no
+/// // assurance against linkage through the fields left in place (§7.2).
 /// assert_ne!(pseudonym(0, "PATID1234"), pseudonym(1, "PATID1234"));
 ///
 /// // Distinct: different identifiers do not collide into one patient.
@@ -108,8 +109,8 @@ mod tests {
 
         // Same key and value, every time.
         assert_eq!(pseudonym(0, "PATID1234"), pseudonym(0, "PATID1234"));
-        // Different keys do not share pseudonyms, so two data sets
-        // redacted under different keys cannot be joined.
+        // A different key gives a different pseudonym (spec §7.2). That is
+        // no assurance against linkage through other retained fields.
         assert_ne!(pseudonym(0, "PATID1234"), pseudonym(1, "PATID1234"));
         // Different values do not collapse into one patient.
         assert_ne!(pseudonym(0, "PATID1234"), pseudonym(0, "PATID1235"));

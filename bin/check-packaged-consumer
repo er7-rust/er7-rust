@@ -1,0 +1,86 @@
+#!/bin/sh
+
+# Build and run a throwaway consumer crate against the three *packaged*
+# crates (target/package/*.crate, produced by one `cargo package` run over
+# all three). The packaged sibling manifests carry registry requirements on
+# `er7` rather than path dependencies, so this resolves them against the
+# packaged `er7` (via [patch.crates-io]): the minimum core version each
+# sibling declares, before it is published. family-policy §1.6.
+#
+# Checks the MSH-2 header decision that differs between the workspace and
+# older registry releases, and one round trip through each crate.
+
+set -eu
+
+workspace=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
+cd "$workspace"
+
+version_of() {
+    sed -n 's/^version = "\(.*\)"$/\1/p' "$1/Cargo.toml" | head -n 1
+}
+er7_version=$(version_of er7)
+redact_version=$(version_of er7-redact)
+serde_version=$(version_of serde-er7)
+
+consumer=target/package-consumer
+rm -rf "$consumer"
+mkdir -p "$consumer/packages" "$consumer/src"
+for crate in "er7-$er7_version" "er7-redact-$redact_version" "serde-er7-$serde_version"; do
+    archive="target/package/$crate.crate"
+    if [ ! -f "$archive" ]; then
+        echo "missing $archive: run cargo package -p er7 -p er7-redact -p serde-er7 first" >&2
+        exit 1
+    fi
+    tar -xzf "$archive" -C "$consumer/packages"
+done
+
+cat > "$consumer/Cargo.toml" <<EOF
+[package]
+name = "packaged-consumer"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[workspace]
+
+[dependencies]
+er7 = "=$er7_version"
+er7-redact = { path = "packages/er7-redact-$redact_version" }
+serde-er7 = { path = "packages/serde-er7-$serde_version" }
+serde_json = "1"
+
+[patch.crates-io]
+er7 = { path = "packages/er7-$er7_version" }
+EOF
+
+cat > "$consumer/src/main.rs" <<'EOF'
+fn main() {
+    // The header decision: six MSH-2 encoding characters are refused.
+    assert!(matches!(
+        er7::parse("MSH|^~\\&#!|LAB"),
+        Err(er7::Error::BadHeader(_))
+    ));
+
+    let text = "MSH|^~\\&|LAB|FAC\rPID|1||PATID1234^^^LAB^MR||SAMPLE^PATIENT\rNTE|1||note";
+    let message = er7::parse(text).expect("parses");
+    assert_eq!(message.to_er7(), text);
+
+    let mut redacted = message.clone();
+    let policy = er7_redact::Policy::patient_identifiers();
+    er7_redact::Redactor::new(policy)
+        .redact(&mut redacted)
+        .expect("redacts");
+    let reparsed = er7::parse(&redacted.to_er7()).expect("redacted output parses");
+    assert_eq!(reparsed.segments.len(), message.segments.len());
+    assert!(!redacted.to_er7().contains("SAMPLE"));
+
+    let wrapped: serde_er7::Message = message.into();
+    let json = serde_json::to_string(&wrapped).expect("serializes");
+    let back: serde_er7::Message = serde_json::from_str(&json).expect("deserializes");
+    assert_eq!(back.to_er7(), text);
+
+    println!("packaged consumer: ok");
+}
+EOF
+
+cargo run --quiet --manifest-path "$consumer/Cargo.toml"

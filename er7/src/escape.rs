@@ -354,6 +354,9 @@ pub fn unescape<'a>(text: &'a str, separators: &Separators) -> Cow<'a, str> {
 /// assert_eq!(escape(r"a\b", &separators), r"a\E\b");
 /// // A literal carriage return would end the segment and truncate the message.
 /// assert_eq!(escape("line\rnext", &separators), r"line\X0D\next");
+/// // Text that is exactly `""` is hex-encoded, so it is not read back as
+/// // the explicit null. Write a null by assigning `er7::message::NULL`.
+/// assert_eq!(escape(r#""""#, &separators), r"\X2222\");
 ///
 /// // Encoding then decoding is the identity, for every value.
 /// for value in ["plain", r"a|b^c~d&e\f", "with\rcr"] {
@@ -375,6 +378,16 @@ pub fn escape<'a>(text: &'a str, separators: &Separators) -> Cow<'a, str> {
             || c == '\n'
     };
     if !text.contains(needs_escaping) {
+        // Text that is exactly `""` would read back as the explicit null,
+        // turning a value into an instruction to clear one. Hex-encoding
+        // both quotes keeps it text (R14, spec §6.3). When `"` is itself a
+        // delimiter the branch below already encodes it, so this is the
+        // only case that needs it.
+        if text == crate::message::NULL {
+            let mut out = String::with_capacity(8);
+            Escape::Hex("2222").write_er7(&mut out, separators);
+            return Cow::Owned(out);
+        }
         return Cow::Borrowed(text);
     }
     let mut out = String::with_capacity(text.len() + 8);
@@ -497,9 +510,47 @@ mod tests {
     }
 
     #[test]
+    fn escapes_the_null_text_so_it_stays_text() {
+        // R14: text that is exactly `""` must not become the explicit
+        // null. Checked through a full wire round trip, with the default
+        // escape character and a custom one.
+        for (header, escaped) in [("MSH|^~\\&|A", r"\X2222\"), ("MSH|^~?&|A", "?X2222?")] {
+            let mut message = crate::parse(&format!("{header}\rZXX|AB")).unwrap();
+            let separators = message.separators;
+            assert_eq!(escape(crate::message::NULL, &separators), escaped);
+            let leaf = message.segments[1].fields[0].repetitions[0].components[0]
+                .subcomponents
+                .first_mut()
+                .unwrap();
+            leaf.set(crate::message::NULL, &separators);
+            let wire = message.to_er7();
+            assert_eq!(wire, format!("{header}\rZXX|{escaped}"));
+            let reread = crate::parse(&wire).unwrap();
+            let field = reread.segments[1].field(1).unwrap();
+            assert!(!field.is_null());
+            let leaf = &field.repetitions[0].components[0].subcomponents[0];
+            assert_eq!(leaf.value(&separators), crate::message::NULL);
+        }
+        // Only the exact text: a value merely holding quotes is unchanged,
+        // and a set using `"` as a delimiter encodes it as that delimiter.
+        assert_eq!(escape(r#"say """#, &seps()), r#"say """#);
+        let quoted = Separators {
+            component: '"',
+            ..seps()
+        };
+        assert_eq!(escape(crate::message::NULL, &quoted), r"\S\\S\");
+    }
+
+    #[test]
     fn escape_and_unescape_round_trip() {
         let seps = seps();
-        for value in ["plain", r"a|b^c~d&e\f", "with\rcr", "Smith & Jones"] {
+        for value in [
+            "plain",
+            r"a|b^c~d&e\f",
+            "with\rcr",
+            "Smith & Jones",
+            r#""""#,
+        ] {
             assert_eq!(unescape(&escape(value, &seps), &seps), value);
         }
     }

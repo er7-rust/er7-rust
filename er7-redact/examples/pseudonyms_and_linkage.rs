@@ -36,8 +36,8 @@ fn main() -> Result<(), er7_redact::Error> {
     assert_eq!(one, two);
     println!("both messages now say PID-3.1 = {one}");
 
-    // A different key produces an unrelated mapping, so two data sets
-    // redacted under different keys cannot be joined.
+    // A different key produces a different mapping. That alone does not
+    // stop two data sets being linked through the fields left in place.
     let mut other = er7::parse("MSH|^~\\&|ADT1|MCM\rPID|1||PATID1234^^^ADT1^MR")?;
     Redactor::new(Policy::patient_identifiers())
         .with_key(1)

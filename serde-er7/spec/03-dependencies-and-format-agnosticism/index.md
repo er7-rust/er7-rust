@@ -7,7 +7,7 @@
 ```toml
 [dependencies]
 serde = "1"
-er7 = { path = "../er7", version = "0" }
+er7 = { path = "../er7", version = "0.4" }
 ```
 
 Both are the point of the crate: `serde` is the trait vocabulary being

@@ -128,6 +128,29 @@ into one answer per repetition.
 repetitions back with `~` is the only honest way to return it as one
 string. See [docs/paths](../paths/index.md).
 
+## How do I read, or add, a repetition?
+
+To read, `query_all` with a path below the field gives one answer per
+repetition: `message.query_all("PID-13.1")?` is `["555-0100", "555-0199"]`.
+In the tree, `field.repetitions` is a plain `Vec`, and
+`field.repetition(n)` is the 1-based accessor.
+
+To add one, push onto that `Vec`. A repetition holds components and a
+component holds subcomponents, so a one-value repetition is:
+
+```rust,ignore
+let mut extra = er7::Repetition::default();
+extra.components.push(er7::Component::default());
+extra.components[0].subcomponents.push(er7::Subcomponent::new("555-0142"));
+phones.repetitions.push(extra);
+```
+
+Use `Subcomponent::set` instead of `new` when the text may contain a
+delimiter. A whole repeating field moves between messages as one `clone`.
+See [the tutorial](../usage/index.md#3-repeated-segments-and-repeated-fields)
+and the runnable version in
+[HL7 v2 for Rust developers](https://github.com/er7-rust/er7-rust/blob/main/docs/hl7-v2-for-rust-developers/index.md#no-dictionary).
+
 ## Does it handle messages that don't use `|^~\&`?
 
 Yes. The delimiter set is read from MSH-1 and MSH-2, never assumed, and

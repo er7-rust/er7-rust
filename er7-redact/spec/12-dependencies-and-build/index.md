@@ -7,7 +7,7 @@ numbers (§12.x) are stable and cited from code, tests, and commit messages.
 
 ```toml
 [dependencies]
-er7 = { path = "../er7", version = "0" }
+er7 = { path = "../er7", version = "0.4" }
 ```
 
 And that is the whole table. `er7` is the value tree this crate edits and

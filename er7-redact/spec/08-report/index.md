@@ -41,6 +41,12 @@ work.
 The new value is not included either, since including it would leak the
 old one for `First`, `Last`, and `Mask`.
 
+A path does contain one piece of input: the segment ID. `Change::path`
+keeps it as sent, so that it names the segment the caller holds. The CLI
+replaces an ID that is not the standard three-character shape before
+writing a report ([§10.3](../10-command-line-interface/index.md), D26), and
+`shareable_path` does the same for a caller.
+
 ## 8.3 Paths are fully qualified
 
 Every path in a report carries every index, including the ones that would

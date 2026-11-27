@@ -89,7 +89,7 @@ test that enforces it.
 | R11 | `is_empty` and `is_null` are never both true. | [§5.3](../05-value-tree/index.md) |
 | R12 | Tokenizing escape sequences is lossless and never fails. | [§6.1](../06-escape-sequences/index.md) |
 | R13 | `unescape` resolves only the sequences that stand for characters; the rest stay literal. | [§6.2](../06-escape-sequences/index.md) |
-| R14 | `escape` encodes the five structural delimiters, plus `\r` and `\n` as hex. | [§6.3](../06-escape-sequences/index.md) |
+| R14 | `escape` encodes the five structural delimiters, plus `\r` and `\n` as hex, and text that is exactly `""` as `\X2222\` so it never becomes the explicit null. | [§6.3](../06-escape-sequences/index.md) |
 | R15 | `unescape(escape(value)) == value` for every value. | [§6.3](../06-escape-sequences/index.md) |
 | R16 | Writing reproduces canonical parsed input byte for byte. | [§7.2](../07-writing/index.md) |
 | R17 | Structural delimiters remain in `to_text`; only leaf text is decoded. | [§7.1](../07-writing/index.md) |

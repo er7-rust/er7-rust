@@ -84,8 +84,9 @@ PID[1]-7[1].1.1   first 4
 PID[1]-11[1].1.1  clear
 ```
 
-The report carries paths and actions and **no values**, so it can go
-straight into a ticket.
+The report carries paths and actions and **no values**. The CLI also
+replaces any non-standard segment ID with a placeholder, since that ID is
+sender text. So `--report` output can go straight into a ticket.
 
 ```sh
 er7-redact --show-policy > de-identify.policy   # the built-in list, as a file to edit

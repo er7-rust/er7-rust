@@ -66,6 +66,18 @@ defaults the starting policy came with (D20,
 [§2.6](../02-redaction-model/index.md)): a policy file of extra rules
 cannot turn `--reject-all` back off.
 
+**The known-value sweep follows the first policy file.** The CLI's own
+empty policy has no sweep setting of its own to defend, so when no
+starting flag is given (or only `--accept-all`), the first `--policy`
+file's `known-values` line decides it. A file that says `known-values off`
+runs with the sweep off, and `--show-policy` says `known-values  off`.
+Later files append as usual, and the sweep only ever turns on (D20). So
+`off` then `off` stays off, and `off` then `on` (in either order) is on.
+A file that says nothing about it means `on`. A built-in starting policy
+(`--reject-all`, `--all-but-the-header`) has the sweep on, and a file
+cannot turn it off. A run with only `--rule` arguments keeps the sweep
+on.
+
 `--accept-all` is the exception, and the only one. It is not a starting
 policy: it sets the posture of whatever policy the run assembled, after
 every file and rule has been read, and so it wins. That is deliberate —
@@ -155,6 +167,29 @@ it has no positions either way:
 ```
 # message 2: unrecognised payload, mask *
 ```
+
+**A segment ID that is not standard is never copied [D26].** A report row
+names a position, and a position starts with a segment ID. The standard
+shape is three characters: an uppercase ASCII letter, then two uppercase
+ASCII letters or digits (`PID`, `OBX`, `ZP1`). Anything else, such as
+`ZSMITHJOHN`, a lowercase name, or one holding spaces or non-ASCII text, is
+sender text that `er7` keeps as data (its R6). A crafted or broken message
+can therefore carry patient detail in that position. Both `--report` and
+`--uncovered` write such an ID as `<segment-label-N>`, where `N` numbers the
+distinct non-standard IDs of that message in order of first appearance in
+the message. The library function `er7_redact::shareable_path` does the
+rewriting, and error paths go through it too ([§9.2](../09-error-handling/index.md)):
+
+```
+MSH[1]-3[1].1.1                    replace REDACTED
+<segment-label-1>[1]-1[1].1.1      replace REDACTED
+```
+
+The row is then no longer a valid `er7 --query` argument for that one
+segment. That is the privacy-first trade ([§1.5](../01-purpose-and-scope/index.md)).
+The library's `Change::path` and `Redactor::uncovered` still carry the ID as
+sent, because a caller in-process already holds the message. A caller who
+shares those paths should pass them through `shareable_path` first.
 
 Like `--report`, **`--uncovered` does not write the redacted message**, is
 independent of the policy's posture, and reports on the input as given —

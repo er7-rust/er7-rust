@@ -27,7 +27,7 @@ enforces it. A rule with no test is a bug in this table.
 | R11 | `distinguishes_absent_empty_and_null`, `carries_the_corners_through_unchanged` | `src/message.rs`, `tests/main.rs` |
 | R12 | `tokenizes_losslessly`, `classifies_every_sequence` | `src/escape.rs` |
 | R13 | `unescapes_delimiters_and_hex`, `keeps_undecodable_sequences_literal` | `src/escape.rs` |
-| R14 | `escapes_delimiters_and_segment_terminators` | `src/escape.rs` |
+| R14 | `escapes_delimiters_and_segment_terminators`, `escapes_the_null_text_so_it_stays_text` | `src/escape.rs` |
 | R15 | `escape_and_unescape_round_trip` | `src/escape.rs` |
 | R16 | `round_trips_a_canonical_message`, `round_trips_custom_delimiters`, `keeps_empty_positions`, `every_sample_round_trips_byte_for_byte` | `src/render.rs`, `tests/main.rs` |
 | R17 | `decodes_only_the_leaves` | `src/render.rs` |
@@ -145,7 +145,32 @@ most fuzzer-generated input — `parse` itself rejects anything without a
 recognisable `MSH`/`FHS`/`BHS` header before getting there at all). Both
 ran clean, no panics found, on 2026-08-28: `parse_roundtrip` completed
 52,355,877 executions in 120 seconds; `parse_with_total` completed
-2,487,369 in the same window. `escape_roundtrip` and `query_paths` fuzz
+2,487,369 in the same window. **Mutation testing.** `cargo mutants -p er7` (cargo-mutants 27.1.0,
+2026-11-26): 378 mutants. 339 were caught, 21 did not compile, and 8 timed
+out (mutants that make `read_messages` loop forever, which the tests
+detect). 10 survived. Eight were real gaps: the CLI outline's exact layout,
+and `query` stopping before a later segment or repetition that has the
+value. `cli_outline_is_exact` and
+`query_looks_past_a_position_that_lacks_the_value` close them, and a
+re-run of the affected functions catches 29 of 30. The two that remain are
+equivalent, meaning no input can tell them apart:
+- deleting the `Text`/`Unterminated` arm of `unescape`, whose fallback
+  writes the same text;
+- deleting `!` in the outline's empty-field skip, since a parsed empty
+  field has no repetitions and so prints nothing either way.
+
+Three more targets were added on 2026-11-26, each building its input so
+that most runs reach the property instead of failing early:
+`malformed_header` (any field separator and an MSH-2 of 0–8 characters;
+an `Ok` must validate, agree with `Separators::from_header`, and
+round-trip), `escape_custom_delimiters` (R12/R14/R15 under a delimiter
+set the fuzzer picks), and `repeating_fields` (values written with `set`
+come back one per repetition, never as the explicit null). Local runs:
+2,219,133 executions in 120 s, 4,836,747 in 60 s, and 705,153 in 60 s,
+all clean. The first `malformed_header` run stopped on input `J`: a
+letter as field separator gives `MissingHeader`, which §3.3 and §4.4
+specify, so the target's assertion was corrected and the parser left as it
+was. `escape_roundtrip` and `query_paths` fuzz
 adjacent properties (escape/unescape round-tripping, and `query` agreeing
 with the head of `query_all`) and are not R6 evidence specifically. The
 targets live in `er7/fuzz/`, its own workspace, so `er7` itself keeps R25.

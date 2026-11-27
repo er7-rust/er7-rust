@@ -31,9 +31,13 @@ pseudonym(key: u64, value: &str) -> String
   [§13](../13-compatibility-and-versioning/index.md) — in every future 0.x
   and 1.x release of this crate. Redacting the same export twice, months
   apart, produces the same output.
-- **Keyed.** The key is a `u64`, defaulting to `0`. Two data sets redacted
-  with different keys share no pseudonyms, so they cannot be joined; two
-  redacted with the same key can.
+- **Keyed.** The key is a `u64`, defaulting to `0`. The output is
+  deterministic for a given key and decoded value, so two data sets
+  redacted with the same key can be joined on their pseudonyms. A
+  different key changes every pseudonym, but that gives **no assurance**
+  that two data sets cannot be linked: the fields left in place, such as
+  dates, codes, and free text, can still join them. The algorithm is
+  unchanged (frozen by §13).
 - **Not cryptographic.** The construction is FNV-1a over the key bytes
   followed by the value bytes. It is a hash, not a MAC: it is fast, it is
   deterministic, and it is **not** collision-resistant against an

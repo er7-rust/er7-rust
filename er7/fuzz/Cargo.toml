@@ -49,6 +49,27 @@ test = false
 doc = false
 bench = false
 
+[[bin]]
+name = "malformed_header"
+path = "fuzz_targets/malformed_header.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "escape_custom_delimiters"
+path = "fuzz_targets/escape_custom_delimiters.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "repeating_fields"
+path = "fuzz_targets/repeating_fields.rs"
+test = false
+doc = false
+bench = false
+
 [profile.dev]
 debug = "line-tables-only"
 split-debuginfo = "unpacked"

@@ -41,15 +41,19 @@ one place this is spelled out at the type most callers reach for first.
 
 ## 6.4 Why one owning wrapper per level, not a borrowing family
 
-`Component::serialize` (and every other multi-child level) clones each
-child to construct a temporary wrapper it can pass to
-`SerializeSeq::serialize_element`, rather than maintaining a second,
-lifetime-parameterized family of borrowing wrapper types that could avoid
-the clone. This is a deliberate simplicity trade-off: an HL7® message is
-kilobytes, not gigabytes, so the clone cost is not worth doubling the
-crate's type surface to avoid. If profiling ever shows this mattering for
-a real workload, the fix is additive — a borrowing family living alongside
-the existing owning one — not a rewrite of what already exists.
+The public API has one owning wrapper per tree level and no second,
+lifetime-parameterized family of borrowing types. Doubling the type
+surface is not worth it.
+
+**Serialization does not clone, though.** Every public `Serialize` impl
+delegates to a private borrowing serializer (`src/borrow.rs`) that writes
+the §2 shape straight from the `er7` tree. Before 2026-11-26 each level
+cloned its children to wrap them. Measured on a synthetic message with
+100,000 repetitions, that doubled peak memory (77 → 154 MiB) and made five
+JSON serializations take 298 ms. Borrowing brings that to 81 MiB and
+13 ms, with byte-identical output ([`BENCHMARKS.md`](../../../BENCHMARKS.md)).
+The fix needed no new public type, which is why the measurement came
+first.
 
 ## 6.5 `Strict<T>` follows the same convention
 

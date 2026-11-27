@@ -293,6 +293,32 @@ fn cli_outlines_multiple_sparse_messages() {
 }
 
 #[test]
+fn cli_outline_is_exact() {
+    // Exact output, not `contains`: a mutation pass (cargo-mutants,
+    // 2026-11-26) showed that extra rows or a missing separator went
+    // unnoticed. A single message has no heading; header fields after MSH-2
+    // split into components like any other; empty fields and empty
+    // components are omitted; two messages are separated by a blank line.
+    let single = "MSH|^~\\&|LAB||||||ORU^R01\rPID|1||A^^B||X";
+    let body = "MSH-1     |\nMSH-2     ^~\\&\nMSH-3     LAB\nMSH-9.1   ORU\nMSH-9.2   R01\n\
+                PID-1     1\nPID-3.1   A\nPID-3.3   B\nPID-5     X\n";
+    let (ok, stdout, stderr) = cli(&[], single);
+    assert!(ok, "{stderr}");
+    assert_eq!(stdout, body);
+
+    let pair = format!("{single}\rMSH|^~\\&|LAB2\rZZZ|1");
+    let (ok, stdout, stderr) = cli(&[], &pair);
+    assert!(ok, "{stderr}");
+    assert_eq!(
+        stdout,
+        format!(
+            "# message 1: ORU^R01\n{body}\n# message 2\n\
+             MSH-1     |\nMSH-2     ^~\\&\nMSH-3     LAB2\nZZZ-1     1\n"
+        )
+    );
+}
+
+#[test]
 fn cli_selects_one_message_of_a_batch() {
     let (ok, stdout, _) = cli(&["--message", "2", "-q", "MSH-10"], BATCH);
     assert!(ok);

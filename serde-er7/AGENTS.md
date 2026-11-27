@@ -23,7 +23,7 @@ drives changes.
 | Crate        | https://crates.io/crates/serde-er7                                          |
 | Docs         | https://docs.rs/serde-er7/                                                  |
 | Website      | https://er7-rust.github.io/serde-er7/                                       |
-| Sibling      | `er7` is a **path** dependency (`{ path = "../er7", version = "0" }`); `tests/` reads that crate's `samples/` from `../er7` via `include_str!` |
+| Sibling      | `er7` is a **path** dependency (`{ path = "../er7", version = "0.4" }`); `tests/` reads that crate's `samples/` from `../er7` via `include_str!` |
 | Maintainer   | Joel Parker Henderson — joel@joelparkerhenderson.com                        |
 
 ## How this repo is documented

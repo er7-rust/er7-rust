@@ -57,7 +57,7 @@ the release notes.
 
 ## 13.4 Dependency on `er7`
 
-`Cargo.toml` depends on `er7` by path (`{ path = "../er7", version = "0" }`)
+`Cargo.toml` depends on `er7` by path (`{ path = "../er7", version = "0.4" }`)
 so the workspace picks up local changes to `er7` immediately; the
 `version` requirement is `"0"` while `er7` is pre-1.0, moving to `"1"` when
 it releases, and is what governs compatibility once this crate is

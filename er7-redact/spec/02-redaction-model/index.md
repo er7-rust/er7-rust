@@ -308,20 +308,35 @@ about the result" ([§14.2](../14-roadmap/index.md)). This is the second
 pass that closes it, and it is on by default.
 
 **What counts as a known value.** Every leaf a rule named, whose action
-was not `keep`, and that carried text (D3, D4) — its **decoded** value,
-before the rule's own action changed it. A rule's action is reused
+was not `keep`, that carried text (D3, D4), and whose value that action
+would change — its **decoded** value, before the rule's own action changed
+it. A value its own action leaves as it is (`first 4` on `ABCD`,
+`replace REDACTED` on `REDACTED`) stays at the named position, so hunting
+it elsewhere would be inconsistent. Skipping it is also what keeps a
+replay idempotent ([§3.6](../03-actions/index.md)). A rule's action is reused
 exactly as found; `keep` never contributes one, because a `keep`'d
 position is a declaration that the value there is not identifying at all
 ([§2.4](#24-rules-apply-in-order-d7-and-a-reject-beats-an-accept-d19)).
 Collecting happens against the message as it arrived, so a `first 4` on
 `PID-7` still contributes the full, undoctored date of birth as a known
-value, not the four characters the rule kept.
+value, not the four characters the rule kept. This holds across rules too.
+When `replace TOKEN` and then `clear` both name `ZXX-1`, the second rule
+learns the original value at that position, never `TOKEN`. So an unrelated
+`TOKEN` elsewhere in the message is left alone. When the sweep is off,
+nothing is collected at all.
 
 The sweep counts Unicode scalar values **after lowercasing** and collects
 a value only if that count is at least three. For example, `示例` has two
 scalars and is skipped. `İX` lowercases to `i`, U+0307 (combining dot
 above), and `x`, so it reaches the threshold. The named position receives
 its rule's action in both cases.
+
+**Cost.** The sweep is linear in the size of the message for ordinary
+input. Collected values are indexed by their first alphanumeric run, and a
+whole-word match can only start at one of the leaf's runs. So a leaf is
+only checked against the values filed under its own runs, plus any value
+that does not start with an alphanumeric character. Many values that share
+one first word are still each checked against a leaf holding that word.
 
 **Where the sweep looks.** Every leaf that carries text and that no rule
 or posture already touched — the same set [`uncovered`](#29-what-no-rule-names-d22)

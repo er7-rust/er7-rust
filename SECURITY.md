@@ -149,7 +149,7 @@ taken on trust:
 | **No build scripts.** Nothing runs at compile time | There is no `build.rs` in any crate |
 | **Library code performs no I/O at all** — no filesystem, no network, no process spawning, no environment reads, no logging, no telemetry | `grep -rn "std::fs\|std::net\|std::env\|std::process" er7/src er7-redact/src serde-er7/src` matches only `main.rs` |
 | **The command-line tools read only what you name** — a file argument or standard input — and write only to standard output or `-o` | `er7/src/main.rs`, `er7-redact/src/main.rs`. No configuration file is searched for and no environment variable is consulted. |
-| **Fuzzed on the untrusted-input surface** | `er7/fuzz/`: `parse_roundtrip`, `parse_with_total`, `escape_roundtrip`, `query_paths` — four targets |
+| **Fuzzed on the untrusted-input surface** | `er7/fuzz/`: `parse_roundtrip`, `parse_with_total`, `escape_roundtrip`, `query_paths`, `malformed_header`, `escape_custom_delimiters`, `repeating_fields` — seven targets |
 | **Every dependency's license and every advisory against it is checked**, on push and again every Monday whether or not anything pushed | `deny.toml`; run `cargo deny check` from the root and from `er7/fuzz/`, or read the `deny` job in `.github/workflows/ci.yml` and `.github/workflows/audit.yml` |
 | **The code that ships is built from the package archive**, not only from the richer workspace checkout | Run `cargo package --locked -p er7`, then repeat for `er7-redact` and `serde-er7`; the `packages` CI job runs all three and verifies each normalized crate against its registry dependencies (family-policy §1.6) |
 | **Each release dependency graph has a checked, machine-readable inventory**, separate from benchmark and fuzz dependencies | The `packages` CI job retains three package-scoped and one fuzz-scoped CycloneDX 1.7 JSON documents. `bin/check-sboms` compares every component list with Cargo's target-filtered normal/build graph; see spec §15. This is an SBOM, not provenance or a vulnerability scan. |
@@ -166,9 +166,13 @@ content. If you log the whole error, you log it.
 Everything else is bounded: `BadHeader` names delimiter characters from the
 header, `BadPath` quotes the path *you* supplied, and
 `er7_redact::Error::BadPolicy` names a line of *your own* policy file. The
-`--report` output carries paths and actions and no values by design
-([§8](er7-redact/spec/08-report/index.md)), which is what makes it safe to
-attach to a ticket.
+`--report` and `--uncovered` output carries paths and actions and no values
+by design ([§8](er7-redact/spec/08-report/index.md)). A segment ID that is
+not the standard three-character shape is sender text, so the CLI writes it
+as a numbered placeholder
+([§10.3](er7-redact/spec/10-command-line-interface/index.md), D26). That is
+what makes the output safe to attach to a ticket. The library's
+`Change::path` keeps the ID as sent.
 
 ## The attack surface, concretely
 

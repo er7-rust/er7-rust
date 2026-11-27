@@ -19,12 +19,13 @@ convention `er7` itself follows (its `AGENTS.md`).
 - **Borrowing (zero-clone) wrapper types** alongside the current owning
   ones — see [§6.4](../06-ergonomics/index.md). Deferred until a real
   workload shows the clone cost mattering.
-- **`serde_yaml`/`bincode` as additional dev-dependencies**, to demonstrate
-  more formats in examples. Deferred as a nice-to-have; JSON alone
-  demonstrates every wire shape in [§2](../02-wire-shapes/index.md) without
-  ambiguity, since JSON has no format-specific behaviour this crate relies
-  on that a binary format's demonstration would need to guard against
-  separately.
+- **`serde_yaml` as an additional dev-dependency**, to demonstrate more
+  formats in examples. Deferred as a nice-to-have. `bincode` is already a
+  dev-dependency: the earlier claim that JSON alone shows every shape was
+  wrong. JSON always writes structs as objects, so it never reached the
+  sequence form a binary format writes. A 2026-11-25 audit found that a
+  bincode round trip failed (`invalid type: sequence, expected a Message
+  object`). S14 fixed it, and `round_trips_through_bincode` now guards it.
 
 ## 9.2 Open questions
 

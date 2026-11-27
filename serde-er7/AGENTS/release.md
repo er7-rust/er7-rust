@@ -10,8 +10,10 @@
    that is a bug per [`spec/index.md`](../spec/index.md)'s own rule ("a
    code change that isn't reflected here is a bug").
 3. `Cargo.toml`'s `er7` dependency is a path dependency during development
-   (`{ path = "../er7", version = "0" }`) so the workspace picks up local
-   `er7` changes immediately. Before publishing, confirm the `version`
+   (`{ path = "../er7", version = "0.4" }`) so the workspace picks up local
+   `er7` changes immediately. The `version` is the first `er7` release whose
+   behaviour this crate relies on, never a bare `"0"` (workspace
+   family-policy §1.6). Publish `er7` first. Before publishing, confirm the
    requirement matches the `er7` release this version was tested against
    — `cargo publish` strips the `path` and publishes against the version
    requirement alone, so an out-of-date requirement would silently pull a

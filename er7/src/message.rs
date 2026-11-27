@@ -16,6 +16,12 @@ use std::borrow::Cow;
 
 /// The literal text HL7® uses for an explicit null: a value the sender is
 /// deliberately clearing, as opposed to one they simply did not send.
+///
+/// Write a null by assigning this to [`Subcomponent::raw`], and only when
+/// `"` is not one of the message's delimiters: when it is, the two quotes
+/// would be structure and the null cannot be represented (spec §5.3).
+/// [`Subcomponent::set`] never writes a null; it encodes the text `""` as
+/// `\X2222\` so that a value stays a value.
 pub const NULL: &str = "\"\"";
 
 /// One ER7 message: the delimiters it declared, and its segments in order.
@@ -193,6 +199,11 @@ impl Subcomponent {
     /// therefore *collapses* it: three repetitions arrive as one value
     /// holding two `\R\` sequences. That is `set` doing its job, and the
     /// wrong tool for moving a value that is more than one leaf.
+    ///
+    /// For the same reason `set` never writes the explicit null: the text
+    /// `""` is stored as `\X2222\`, which reads back as two quote
+    /// characters rather than "clear this". To write a null, assign
+    /// [`NULL`] to `raw` (spec §5.3).
     ///
     /// Copy the structure instead. Every level of the tree is a public
     /// `Vec` and every node is `Clone`, so a repeating field moves as
@@ -1047,6 +1058,19 @@ mod tests {
 
     fn message() -> Message {
         parse(ADT).unwrap()
+    }
+
+    #[test]
+    fn query_looks_past_a_position_that_lacks_the_value() {
+        // `query` stops early once it has a value, but only once it has
+        // one. A first segment or repetition without the asked-for position
+        // must not end the search (found by cargo-mutants, 2026-11-26).
+        let message = crate::parse(
+            "MSH|^~\\&|LAB\rOBX|1|NM\rOBX|2|NM|X||187\rPID|1||||||||||||555-1111~555-2222^HOME",
+        )
+        .unwrap();
+        assert_eq!(message.query("OBX-5").unwrap().as_deref(), Some("187"));
+        assert_eq!(message.query("PID-13.2").unwrap().as_deref(), Some("HOME"));
     }
 
     #[test]
